@@ -1,0 +1,11 @@
+[package]
+name = "turtle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+m_lexer = "0.0.4"
+rowan = "0.16.1"
+
+
+xtask = { path = "./xtask" }
