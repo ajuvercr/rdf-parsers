@@ -1,4 +1,4 @@
-use crate::{SyntaxKind as Sk, testing};
+use crate::{Token as Sk, testing};
 
 macro_rules! imp {
     ($f:path, $to:path) => {

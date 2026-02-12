@@ -1,12 +1,14 @@
-use turtle::{SyntaxKind, SyntaxNode, parse};
+use turtle::{SyntaxNode, Token, parse_t};
 
 fn print(n: &SyntaxNode, indent: usize, mut errors: &[String]) {
     for _ in 0..indent {
         eprint!(" ");
     }
-    if n.kind() == SyntaxKind::ERROR {
-        eprintln!("{:?} {}", n, errors[0]);
-        errors = &errors[1..];
+    if n.kind() == turtle::testing::SyntaxKind::Error {
+        eprintln!("{:?} {:?}", n, errors.first());
+        if errors.len() > 0 {
+            errors = &errors[1..];
+        }
     } else {
         eprintln!("{:?}", n);
     }
@@ -27,11 +29,12 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "a b c d .";
+    let sexps = "a b c .";
     println!("Parsing {}", sexps);
-    let parse = parse(sexps);
+    let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 
     let root = parse.syntax();
 
-    print(&root, 0, &parse.errors);
+    let errors: Vec<_> = parse.errors.iter().cloned().collect();
+    print(&root, 0, &errors);
 }

@@ -1,14 +1,14 @@
 use ariadne::{Report, ReportKind, Source};
 use chumsky::error::Rich;
 use proc_macro::TokenStream;
-use proc_macro2::{Span, token_stream};
+use proc_macro2::token_stream;
 use quote::quote;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::ops::Range;
 use std::{io::Cursor, path::PathBuf};
-use syn::{Ident, LitStr, parse_macro_input};
+use syn::{LitStr, parse_macro_input};
 
-use crate::parser::{Config, Context, Expr, Mark, Rule};
+use crate::parser::{Config, Expr, Mark, Rule};
 
 mod parser;
 
@@ -18,25 +18,6 @@ enum Terminal {
     Ref(String),
 }
 impl Terminal {
-    fn as_literal(&self) -> Option<&str> {
-        match self {
-            Terminal::Literal(x) => Some(x.as_str()),
-            Terminal::Ref(_) => None,
-        }
-    }
-    fn as_str(&self) -> &str {
-        match self {
-            Terminal::Ref(x) => x.as_str(),
-            Terminal::Literal(x) => x.as_str(),
-        }
-    }
-    fn as_ref(&self) -> Option<&str> {
-        match self {
-            Terminal::Ref(x) => Some(x.as_str()),
-            Terminal::Literal(_) => None,
-        }
-    }
-
     fn ident<'a, 'b: 'a>(&'a self, config: &'b Config) -> Option<&'a str> {
         match self {
             Terminal::Ref(x) => Some(x.as_str()),
@@ -80,45 +61,63 @@ fn to_impl(
             let imp = to_impl(expr, ctx, terminals);
             quote! {
                 let mut output = crate::ParseRes::Ok;
-                let mut checkpoint = context.checkpoint();
-                if output != crate::ParseRes::Ok {
-                    return output;
-                }
+                let mut checkpoint = parser.checkpoint();
+
                 while output == crate::ParseRes::Ok {
+                    checkpoint = parser.checkpoint();
                     output = { #imp };
+                    if !parser.consumed_since(&checkpoint) {
+                        return crate::ParseRes::IncorrectTermType(crate::TermType::Subject);
+                    }
                 }
-                context.reset(checkpoint);
-                crate::ParseRes::Ok
+                parser.reset(&checkpoint);
+                if output == crate::ParseRes::Eof {
+                    crate::ParseRes::Eof
+                } else {
+                    crate::ParseRes::Ok
+                }
             }
         }
         Expr::Marked(expr, Mark::Plus) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
                 let mut output = { #imp };
-                let mut checkpoint = context.checkpoint();
+                let mut checkpoint = parser.checkpoint();
                 while output == crate::ParseRes::Ok {
                     output = { #imp };
+                    if !parser.consumed_since(&checkpoint) {
+                        return crate::ParseRes::IncorrectTermType(crate::TermType::Subject);
+                    }
                 }
-                context.reset(checkpoint);
-                crate::ParseRes::Ok
+                parser.reset(&checkpoint);
+                if output == crate::ParseRes::Eof {
+                    crate::ParseRes::Eof
+                } else {
+                    crate::ParseRes::Ok
+                }
             }
         }
         Expr::Either(exprs) => {
-            let parts = exprs.iter().map(|e| to_impl(e, ctx, terminals));
+            let parts: Vec<_> = exprs.iter().map(|e| to_impl(e, ctx, terminals)).collect();
+            let first = &parts[0];
+            let others = &parts[1..];
             quote! {
-                let checkpoint = context.checkpoint();
-                let mut out = crate::ParseRes::Ok;
+                let checkpoint = parser.checkpoint();
+                let mut out = {#first};
+                if out == crate::ParseRes::Ok {
+                    return out;
+                }
 
                 #(
                     {
-                        context.reset(checkpoint);
-                        let o =  { #parts };
+                        parser.reset(&checkpoint);
+                        let o =  { #others };
 
                         if o == crate::ParseRes::Ok {
                             return o;
                         }
 
-                        out.combine(o);
+                        out = out.combine_or(o);
                     }
                 )*
 
@@ -130,7 +129,12 @@ fn to_impl(
             quote! {
                 let mut out = crate::ParseRes::Ok;
                 #(
-                    out.combine({#parts});
+                    out = out.combine_and({#parts});
+                    // This is kinda anoying, we want Unexected(STOP) to be seen later on
+                    // So we will implement more functions!
+                    if out == crate::ParseRes::Eof  {
+                        return out;
+                    }
                 )*
                 out
             }
@@ -139,10 +143,8 @@ fn to_impl(
             terminals.insert(Terminal::Literal(f.clone()));
             if let Some(name) = ctx.context.with.get(f) {
                 let n = ctx.context.ident_for(name);
-                let msg = format!(" parsing {}", f);
                 quote! {
-                    let sel: Result<#n, ()> = Sk::STOP.try_into();
-                    crate::ParseRes::Ok
+                    #n::parse(parser, context)
                 }
             } else {
                 let error = format!("Expected with literal {} ", f);
@@ -176,8 +178,16 @@ fn producing_trait_impl(
         pub struct #n;
 
         impl crate::ParserTrait for #n {
+            const KIND: SyntaxKind = SyntaxKind::#n;
+
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
-                #imp
+                println!("Parsing {:?}", Self::KIND);
+                let mut func = || {
+                    #imp
+                };
+                let o = func() ;
+                println!("Finished {:?} {:?}", Self::KIND, o);
+                o
             }
         }
     }
@@ -189,8 +199,10 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
         pub struct #n;
 
         impl crate::ParserTrait for #n {
+            const KIND: SyntaxKind = SyntaxKind::#n;
+
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
-                crate::ParseRes::Ok
+                parser.expect_as(Self::KIND)
             }
         }
     }
@@ -260,10 +272,13 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         #[repr(u16)]
         pub enum SyntaxKind {
             Eof = 0,
+            WhiteSpace,
+            Comment,
             /// producings
             #( #producing ,)*
             /// terminals
             #( #terminals ,)*
+            Error,
             ROOT,    // top-level node: a list of s-expressions
         }
         pub use SyntaxKind::*;

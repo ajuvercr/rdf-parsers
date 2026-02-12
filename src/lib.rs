@@ -2,30 +2,36 @@ use rowan::GreenNode;
 use rowan::GreenNodeBuilder;
 
 mod impls;
+mod list;
 pub trait ParserTrait {
+    const KIND: testing::SyntaxKind;
     fn parse(parser: &mut crate::Parser, context: &mut Context) -> crate::ParseRes;
 }
 pub struct Context {}
 
-impl Context {
-    pub fn checkpoint(&mut self) -> usize {
-        0
-    }
-
-    pub fn reset(&mut self, checkpoint: usize) {}
-}
-
-mod testing {
+pub mod testing {
     use xtask::include_path_code;
 
-    use crate::SyntaxKind as Sk;
     include_path_code!("./xtask/turtle.txt");
+
+    impl From<SyntaxKind> for rowan::SyntaxKind {
+        fn from(kind: SyntaxKind) -> Self {
+            Self(kind as u16)
+        }
+    }
+
+    impl From<rowan::SyntaxKind> for SyntaxKind {
+        fn from(value: rowan::SyntaxKind) -> Self {
+            assert!(value.0 <= SyntaxKind::ROOT as u16);
+            unsafe { std::mem::transmute::<u16, SyntaxKind>(value.0) }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 #[repr(u16)]
-pub enum SyntaxKind {
+pub enum Token {
     L_SQ = 0,   // '['
     R_SQ,       // ']'
     STOP,       // '.'
@@ -35,27 +41,31 @@ pub enum SyntaxKind {
     WHITESPACE, // whitespaces is explicit
     COMMENT,    // comment is explicit
     ERROR,      // as well as errors
-
-    // composite nodes
-    TRIPLE,
-    SUBJECT,
-    PREDICATE,
-    OBJECT,
-    BN_LIST, // `[1 2;  3 4]`
-    PO,      // 1 2
-    PO_LIST, // 1 2; 3 4
-    O_LIST,  // `1, 2, 3`
-    ATOM,    // `+`, `15`, wraps a WORD token
-    ROOT,    // top-level node: a list of s-expressions
 }
-use SyntaxKind::*;
+use Token::*;
 
-mod parser;
-pub use parser::*;
+impl TryFrom<Token> for testing::SyntaxKind {
+    type Error = ();
+
+    fn try_from(value: Token) -> Result<Self, ()> {
+        let o = match value {
+            L_SQ => testing::SyntaxKind::SqOpen,
+            R_SQ => testing::SyntaxKind::SqClose,
+            STOP => testing::SyntaxKind::Stop,
+            SEMI => testing::SyntaxKind::Colon,
+            COMMA => testing::SyntaxKind::Comma,
+            TERM => testing::SyntaxKind::Iriref,
+            COMMENT => testing::SyntaxKind::Comment,
+            WHITESPACE => testing::SyntaxKind::WhiteSpace,
+            _ => return Err(()),
+        };
+        Ok(o)
+    }
+}
 
 pub struct Parse {
     pub green_node: GreenNode,
-    pub errors: Vec<String>,
+    pub errors: List<String>,
 }
 
 pub type SyntaxNode = rowan::SyntaxNode<Lang>;
@@ -72,27 +82,16 @@ impl Parse {
     }
 }
 
-/// Some boilerplate is needed, as rowan settled on using its own
-/// `struct SyntaxKind(u16)` internally, instead of accepting the
-/// user's `enum SyntaxKind` as a type parameter.
-///
-/// First, to easily pass the enum variants into rowan via `.into()`:
-impl From<SyntaxKind> for rowan::SyntaxKind {
-    fn from(kind: SyntaxKind) -> Self {
-        Self(kind as u16)
-    }
-}
-
 /// Second, implementing the `Language` trait teaches rowan to convert between
 /// these two SyntaxKind types, allowing for a nicer SyntaxNode API where
 /// "kinds" are values from our `enum SyntaxKind`, instead of plain u16 values.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Lang {}
 impl rowan::Language for Lang {
-    type Kind = SyntaxKind;
+    type Kind = testing::SyntaxKind;
     fn kind_from_raw(raw: rowan::SyntaxKind) -> Self::Kind {
-        assert!(raw.0 <= ROOT as u16);
-        unsafe { std::mem::transmute::<u16, SyntaxKind>(raw.0) }
+        assert!(raw.0 <= testing::SyntaxKind::ROOT as u16);
+        unsafe { std::mem::transmute::<u16, testing::SyntaxKind>(raw.0) }
     }
     fn kind_to_raw(kind: Self::Kind) -> rowan::SyntaxKind {
         kind.into()
@@ -100,226 +99,281 @@ impl rowan::Language for Lang {
 }
 
 #[derive(Debug)]
-struct Token {
-    kind: SyntaxKind,
+pub struct FatToken {
+    kind: Token,
     text: String,
     old_kind: Option<TermType>,
 }
 
-#[derive(PartialEq, Eq, Debug)]
-enum TermType {
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+pub enum TermType {
     Subject,
     Predicate,
     Object,
 }
-impl From<TermType> for rowan::SyntaxKind {
-    fn from(value: TermType) -> Self {
-        match value {
-            TermType::Subject => SUBJECT.into(),
-            TermType::Predicate => PREDICATE.into(),
-            TermType::Object => OBJECT.into(),
-        }
-    }
-}
+// impl From<TermType> for rowan::SyntaxKind {
+//     fn from(value: TermType) -> Self {
+//         match value {
+//             TermType::Subject => SUBJECT.into(),
+//             TermType::Predicate => PREDICATE.into(),
+//             TermType::Object => OBJECT.into(),
+//         }
+//     }
+// }
 
 mod parser_impl {
-    use rowan::Checkpoint;
+    use crate::list::List;
 
     use super::*;
+
+    pub struct Checkpoint {
+        tokens: List<FatToken>,
+        errors: List<String>,
+    }
 
     pub struct Parser {
         /// input tokens, including whitespace,
         /// in *reverse* order.
-        tokens: Vec<Token>,
+        tokens: List<FatToken>,
         /// the in-progress tree.
-        builder: GreenNodeBuilder<'static>,
+        pub builder: GreenNodeBuilder<'static>,
         /// the list of syntax errors we've accumulated
         /// so far.
-        errors: Vec<String>,
-    }
-
-    #[derive(PartialEq, Eq)]
-    pub enum ParseRes {
-        Ok,
-        IncorrectTermType(TermType),
-        Unexpected(SyntaxKind),
-        Eof,
-    }
-    impl ParseRes {
-        pub fn combine(&mut self, other: ParseRes) {}
+        errors: List<String>,
     }
 
     impl Parser {
-        fn parse(mut self) -> Parse {
-            self.builder.start_node(ROOT.into());
-
-            loop {
-                match self.triple() {
-                    ParseRes::Ok => (),
-                    ParseRes::Unexpected(_) => {
-                        self.start_node(ERROR);
-                        self.errors.push("some error".to_string());
-                        self.bump(); // be sure to chug along in case of error
-                        self.builder.finish_node();
-                    }
-                    ParseRes::IncorrectTermType(_) => {
-                        // I think this cannot happen
-                    }
-                    ParseRes::Eof => break,
-                }
+        pub fn checkpoint(&self) -> Checkpoint {
+            self.builder.checkpoint();
+            Checkpoint {
+                tokens: self.tokens.clone(),
+                errors: self.errors.clone(),
             }
+        }
+        pub fn reset(&mut self, checkout: &Checkpoint) {
+            self.errors = checkout.errors.clone();
+            self.tokens = checkout.tokens.clone();
+        }
+    }
 
-            // Don't forget to eat *trailing* whitespace
+    #[derive(PartialEq, Eq, Clone, Copy, Debug)]
+    pub enum ParseRes {
+        Ok,
+        IncorrectTermType(TermType),
+        Unexpected(Token),
+        Eof,
+    }
+    impl ParseRes {
+        pub fn combine_or(self, other: ParseRes) -> ParseRes {
+            match (self, other) {
+                (ParseRes::Ok, _) => ParseRes::Ok,
+                (_, ParseRes::Ok) => ParseRes::Ok,
+                (ParseRes::Eof, t) => t,
+                (x, ParseRes::Eof) => x,
+                (ParseRes::IncorrectTermType(t), _) => ParseRes::IncorrectTermType(t),
+                (_, ParseRes::IncorrectTermType(term_type)) => {
+                    ParseRes::IncorrectTermType(term_type)
+                }
+                (ParseRes::Unexpected(syntax_kind), _) => ParseRes::Unexpected(syntax_kind),
+            }
+        }
+        pub fn combine_and(self, other: ParseRes) -> ParseRes {
+            match (self, other) {
+                (x, ParseRes::Ok) => x,
+                (_, ParseRes::Eof) => ParseRes::Eof,
+                (_, x) => x,
+            }
+        }
+        pub fn is_unexpected(&self) -> bool {
+            match self {
+                Self::Unexpected(_) => true,
+                _ => false,
+            }
+        }
+    }
+
+    impl Parser {
+        pub fn parse_item<T: ParserTrait>(mut self) -> Parse {
+            self.builder.start_node(testing::SyntaxKind::ROOT.into());
+            let o = T::parse(&mut self, &mut Context {});
+            println!("result {:?}", o);
             self.eat_skips();
-            // Close the root node.
             self.builder.finish_node();
-
-            // Turn the builder into a GreenNode
             Parse {
                 green_node: self.builder.finish(),
                 errors: self.errors,
             }
         }
+        // fn parse(mut self) -> Parse {
+        //     self.builder.start_node(ROOT.into());
+        //
+        //     loop {
+        //         match self.triple() {
+        //             ParseRes::Ok => (),
+        //             ParseRes::Unexpected(_) => {
+        //                 self.start_node(ERROR);
+        //                 self.errors.push("some error".to_string());
+        //                 self.bump(); // be sure to chug along in case of error
+        //                 self.builder.finish_node();
+        //             }
+        //             ParseRes::IncorrectTermType(_) => {
+        //                 // I think this cannot happen
+        //             }
+        //             ParseRes::Eof => break,
+        //         }
+        //     }
+        //
+        //     // Don't forget to eat *trailing* whitespace
+        //     self.eat_skips();
+        //     // Close the root node.
+        //     self.builder.finish_node();
+        //
+        //     // Turn the builder into a GreenNode
+        //     Parse {
+        //         green_node: self.builder.finish(),
+        //         errors: self.errors,
+        //     }
+        // }
+        //
+        // fn triple(&mut self) -> ParseRes {
+        //     let checkpoint = self.builder.checkpoint();
+        //
+        //     let subject_parsed = self.term(TermType::Subject);
+        //     if subject_parsed == ParseRes::Ok {
+        //         self.builder.start_node_at(checkpoint, TRIPLE.into());
+        //         let out = match self.po_list() {
+        //             ParseRes::IncorrectTermType(_) => {
+        //                 self.finish_node();
+        //                 return ParseRes::Ok;
+        //             }
+        //             ParseRes::Unexpected(STOP) => {
+        //                 self.bump();
+        //                 self.finish_node();
+        //                 ParseRes::Ok
+        //             }
+        //             x => return x,
+        //         };
+        //     }
+        //
+        //     let res = self.current().map(|x| x.kind);
+        //
+        //     if let Some(unexpected) = res {
+        //         if unexpected == STOP {
+        //             self.builder.start_node_at(checkpoint, TRIPLE.into());
+        //             self.bump();
+        //             self.finish_node();
+        //             ParseRes::Ok
+        //         } else {
+        //             ParseRes::Unexpected(unexpected)
+        //         }
+        //     } else {
+        //         ParseRes::Eof
+        //     }
+        // }
+        //
+        // fn term(&mut self, term_kind: TermType) -> ParseRes {
+        //     let kind = self.current().map(|x| x.kind);
+        //     let out = match kind {
+        //         Some(L_SQ) => {
+        //             self.start_node(term_kind);
+        //             let out = self.bnode();
+        //             self.finish_node();
+        //             out
+        //         }
+        //         Some(TERM) => {
+        //             self.start_node(term_kind);
+        //             self.start_node(ATOM);
+        //             self.bump();
+        //             self.finish_node();
+        //             self.finish_node();
+        //             ParseRes::Ok
+        //         }
+        //         Some(x) => ParseRes::Unexpected(x),
+        //         None => ParseRes::Eof,
+        //     };
+        //     out
+        // }
+        //
+        // fn bnode(&mut self) -> ParseRes {
+        //     self.start_node(BN_LIST);
+        //     self.bump(); // L_SQ
+        //     let out = match self.po_list() {
+        //         ParseRes::Unexpected(R_SQ) => {
+        //             self.bump();
+        //             ParseRes::Ok
+        //         }
+        //         x => x,
+        //     };
+        //     self.finish_node();
+        //     out
+        // }
+        //
+        // fn po_list(&mut self) -> ParseRes {
+        //     self.start_node(PO_LIST);
+        //     loop {
+        //         let out = match self.po() {
+        //             ParseRes::Unexpected(SEMI)
+        //             | ParseRes::IncorrectTermType(TermType::Predicate) => {
+        //                 self.bump();
+        //                 continue;
+        //             }
+        //             x => x,
+        //         };
+        //         self.finish_node();
+        //         return out;
+        //     }
+        // }
+        //
+        // fn po(&mut self) -> ParseRes {
+        //     self.start_node(PO);
+        //     let predicate = self.term(TermType::Predicate);
+        //     match predicate {
+        //         ParseRes::Eof => return ParseRes::Eof,
+        //         _ => (),
+        //     }
+        //     let objects = self.o_list();
+        //     self.finish_node();
+        //     return objects;
+        // }
+        //
+        // fn o_list(&mut self) -> ParseRes {
+        //     let checkpoint = self.builder.checkpoint();
+        //     let mut started = false;
+        //     loop {
+        //         if started {
+        //             self.expect(COMMA);
+        //         }
+        //         let t = self.term(TermType::Object);
+        //         let out = match t {
+        //             ParseRes::Ok => {
+        //                 if !started {
+        //                     self.builder.start_node_at(checkpoint, O_LIST.into());
+        //                     started = true;
+        //                 }
+        //
+        //                 if !(self.peek(SEMI) || self.peek(STOP) || self.peek(R_SQ)) {
+        //                     continue;
+        //                 }
+        //
+        //                 ParseRes::Ok
+        //             }
+        //             ParseRes::Unexpected(COMMA) => {
+        //                 if !started {
+        //                     self.builder.start_node_at(checkpoint, O_LIST.into());
+        //                     started = true;
+        //                 }
+        //                 continue;
+        //             }
+        //             x => x,
+        //         };
+        //         if started {
+        //             self.finish_node();
+        //         }
+        //         return out;
+        //     }
+        // }
 
-        fn triple(&mut self) -> ParseRes {
-            let checkpoint = self.builder.checkpoint();
-
-            let subject_parsed = self.term(TermType::Subject);
-            if subject_parsed == ParseRes::Ok {
-                self.builder.start_node_at(checkpoint, TRIPLE.into());
-                let out = match self.po_list() {
-                    ParseRes::IncorrectTermType(_) => {
-                        self.finish_node();
-                        return ParseRes::Ok;
-                    }
-                    ParseRes::Unexpected(STOP) => {
-                        self.bump();
-                        self.finish_node();
-                        ParseRes::Ok
-                    }
-                    x => return x,
-                };
-            }
-
-            let res = self.current().map(|x| x.kind);
-
-            if let Some(unexpected) = res {
-                if unexpected == STOP {
-                    self.builder.start_node_at(checkpoint, TRIPLE.into());
-                    self.bump();
-                    self.finish_node();
-                    ParseRes::Ok
-                } else {
-                    ParseRes::Unexpected(unexpected)
-                }
-            } else {
-                ParseRes::Eof
-            }
-        }
-
-        fn term(&mut self, term_kind: TermType) -> ParseRes {
-            let kind = self.current().map(|x| x.kind);
-            let out = match kind {
-                Some(L_SQ) => {
-                    self.start_node(term_kind);
-                    let out = self.bnode();
-                    self.finish_node();
-                    out
-                }
-                Some(TERM) => {
-                    self.start_node(term_kind);
-                    self.start_node(ATOM);
-                    self.bump();
-                    self.finish_node();
-                    self.finish_node();
-                    ParseRes::Ok
-                }
-                Some(x) => ParseRes::Unexpected(x),
-                None => ParseRes::Eof,
-            };
-            out
-        }
-
-        fn bnode(&mut self) -> ParseRes {
-            self.start_node(BN_LIST);
-            self.bump(); // L_SQ
-            let out = match self.po_list() {
-                ParseRes::Unexpected(R_SQ) => {
-                    self.bump();
-                    ParseRes::Ok
-                }
-                x => x,
-            };
-            self.finish_node();
-            out
-        }
-
-        fn po_list(&mut self) -> ParseRes {
-            self.start_node(PO_LIST);
-            loop {
-                let out = match self.po() {
-                    ParseRes::Unexpected(SEMI)
-                    | ParseRes::IncorrectTermType(TermType::Predicate) => {
-                        self.bump();
-                        continue;
-                    }
-                    x => x,
-                };
-                self.finish_node();
-                return out;
-            }
-        }
-
-        fn po(&mut self) -> ParseRes {
-            self.start_node(PO);
-            let predicate = self.term(TermType::Predicate);
-            match predicate {
-                ParseRes::Eof => return ParseRes::Eof,
-                _ => (),
-            }
-            let objects = self.o_list();
-            self.finish_node();
-            return objects;
-        }
-
-        fn o_list(&mut self) -> ParseRes {
-            let checkpoint = self.builder.checkpoint();
-            let mut started = false;
-            loop {
-                if started {
-                    self.expect(COMMA);
-                }
-                let t = self.term(TermType::Object);
-                let out = match t {
-                    ParseRes::Ok => {
-                        if !started {
-                            self.builder.start_node_at(checkpoint, O_LIST.into());
-                            started = true;
-                        }
-
-                        if !(self.peek(SEMI) || self.peek(STOP) || self.peek(R_SQ)) {
-                            continue;
-                        }
-
-                        ParseRes::Ok
-                    }
-                    ParseRes::Unexpected(COMMA) => {
-                        if !started {
-                            self.builder.start_node_at(checkpoint, O_LIST.into());
-                            started = true;
-                        }
-                        continue;
-                    }
-                    x => x,
-                };
-                if started {
-                    self.finish_node();
-                }
-                return out;
-            }
-        }
-
-        fn peek(&self, kind: SyntaxKind) -> bool {
+        pub fn peek(&self, kind: Token) -> bool {
             if let Some(c) = self.current() {
                 if c.kind == kind {
                     return true;
@@ -327,7 +381,19 @@ mod parser_impl {
             }
             return false;
         }
-        fn expect(&mut self, kind: SyntaxKind) {
+
+        pub fn peek_as<T: TryFrom<Token> + PartialEq>(&self, kind: T) -> bool {
+            if let Some(c) = self.current() {
+                if let Ok(c) = T::try_from(c.kind) {
+                    if c == kind {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+
+        pub fn expect(&mut self, kind: Token) {
             if let Some(c) = self.current() {
                 if c.kind == kind {
                     self.bump();
@@ -335,19 +401,47 @@ mod parser_impl {
                 }
             }
 
-            self.start_node(ERROR);
-            self.errors.push(format!("Expected {:?}", kind));
+            self.start_node(testing::SyntaxKind::Error);
+            self.errors = self.errors.prepend(format!("Expected {:?}", kind));
             self.finish_node();
         }
 
-        fn start_node<K: Into<rowan::SyntaxKind>>(&mut self, kind: K) {
+        pub fn expect_as<T: TryFrom<Token> + PartialEq + std::fmt::Debug>(
+            &mut self,
+            kind: T,
+        ) -> ParseRes
+        where
+            <T as TryFrom<Token>>::Error: std::fmt::Debug,
+        {
+            let e = if let Some(c) = self.current() {
+                println!("{:?} {:?} !== {:?}", c, T::try_from(c.kind), kind);
+                if let Ok(c) = T::try_from(c.kind) {
+                    if c == kind {
+                        println!("  Equals");
+                        self.bump();
+                        return ParseRes::Ok;
+                    }
+                }
+
+                ParseRes::Unexpected(c.kind)
+            } else {
+                ParseRes::Eof
+            };
+
+            // self.start_node(testing::SyntaxKind::Error);
+            // self.errors = self.errors.prepend(format!("Expected {:?}", kind));
+            // self.finish_node();
+            e
+        }
+
+        pub fn start_node<K: Into<rowan::SyntaxKind>>(&mut self, kind: K) {
             self.builder.start_node(kind.into());
         }
-        fn finish_node(&mut self) {
+        pub fn finish_node(&mut self) {
             self.builder.finish_node();
         }
 
-        fn skip_token(&self, token: &Token) -> bool {
+        pub fn skip_token(&self, token: &FatToken) -> bool {
             match token.kind {
                 WHITESPACE => true,
                 COMMENT => true,
@@ -356,64 +450,80 @@ mod parser_impl {
         }
 
         /// Advance one token, adding it to the current branch of the tree builder.
-        fn bump(&mut self) {
+        pub fn bump(&mut self) {
             self.eat_skips();
-            let token = self.tokens.pop().unwrap();
-            self.builder.token(token.kind.into(), token.text.as_str());
+            let token = self.tokens.head().unwrap();
+            if let Ok(t) = testing::SyntaxKind::try_from(token.kind) {
+                self.builder.token(t.into(), token.text.as_str());
+            } else {
+                eprintln!("Failed to build token for {:?}", token);
+            }
+            self.tokens = self.tokens.tail().unwrap().clone();
         }
 
         /// Peek at the first unprocessed token that is relevant
-        fn current(&self) -> Option<&Token> {
-            self.tokens
-                .iter()
-                .rev()
-                .skip_while(|t| self.skip_token(t))
-                .next()
+        pub fn current(&self) -> Option<&FatToken> {
+            self.tokens.iter().skip_while(|t| self.skip_token(t)).next()
         }
 
-        fn eat_skips(&mut self) {
-            while let Some(t) = self.tokens.last()
-                && self.skip_token(t)
+        pub fn consumed_since(&self, checkpoint: &Checkpoint) -> bool {
+            self.tokens.same(&checkpoint.tokens)
+        }
+
+        pub fn eat_skips(&mut self) {
+            while let Some(token) = self.tokens.head()
+                && self.skip_token(token)
             {
-                let token = self.tokens.pop().unwrap();
-                self.builder.token(token.kind.into(), token.text.as_str());
+                println!("Eat skips {:?}", token);
+
+                if let Ok(t) = testing::SyntaxKind::try_from(token.kind) {
+                    self.builder.token(t.into(), token.text.as_str());
+                } else {
+                    eprintln!("Failed to build token for {:?}", token);
+                }
+
+                self.tokens = self.tokens.tail().unwrap().clone();
             }
         }
     }
 
-    pub fn parse(text: &str) -> Parse {
-        let mut tokens = lex(text);
+    // pub fn parse(text: &str) -> Parse {
+    //     let mut tokens = lex(text);
+    //     println!("Tokens {:?}", tokens);
+    //     tokens.reverse();
+    //     Parser {
+    //         tokens,
+    //         builder: GreenNodeBuilder::new(),
+    //         errors: Vec::new(),
+    //     }
+    //     .parse()
+    // }
+
+    pub fn parse_t<T: ParserTrait>(text: &str) -> Parse {
+        let tokens = lex(text);
         println!("Tokens {:?}", tokens);
-        tokens.reverse();
         Parser {
             tokens,
             builder: GreenNodeBuilder::new(),
-            errors: Vec::new(),
+            errors: Inner::new(),
         }
-        .parse()
+        .parse_item::<T>()
     }
 }
 
 pub use parser_impl::*;
+
+use crate::list::Inner;
+use crate::list::List;
 /// Split the input string into a flat list of tokens
 /// (such as L_PAREN, WORD, and WHITESPACE)
-fn lex(text: &str) -> Vec<Token> {
-    fn tok(t: SyntaxKind) -> m_lexer::TokenKind {
-        m_lexer::TokenKind(rowan::SyntaxKind::from(t).0)
+fn lex(text: &str) -> List<FatToken> {
+    fn tok(t: Token) -> m_lexer::TokenKind {
+        let i = t as u16;
+        m_lexer::TokenKind(i)
     }
-    fn kind(t: m_lexer::TokenKind) -> SyntaxKind {
-        match t.0 {
-            0 => L_SQ,
-            1 => R_SQ,
-            2 => STOP,
-            3 => SEMI,
-            4 => COMMA,
-            5 => TERM,
-            6 => WHITESPACE,
-            7 => COMMENT,
-            8 => ERROR,
-            _ => unreachable!(),
-        }
+    fn kind(t: m_lexer::TokenKind) -> Token {
+        unsafe { std::mem::transmute::<u16, Token>(t.0) }
     }
 
     let lexer = m_lexer::LexerBuilder::new()
@@ -430,18 +540,20 @@ fn lex(text: &str) -> Vec<Token> {
         ])
         .build();
 
-    lexer
+    let vec: Vec<_> = lexer
         .tokenize(text)
         .into_iter()
         .map(|t| (t.len, kind(t.kind)))
         .scan(0usize, |start_offset, (len, kind)| {
             let s: String = text[*start_offset..*start_offset + len].into();
             *start_offset += len;
-            Some(Token {
+            Some(FatToken {
                 kind,
                 text: s,
                 old_kind: None,
             })
         })
-        .collect()
+        .collect();
+
+    vec.into_iter().rfold(Inner::new(), |acc, b| acc.prepend(b))
 }
