@@ -129,12 +129,14 @@ mod parser_impl {
     pub struct Checkpoint {
         tokens: List<FatToken>,
         errors: List<String>,
+        done: List<testing::SyntaxKind>,
     }
 
     pub struct Parser {
         /// input tokens, including whitespace,
         /// in *reverse* order.
         tokens: List<FatToken>,
+        pub done: List<testing::SyntaxKind>,
         /// the in-progress tree.
         pub builder: GreenNodeBuilder<'static>,
         /// the list of syntax errors we've accumulated
@@ -144,15 +146,17 @@ mod parser_impl {
 
     impl Parser {
         pub fn checkpoint(&self) -> Checkpoint {
-            self.builder.checkpoint();
             Checkpoint {
                 tokens: self.tokens.clone(),
                 errors: self.errors.clone(),
+                done: self.done.clone(),
             }
         }
+
         pub fn reset(&mut self, checkout: &Checkpoint) {
             self.errors = checkout.errors.clone();
             self.tokens = checkout.tokens.clone();
+            self.done = checkout.done.clone();
         }
     }
 
@@ -161,6 +165,7 @@ mod parser_impl {
         Ok,
         IncorrectTermType(TermType),
         Unexpected(Token),
+        Loop,
         Eof,
     }
     impl ParseRes {
@@ -175,6 +180,7 @@ mod parser_impl {
                     ParseRes::IncorrectTermType(term_type)
                 }
                 (ParseRes::Unexpected(syntax_kind), _) => ParseRes::Unexpected(syntax_kind),
+                (x, _) => x,
             }
         }
         pub fn combine_and(self, other: ParseRes) -> ParseRes {
@@ -204,174 +210,6 @@ mod parser_impl {
                 errors: self.errors,
             }
         }
-        // fn parse(mut self) -> Parse {
-        //     self.builder.start_node(ROOT.into());
-        //
-        //     loop {
-        //         match self.triple() {
-        //             ParseRes::Ok => (),
-        //             ParseRes::Unexpected(_) => {
-        //                 self.start_node(ERROR);
-        //                 self.errors.push("some error".to_string());
-        //                 self.bump(); // be sure to chug along in case of error
-        //                 self.builder.finish_node();
-        //             }
-        //             ParseRes::IncorrectTermType(_) => {
-        //                 // I think this cannot happen
-        //             }
-        //             ParseRes::Eof => break,
-        //         }
-        //     }
-        //
-        //     // Don't forget to eat *trailing* whitespace
-        //     self.eat_skips();
-        //     // Close the root node.
-        //     self.builder.finish_node();
-        //
-        //     // Turn the builder into a GreenNode
-        //     Parse {
-        //         green_node: self.builder.finish(),
-        //         errors: self.errors,
-        //     }
-        // }
-        //
-        // fn triple(&mut self) -> ParseRes {
-        //     let checkpoint = self.builder.checkpoint();
-        //
-        //     let subject_parsed = self.term(TermType::Subject);
-        //     if subject_parsed == ParseRes::Ok {
-        //         self.builder.start_node_at(checkpoint, TRIPLE.into());
-        //         let out = match self.po_list() {
-        //             ParseRes::IncorrectTermType(_) => {
-        //                 self.finish_node();
-        //                 return ParseRes::Ok;
-        //             }
-        //             ParseRes::Unexpected(STOP) => {
-        //                 self.bump();
-        //                 self.finish_node();
-        //                 ParseRes::Ok
-        //             }
-        //             x => return x,
-        //         };
-        //     }
-        //
-        //     let res = self.current().map(|x| x.kind);
-        //
-        //     if let Some(unexpected) = res {
-        //         if unexpected == STOP {
-        //             self.builder.start_node_at(checkpoint, TRIPLE.into());
-        //             self.bump();
-        //             self.finish_node();
-        //             ParseRes::Ok
-        //         } else {
-        //             ParseRes::Unexpected(unexpected)
-        //         }
-        //     } else {
-        //         ParseRes::Eof
-        //     }
-        // }
-        //
-        // fn term(&mut self, term_kind: TermType) -> ParseRes {
-        //     let kind = self.current().map(|x| x.kind);
-        //     let out = match kind {
-        //         Some(L_SQ) => {
-        //             self.start_node(term_kind);
-        //             let out = self.bnode();
-        //             self.finish_node();
-        //             out
-        //         }
-        //         Some(TERM) => {
-        //             self.start_node(term_kind);
-        //             self.start_node(ATOM);
-        //             self.bump();
-        //             self.finish_node();
-        //             self.finish_node();
-        //             ParseRes::Ok
-        //         }
-        //         Some(x) => ParseRes::Unexpected(x),
-        //         None => ParseRes::Eof,
-        //     };
-        //     out
-        // }
-        //
-        // fn bnode(&mut self) -> ParseRes {
-        //     self.start_node(BN_LIST);
-        //     self.bump(); // L_SQ
-        //     let out = match self.po_list() {
-        //         ParseRes::Unexpected(R_SQ) => {
-        //             self.bump();
-        //             ParseRes::Ok
-        //         }
-        //         x => x,
-        //     };
-        //     self.finish_node();
-        //     out
-        // }
-        //
-        // fn po_list(&mut self) -> ParseRes {
-        //     self.start_node(PO_LIST);
-        //     loop {
-        //         let out = match self.po() {
-        //             ParseRes::Unexpected(SEMI)
-        //             | ParseRes::IncorrectTermType(TermType::Predicate) => {
-        //                 self.bump();
-        //                 continue;
-        //             }
-        //             x => x,
-        //         };
-        //         self.finish_node();
-        //         return out;
-        //     }
-        // }
-        //
-        // fn po(&mut self) -> ParseRes {
-        //     self.start_node(PO);
-        //     let predicate = self.term(TermType::Predicate);
-        //     match predicate {
-        //         ParseRes::Eof => return ParseRes::Eof,
-        //         _ => (),
-        //     }
-        //     let objects = self.o_list();
-        //     self.finish_node();
-        //     return objects;
-        // }
-        //
-        // fn o_list(&mut self) -> ParseRes {
-        //     let checkpoint = self.builder.checkpoint();
-        //     let mut started = false;
-        //     loop {
-        //         if started {
-        //             self.expect(COMMA);
-        //         }
-        //         let t = self.term(TermType::Object);
-        //         let out = match t {
-        //             ParseRes::Ok => {
-        //                 if !started {
-        //                     self.builder.start_node_at(checkpoint, O_LIST.into());
-        //                     started = true;
-        //                 }
-        //
-        //                 if !(self.peek(SEMI) || self.peek(STOP) || self.peek(R_SQ)) {
-        //                     continue;
-        //                 }
-        //
-        //                 ParseRes::Ok
-        //             }
-        //             ParseRes::Unexpected(COMMA) => {
-        //                 if !started {
-        //                     self.builder.start_node_at(checkpoint, O_LIST.into());
-        //                     started = true;
-        //                 }
-        //                 continue;
-        //             }
-        //             x => x,
-        //         };
-        //         if started {
-        //             self.finish_node();
-        //         }
-        //         return out;
-        //     }
-        // }
 
         pub fn peek(&self, kind: Token) -> bool {
             if let Some(c) = self.current() {
@@ -406,19 +244,28 @@ mod parser_impl {
             self.finish_node();
         }
 
-        pub fn expect_as<T: TryFrom<Token> + PartialEq + std::fmt::Debug>(
-            &mut self,
-            kind: T,
-        ) -> ParseRes
-        where
-            <T as TryFrom<Token>>::Error: std::fmt::Debug,
-        {
+        pub fn starting<T: ParserTrait>(&mut self) {
+            self.done = self.done.prepend(T::KIND);
+        }
+
+        pub fn already_done<T: ParserTrait>(&self) -> bool {
+            let k = T::KIND;
+            self.done.iter().any(|x| x == &k)
+        }
+
+        pub fn expect_as<T: ParserTrait + std::fmt::Debug>(&mut self, kind: T) -> ParseRes {
             let e = if let Some(c) = self.current() {
-                println!("{:?} {:?} !== {:?}", c, T::try_from(c.kind), kind);
-                if let Ok(c) = T::try_from(c.kind) {
-                    if c == kind {
+                println!(
+                    "{:?} {:?} !== {:?}",
+                    c,
+                    testing::SyntaxKind::try_from(c.kind),
+                    kind
+                );
+                if let Ok(c) = testing::SyntaxKind::try_from(c.kind) {
+                    if c == T::KIND {
                         println!("  Equals");
                         self.bump();
+                        self.done = List::default();
                         return ParseRes::Ok;
                     }
                 }
@@ -427,6 +274,8 @@ mod parser_impl {
             } else {
                 ParseRes::Eof
             };
+
+            self.done = self.done.prepend(T::KIND);
 
             // self.start_node(testing::SyntaxKind::Error);
             // self.errors = self.errors.prepend(format!("Expected {:?}", kind));
@@ -505,7 +354,8 @@ mod parser_impl {
         Parser {
             tokens,
             builder: GreenNodeBuilder::new(),
-            errors: Inner::new(),
+            errors: List::default(),
+            done: List::default(),
         }
         .parse_item::<T>()
     }

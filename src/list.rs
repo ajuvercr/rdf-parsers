@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub enum Inner<T> {
+    #[default]
     Nil,
     Cons(T, List<T>, usize),
 }

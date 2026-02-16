@@ -175,18 +175,29 @@ fn producing_trait_impl(
     let n = ctx.context.ident_for(&rule.name);
     let imp = to_impl(&rule.expression, ctx, terminals);
     quote! {
+        #[derive(Debug)]
         pub struct #n;
 
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
+                if parser.already_done::<Self>() {
+                    return crate::ParseRes::Loop;
+                }
+                parser.starting::<Self>();
                 println!("Parsing {:?}", Self::KIND);
+                let checkpoint = parser.builder.checkpoint();
                 let mut func = || {
                     #imp
                 };
                 let o = func() ;
-                println!("Finished {:?} {:?}", Self::KIND, o);
+                if o == crate::ParseRes::Ok {
+                    parser.builder.start_node_at(checkpoint, Self::KIND.into());
+                    parser.builder.finish_node();
+                }
+                let done_list: Vec<_> = parser.done.iter().collect();
+                println!("Finished {:?} {:?} {:?}", Self::KIND, o, done_list);
                 o
             }
         }
@@ -196,13 +207,17 @@ fn producing_trait_impl(
 fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&terminal);
     quote! {
+        #[derive(Debug)]
         pub struct #n;
 
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
-                parser.expect_as(Self::KIND)
+                if parser.already_done::<Self>() {
+                    return crate::ParseRes::Loop;
+                }
+                parser.expect_as(Self)
             }
         }
     }
