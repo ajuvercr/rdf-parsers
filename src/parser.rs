@@ -49,7 +49,7 @@ use crate::{Context, Lang, ParserTrait, Token, list::List, testing};
 pub struct Parser {
     /// input tokens, including whitespace,
     /// in *reverse* order.
-    tokens: List<FatToken>,
+    pub tokens: List<FatToken>,
     pub done: List<testing::SyntaxKind>,
     pub res: ParseRes,
     /// the list of syntax errors we've accumulated
@@ -125,7 +125,7 @@ impl Step {
 #[derive(Clone, Debug, Default)]
 pub struct ParseRes {
     pub steps: List<Step>,
-    pub error_value: usize,
+    pub error_value: isize,
 }
 
 impl ParseRes {
@@ -162,7 +162,6 @@ impl Parser {
 
         let steps: Vec<_> = self.res.steps.iter().cloned().collect();
         for step in steps.into_iter().rev() {
-            println!("apply {:?}", step);
             step.apply(&mut self, &mut builder);
         }
 
@@ -219,19 +218,13 @@ impl Parser {
         self.done.iter().any(|x| x == &k)
     }
 
-    pub fn expect_as<T: ParserTrait + std::fmt::Debug>(&mut self, kind: T) {
+    pub fn expect_as<T: ParserTrait + std::fmt::Debug>(&mut self, error: isize) {
         let e = if let Some(c) = self.current() {
-            println!(
-                "{:?} {:?} !== {:?}",
-                c,
-                testing::SyntaxKind::try_from(c.kind),
-                kind
-            );
             if let Ok(c) = testing::SyntaxKind::try_from(c.kind) {
                 if c == T::KIND {
-                    println!("  Equals");
                     self.bump();
                     self.done = List::default();
+                    self.res.error_value -= error;
                     return;
                 }
             }
@@ -240,7 +233,7 @@ impl Parser {
                 .res
                 .steps
                 .prepend(Step::Error(Error::Expected(T::KIND)));
-            self.res.error_value += 1;
+            self.res.error_value += error;
         } else {
             self.res.error_value += 1;
         };
@@ -287,7 +280,6 @@ impl Parser {
         while let Some(token) = self.tokens.head()
             && self.skip_token(token)
         {
-            println!("Eat skips {:?}", token);
             self.res.steps = self.res.steps.prepend(Step::bump());
             self.tokens = self.tokens.tail().unwrap().clone();
         }

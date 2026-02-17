@@ -1,4 +1,4 @@
-use chumsky::{extra::Err, prelude::*};
+use chumsky::{error, extra::Err, prelude::*};
 use proc_macro2::Span;
 use std::collections::HashMap;
 use syn::Ident;
@@ -35,6 +35,7 @@ fn uniform_ident(ident: &str) -> String {
 pub struct Context {
     pub rename: HashMap<String, String>,
     pub with: HashMap<String, String>,
+    pub error_values: HashMap<String, isize>,
 }
 
 impl Context {
@@ -51,6 +52,7 @@ impl Context {
 enum CtxBlock {
     Rename(Vec<(String, String)>),
     With(Vec<(String, String)>),
+    ErrorValues(Vec<(String, isize)>),
 }
 
 pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<'src, char>>> {
@@ -76,7 +78,16 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .ignore_then(mapping)
         .map(CtxBlock::With);
 
-    let block = rename.or(with);
+    let error_values = section_header("error_value", "===")
+        .ignore_then(mapping)
+        .map(|vs| {
+            vs.into_iter()
+                .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
+                .collect::<Vec<_>>()
+        })
+        .map(CtxBlock::ErrorValues);
+
+    let block = rename.or(with).or(error_values);
 
     section_header("context", "==")
         .labelled("context header")
@@ -87,6 +98,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                 match b {
                     CtxBlock::Rename(entries) => ctx.rename.extend(entries),
                     CtxBlock::With(entries) => ctx.with.extend(entries),
+                    CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
                 }
             }
             ctx

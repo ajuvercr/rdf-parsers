@@ -29,6 +29,13 @@ impl<T> Inner<T> {
         Rc::new(Inner::Nil)
     }
 
+    pub fn len(&self) -> usize {
+        match self {
+            Inner::Nil => 0,
+            Inner::Cons(_, _, x) => *x,
+        }
+    }
+
     pub fn prepend(self: &List<T>, value: T) -> List<T> {
         let at = match self.as_ref() {
             Inner::Nil => 0,

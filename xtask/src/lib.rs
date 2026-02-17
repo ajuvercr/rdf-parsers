@@ -53,9 +53,16 @@ fn to_impl(
         Expr::Marked(expr, Mark::Option) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
+                let tn = parser.tokens.len();
                 let check = parser.clone();
                 #imp;
-                if parser.res.error_value > check.res.error_value {
+
+                // We need soemthing better I think
+                // Maybe we need some kind of 'good' metric, now we only have error_value
+                // So that matching a closing ] is actually really important
+                // We also need to find a way to let the thing parse as much as possible, now he
+                // just gives up
+                if parser.res.error_value > check.res.error_value  {
                     *parser = check;
                 }
             }
@@ -92,8 +99,11 @@ fn to_impl(
             let first = &parts[0];
             let others = &parts[1..];
             quote! {
+                let start = parser.tokens.len();
                 let checkpoint = parser.clone();
                 { #first };
+
+                let mut error_value = parser.res.error_value ;
                 let mut out = parser.clone();
 
                 #(
@@ -101,10 +111,11 @@ fn to_impl(
                         parser.reset(&checkpoint);
                         { #others };
 
-                        if parser.res.error_value < out.res.error_value {
+                        let o_error_value = parser.res.error_value;
+                        if o_error_value < error_value{
                             out = parser.clone();
+                            error_value = o_error_value;
                         }
-
                     }
                 )*
 
@@ -118,7 +129,6 @@ fn to_impl(
                     {#parts};
 
                     if parser.is_empty() {
-                        println!("isempty");
                         return;
                     }
                 )*
@@ -167,23 +177,37 @@ fn producing_trait_impl(
             const KIND: SyntaxKind = SyntaxKind::#n;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
-                if parser.res.error_value > 10 {
-                    return;
-                }
+                // if parser.res.error_value > 10 {
+                //     return;
+                // }
                 if parser.already_done::<Self>() {
                     parser.res.error_value += 10;
                     return;
                 }
+
                 parser.starting::<Self>();
-                println!("Parsing {:?}", Self::KIND);
+
                 parser.res.start_node(Self::KIND.into());
+                let old_parser = parser.clone();
+                let on = old_parser.tokens.len();
 
                 let mut func = || {
                     #imp
                 };
                 func() ;
 
+
+                if parser.tokens.len() == on {
+                    let ev = parser.res.error_value;
+                    *parser = old_parser;
+                    parser.res.steps = parser
+                        .res
+                        .steps
+                        .prepend(crate::Step::Error(crate::Error::Expected(Self::KIND)));
+                     parser.res.error_value = ev;
+                }
                 parser.res.finish_node();
+
 
                 let done_list: Vec<_> = parser.done.iter().collect();
                 println!("Finished {:?} {:?}", Self::KIND, done_list);
@@ -194,6 +218,7 @@ fn producing_trait_impl(
 
 fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&terminal);
+    let error = ctx.context.error_values.get(terminal).copied().unwrap_or(1);
     quote! {
         #[derive(Debug)]
         pub struct #n;
@@ -206,7 +231,7 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
                     return;
                 }
                 println!("error value {}", parser.res.error_value);
-                parser.expect_as(Self)
+                parser.expect_as::<Self>(#error)
             }
         }
     }
@@ -300,6 +325,5 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
     )*
         };
 
-    println!("{}", out);
     out.into()
 }
