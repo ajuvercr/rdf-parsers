@@ -1,4 +1,4 @@
-use turtle::{SyntaxNode, Token, parse_t};
+use turtle::{SyntaxNode, parse_t};
 
 fn print(n: &SyntaxNode, indent: usize, mut errors: &[String]) {
     for _ in 0..indent {
@@ -29,7 +29,7 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "a b c .";
+    let sexps = "a b c d .";
     println!("Parsing {}", sexps);
     let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 

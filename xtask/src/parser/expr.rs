@@ -4,6 +4,7 @@ use chumsky::prelude::*;
 
 use crate::parser::section_header;
 
+#[allow(unused)]
 #[derive(Clone, Debug)]
 pub struct Rule {
     id: String,

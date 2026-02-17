@@ -1,10 +1,25 @@
 use std::rc::Rc;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub enum Inner<T> {
     #[default]
     Nil,
     Cons(T, List<T>, usize),
+}
+impl<T: std::fmt::Debug> std::fmt::Debug for Inner<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Nil => write!(f, "[ ]"),
+            Self::Cons(item, cons, _) => {
+                write!(f, "[ {:?}", item)?;
+                for x in cons.iter() {
+                    write!(f, ", {:?}", x)?;
+                }
+                write!(f, " ]")?;
+                Ok(())
+            }
+        }
+    }
 }
 
 pub type List<T> = Rc<Inner<T>>;
@@ -35,6 +50,13 @@ impl<T> Inner<T> {
             Inner::Cons(_, t, _) => Some(t),
         }
     }
+    pub fn slice(&self) -> Option<(&T, &List<T>)> {
+        match &self {
+            Inner::Nil => None,
+            Inner::Cons(r, t, _) => Some((r, t)),
+        }
+    }
+
     pub fn same(self: &List<T>, other: &List<T>) -> bool {
         Rc::ptr_eq(self, other)
     }

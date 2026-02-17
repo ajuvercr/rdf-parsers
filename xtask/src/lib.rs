@@ -53,48 +53,38 @@ fn to_impl(
         Expr::Marked(expr, Mark::Option) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
+                let check = parser.clone();
                 #imp;
-                crate::ParseRes::Ok
+                if parser.res.error_value > check.res.error_value {
+                    *parser = check;
+                }
             }
         }
         Expr::Marked(expr, Mark::Star) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let mut output = crate::ParseRes::Ok;
-                let mut checkpoint = parser.checkpoint();
+                let mut checkpoint = parser.clone();
 
-                while output == crate::ParseRes::Ok {
-                    checkpoint = parser.checkpoint();
-                    output = { #imp };
-                    if !parser.consumed_since(&checkpoint) {
-                        return crate::ParseRes::IncorrectTermType(crate::TermType::Subject);
-                    }
+                { #imp };
+                while parser.consumed_since(&checkpoint) {
+                    checkpoint = parser.clone();
+                    { #imp };
                 }
                 parser.reset(&checkpoint);
-                if output == crate::ParseRes::Eof {
-                    crate::ParseRes::Eof
-                } else {
-                    crate::ParseRes::Ok
-                }
             }
         }
         Expr::Marked(expr, Mark::Plus) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
                 let mut output = { #imp };
-                let mut checkpoint = parser.checkpoint();
-                while output == crate::ParseRes::Ok {
-                    output = { #imp };
-                    if !parser.consumed_since(&checkpoint) {
-                        return crate::ParseRes::IncorrectTermType(crate::TermType::Subject);
-                    }
+                let mut checkpoint = parser.clone();
+
+                { #imp };
+                while parser.consumed_since(&checkpoint) {
+                    checkpoint = parser.clone();
+                    { #imp };
                 }
                 parser.reset(&checkpoint);
-                if output == crate::ParseRes::Eof {
-                    crate::ParseRes::Eof
-                } else {
-                    crate::ParseRes::Ok
-                }
             }
         }
         Expr::Either(exprs) => {
@@ -102,44 +92,39 @@ fn to_impl(
             let first = &parts[0];
             let others = &parts[1..];
             quote! {
-                let checkpoint = parser.checkpoint();
-                let mut out = {#first};
-                if out == crate::ParseRes::Ok {
-                    return out;
-                }
+                let checkpoint = parser.clone();
+                { #first };
+                let mut out = parser.clone();
 
                 #(
                     {
                         parser.reset(&checkpoint);
-                        let o =  { #others };
+                        { #others };
 
-                        if o == crate::ParseRes::Ok {
-                            return o;
+                        if parser.res.error_value < out.res.error_value {
+                            out = parser.clone();
                         }
 
-                        out = out.combine_or(o);
                     }
                 )*
 
-                out
+                *parser = out;
             }
         }
         Expr::Seq(exprs) => {
             let parts = exprs.iter().map(|e| to_impl(e, ctx, terminals));
             quote! {
-                let mut out = crate::ParseRes::Ok;
                 #(
-                    out = out.combine_and({#parts});
-                    // This is kinda anoying, we want Unexected(STOP) to be seen later on
-                    // So we will implement more functions!
-                    if out == crate::ParseRes::Eof  {
-                        return out;
+                    {#parts};
+
+                    if parser.is_empty() {
+                        println!("isempty");
+                        return;
                     }
                 )*
-                out
             }
         }
-        Expr::Literal(literal_type, f) => {
+        Expr::Literal(_literal_type, f) => {
             terminals.insert(Terminal::Literal(f.clone()));
             if let Some(name) = ctx.context.with.get(f) {
                 let n = ctx.context.ident_for(name);
@@ -181,24 +166,27 @@ fn producing_trait_impl(
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
 
-            fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
+            fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
+                if parser.res.error_value > 10 {
+                    return;
+                }
                 if parser.already_done::<Self>() {
-                    return crate::ParseRes::Loop;
+                    parser.res.error_value += 10;
+                    return;
                 }
                 parser.starting::<Self>();
                 println!("Parsing {:?}", Self::KIND);
-                let checkpoint = parser.builder.checkpoint();
+                parser.res.start_node(Self::KIND.into());
+
                 let mut func = || {
                     #imp
                 };
-                let o = func() ;
-                if o == crate::ParseRes::Ok {
-                    parser.builder.start_node_at(checkpoint, Self::KIND.into());
-                    parser.builder.finish_node();
-                }
+                func() ;
+
+                parser.res.finish_node();
+
                 let done_list: Vec<_> = parser.done.iter().collect();
-                println!("Finished {:?} {:?} {:?}", Self::KIND, o, done_list);
-                o
+                println!("Finished {:?} {:?}", Self::KIND, done_list);
             }
         }
     }
@@ -213,10 +201,11 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
 
-            fn parse(parser: &mut crate::Parser, context: &mut crate::Context) -> crate::ParseRes {
-                if parser.already_done::<Self>() {
-                    return crate::ParseRes::Loop;
+            fn parse(parser: &mut crate::Parser, context: &mut crate::Context) {
+                if parser.res.error_value > 10 {
+                    return;
                 }
+                println!("error value {}", parser.res.error_value);
                 parser.expect_as(Self)
             }
         }
