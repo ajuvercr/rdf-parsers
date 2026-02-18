@@ -172,6 +172,35 @@ impl Parser {
         }
     }
 
+    pub fn producing_rule<P: ParserTrait>(&mut self, imp: impl FnOnce(&mut Parser) -> ()) {
+        if self.already_done::<P>() {
+            self.res.error_value += 10;
+            return;
+        }
+
+        self.starting::<P>();
+
+        self.res.start_node(P::KIND.into());
+        let old_parser = self.clone();
+        let on = old_parser.tokens.len();
+
+        imp(self);
+
+        if self.tokens.len() == on {
+            let ev = self.res.error_value;
+            *self = old_parser;
+            self.res.steps = self
+                .res
+                .steps
+                .prepend(crate::Step::Error(crate::Error::Expected(P::KIND)));
+            self.res.error_value = ev;
+        }
+        self.res.finish_node();
+
+        let done_list: Vec<_> = self.done.iter().collect();
+        println!("Finished {:?} {:?}", P::KIND, done_list);
+    }
+
     pub fn peek(&self, kind: Token) -> bool {
         if let Some(c) = self.current() {
             if c.kind == kind {
@@ -235,7 +264,11 @@ impl Parser {
                 .prepend(Step::Error(Error::Expected(T::KIND)));
             self.res.error_value += error;
         } else {
-            self.res.error_value += 1;
+            self.res.steps = self
+                .res
+                .steps
+                .prepend(Step::Error(Error::Expected(T::KIND)));
+            self.res.error_value += error;
         };
 
         self.done = self.done.prepend(T::KIND);

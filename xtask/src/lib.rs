@@ -128,9 +128,9 @@ fn to_impl(
                 #(
                     {#parts};
 
-                    if parser.is_empty() {
-                        return;
-                    }
+                    // if parser.is_empty() {
+                    //     return;
+                    // }
                 )*
             }
         }
@@ -177,40 +177,11 @@ fn producing_trait_impl(
             const KIND: SyntaxKind = SyntaxKind::#n;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
-                // if parser.res.error_value > 10 {
-                //     return;
-                // }
-                if parser.already_done::<Self>() {
-                    parser.res.error_value += 10;
-                    return;
-                }
-
-                parser.starting::<Self>();
-
-                parser.res.start_node(Self::KIND.into());
-                let old_parser = parser.clone();
-                let on = old_parser.tokens.len();
-
-                let mut func = || {
+                let mut func = |parser: &mut crate::Parser| {
                     #imp
                 };
-                func() ;
 
-
-                if parser.tokens.len() == on {
-                    let ev = parser.res.error_value;
-                    *parser = old_parser;
-                    parser.res.steps = parser
-                        .res
-                        .steps
-                        .prepend(crate::Step::Error(crate::Error::Expected(Self::KIND)));
-                     parser.res.error_value = ev;
-                }
-                parser.res.finish_node();
-
-
-                let done_list: Vec<_> = parser.done.iter().collect();
-                println!("Finished {:?} {:?}", Self::KIND, done_list);
+                parser.producing_rule::<Self>(func);
             }
         }
     }
