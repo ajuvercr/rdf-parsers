@@ -1,9 +1,10 @@
 use ariadne::{Report, ReportKind, Source};
+use chumsky::container::Seq;
 use chumsky::error::Rich;
 use proc_macro::TokenStream;
 use proc_macro2::token_stream;
 use quote::quote;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 use std::{io::Cursor, path::PathBuf};
 use syn::{LitStr, parse_macro_input};
@@ -53,73 +54,44 @@ fn to_impl(
         Expr::Marked(expr, Mark::Option) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let tn = parser.tokens.len();
-                let check = parser.clone();
-                #imp;
+                let func = |parser: &mut crate::Parser| {
+                    #imp
+                };
 
-                // We need soemthing better I think
-                // Maybe we need some kind of 'good' metric, now we only have error_value
-                // So that matching a closing ] is actually really important
-                // We also need to find a way to let the thing parse as much as possible, now he
-                // just gives up
-                if parser.res.error_value > check.res.error_value  {
-                    *parser = check;
-                }
+                parser.option(func);
             }
         }
         Expr::Marked(expr, Mark::Star) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let mut checkpoint = parser.clone();
+                let func = |parser: &mut crate::Parser| {
+                    #imp
+                };
 
-                { #imp };
-                while parser.consumed_since(&checkpoint) {
-                    checkpoint = parser.clone();
-                    { #imp };
-                }
-                parser.reset(&checkpoint);
+                parser.star(func);
             }
         }
         Expr::Marked(expr, Mark::Plus) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let mut output = { #imp };
-                let mut checkpoint = parser.clone();
+                let func = |parser: &mut crate::Parser| {
+                    #imp
+                };
 
-                { #imp };
-                while parser.consumed_since(&checkpoint) {
-                    checkpoint = parser.clone();
-                    { #imp };
-                }
-                parser.reset(&checkpoint);
+                parser.plus(func);
             }
         }
         Expr::Either(exprs) => {
             let parts: Vec<_> = exprs.iter().map(|e| to_impl(e, ctx, terminals)).collect();
-            let first = &parts[0];
-            let others = &parts[1..];
             quote! {
-                let start = parser.tokens.len();
-                let checkpoint = parser.clone();
-                { #first };
-
-                let mut error_value = parser.res.error_value ;
-                let mut out = parser.clone();
+                let mut checker = crate::Checker::new(parser);
 
                 #(
-                    {
-                        parser.reset(&checkpoint);
-                        { #others };
-
-                        let o_error_value = parser.res.error_value;
-                        if o_error_value < error_value{
-                            out = parser.clone();
-                            error_value = o_error_value;
-                        }
-                    }
+                    { #parts };
+                    checker.update(parser);
                 )*
 
-                *parser = out;
+                *parser = checker.get();
             }
         }
         Expr::Seq(exprs) => {
@@ -127,10 +99,6 @@ fn to_impl(
             quote! {
                 #(
                     {#parts};
-
-                    // if parser.is_empty() {
-                    //     return;
-                    // }
                 )*
             }
         }
@@ -166,15 +134,19 @@ fn producing_trait_impl(
     rule: &Rule,
     ctx: &Config,
     terminals: &mut HashSet<Terminal>,
+    can_be_empty: &HashMap<String, bool>,
 ) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&rule.name);
     let imp = to_impl(&rule.expression, ctx, terminals);
+    let can_be_emtpy = *can_be_empty.get(&rule.name).unwrap();
+
     quote! {
         #[derive(Debug)]
         pub struct #n;
 
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
+            const CAN_BE_EMPTY: bool = #can_be_emtpy;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
                 let mut func = |parser: &mut crate::Parser| {
@@ -196,15 +168,43 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
 
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
+            const CAN_BE_EMPTY: bool = false;
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) {
                 if parser.res.error_value > 10 {
                     return;
                 }
-                println!("error value {}", parser.res.error_value);
+
                 parser.expect_as::<Self>(#error)
             }
         }
+    }
+}
+
+fn set_can_be_empty(name: &str, ctx: &Config, map: &mut HashMap<String, bool>) -> bool {
+    if let Some(r) = map.get(name) {
+        return *r;
+    }
+
+    let result = if let Some(rule) = ctx.rules.producing.iter().find(|x| &x.name == name) {
+        rule_can_be_empty(&rule.expression, ctx, map)
+    } else {
+        false
+    };
+    // This is a terminal
+    map.insert(name.to_string(), result);
+    result
+}
+
+fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>) -> bool {
+    match expr {
+        Expr::Marked(_, Mark::Star) => true,
+        Expr::Marked(_, Mark::Option) => true,
+        Expr::Marked(expr, Mark::Plus) => rule_can_be_empty(expr, ctx, map),
+        Expr::Either(exprs) => exprs.iter().any(|e| rule_can_be_empty(e, ctx, map)),
+        Expr::Seq(exprs) => exprs.iter().all(|e| rule_can_be_empty(e, ctx, map)),
+        Expr::Literal(_, _) => false,
+        Expr::Reference(s) => set_can_be_empty(&s, ctx, map),
     }
 }
 
@@ -238,12 +238,20 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         }
     };
 
+    let mut can_be_empty = HashMap::new();
+
+    for r in config.rules.producing.iter() {
+        set_can_be_empty(&r.name, &config, &mut can_be_empty);
+    }
+
+    println!("Can Be Empty {:?}", can_be_empty);
+
     let mut terminals = HashSet::new();
     let definitions: Vec<_> = config
         .rules
         .producing
         .iter()
-        .map(|value| producing_trait_impl(value, &config, &mut terminals))
+        .map(|value| producing_trait_impl(value, &config, &mut terminals, &can_be_empty))
         .collect();
 
     let terminal_definitions: Vec<_> = terminals

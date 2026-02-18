@@ -9,6 +9,7 @@ mod parser;
 
 pub trait ParserTrait {
     const KIND: testing::SyntaxKind;
+    const CAN_BE_EMPTY: bool;
     fn parse(parser: &mut crate::Parser, context: &mut Context);
 }
 pub struct Context {}
@@ -123,6 +124,5 @@ fn lex(text: &str) -> List<FatToken> {
 
 pub fn parse_t<T: ParserTrait>(text: &str) -> Parse {
     let tokens = lex(text);
-    println!("Tokens {:?}", tokens);
     Parser::new(tokens).parse_item::<T>()
 }

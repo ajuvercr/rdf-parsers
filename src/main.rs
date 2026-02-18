@@ -104,15 +104,11 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "  a b  ";
+    let sexps = "   [ ] a b . ";
     println!("Parsing {}", sexps);
     let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 
     let root = parse.syntax();
-
-    println!("{:#?}", root);
-    let des: Vec<_> = root.descendants_with_tokens().collect();
-    println!("{:?}", des);
 
     let mut errors: Vec<_> = parse.errors.iter().cloned().collect();
     errors.reverse();

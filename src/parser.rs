@@ -74,20 +74,17 @@ pub enum Error {
 
 #[derive(Clone, Debug)]
 pub enum Step {
-    Start(rowan::SyntaxKind, Option<rowan::Checkpoint>),
+    Start(rowan::SyntaxKind),
     Error(Error),
     End,
     Bump,
 }
 impl Step {
     pub fn start(kind: impl Into<rowan::SyntaxKind>) -> Self {
-        Step::Start(kind.into(), None)
+        Step::Start(kind.into())
     }
     pub fn error(error: Error) -> Self {
         Self::Error(error)
-    }
-    pub fn start_at(kind: impl Into<rowan::SyntaxKind>, checkpoint: rowan::Checkpoint) -> Self {
-        Step::Start(kind.into(), Some(checkpoint))
     }
 
     pub fn end() -> Self {
@@ -100,8 +97,10 @@ impl Step {
 
     pub fn apply(&self, parser: &mut Parser, builder: &mut GreenNodeBuilder<'_>) {
         match self {
-            Step::Start(syntax_kind, None) => builder.start_node(*syntax_kind),
-            Step::Start(syntax_kind, Some(x)) => builder.start_node_at(x.clone(), *syntax_kind),
+            Step::Start(syntax_kind) => {
+                parser.skip_white_with_builder(builder);
+                builder.start_node(*syntax_kind);
+            }
             Step::End => builder.finish_node(),
             Step::Error(e) => {
                 builder.start_node(testing::SyntaxKind::Error.into());
@@ -109,6 +108,7 @@ impl Step {
                 builder.finish_node();
             }
             Step::Bump => {
+                parser.skip_white_with_builder(builder);
                 if let Some((i, r)) = parser.tokens.slice() {
                     if let Ok(r) = testing::SyntaxKind::try_from(i.kind) {
                         builder.token(r.into(), &i.text);
@@ -136,10 +136,6 @@ impl ParseRes {
         }
     }
 
-    pub fn start_node_at(&mut self, checkpoint: rowan::Checkpoint, kind: rowan::SyntaxKind) {
-        self.steps = self.steps.prepend(Step::start_at(kind, checkpoint));
-    }
-
     pub fn finish_node(&mut self) {
         self.steps = self.steps.prepend(Step::end());
     }
@@ -150,10 +146,22 @@ impl ParseRes {
 }
 
 impl Parser {
+    fn skip_white_with_builder(&mut self, builder: &mut GreenNodeBuilder<'_>) {
+        while let Some((i, r)) = self.tokens.slice()
+            && self.skip_token(i)
+        {
+            if let Ok(r) = testing::SyntaxKind::try_from(i.kind) {
+                builder.token(r.into(), &i.text);
+            } else {
+                builder.token(testing::SyntaxKind::Error.into(), &i.text);
+            }
+            self.tokens = r.clone();
+        }
+    }
+
     pub fn parse_item<T: ParserTrait>(mut self) -> Parse {
         let tokens = self.tokens.clone();
         T::parse(&mut self, &mut Context {});
-        println!("result {:#?}", self);
         self.eat_skips();
 
         self.tokens = tokens;
@@ -164,6 +172,8 @@ impl Parser {
         for step in steps.into_iter().rev() {
             step.apply(&mut self, &mut builder);
         }
+
+        self.skip_white_with_builder(&mut builder);
 
         builder.finish_node();
         Parse {
@@ -196,9 +206,31 @@ impl Parser {
             self.res.error_value = ev;
         }
         self.res.finish_node();
+    }
 
-        let done_list: Vec<_> = self.done.iter().collect();
-        println!("Finished {:?} {:?}", P::KIND, done_list);
+    pub fn star(&mut self, mut imp: impl FnMut(&mut Parser) -> ()) {
+        let mut checkpoint = self.clone();
+
+        while {
+            imp(self);
+            self.consumed_since(&checkpoint)
+        } {
+            checkpoint = self.clone();
+        }
+        self.reset(&checkpoint);
+    }
+
+    pub fn plus(&mut self, mut imp: impl FnMut(&mut Parser) -> ()) {
+        imp(self);
+        self.star(imp);
+    }
+    pub fn option(&mut self, imp: impl FnOnce(&mut Parser) -> ()) {
+        let check = self.clone();
+        imp(self);
+
+        if self.res.error_value > check.res.error_value {
+            *self = check;
+        }
     }
 
     pub fn peek(&self, kind: Token) -> bool {
@@ -313,8 +345,42 @@ impl Parser {
         while let Some(token) = self.tokens.head()
             && self.skip_token(token)
         {
-            self.res.steps = self.res.steps.prepend(Step::bump());
+            // self.res.steps = self.res.steps.prepend(Step::bump());
             self.tokens = self.tokens.tail().unwrap().clone();
         }
+    }
+}
+
+pub(crate) struct Checker {
+    checkpoint: Parser,
+    error_value: isize,
+    out: Option<Parser>,
+}
+
+impl Checker {
+    pub fn new(parser: &Parser) -> Self {
+        Self {
+            checkpoint: parser.clone(),
+            error_value: parser.res.error_value,
+            out: None,
+        }
+    }
+
+    pub fn update(&mut self, parser: &mut Parser) {
+        if self.out.is_none() {
+            self.out = Some(parser.clone());
+            self.error_value = parser.res.error_value;
+        } else {
+            let o_error_value = parser.res.error_value;
+            if parser.res.error_value < self.error_value {
+                self.out = Some(parser.clone());
+                self.error_value = o_error_value;
+            }
+        }
+        parser.reset(&self.checkpoint);
+    }
+
+    pub fn get(self) -> Parser {
+        self.out.unwrap_or(self.checkpoint)
     }
 }
