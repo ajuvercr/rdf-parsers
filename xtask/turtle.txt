@@ -7,7 +7,7 @@
 [5]	base	::=	'@base' IRIREF '.'
 [5s]	sparqlBase	::=	"BASE" IRIREF
 [6s]	sparqlPrefix	::=	"PREFIX" PNAME_NS IRIREF
-[6]	triples	::=	subject predicateObjectList | blankNodePropertyList predicateObjectList?
+[6]	triples	::=	 blankNodePropertyList predicateObjectList? | subject predicateObjectList
 [7]	predicateObjectList	::=	verb objectList (';' (verb objectList)?)*
 [8]	objectList	::=	object (',' object)*
 [9]	verb	::=	predicate | 'a'

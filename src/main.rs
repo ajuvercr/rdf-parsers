@@ -104,7 +104,7 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "   [ ] a b . ";
+    let sexps = "   [    ] . ";
     println!("Parsing {}", sexps);
     let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 
@@ -115,10 +115,12 @@ fn main() {
     let error_nodes: Vec<_> = root
         .descendants()
         .filter(|x| x.kind() == testing::SyntaxKind::Error)
-        .flat_map(|x| {
-            root.token_at_offset(x.text_range().start())
-                .right_biased()
-                .map(|x| x.text_range().into())
+        .flat_map(|x| match root.token_at_offset(x.text_range().start()) {
+            rowan::TokenAtOffset::None => None,
+            rowan::TokenAtOffset::Single(x) => Some(x.text_range().into()),
+            rowan::TokenAtOffset::Between(a, b) => {
+                Some(a.text_range().start().into()..b.text_range().start().into())
+            }
         })
         .zip(errors.iter())
         .collect();
