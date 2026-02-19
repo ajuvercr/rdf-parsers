@@ -10,6 +10,8 @@ mod parser;
 pub trait ParserTrait {
     const KIND: testing::SyntaxKind;
     const CAN_BE_EMPTY: bool;
+    const FIRST_ITEMS: &'static [testing::SyntaxKind];
+    const LAST_ITEMS: &'static [testing::SyntaxKind];
     fn parse(parser: &mut crate::Parser, context: &mut Context);
 }
 pub struct Context {}

@@ -1,8 +1,80 @@
-use std::ops::Range;
+use std::{collections::HashSet, ops::Range};
 
 use ariadne::Span;
-use rowan::{NodeOrToken, SyntaxToken};
+use rowan::{NodeOrToken, SyntaxToken, TextSize};
 use turtle::{Lang, SyntaxNode, parse_t, testing};
+
+fn completion(n: &SyntaxNode, at: usize) -> HashSet<testing::SyntaxKind> {
+    let at = TextSize::new(at as u32);
+
+    let mut out = HashSet::new();
+    if let Some(end) = n
+        .descendants()
+        .filter(|x| x.text_range().end() == at)
+        .next()
+    {
+        println!("end {:?}", end);
+        out.extend(testing::ending_tokens(end.kind()).iter());
+    }
+
+    if let Some(end) = n
+        .descendants()
+        .filter(|x| x.text_range().start() == at)
+        .next()
+    {
+        println!("start {:?}", end);
+        out.extend(testing::starting_tokens(end.kind()).iter());
+    }
+
+    if let Some(end) = n.token_at_offset(at).left_biased() {
+        println!("sefl {:?}", end);
+        out.extend(testing::ending_tokens(end.kind()).iter());
+    }
+
+    out
+    // let (mut start, mut end) = match n.token_at_offset(at) {
+    //     rowan::TokenAtOffset::None => (None, None),
+    //     rowan::TokenAtOffset::Single(x) => (
+    //         Some(NodeOrToken::Token(x.clone())),
+    //         Some(NodeOrToken::Token(x)),
+    //     ),
+    //     rowan::TokenAtOffset::Between(a, b) => {
+    //         (Some(NodeOrToken::Token(a)), Some(NodeOrToken::Token(b)))
+    //     }
+    // };
+    //
+    // while let Some(ref s) = start
+    //     && (s.kind() == testing::SyntaxKind::WhiteSpace || s.kind() == testing::SyntaxKind::Error)
+    // {
+    //     if let Some(n) = s.prev_sibling_or_token() {
+    //         start = Some(n);
+    //     } else {
+    //         break;
+    //     }
+    // }
+    // while let Some(ref s) = end
+    //     && (s.kind() == testing::SyntaxKind::WhiteSpace || s.kind() == testing::SyntaxKind::Error)
+    // {
+    //     if let Some(n) = s.next_sibling_or_token() {
+    //         end = Some(n);
+    //     } else {
+    //         break;
+    //     }
+    // }
+    //
+    // println!("start {:?} end {:?}", start, end);
+    //
+    // let mut out: HashSet<testing::SyntaxKind> = HashSet::new();
+    // if let Some(start) = start {
+    //     out.extend(testing::ending_tokens(start.kind()).iter());
+    // }
+    //
+    // if let Some(end) = end {
+    //     out.extend(testing::starting_tokens(end.kind()).iter());
+    // }
+    //
+    // out
+}
 
 fn print(n: &SyntaxNode, indent: usize, errors: &mut &[String]) {
     for _ in 0..indent {
@@ -104,7 +176,7 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "   [    ] . ";
+    let sexps = "[    ] a b;  ";
     println!("Parsing {}", sexps);
     let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 
@@ -130,4 +202,9 @@ fn main() {
     let mut es: &[String] = &errors;
     println!("All errors {:?}", error_nodes);
     print(&root, 0, &mut es);
+
+    if let Some(r) = root.first_child() {
+        let completions = completion(&r, 11);
+        println!("Completions {:?}", completions);
+    }
 }

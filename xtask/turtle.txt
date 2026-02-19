@@ -50,5 +50,5 @@ prefix_token -> 100
 base_token -> 100
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-sq_open -> 3
-sq_close -> 3
+sq_open -> 5
+sq_close -> 5

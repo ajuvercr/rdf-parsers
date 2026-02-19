@@ -285,7 +285,7 @@ impl Parser {
                 if c == T::KIND {
                     self.bump();
                     self.done = List::default();
-                    self.res.error_value -= error / 2;
+                    self.res.error_value -= error / 2 + 1;
                     return;
                 }
             }

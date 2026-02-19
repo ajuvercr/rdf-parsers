@@ -1,10 +1,10 @@
 use ariadne::{Report, ReportKind, Source};
-use chumsky::container::Seq;
 use chumsky::error::Rich;
 use proc_macro::TokenStream;
 use proc_macro2::token_stream;
 use quote::quote;
 use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 use std::ops::Range;
 use std::{io::Cursor, path::PathBuf};
 use syn::{LitStr, parse_macro_input};
@@ -135,10 +135,44 @@ fn producing_trait_impl(
     ctx: &Config,
     terminals: &mut HashSet<Terminal>,
     can_be_empty: &HashMap<String, bool>,
+    first_items: &HashMap<String, HashSet<Item>>,
+    last_items: &HashMap<String, HashSet<Item>>,
 ) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&rule.name);
     let imp = to_impl(&rule.expression, ctx, terminals);
     let can_be_emtpy = *can_be_empty.get(&rule.name).unwrap();
+
+    let fi: Vec<_> = first_items
+        .get(&rule.name)
+        .expect("first_items to contain me")
+        .iter()
+        .map(|x| match x {
+            Item::Terminal(s) => {
+                let n = ctx.context.ident_for(&s);
+                quote! { SyntaxKind::#n }
+            }
+            Item::NonTerminal(s) => {
+                let n = ctx.context.ident_for(&s);
+                quote! { SyntaxKind::#n }
+            }
+        })
+        .collect();
+
+    let li: Vec<_> = last_items
+        .get(&rule.name)
+        .expect("first_items to contain me")
+        .iter()
+        .map(|x| match x {
+            Item::Terminal(s) => {
+                let n = ctx.context.ident_for(&s);
+                quote! { SyntaxKind::#n }
+            }
+            Item::NonTerminal(s) => {
+                let n = ctx.context.ident_for(&s);
+                quote! { SyntaxKind::#n }
+            }
+        })
+        .collect();
 
     quote! {
         #[derive(Debug)]
@@ -147,6 +181,9 @@ fn producing_trait_impl(
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
             const CAN_BE_EMPTY: bool = #can_be_emtpy;
+
+            const FIRST_ITEMS: &'static [SyntaxKind] = &[ #( #fi, )* ];
+            const LAST_ITEMS: &'static [SyntaxKind] = &[ #( #li, )* ];
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
                 let mut func = |parser: &mut crate::Parser| {
@@ -161,7 +198,7 @@ fn producing_trait_impl(
 
 fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&terminal);
-    let error = ctx.context.error_values.get(terminal).copied().unwrap_or(1);
+    let error = ctx.context.error_values.get(terminal).copied().unwrap_or(2);
     quote! {
         #[derive(Debug)]
         pub struct #n;
@@ -169,6 +206,8 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
         impl crate::ParserTrait for #n {
             const KIND: SyntaxKind = SyntaxKind::#n;
             const CAN_BE_EMPTY: bool = false;
+            const FIRST_ITEMS: &'static [SyntaxKind] = &[];
+            const LAST_ITEMS: &'static [SyntaxKind] = &[ ];
 
             fn parse(parser: &mut crate::Parser, context: &mut crate::Context) {
                 if parser.res.error_value > 10 {
@@ -176,6 +215,141 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
                 }
 
                 parser.expect_as::<Self>(#error)
+            }
+        }
+    }
+}
+
+#[derive(Hash, PartialEq, PartialOrd, Debug, Clone, Eq)]
+enum Item {
+    Terminal(String),
+    NonTerminal(String),
+}
+impl Item {
+    fn terminal(s: impl Into<String>) -> Self {
+        Self::Terminal(s.into())
+    }
+
+    fn non_terminal(s: impl Into<String>) -> Self {
+        Self::NonTerminal(s.into())
+    }
+}
+
+fn set_first_possible_item(
+    name: &str,
+    ctx: &Config,
+    map: &mut HashMap<String, HashSet<Item>>,
+    can_be_empty: &mut HashMap<String, bool>,
+) {
+    if map.contains_key(name) {
+        return;
+    }
+
+    let mut set = HashSet::new();
+    if let Some(rule) = ctx.rules.producing.iter().find(|x| &x.name == name) {
+        expr_first_items(&rule.expression, ctx, map, &mut set, can_be_empty);
+    }
+    map.insert(name.to_string(), set);
+}
+
+fn set_last_possible_item(
+    name: &str,
+    ctx: &Config,
+    map: &mut HashMap<String, HashSet<Item>>,
+    can_be_empty: &mut HashMap<String, bool>,
+    at: usize,
+) {
+    if map.contains_key(name) {
+        return;
+    }
+
+    let mut set = HashSet::new();
+    if let Some(rule) = ctx.rules.producing.iter().find(|x| &x.name == name) {
+        expr_last_items(&rule.expression, ctx, map, &mut set, can_be_empty, at + 1);
+    }
+    map.insert(name.to_string(), set);
+}
+
+fn expr_first_items(
+    expr: &Expr,
+    ctx: &Config,
+    map: &mut HashMap<String, HashSet<Item>>,
+    set: &mut HashSet<Item>,
+    can_be_empty: &mut HashMap<String, bool>,
+) {
+    match expr {
+        Expr::Marked(e, _) => {
+            expr_first_items(e, ctx, map, set, can_be_empty);
+        }
+        Expr::Either(exprs) => {
+            for e in exprs {
+                expr_first_items(e, ctx, map, set, can_be_empty);
+            }
+        }
+        Expr::Seq(exprs) => {
+            for e in exprs {
+                expr_first_items(e, ctx, map, set, can_be_empty);
+                if !rule_can_be_empty(e, ctx, can_be_empty) {
+                    break;
+                }
+            }
+        }
+        Expr::Literal(_literal_type, s) => {
+            set.insert(Item::terminal(ctx.context.with.get(s).cloned().unwrap()));
+        }
+        Expr::Reference(s) => {
+            set.insert(Item::non_terminal(s));
+            set_first_possible_item(&s, ctx, map, can_be_empty);
+            if let Some(new_set) = map.get(s) {
+                set.extend(new_set.iter().cloned());
+            } else {
+                eprintln!("Hmm this should be present");
+            }
+        }
+    }
+}
+
+fn expr_last_items(
+    expr: &Expr,
+    ctx: &Config,
+    map: &mut HashMap<String, HashSet<Item>>,
+    set: &mut HashSet<Item>,
+    can_be_empty: &mut HashMap<String, bool>,
+    done: usize,
+) {
+    if done > 100 {
+        return;
+    }
+    match expr {
+        Expr::Marked(e, _) => {
+            expr_last_items(e, ctx, map, set, can_be_empty, done + 1);
+        }
+        Expr::Either(exprs) => {
+            for e in exprs {
+                expr_last_items(e, ctx, map, set, can_be_empty, done + 1);
+                if !rule_can_be_empty(e, ctx, can_be_empty) {
+                    break;
+                }
+            }
+        }
+        Expr::Seq(exprs) => {
+            for e in exprs.iter().rev() {
+                expr_last_items(e, ctx, map, set, can_be_empty, done + 1);
+                if !rule_can_be_empty(e, ctx, can_be_empty) {
+                    break;
+                }
+            }
+        }
+        Expr::Literal(_literal_type, s) => {
+            set.insert(Item::terminal(ctx.context.with.get(s).cloned().unwrap()));
+        }
+        Expr::Reference(s) => {
+            set.insert(Item::non_terminal(s));
+            set_last_possible_item(&s, ctx, map, can_be_empty, done + 1);
+            if let Some(new_set) = map.get(s) {
+                set.extend(new_set.iter().cloned());
+            } else {
+                eprintln!("Hmm this should be present");
             }
         }
     }
@@ -239,19 +413,37 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
     };
 
     let mut can_be_empty = HashMap::new();
+    let mut first_items = HashMap::new();
+    let mut last_items = HashMap::new();
 
     for r in config.rules.producing.iter() {
         set_can_be_empty(&r.name, &config, &mut can_be_empty);
     }
 
+    for r in config.rules.producing.iter() {
+        set_first_possible_item(&r.name, &config, &mut first_items, &mut can_be_empty);
+        set_last_possible_item(&r.name, &config, &mut last_items, &mut can_be_empty, 0);
+    }
+
     println!("Can Be Empty {:?}", can_be_empty);
+    println!("First items {:#?}", first_items);
+    println!("Last items {:#?}", last_items);
 
     let mut terminals = HashSet::new();
     let definitions: Vec<_> = config
         .rules
         .producing
         .iter()
-        .map(|value| producing_trait_impl(value, &config, &mut terminals, &can_be_empty))
+        .map(|value| {
+            producing_trait_impl(
+                value,
+                &config,
+                &mut terminals,
+                &can_be_empty,
+                &first_items,
+                &last_items,
+            )
+        })
         .collect();
 
     let terminal_definitions: Vec<_> = terminals
@@ -302,6 +494,23 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
     #(
         #terminal_definitions
     )*
+
+    pub fn starting_tokens(t: SyntaxKind) -> &'static [SyntaxKind] {
+        use crate::ParserTrait as _;
+        match t {
+            #(SyntaxKind::#producing => #producing::FIRST_ITEMS , )*
+            _ => &[],
+        }
+    }
+
+    pub fn ending_tokens(t: SyntaxKind) -> &'static [SyntaxKind] {
+        use crate::ParserTrait as _;
+        match t {
+            #(SyntaxKind::#producing => #producing::LAST_ITEMS , )*
+            _ => &[],
+        }
+    }
+
         };
 
     out.into()
