@@ -56,7 +56,7 @@ fn to_impl(
         Expr::Marked(expr, Mark::Option) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let func = |parser: &mut crate::Parser| {
+                let func = |parser: &mut crate::Parser<SyntaxKind>| {
                     #imp
                 };
 
@@ -66,7 +66,7 @@ fn to_impl(
         Expr::Marked(expr, Mark::Star) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let func = |parser: &mut crate::Parser| {
+                let func = |parser: &mut crate::Parser<SyntaxKind>| {
                     #imp
                 };
 
@@ -76,7 +76,7 @@ fn to_impl(
         Expr::Marked(expr, Mark::Plus) => {
             let imp = to_impl(expr, ctx, terminals);
             quote! {
-                let func = |parser: &mut crate::Parser| {
+                let func = |parser: &mut crate::Parser<SyntaxKind>| {
                     #imp
                 };
 
@@ -181,14 +181,16 @@ fn producing_trait_impl(
         pub struct #n;
 
         impl crate::ParserTrait for #n {
+            type Kind = SyntaxKind;
+
             const KIND: SyntaxKind = SyntaxKind::#n;
             const CAN_BE_EMPTY: bool = #can_be_emtpy;
 
             const FIRST_ITEMS: &'static [SyntaxKind] = &[ #( #fi, )* ];
             const LAST_ITEMS: &'static [SyntaxKind] = &[ #( #li, )* ];
 
-            fn parse(parser: &mut crate::Parser, context: &mut crate::Context)  {
-                let mut func = |parser: &mut crate::Parser| {
+            fn parse(parser: &mut crate::Parser<SyntaxKind>, context: &mut crate::Context)  {
+                let mut func = |parser: &mut crate::Parser<SyntaxKind>| {
                     #imp
                 };
 
@@ -206,12 +208,14 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
         pub struct #n;
 
         impl crate::ParserTrait for #n {
+            type Kind = SyntaxKind;
+
             const KIND: SyntaxKind = SyntaxKind::#n;
             const CAN_BE_EMPTY: bool = false;
             const FIRST_ITEMS: &'static [SyntaxKind] = &[];
             const LAST_ITEMS: &'static [SyntaxKind] = &[ ];
 
-            fn parse(parser: &mut crate::Parser, context: &mut crate::Context) {
+            fn parse(parser: &mut crate::Parser<SyntaxKind>, context: &mut crate::Context) {
                 if parser.res.error_value > 10 {
                     return;
                 }
@@ -482,8 +486,6 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         })
         .collect();
 
-    println!("terminals {:?}", terminals);
-
     let producing: Vec<_> = producing
         .into_iter()
         .map(|x| config.context.ident_for(x))
@@ -495,7 +497,9 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         #[repr(u16)]
         pub enum SyntaxKind {
             Eof = 0,
+            #[regex(r"[ \t\n]+")]
             WhiteSpace,
+            #[regex(r"\\#[^\n]+", allow_greedy=true)]
             Comment,
             /// producings
             #( #producing ,)*

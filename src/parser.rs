@@ -1,13 +1,13 @@
 #[allow(unused)]
 #[derive(Debug)]
-pub struct FatToken {
-    kind: Token,
+pub struct FatToken<T: TokenTrait> {
+    kind: T,
     text: String,
     range: Range<usize>,
     old_kind: Option<TermType>,
 }
-impl FatToken {
-    pub fn new(kind: Token, range: Range<usize>, text: String) -> Self {
+impl<T: TokenTrait> FatToken<T> {
+    pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
         FatToken {
             kind,
             range,
@@ -31,66 +31,58 @@ pub struct Parse {
 }
 
 impl Parse {
-    pub fn syntax(&self) -> SyntaxNode {
-        SyntaxNode::new_root(self.green_node.clone())
+    pub fn syntax<L: Language>(&self) -> rowan::SyntaxNode<L> {
+        rowan::SyntaxNode::new_root(self.green_node.clone())
     }
 }
 
-pub type SyntaxNode = rowan::SyntaxNode<Lang>;
-
-#[allow(unused)]
-pub type SyntaxToken = rowan::SyntaxToken<Lang>;
-
-#[allow(unused)]
-pub type SyntaxElement = rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
-
 use std::{collections::HashSet, ops::Range};
 
-use rowan::{GreenNode, GreenNodeBuilder};
+use rowan::{GreenNode, GreenNodeBuilder, Language};
 
-use crate::{Context, Lang, ParserTrait, Token, list::List, testing};
+use crate::{Context, ParserTrait, TokenTrait, list::List};
 
 #[derive(Clone, Debug)]
-pub struct Parser {
+pub struct Parser<T: TokenTrait> {
     /// input tokens, including whitespace,
     /// in *reverse* order.
-    pub tokens: List<FatToken>,
-    pub done: List<testing::SyntaxKind>,
-    pub res: ParseRes,
+    pub tokens: List<FatToken<T>>,
+    pub done: List<T>,
+    pub res: ParseRes<T>,
     suggesting: bool,
     /// the list of syntax errors we've accumulated
     /// so far.
     errors: List<String>,
 }
 
-impl Parser {
-    pub fn new(tokens: List<FatToken>) -> Self {
+impl<T: TokenTrait> Parser<T> {
+    pub fn new(tokens: List<FatToken<T>>) -> Self {
         Parser {
             tokens,
             suggesting: true,
-            res: ParseRes::default(),
+            res: ParseRes::<T>::default(),
             errors: List::default(),
             done: List::default(),
         }
     }
 }
 #[derive(Clone, Debug)]
-pub enum Error {
-    Expected(testing::SyntaxKind),
+pub enum Error<T> {
+    Expected(T),
 }
 
 #[derive(Clone, Debug)]
-pub enum Step {
+pub enum Step<T> {
     Start(rowan::SyntaxKind),
-    Error(Error),
+    Error(Error<T>),
     End,
     Bump,
 }
-impl Step {
+impl<T: TokenTrait> Step<T> {
     pub fn start(kind: impl Into<rowan::SyntaxKind>) -> Self {
         Step::Start(kind.into())
     }
-    pub fn error(error: Error) -> Self {
+    pub fn error(error: Error<T>) -> Self {
         Self::Error(error)
     }
 
@@ -102,7 +94,7 @@ impl Step {
         Step::Bump
     }
 
-    pub fn apply(&self, parser: &mut Parser, builder: &mut GreenNodeBuilder<'_>) {
+    pub fn apply(&self, parser: &mut Parser<T>, builder: &mut GreenNodeBuilder<'_>) {
         match self {
             Step::Start(syntax_kind) => {
                 parser.skip_white_with_builder(builder);
@@ -110,18 +102,14 @@ impl Step {
             }
             Step::End => builder.finish_node(),
             Step::Error(e) => {
-                builder.start_node(testing::SyntaxKind::Error.into());
+                builder.start_node(T::ERROR.into());
                 parser.errors = parser.errors.prepend(format!("{:?}", e));
                 builder.finish_node();
             }
             Step::Bump => {
                 parser.skip_white_with_builder(builder);
                 if let Some((i, r)) = parser.tokens.slice() {
-                    if let Ok(r) = testing::SyntaxKind::try_from(i.kind) {
-                        builder.token(r.into(), &i.text);
-                    } else {
-                        builder.token(testing::SyntaxKind::Error.into(), &i.text);
-                    }
+                    builder.token(i.kind.clone().into(), &i.text);
                     parser.tokens = r.clone();
                 }
             }
@@ -129,14 +117,23 @@ impl Step {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct ParseRes {
-    pub steps: List<Step>,
+#[derive(Clone, Debug)]
+pub struct ParseRes<T: TokenTrait> {
+    pub steps: List<Step<T>>,
     pub error_value: isize,
 }
 
-impl ParseRes {
-    pub fn combine(&mut self, other: &ParseRes) {
+impl<T: TokenTrait> Default for ParseRes<T> {
+    fn default() -> Self {
+        Self {
+            steps: Default::default(),
+            error_value: Default::default(),
+        }
+    }
+}
+
+impl<T: TokenTrait> ParseRes<T> {
+    pub fn combine(&mut self, other: &Self) {
         self.error_value += other.error_value;
         for x in other.steps.iter() {
             self.steps.prepend(x.clone());
@@ -152,31 +149,27 @@ impl ParseRes {
     }
 }
 
-impl Parser {
+impl<T: TokenTrait> Parser<T> {
     fn skip_white_with_builder(&mut self, builder: &mut GreenNodeBuilder<'_>) {
         while let Some((i, r)) = self.tokens.slice()
             && self.skip_token(i)
         {
-            if let Ok(r) = testing::SyntaxKind::try_from(i.kind) {
-                builder.token(r.into(), &i.text);
-            } else {
-                builder.token(testing::SyntaxKind::Error.into(), &i.text);
-            }
+            builder.token(i.kind.clone().into(), &i.text);
             self.tokens = r.clone();
         }
     }
 
-    pub fn parse_item<T: ParserTrait>(mut self) -> Parse {
+    pub fn parse_item<O: ParserTrait<Kind = T>>(mut self) -> Parse {
         let tokens = self.tokens.clone();
         let mut ctx = Context {
             suggestions: HashSet::new(),
         };
-        T::parse(&mut self, &mut ctx);
+        O::parse(&mut self, &mut ctx);
         self.eat_skips();
 
         self.tokens = tokens;
         let mut builder = GreenNodeBuilder::new();
-        builder.start_node(testing::SyntaxKind::ROOT.into());
+        builder.start_node(T::ROOT.into());
 
         let steps: Vec<_> = self.res.steps.iter().cloned().collect();
         for step in steps.into_iter().rev() {
@@ -193,7 +186,7 @@ impl Parser {
         }
     }
 
-    pub fn producing_rule<P: ParserTrait>(&mut self, imp: impl FnOnce(&mut Parser) -> ()) {
+    pub fn producing_rule<P: ParserTrait<Kind = T>>(&mut self, imp: impl FnOnce(&mut Self) -> ()) {
         if self.already_done::<P>() {
             self.res.error_value += 10;
             return;
@@ -219,7 +212,7 @@ impl Parser {
         self.res.finish_node();
     }
 
-    pub fn star(&mut self, mut imp: impl FnMut(&mut Parser) -> ()) {
+    pub fn star(&mut self, mut imp: impl FnMut(&mut Self) -> ()) {
         let mut checkpoint = self.clone();
 
         while {
@@ -231,11 +224,11 @@ impl Parser {
         self.reset(&checkpoint);
     }
 
-    pub fn plus(&mut self, mut imp: impl FnMut(&mut Parser) -> ()) {
+    pub fn plus(&mut self, mut imp: impl FnMut(&mut Self) -> ()) {
         imp(self);
         self.star(imp);
     }
-    pub fn option(&mut self, imp: impl FnOnce(&mut Parser) -> ()) {
+    pub fn option(&mut self, imp: impl FnOnce(&mut Self) -> ()) {
         let check = self.clone();
         imp(self);
 
@@ -244,89 +237,54 @@ impl Parser {
         }
     }
 
-    pub fn peek(&self, kind: Token) -> bool {
-        if let Some(c) = self.current() {
-            if c.kind == kind {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    pub fn peek_as<T: TryFrom<Token> + PartialEq>(&self, kind: T) -> bool {
-        if let Some(c) = self.current() {
-            if let Ok(c) = T::try_from(c.kind) {
-                if c == kind {
-                    return true;
-                }
-            }
-        }
-        false
-    }
-
-    pub fn expect(&mut self, kind: Token) {
-        if let Some(c) = self.current() {
-            if c.kind == kind {
-                self.bump();
-                return;
-            }
-        }
-
-        self.start_node(testing::SyntaxKind::Error);
-        self.errors = self.errors.prepend(format!("Expected {:?}", kind));
-        self.finish_node();
-    }
-
-    pub fn starting<T: ParserTrait>(&mut self) {
-        self.done = self.done.prepend(T::KIND);
+    pub fn starting<O: ParserTrait<Kind = T>>(&mut self) {
+        self.done = self.done.prepend(O::KIND);
     }
 
     pub fn reset(&mut self, other: &Self) {
         *self = other.clone();
     }
 
-    pub fn already_done<T: ParserTrait>(&self) -> bool {
-        let k = T::KIND;
+    pub fn already_done<O: ParserTrait<Kind = T>>(&self) -> bool {
+        let k = O::KIND;
         self.done.iter().any(|x| x == &k)
     }
 
-    pub fn expect_as<T: ParserTrait + std::fmt::Debug>(
+    pub fn expect_as<O: ParserTrait<Kind = T> + std::fmt::Debug>(
         &mut self,
         error: isize,
         context: &mut Context,
     ) {
         let e = if let Some(c) = self.current() {
-            if let Ok(c) = testing::SyntaxKind::try_from(c.kind) {
-                if c == T::KIND {
-                    self.bump();
-                    self.done = List::default();
-                    self.res.error_value -= error / 2 + 1;
-                    // self.suggesting = true;
-                    return;
-                }
+            if c.kind == O::KIND {
+                self.bump();
+                self.done = List::default();
+                self.res.error_value -= error / 2 + 1;
+                // self.suggesting = true;
+                return;
             }
 
             if self.suggesting && self.res.error_value <= 0 {
                 context
                     .suggestions
-                    .insert((format!("{:?}", T::KIND), c.range.clone()));
+                    .insert((format!("{:?}", O::KIND), c.range.clone()));
             }
             self.suggesting = false;
 
             self.res.steps = self
                 .res
                 .steps
-                .prepend(Step::Error(Error::Expected(T::KIND)));
+                .prepend(Step::Error(Error::Expected(O::KIND)));
             self.res.error_value += error;
         } else {
             self.res.steps = self
                 .res
                 .steps
-                .prepend(Step::Error(Error::Expected(T::KIND)));
+                .prepend(Step::Error(Error::Expected(O::KIND)));
             self.res.error_value += error;
         };
 
-        self.done = self.done.prepend(T::KIND);
+        self.done = self.done.prepend(O::KIND);
         e
     }
 
@@ -337,12 +295,8 @@ impl Parser {
         self.res.finish_node();
     }
 
-    pub fn skip_token(&self, token: &FatToken) -> bool {
-        match token.kind {
-            Token::WHITESPACE => true,
-            Token::COMMENT => true,
-            _ => false,
-        }
+    pub fn skip_token(&self, token: &FatToken<T>) -> bool {
+        token.kind.skips()
     }
 
     /// Advance one token, adding it to the current branch of the tree builder.
@@ -356,7 +310,7 @@ impl Parser {
     }
 
     /// Peek at the first unprocessed token that is relevant
-    pub fn current(&self) -> Option<&FatToken> {
+    pub fn current(&self) -> Option<&FatToken<T>> {
         self.tokens.iter().skip_while(|t| self.skip_token(t)).next()
     }
 
@@ -374,14 +328,14 @@ impl Parser {
     }
 }
 
-pub(crate) struct Checker {
-    checkpoint: Parser,
+pub(crate) struct Checker<T: TokenTrait> {
+    checkpoint: Parser<T>,
     error_value: isize,
-    out: Option<Parser>,
+    out: Option<Parser<T>>,
 }
 
-impl Checker {
-    pub fn new(parser: &Parser) -> Self {
+impl<T: TokenTrait> Checker<T> {
+    pub fn new(parser: &Parser<T>) -> Self {
         Self {
             checkpoint: parser.clone(),
             error_value: parser.res.error_value,
@@ -389,7 +343,7 @@ impl Checker {
         }
     }
 
-    pub fn update(&mut self, parser: &mut Parser) {
+    pub fn update(&mut self, parser: &mut Parser<T>) {
         if self.out.is_none() {
             self.out = Some(parser.clone());
             self.error_value = parser.res.error_value;
@@ -403,7 +357,7 @@ impl Checker {
         parser.reset(&self.checkpoint);
     }
 
-    pub fn get(self) -> Parser {
+    pub fn get(self) -> Parser<T> {
         self.out.unwrap_or(self.checkpoint)
     }
 }

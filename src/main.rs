@@ -1,13 +1,17 @@
 use std::{
     collections::{HashMap, HashSet},
+    fs::read_to_string,
     ops::Range,
 };
 
 use ariadne::Span;
 use rowan::{NodeOrToken, SyntaxToken, TextSize};
-use turtle::{Lang, SyntaxNode, parse_t, testing};
+use turtle::{
+    parse_t,
+    turtle::{self as lang, Lang, SyntaxKind, SyntaxNode},
+};
 
-fn completion(n: &SyntaxNode, at: usize) -> HashSet<testing::SyntaxKind> {
+fn completion(n: &SyntaxNode, at: usize) -> HashSet<SyntaxKind> {
     let at = TextSize::new(at as u32);
 
     let mut out = HashSet::new();
@@ -17,7 +21,7 @@ fn completion(n: &SyntaxNode, at: usize) -> HashSet<testing::SyntaxKind> {
         .next()
     {
         println!("end {:?}", end);
-        out.extend(testing::ending_tokens(end.kind()).iter());
+        out.extend(lang::ending_tokens(end.kind()).iter());
     }
 
     if let Some(end) = n
@@ -26,12 +30,12 @@ fn completion(n: &SyntaxNode, at: usize) -> HashSet<testing::SyntaxKind> {
         .next()
     {
         println!("start {:?}", end);
-        out.extend(testing::starting_tokens(end.kind()).iter());
+        out.extend(lang::starting_tokens(end.kind()).iter());
     }
 
     if let Some(end) = n.token_at_offset(at).left_biased() {
         println!("sefl {:?}", end);
-        out.extend(testing::ending_tokens(end.kind()).iter());
+        out.extend(lang::ending_tokens(end.kind()).iter());
     }
 
     out
@@ -83,7 +87,7 @@ fn print(n: &SyntaxNode, indent: usize, errors: &mut &[String]) {
     for _ in 0..indent {
         eprint!(" ");
     }
-    if n.kind() == turtle::testing::SyntaxKind::Error {
+    if n.kind() == lang::SyntaxKind::Error {
         eprintln!("{:?} {:?}", n, errors.first());
         if errors.len() > 0 {
             *errors = &errors[1..];
@@ -109,7 +113,7 @@ fn find_range(token: SyntaxNode) -> std::ops::Range<usize> {
 
     let is_empty = |token: &NodeOrToken<rowan::SyntaxNode<Lang>, SyntaxToken<Lang>>| {
         let kind = token.kind();
-        kind == testing::SyntaxKind::Error || kind == testing::SyntaxKind::WhiteSpace
+        kind == lang::SyntaxKind::Error || kind == lang::SyntaxKind::WhiteSpace
     };
 
     if let Some(mut start_find) = token.prev_sibling_or_token() {
@@ -176,13 +180,9 @@ fn print_ariadne(errors: &[(Range<usize>, &String)], source: &str) {
 // 5. timing information?
 // 6. context aware parsing!
 fn main() {
-    let s: &'static str = "";
-
-    println!("Got: {}", s);
-    let sexps = "nicky vriend arthur, korneel;
-                             boyfriend arthur.";
+    let sexps = read_to_string("./test.ttl").unwrap();
     println!("Parsing {}", sexps);
-    let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
+    let parse: turtle::Parse = parse_t::<turtle::turtle::TurtleDoc>(&sexps);
 
     let root = parse.syntax();
 
@@ -190,7 +190,7 @@ fn main() {
     errors.reverse();
     let error_nodes: Vec<_> = root
         .descendants()
-        .filter(|x| x.kind() == testing::SyntaxKind::Error)
+        .filter(|x| x.kind() == lang::SyntaxKind::Error)
         .flat_map(|x| match root.token_at_offset(x.text_range().start()) {
             rowan::TokenAtOffset::None => None,
             rowan::TokenAtOffset::Single(x) => Some(x.text_range().into()),
@@ -200,8 +200,6 @@ fn main() {
         })
         .zip(errors.iter())
         .collect();
-
-    print_ariadne(&error_nodes, sexps);
 
     let mut es: &[String] = &errors;
     println!("All errors {:?}", error_nodes);
@@ -220,4 +218,6 @@ fn main() {
         let completions = completion(&r, 11);
         println!("Completions {:?}", completions);
     }
+
+    print_ariadne(&error_nodes, &sexps);
 }
