@@ -13,3 +13,4 @@ syn = { version = "2", features = ["full"] }
 quote = "1"
 proc-macro2 = "1"
 ariadne = { version = "0.6.0", features = ["auto-color"] }
+regex = "1.12.3"

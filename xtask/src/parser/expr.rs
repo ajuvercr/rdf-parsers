@@ -24,6 +24,7 @@ pub enum LiteralType {
     Single,
     Double,
     Regex,
+    Hex,
 }
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -32,6 +33,14 @@ pub enum Expr {
     Seq(Vec<Self>),
     Literal(LiteralType, String),
     Reference(String),
+}
+
+fn hex<'src>() -> impl Parser<'src, &'src str, String, extra::Err<Rich<'src, char>>> + Clone {
+    just("#x").ignore_then(one_of("0123456789ABCDEF").repeated().collect())
+}
+
+fn ws<'src>() -> impl Parser<'src, &'src str, (), extra::Err<Rich<'src, char>>> + Clone {
+    one_of(" \t").repeated().ignored()
 }
 
 fn ident<'src>() -> impl Parser<'src, &'src str, String, extra::Err<Rich<'src, char>>> + Clone {
@@ -49,19 +58,21 @@ fn padded<'src>(
     let start = just("/*");
     let end = just("*/");
     let comment = unit.repeated().delimited_by(start, end);
-    just(c).padded().padded_by(comment.padded().repeated())
+    just(c)
+        .padded_by(ws())
+        .padded_by(comment.padded_by(ws()).repeated())
 }
 
 fn rule<'src>() -> impl Parser<'src, &'src str, Rule, extra::Err<Rich<'src, char>>> {
     let n = none_of("]")
         .repeated()
         .collect()
-        .delimited_by(padded('['), padded(']'));
+        .delimited_by(just('\n').or_not().ignore_then(just('[')), just(']'));
 
-    let name = ident().padded();
+    let name = ident().padded_by(ws());
 
     n.then(name)
-        .then_ignore(just("::=").padded())
+        .then_ignore(just("::=").padded_by(ws()))
         .then(expr())
         .map(|((id, name), expr)| Rule {
             id,
@@ -76,7 +87,7 @@ fn expr<'src>() -> impl Parser<'src, &'src str, Expr, extra::Err<Rich<'src, char
         just('?').to(Mark::Option),
         just('+').to(Mark::Plus),
     ))
-    .padded();
+    .padded_by(ws());
 
     recursive(|a_parser| {
         let grouped = a_parser.clone().delimited_by(padded('('), padded(')'));
@@ -85,23 +96,27 @@ fn expr<'src>() -> impl Parser<'src, &'src str, Expr, extra::Err<Rich<'src, char
             .collect()
             .delimited_by(padded('\''), padded('\''))
             .map(|x| Expr::Literal(LiteralType::Single, x))
-            .padded();
+            .padded_by(ws());
         let literal2 = none_of('"')
             .repeated()
             .collect()
             .delimited_by(padded('"'), padded('"'))
             .map(|x| Expr::Literal(LiteralType::Double, x))
-            .padded();
+            .padded_by(ws());
 
         let literal3 = none_of(']')
             .repeated()
             .collect()
             .delimited_by(padded('['), padded(']'))
             .map(|x| Expr::Literal(LiteralType::Regex, x))
-            .padded();
-        let reference = ident().map(Expr::Reference).padded();
+            .padded_by(ws());
 
-        let main = choice((grouped, literal, literal2, literal3, reference));
+        let literal4 = hex()
+            .map(|x| Expr::Literal(LiteralType::Hex, x))
+            .padded_by(ws());
+        let reference = ident().map(Expr::Reference).padded_by(ws());
+
+        let main = choice((grouped, literal, literal2, literal3, literal4, reference));
 
         let main = main
             .clone()
@@ -119,7 +134,7 @@ fn expr<'src>() -> impl Parser<'src, &'src str, Expr, extra::Err<Rich<'src, char
 
         let main = main
             .clone()
-            .separated_by(padded('|'))
+            .separated_by(just('|').padded_by(one_of(" \t\n\r").repeated()))
             .at_least(2)
             .collect()
             .map(Expr::Either)

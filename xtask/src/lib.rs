@@ -1,7 +1,7 @@
 use ariadne::{Report, ReportKind, Source};
 use chumsky::error::Rich;
 use proc_macro::TokenStream;
-use proc_macro2::token_stream;
+use proc_macro2::{Span, token_stream};
 use quote::quote;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
@@ -10,8 +10,10 @@ use std::{io::Cursor, path::PathBuf};
 use syn::{LitStr, parse_macro_input};
 
 use crate::parser::{Config, Expr, Mark, Rule};
+use crate::regex::{order_rules_by_references, to_regex};
 
 mod parser;
+mod regex;
 
 #[derive(Debug, Hash, Eq, PartialEq, PartialOrd)]
 enum Terminal {
@@ -425,10 +427,6 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         set_last_possible_item(&r.name, &config, &mut last_items, &mut can_be_empty, 0);
     }
 
-    println!("Can Be Empty {:?}", can_be_empty);
-    println!("First items {:#?}", first_items);
-    println!("Last items {:#?}", last_items);
-
     let mut terminals = HashSet::new();
     let definitions: Vec<_> = config
         .rules
@@ -446,6 +444,8 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         })
         .collect();
 
+    let sub_pattersn = get_sub_patterns(&config.rules.terminals);
+
     let terminal_definitions: Vec<_> = terminals
         .iter()
         .flat_map(|x| x.ident(&config))
@@ -455,20 +455,43 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
     let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
     producing.sort();
 
-    let mut terminals: Vec<_> = terminals.iter().flat_map(|x| x.ident(&config)).collect();
-    terminals.sort();
+    let terminals: Vec<_> = terminals
+        .iter()
+        .flat_map(|x| {
+            if let Some(name) = x.ident(&config) {
+                let ident = config.context.ident_for(name);
+                match x {
+                    Terminal::Literal(x) => quote! {
+                        #[token(#x)]
+                        #ident,
+                    },
+                    Terminal::Ref(n) => {
+                        let regex = format!("(?&{})", n);
+                        quote! {
+                            #[regex(#regex)]
+                            #ident,
+                        }
+                    }
+                }
+            } else {
+                let error = format!("Expected a with entry for {:?}", x);
+                quote! {
+                    compiler_error!(#error)
+                }
+            }
+        })
+        .collect();
+
+    println!("terminals {:?}", terminals);
 
     let producing: Vec<_> = producing
         .into_iter()
         .map(|x| config.context.ident_for(x))
         .collect();
-    let terminals: Vec<_> = terminals
-        .into_iter()
-        .map(|x| config.context.ident_for(x))
-        .collect();
 
     let enum_definition = quote! {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
+        #(#sub_pattersn)*
         #[repr(u16)]
         pub enum SyntaxKind {
             Eof = 0,
@@ -477,12 +500,14 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
             /// producings
             #( #producing ,)*
             /// terminals
-            #( #terminals ,)*
+            #( #terminals )*
             Error,
             ROOT,    // top-level node: a list of s-expressions
         }
         pub use SyntaxKind::*;
     };
+
+    println!("definitions\n{}", enum_definition);
 
     let out = quote! {
     #enum_definition
@@ -514,4 +539,31 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         };
 
     out.into()
+}
+
+fn get_sub_patterns(rules: &[Rule]) -> Vec<proc_macro2::TokenStream> {
+    let ordered_rules = order_rules_by_references(rules).unwrap();
+    let sub_pattersn: Vec<_> = ordered_rules
+        .iter()
+        .map(|x| {
+            let pattern = to_regex(&x.expression);
+            let ident = syn::Ident::new(&x.name, Span::call_site());
+
+            let pat_lit: LitStr = match syn::parse_str(&format!("r#\"{pattern}\"#")) {
+                Ok(x) => x,
+                Err(e) => {
+                    let error = e.to_string();
+                    eprintln!("error {} {} {} {:?}", x.name, error, pattern, pattern);
+                    return quote! {
+                        compiler_error!(#error);
+                    };
+                }
+            };
+
+            quote!(
+                #[logos(subpattern #ident = #pat_lit)]
+            )
+        })
+        .collect();
+    sub_pattersn
 }

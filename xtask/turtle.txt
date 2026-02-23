@@ -23,7 +23,7 @@
 [17]	String	::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
 [135s]	iri	::=	IRIREF | PrefixedName
 [136s]	PrefixedName	::=	PNAME_LN | PNAME_NS
-[137s]	BlankNode	::=	BLANK_NODE_LABEL | ANON | '[' ']'
+[137s]	BlankNode	::=	BLANK_NODE_LABEL | ANON 
 === terminals ===
 [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>'
 [139s]	PNAME_NS	::=	PN_PREFIX? ':'

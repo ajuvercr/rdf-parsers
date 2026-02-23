@@ -2,7 +2,7 @@ mod context;
 pub use context::{Context, context_parser};
 mod expr;
 use expr::parse_rules;
-pub use expr::{Expr, Mark, Rule, Rules};
+pub use expr::{Expr, LiteralType, Mark, Rule, Rules};
 
 use chumsky::{extra::Err, prelude::*};
 
