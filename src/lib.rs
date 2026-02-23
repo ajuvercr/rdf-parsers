@@ -55,4 +55,7 @@ pub trait TokenTrait: Debug + Clone + Into<rowan::SyntaxKind> + PartialEq {
     const ROOT: Self;
 
     fn skips(&self) -> bool;
+
+    fn starting_tokens(&self) -> &'static [Self];
+    fn ending_tokens(&self) -> &'static [Self];
 }

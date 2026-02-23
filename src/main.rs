@@ -39,48 +39,6 @@ fn completion(n: &SyntaxNode, at: usize) -> HashSet<SyntaxKind> {
     }
 
     out
-    // let (mut start, mut end) = match n.token_at_offset(at) {
-    //     rowan::TokenAtOffset::None => (None, None),
-    //     rowan::TokenAtOffset::Single(x) => (
-    //         Some(NodeOrToken::Token(x.clone())),
-    //         Some(NodeOrToken::Token(x)),
-    //     ),
-    //     rowan::TokenAtOffset::Between(a, b) => {
-    //         (Some(NodeOrToken::Token(a)), Some(NodeOrToken::Token(b)))
-    //     }
-    // };
-    //
-    // while let Some(ref s) = start
-    //     && (s.kind() == testing::SyntaxKind::WhiteSpace || s.kind() == testing::SyntaxKind::Error)
-    // {
-    //     if let Some(n) = s.prev_sibling_or_token() {
-    //         start = Some(n);
-    //     } else {
-    //         break;
-    //     }
-    // }
-    // while let Some(ref s) = end
-    //     && (s.kind() == testing::SyntaxKind::WhiteSpace || s.kind() == testing::SyntaxKind::Error)
-    // {
-    //     if let Some(n) = s.next_sibling_or_token() {
-    //         end = Some(n);
-    //     } else {
-    //         break;
-    //     }
-    // }
-    //
-    // println!("start {:?} end {:?}", start, end);
-    //
-    // let mut out: HashSet<testing::SyntaxKind> = HashSet::new();
-    // if let Some(start) = start {
-    //     out.extend(testing::ending_tokens(start.kind()).iter());
-    // }
-    //
-    // if let Some(end) = end {
-    //     out.extend(testing::starting_tokens(end.kind()).iter());
-    // }
-    //
-    // out
 }
 
 fn print(n: &SyntaxNode, indent: usize, errors: &mut &[String]) {

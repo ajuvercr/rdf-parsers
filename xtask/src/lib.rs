@@ -524,21 +524,36 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         #terminal_definitions
     )*
 
-    pub fn starting_tokens(t: SyntaxKind) -> &'static [SyntaxKind] {
-        use crate::ParserTrait as _;
-        match t {
-            #(SyntaxKind::#producing => #producing::FIRST_ITEMS , )*
-            _ => &[],
+    impl TokenTrait for SyntaxKind {
+        const ERROR: Self = SyntaxKind::Error;
+        const ROOT: Self = SyntaxKind::ROOT;
+
+        fn skips(&self) -> bool {
+            match self {
+                SyntaxKind::WhiteSpace => true,
+                SyntaxKind::Error => true,
+                SyntaxKind::Comment => true,
+                _ => false,
+            }
+        }
+
+        fn starting_tokens(&self) -> &'static [SyntaxKind] {
+            use crate::ParserTrait as _;
+            match self {
+                #(SyntaxKind::#producing => #producing::FIRST_ITEMS , )*
+                _ => &[],
+            }
+        }
+
+        fn ending_tokens(&self) -> &'static [SyntaxKind] {
+            use crate::ParserTrait as _;
+            match self {
+                #(SyntaxKind::#producing => #producing::LAST_ITEMS , )*
+                _ => &[],
+            }
         }
     }
 
-    pub fn ending_tokens(t: SyntaxKind) -> &'static [SyntaxKind] {
-        use crate::ParserTrait as _;
-        match t {
-            #(SyntaxKind::#producing => #producing::LAST_ITEMS , )*
-            _ => &[],
-        }
-    }
 
         };
 

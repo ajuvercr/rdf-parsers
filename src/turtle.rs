@@ -30,18 +30,3 @@ impl rowan::Language for Lang {
         kind.into()
     }
 }
-
-impl TokenTrait for SyntaxKind {
-    const ERROR: Self = SyntaxKind::Error;
-
-    const ROOT: Self = SyntaxKind::ROOT;
-
-    fn skips(&self) -> bool {
-        match self {
-            SyntaxKind::WhiteSpace => true,
-            SyntaxKind::Error => true,
-            SyntaxKind::Comment => true,
-            _ => false,
-        }
-    }
-}
