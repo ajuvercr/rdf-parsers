@@ -23,6 +23,7 @@ pub enum Mark {
 pub enum LiteralType {
     Single,
     Double,
+    Regex,
 }
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -91,9 +92,16 @@ fn expr<'src>() -> impl Parser<'src, &'src str, Expr, extra::Err<Rich<'src, char
             .delimited_by(padded('"'), padded('"'))
             .map(|x| Expr::Literal(LiteralType::Double, x))
             .padded();
+
+        let literal3 = none_of(']')
+            .repeated()
+            .collect()
+            .delimited_by(padded('['), padded(']'))
+            .map(|x| Expr::Literal(LiteralType::Regex, x))
+            .padded();
         let reference = ident().map(Expr::Reference).padded();
 
-        let main = choice((grouped, literal, literal2, reference));
+        let main = choice((grouped, literal, literal2, literal3, reference));
 
         let main = main
             .clone()
@@ -124,12 +132,12 @@ fn expr<'src>() -> impl Parser<'src, &'src str, Expr, extra::Err<Rich<'src, char
 #[derive(Debug, Clone, Default)]
 pub struct Rules {
     pub producing: Vec<Rule>,
-    pub terminals: HashMap<String, String>,
+    pub terminals: Vec<Rule>,
 }
 
 enum Block {
     Producing(Vec<Rule>),
-    Terminals(Vec<(String, String)>),
+    Terminals(Vec<Rule>),
 }
 
 pub fn parse_rules<'src>() -> impl Parser<'src, &'src str, Rules, extra::Err<Rich<'src, char>>> {
@@ -137,9 +145,8 @@ pub fn parse_rules<'src>() -> impl Parser<'src, &'src str, Rules, extra::Err<Ric
         .ignore_then(rule().repeated().collect())
         .map(Block::Producing);
 
-    let terminal = ident().then_ignore(just("::=")).then(ident());
     let terminals = section_header("terminals", "===")
-        .ignore_then(terminal.repeated().collect())
+        .ignore_then(rule().repeated().collect())
         .map(Block::Terminals);
 
     let block = producing.or(terminals).repeated().collect();

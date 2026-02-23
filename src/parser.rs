@@ -3,12 +3,14 @@
 pub struct FatToken {
     kind: Token,
     text: String,
+    range: Range<usize>,
     old_kind: Option<TermType>,
 }
 impl FatToken {
-    pub fn new(kind: Token, text: String) -> Self {
+    pub fn new(kind: Token, range: Range<usize>, text: String) -> Self {
         FatToken {
             kind,
+            range,
             text,
             old_kind: None,
         }
@@ -25,6 +27,7 @@ pub enum TermType {
 pub struct Parse {
     pub green_node: GreenNode,
     pub errors: List<String>,
+    pub suggestions: HashSet<(String, Range<usize>)>,
 }
 
 impl Parse {
@@ -41,6 +44,8 @@ pub type SyntaxToken = rowan::SyntaxToken<Lang>;
 #[allow(unused)]
 pub type SyntaxElement = rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
 
+use std::{collections::HashSet, ops::Range};
+
 use rowan::{GreenNode, GreenNodeBuilder};
 
 use crate::{Context, Lang, ParserTrait, Token, list::List, testing};
@@ -52,6 +57,7 @@ pub struct Parser {
     pub tokens: List<FatToken>,
     pub done: List<testing::SyntaxKind>,
     pub res: ParseRes,
+    suggesting: bool,
     /// the list of syntax errors we've accumulated
     /// so far.
     errors: List<String>,
@@ -61,6 +67,7 @@ impl Parser {
     pub fn new(tokens: List<FatToken>) -> Self {
         Parser {
             tokens,
+            suggesting: true,
             res: ParseRes::default(),
             errors: List::default(),
             done: List::default(),
@@ -161,7 +168,10 @@ impl Parser {
 
     pub fn parse_item<T: ParserTrait>(mut self) -> Parse {
         let tokens = self.tokens.clone();
-        T::parse(&mut self, &mut Context {});
+        let mut ctx = Context {
+            suggestions: HashSet::new(),
+        };
+        T::parse(&mut self, &mut ctx);
         self.eat_skips();
 
         self.tokens = tokens;
@@ -179,6 +189,7 @@ impl Parser {
         Parse {
             green_node: builder.finish(),
             errors: self.errors,
+            suggestions: ctx.suggestions,
         }
     }
 
@@ -279,16 +290,28 @@ impl Parser {
         self.done.iter().any(|x| x == &k)
     }
 
-    pub fn expect_as<T: ParserTrait + std::fmt::Debug>(&mut self, error: isize) {
+    pub fn expect_as<T: ParserTrait + std::fmt::Debug>(
+        &mut self,
+        error: isize,
+        context: &mut Context,
+    ) {
         let e = if let Some(c) = self.current() {
             if let Ok(c) = testing::SyntaxKind::try_from(c.kind) {
                 if c == T::KIND {
                     self.bump();
                     self.done = List::default();
                     self.res.error_value -= error / 2 + 1;
+                    // self.suggesting = true;
                     return;
                 }
             }
+
+            if self.suggesting && self.res.error_value <= 0 {
+                context
+                    .suggestions
+                    .insert((format!("{:?}", T::KIND), c.range.clone()));
+            }
+            self.suggesting = false;
 
             self.res.steps = self
                 .res

@@ -1,4 +1,7 @@
-use std::{collections::HashSet, ops::Range};
+use std::{
+    collections::{HashMap, HashSet},
+    ops::Range,
+};
 
 use ariadne::Span;
 use rowan::{NodeOrToken, SyntaxToken, TextSize};
@@ -176,7 +179,8 @@ fn main() {
     let s: &'static str = "";
 
     println!("Got: {}", s);
-    let sexps = "[    ] a b;  ";
+    let sexps = "nicky vriend arthur, korneel;
+                             boyfriend arthur.";
     println!("Parsing {}", sexps);
     let parse: turtle::Parse = parse_t::<turtle::testing::TurtleDoc>(sexps);
 
@@ -201,6 +205,15 @@ fn main() {
 
     let mut es: &[String] = &errors;
     println!("All errors {:?}", error_nodes);
+    let mut suggestion_per: HashMap<usize, Vec<String>> = HashMap::new();
+    for (a, b) in parse.suggestions {
+        suggestion_per.entry(b.start()).or_default().push(a);
+    }
+    let mut sugs: Vec<_> = suggestion_per.into_iter().collect();
+    sugs.sort();
+    for s in sugs {
+        println!("{:?}", s);
+    }
     print(&root, 0, &mut es);
 
     if let Some(r) = root.first_child() {

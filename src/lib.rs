@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+use std::ops::Range;
+
 use crate::list::Inner;
 use crate::list::List;
 use Token::*;
@@ -14,13 +17,14 @@ pub trait ParserTrait {
     const LAST_ITEMS: &'static [testing::SyntaxKind];
     fn parse(parser: &mut crate::Parser, context: &mut Context);
 }
-pub struct Context {}
+pub struct Context {
+    suggestions: HashSet<(String, Range<usize>)>,
+}
 
 pub mod testing {
     use xtask::include_path_code;
 
     include_path_code!("./xtask/turtle.txt");
-
     impl From<SyntaxKind> for rowan::SyntaxKind {
         fn from(kind: SyntaxKind) -> Self {
             Self(kind as u16)
@@ -115,9 +119,10 @@ fn lex(text: &str) -> List<FatToken> {
         .into_iter()
         .map(|t| (t.len, kind(t.kind)))
         .scan(0usize, |start_offset, (len, kind)| {
-            let s: String = text[*start_offset..*start_offset + len].into();
+            let r = *start_offset..*start_offset + len;
+            let s: String = text[r.clone()].into();
             *start_offset += len;
-            Some(FatToken::new(kind, s))
+            Some(FatToken::new(kind, r, s))
         })
         .collect();
 

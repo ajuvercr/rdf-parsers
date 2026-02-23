@@ -214,7 +214,7 @@ fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStrea
                     return;
                 }
 
-                parser.expect_as::<Self>(#error)
+                parser.expect_as::<Self>(#error, context)
             }
         }
     }
