@@ -1,7 +1,7 @@
 #[allow(unused)]
 #[derive(Debug)]
 pub struct FatToken<T: TokenTrait> {
-    kind: T,
+    pub kind: T,
     text: String,
     range: Range<usize>,
     old_kind: Option<TermType>,
@@ -221,6 +221,7 @@ impl<T: TokenTrait> Parser<T> {
         } {
             checkpoint = self.clone();
         }
+
         self.reset(&checkpoint);
     }
 

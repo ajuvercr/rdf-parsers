@@ -60,17 +60,12 @@ double -> myDouble
 . -> stop
 @prefix -> prefix_token
 @base -> base_token
-BASE -> sparql_base_token
-PREFIX -> sparql_prefix_token
 ; -> colon
-a -> type_a
 [ -> sq_open
 ] -> sq_close
 ( -> cl_open
 ) -> cl_close
 ^^ -> datatype
-true -> trueValue
-false -> falseValue
 === error_value ===
 prefix_token -> 100
 base_token -> 100

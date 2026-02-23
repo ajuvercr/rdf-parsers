@@ -21,10 +21,10 @@ enum Terminal {
     Ref(String),
 }
 impl Terminal {
-    fn ident<'a, 'b: 'a>(&'a self, config: &'b Config) -> Option<&'a str> {
+    fn ident<'a, 'b: 'a>(&'a self, config: &'b Config) -> String {
         match self {
-            Terminal::Ref(x) => Some(x.as_str()),
-            Terminal::Literal(x) => config.context.with.get(x).map(|x| x.as_str()),
+            Terminal::Ref(x) => x.to_string(),
+            Terminal::Literal(x) => config.context.with(x),
         }
     }
 }
@@ -106,16 +106,10 @@ fn to_impl(
         }
         Expr::Literal(_literal_type, f) => {
             terminals.insert(Terminal::Literal(f.clone()));
-            if let Some(name) = ctx.context.with.get(f) {
-                let n = ctx.context.ident_for(name);
-                quote! {
-                    #n::parse(parser, context)
-                }
-            } else {
-                let error = format!("Expected with literal {} ", f);
-                quote! {
-                    compile_error!(#error)
-                }
+            let name = ctx.context.with(f);
+            let n = ctx.context.ident_for(&name);
+            quote! {
+                #n::parse(parser, context)
             }
         }
         Expr::Reference(re) => {
@@ -142,7 +136,9 @@ fn producing_trait_impl(
 ) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&rule.name);
     let imp = to_impl(&rule.expression, ctx, terminals);
-    let can_be_emtpy = *can_be_empty.get(&rule.name).unwrap();
+    let can_be_emtpy = *can_be_empty
+        .get(&rule.name)
+        .expect("can_be_empty to contain the rule");
 
     let fi: Vec<_> = first_items
         .get(&rule.name)
@@ -176,6 +172,8 @@ fn producing_trait_impl(
         })
         .collect();
 
+    // const FIRST_ITEMS: &'static [SyntaxKind] = &[ #( #fi, )* ];
+    // const LAST_ITEMS: &'static [SyntaxKind] = &[ #( #li, )* ];
     quote! {
         #[derive(Debug)]
         pub struct #n;
@@ -186,8 +184,8 @@ fn producing_trait_impl(
             const KIND: SyntaxKind = SyntaxKind::#n;
             const CAN_BE_EMPTY: bool = #can_be_emtpy;
 
-            const FIRST_ITEMS: &'static [SyntaxKind] = &[ #( #fi, )* ];
-            const LAST_ITEMS: &'static [SyntaxKind] = &[ #( #li, )* ];
+            const FIRST_ITEMS: &'static [SyntaxKind] = &[  ];
+            const LAST_ITEMS: &'static [SyntaxKind] = &[ ];
 
             fn parse(parser: &mut crate::Parser<SyntaxKind>, context: &mut crate::Context)  {
                 let mut func = |parser: &mut crate::Parser<SyntaxKind>| {
@@ -200,9 +198,15 @@ fn producing_trait_impl(
     }
 }
 
-fn terminal_trait_impl(terminal: &str, ctx: &Config) -> token_stream::TokenStream {
+fn terminal_trait_impl(terminal: &str, is_kw: bool, ctx: &Config) -> token_stream::TokenStream {
     let n = ctx.context.ident_for(&terminal);
-    let error = ctx.context.error_values.get(terminal).copied().unwrap_or(2);
+    let defa = if is_kw { 100 } else { 2 };
+    let error = ctx
+        .context
+        .error_values
+        .get(terminal)
+        .copied()
+        .unwrap_or(defa);
     quote! {
         #[derive(Debug)]
         pub struct #n;
@@ -301,7 +305,7 @@ fn expr_first_items(
             }
         }
         Expr::Literal(_literal_type, s) => {
-            set.insert(Item::terminal(ctx.context.with.get(s).cloned().unwrap()));
+            set.insert(Item::terminal(ctx.context.with(s)));
         }
         Expr::Reference(s) => {
             set.insert(Item::non_terminal(s));
@@ -347,7 +351,7 @@ fn expr_last_items(
             }
         }
         Expr::Literal(_literal_type, s) => {
-            set.insert(Item::terminal(ctx.context.with.get(s).cloned().unwrap()));
+            set.insert(Item::terminal(ctx.context.with(s)));
         }
         Expr::Reference(s) => {
             set.insert(Item::non_terminal(s));
@@ -452,8 +456,14 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
 
     let terminal_definitions: Vec<_> = terminals
         .iter()
-        .flat_map(|x| x.ident(&config))
-        .map(|x| terminal_trait_impl(x, &config))
+        .map(|x| {
+            let ident = x.ident(&config);
+            let is_kw = match x {
+                Terminal::Literal(_) => true,
+                Terminal::Ref(_) => false,
+            };
+            terminal_trait_impl(&ident, is_kw, &config)
+        })
         .collect();
 
     let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
@@ -461,26 +471,22 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
 
     let terminals: Vec<_> = terminals
         .iter()
-        .flat_map(|x| {
-            if let Some(name) = x.ident(&config) {
-                let ident = config.context.ident_for(name);
-                match x {
-                    Terminal::Literal(x) => quote! {
-                        #[token(#x)]
-                        #ident,
-                    },
-                    Terminal::Ref(n) => {
-                        let regex = format!("(?&{})", n);
-                        quote! {
-                            #[regex(#regex)]
-                            #ident,
-                        }
-                    }
-                }
-            } else {
-                let error = format!("Expected a with entry for {:?}", x);
+        .flat_map(|x| match x {
+            Terminal::Literal(x) => {
+                let name = config.context.with(x);
+                let ident = config.context.ident_for(&name);
+
                 quote! {
-                    compiler_error!(#error)
+                    #[token(#x)]
+                    #ident,
+                }
+            }
+            Terminal::Ref(n) => {
+                let regex = format!("(?&{})", n);
+                let ident = config.context.ident_for(n);
+                quote! {
+                    #[regex(#regex)]
+                    #ident,
                 }
             }
         })
@@ -508,13 +514,40 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
             Error,
             ROOT,    // top-level node: a list of s-expressions
         }
-        pub use SyntaxKind::*;
     };
 
-    println!("definitions\n{}", enum_definition);
-
     let out = quote! {
+
+    use crate::TokenTrait;
+    pub type SyntaxNode = rowan::SyntaxNode<Lang>;
+
     #enum_definition
+
+    impl From<SyntaxKind> for rowan::SyntaxKind {
+        fn from(kind: SyntaxKind) -> Self {
+            Self(kind as u16)
+        }
+    }
+
+    impl From<rowan::SyntaxKind> for SyntaxKind {
+        fn from(value: rowan::SyntaxKind) -> Self {
+            assert!(value.0 <= SyntaxKind::ROOT as u16);
+            unsafe { std::mem::transmute::<u16, SyntaxKind>(value.0) }
+        }
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub enum Lang {}
+    impl rowan::Language for Lang {
+        type Kind = SyntaxKind;
+        fn kind_from_raw(raw: rowan::SyntaxKind) -> Self::Kind {
+            assert!(raw.0 <= SyntaxKind::ROOT as u16);
+            unsafe { std::mem::transmute::<u16, SyntaxKind>(raw.0) }
+        }
+        fn kind_to_raw(kind: Self::Kind) -> rowan::SyntaxKind {
+            kind.into()
+        }
+    }
 
     #(
         #definitions

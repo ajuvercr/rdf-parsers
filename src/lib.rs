@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use std::ops::Range;
 use std::{collections::HashSet, fmt::Debug};
 
@@ -6,9 +7,11 @@ use logos::{Lexer, Logos};
 pub use parser::*;
 
 mod impls;
+pub use impls::sparql;
+pub use impls::turtle;
 mod list;
 mod parser;
-pub mod turtle;
+pub mod util;
 
 pub trait ParserTrait {
     type Kind: 'static + TokenTrait;
@@ -18,6 +21,17 @@ pub trait ParserTrait {
     const LAST_ITEMS: &'static [Self::Kind];
     fn parse(parser: &mut crate::Parser<Self::Kind>, context: &mut Context);
 }
+
+pub trait TokenTrait: Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Hash {
+    const ERROR: Self;
+    const ROOT: Self;
+
+    fn skips(&self) -> bool;
+
+    fn starting_tokens(&self) -> &'static [Self];
+    fn ending_tokens(&self) -> &'static [Self];
+}
+
 pub struct Context {
     suggestions: HashSet<(String, Range<usize>)>,
 }
@@ -42,20 +56,13 @@ where
         tokens.push(FatToken::new(kind, lexer.span(), s));
     }
 
+    let ts: Vec<_> = tokens.iter().map(|x| &x.kind).collect();
+    println!("tokens {:?}", ts);
+
     let tokens = tokens
         .into_iter()
         .rfold(Inner::new(), |acc, b| acc.prepend(b));
 
     // let tokens = lex(text);
     Parser::new(tokens).parse_item::<T>()
-}
-
-pub trait TokenTrait: Debug + Clone + Into<rowan::SyntaxKind> + PartialEq {
-    const ERROR: Self;
-    const ROOT: Self;
-
-    fn skips(&self) -> bool;
-
-    fn starting_tokens(&self) -> &'static [Self];
-    fn ending_tokens(&self) -> &'static [Self];
 }

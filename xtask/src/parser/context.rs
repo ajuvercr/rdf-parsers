@@ -1,11 +1,11 @@
-use chumsky::{error, extra::Err, prelude::*};
+use chumsky::{extra::Err, prelude::*};
 use proc_macro2::Span;
 use std::collections::HashMap;
 use syn::Ident;
 
 use crate::parser::section_header;
 
-fn uniform_ident(ident: &str) -> String {
+pub(crate) fn uniform_ident(ident: &str) -> String {
     let mut out = String::new();
 
     let mut should_uppercase = true;
@@ -34,7 +34,7 @@ fn uniform_ident(ident: &str) -> String {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Context {
     pub rename: HashMap<String, String>,
-    pub with: HashMap<String, String>,
+    with: HashMap<String, String>,
     pub error_values: HashMap<String, isize>,
 }
 
@@ -45,6 +45,24 @@ impl Context {
         let st = uniform_ident(mapped);
 
         Ident::new(&st, Span::call_site())
+    }
+
+    pub fn with(&self, literal: &str) -> String {
+        if let Some(n) = self.with.get(literal) {
+            n.clone()
+        } else {
+            let good = literal.chars().next().unwrap().is_alphabetic()
+                && literal
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == ' ' || c == '_');
+
+            if good {
+                uniform_ident(&format!("{}_Lit", literal))
+            } else {
+                eprintln!("Failed to find with for {}", literal);
+                panic!("aah")
+            }
+        }
     }
 }
 
@@ -57,7 +75,7 @@ enum CtxBlock {
 
 pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<'src, char>>> {
     // Read the rest of the line, trim it.
-    let line_text = none_of("\n\r -><")
+    let line_text = none_of(" \n")
         .repeated()
         .collect::<String>()
         .map(|s| s.to_string())
