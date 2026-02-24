@@ -3,7 +3,7 @@ use std::fs::read_to_string;
 
 use ariadne::Span as _;
 use turtle::parse_t;
-use turtle::sparql as lang;
+use turtle::turtle as lang;
 use turtle::util::{completion, print, print_ariadne};
 
 // TODO:
@@ -17,7 +17,7 @@ use turtle::util::{completion, print, print_ariadne};
 fn main() {
     let sexps = read_to_string("./test.ttl").unwrap();
     println!("Parsing {}", sexps);
-    let parse: turtle::Parse = parse_t::<lang::QueryUnit>(&sexps);
+    let parse: turtle::Parse = parse_t::<lang::TurtleDoc>(&sexps);
 
     let root = parse.syntax::<lang::Lang>();
 
