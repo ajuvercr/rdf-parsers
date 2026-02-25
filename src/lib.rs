@@ -2,10 +2,12 @@ use std::hash::Hash;
 use std::ops::Range;
 use std::{collections::HashSet, fmt::Debug};
 
-use crate::list::Inner;
+use crate::a_star::Element;
+use crate::list::{Inner, List};
 use logos::{Lexer, Logos};
 pub use parser::*;
 
+mod a_star;
 mod impls;
 pub use impls::sparql;
 pub use impls::turtle;
@@ -22,9 +24,11 @@ pub trait ParserTrait {
     fn parse(parser: &mut crate::Parser<Self::Kind>, context: &mut Context);
 }
 
-pub trait TokenTrait: Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Hash {
+pub trait TokenTrait: Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Hash + 'static {
     const ERROR: Self;
     const ROOT: Self;
+
+    fn branch(&self) -> u32;
 
     fn skips(&self) -> bool;
 
@@ -65,4 +69,28 @@ where
 
     // let tokens = lex(text);
     Parser::new(tokens).parse_item::<T>()
+}
+
+pub fn parse_t_2<'a, T: a_star::ParserTraitConsts>(text: &'a str) -> Parse
+where
+    T::Kind: Logos<'a, Source = str>,
+    <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
+{
+    let mut lexer: Lexer<'a, T::Kind> = Lexer::new(text);
+
+    let mut tokens: Vec<FatToken<T::Kind>> = Vec::default();
+
+    while let Some(t) = lexer.next() {
+        let kind = t.unwrap_or(T::Kind::ERROR);
+
+        let s = text[lexer.span()].to_string();
+        tokens.push(FatToken::new(kind, lexer.span(), s));
+    }
+
+    let ts: Vec<_> = tokens.iter().map(|x| &x.kind).collect();
+    println!("tokens {:?}", ts);
+
+    let list = a_star::a_star(T::new(), &tokens);
+
+    Parse::from_steps(&tokens, list)
 }

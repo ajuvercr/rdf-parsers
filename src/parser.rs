@@ -29,6 +29,54 @@ pub struct Parse {
     pub errors: List<String>,
     pub suggestions: HashSet<(String, Range<usize>)>,
 }
+impl Parse {
+    pub fn from_steps<T: crate::TokenTrait>(tokens: &[FatToken<T>], steps: List<Step<T>>) -> Self {
+        let mut at = 0;
+        let skip_white_with_builder = |builder: &mut GreenNodeBuilder<'_>, at: &mut usize| {
+            while let Some(t) = tokens.get(*at)
+                && t.kind.skips()
+            {
+                builder.token(t.kind.clone().into(), &t.text);
+                *at += 1;
+            }
+        };
+
+        let mut errors = List::default();
+        let mut builder = GreenNodeBuilder::new();
+        builder.start_node(T::ROOT.into());
+        let steps: Vec<_> = steps.iter().cloned().collect();
+        for step in steps.into_iter().rev() {
+            match step {
+                Step::Start(syntax_kind) => {
+                    skip_white_with_builder(&mut builder, &mut at);
+                    builder.start_node(syntax_kind);
+                }
+                Step::End => builder.finish_node(),
+                Step::Error(e) => {
+                    builder.start_node(T::ERROR.into());
+                    errors = errors.prepend(format!("{:?}", e));
+                    builder.finish_node();
+                }
+                Step::Bump => {
+                    skip_white_with_builder(&mut builder, &mut at);
+                    if let Some(i) = tokens.get(at) {
+                        builder.token(i.kind.clone().into(), &i.text);
+                        at += 1;
+                    }
+                }
+            }
+        }
+        skip_white_with_builder(&mut builder, &mut at);
+
+        builder.finish_node();
+
+        Parse {
+            green_node: builder.finish(),
+            errors: errors,
+            suggestions: HashSet::new(),
+        }
+    }
+}
 
 impl Parse {
     pub fn syntax<L: Language>(&self) -> rowan::SyntaxNode<L> {
@@ -66,12 +114,12 @@ impl<T: TokenTrait> Parser<T> {
         }
     }
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error<T> {
     Expected(T),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Step<T> {
     Start(rowan::SyntaxKind),
     Error(Error<T>),

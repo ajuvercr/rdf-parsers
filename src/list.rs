@@ -6,6 +6,24 @@ pub enum Inner<T> {
     Nil,
     Cons(T, List<T>, usize),
 }
+impl<T: PartialEq> PartialEq for Inner<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Cons(t1, c1, l1), Self::Cons(t2, c2, l2)) => {
+                if l1 != l2 || t1 != t2 {
+                    return false;
+                }
+                if Rc::ptr_eq(c1, c2) {
+                    return true;
+                }
+                c1 == c2
+            }
+            (Inner::Nil, Inner::Nil) => true,
+            _ => false,
+        }
+    }
+}
+impl<T: Eq> Eq for Inner<T> {}
 impl<T: std::fmt::Debug> std::fmt::Debug for Inner<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

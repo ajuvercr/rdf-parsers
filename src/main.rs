@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 
 use ariadne::Span as _;
-use turtle::parse_t;
-use turtle::turtle as lang;
+use turtle::parse_t_2;
+use turtle::sparql as lang;
 use turtle::util::{completion, print, print_ariadne};
 
 // TODO:
@@ -17,7 +17,7 @@ use turtle::util::{completion, print, print_ariadne};
 fn main() {
     let sexps = read_to_string("./test.ttl").unwrap();
     println!("Parsing {}", sexps);
-    let parse: turtle::Parse = parse_t::<lang::TurtleDoc>(&sexps);
+    let parse = parse_t_2::<lang::QueryUnit>(&sexps);
 
     let root = parse.syntax::<lang::Lang>();
 
@@ -37,7 +37,6 @@ fn main() {
         .collect();
 
     let mut es: &[String] = &errors;
-    println!("All errors {:?}", error_nodes);
     let mut suggestion_per: HashMap<usize, Vec<String>> = HashMap::new();
     for (a, b) in parse.suggestions {
         suggestion_per.entry(b.start()).or_default().push(a);
@@ -50,9 +49,10 @@ fn main() {
     print(&root, 0, &mut es);
 
     if let Some(r) = root.first_child() {
-        let completions = completion(&r, 11);
+        let completions = completion(&r, 2);
         println!("Completions {:?}", completions);
     }
 
+    println!("All errors {:?}", error_nodes);
     print_ariadne(&error_nodes, &sexps);
 }

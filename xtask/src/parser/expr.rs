@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
 use chumsky::prelude::*;
 
@@ -26,13 +26,40 @@ pub enum LiteralType {
     Regex,
     Hex,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Expr {
     Marked(Box<Self>, Mark),
     Either(Vec<Self>),
     Seq(Vec<Self>),
     Literal(LiteralType, String),
     Reference(String),
+}
+impl Debug for Expr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Marked(arg0, Mark::Option) => write!(f, "({:?})?", arg0),
+            Self::Marked(arg0, Mark::Star) => write!(f, "({:?})*", arg0),
+            Self::Marked(arg0, Mark::Plus) => write!(f, "({:?})+", arg0),
+            Self::Either(arg0) => {
+                write!(f, "( {:?}", arg0[0])?;
+                for a in &arg0[1..] {
+                    write!(f, " | {:?}", a)?;
+                }
+
+                write!(f, " )")?;
+                Ok(())
+            }
+            Self::Seq(arg0) => {
+                write!(f, "{:?}", arg0[0])?;
+                for a in &arg0[1..] {
+                    write!(f, " {:?}", a)?;
+                }
+                Ok(())
+            }
+            Self::Literal(_, arg1) => write!(f, "\"{}\"", arg1),
+            Self::Reference(arg0) => write!(f, "{}", arg0),
+        }
+    }
 }
 
 fn hex<'src>() -> impl Parser<'src, &'src str, String, extra::Err<Rich<'src, char>>> + Clone {
