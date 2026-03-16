@@ -9,5 +9,3 @@ logos = "0.16.1"
 m_lexer = "0.0.4"
 rowan = "0.16.1"
 
-
-xtask = { path = "./xtask" }

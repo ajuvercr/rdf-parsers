@@ -3,7 +3,7 @@
 pub struct FatToken<T: TokenTrait> {
     pub kind: T,
     text: String,
-    range: Range<usize>,
+    pub range: Range<usize>,
     old_kind: Option<TermType>,
 }
 impl<T: TokenTrait> FatToken<T> {
@@ -30,6 +30,39 @@ pub struct Parse {
     pub suggestions: HashSet<(String, Range<usize>)>,
 }
 impl Parse {
+    pub fn expected_at<L>(
+        &self,
+        byte_offset: usize,
+        first_tokens: fn(L::Kind) -> &'static [L::Kind],
+    ) -> Vec<L::Kind>
+    where
+        L: rowan::Language,
+        L::Kind: Eq + std::hash::Hash + Copy,
+    {
+        use rowan::{TextSize, TokenAtOffset};
+        let root = self.syntax::<L>();
+        let offset = TextSize::new(byte_offset as u32);
+
+        let (current_kind, start_node) = match root.token_at_offset(offset) {
+            TokenAtOffset::None => (None, None),
+            TokenAtOffset::Single(t) => (Some(t.kind()), t.parent()),
+            TokenAtOffset::Between(_, right) => (Some(right.kind()), right.parent()),
+        };
+
+        let mut result = HashSet::new();
+        let mut node = start_node;
+        while let Some(n) = node {
+            result.extend(first_tokens(n.kind()).iter().copied());
+            node = n.parent();
+        }
+
+        if let Some(k) = current_kind {
+            result.remove(&k);
+        }
+
+        result.into_iter().collect()
+    }
+
     pub fn from_steps<T: crate::TokenTrait>(tokens: &[FatToken<T>], steps: List<Step<T>>) -> Self {
         let mut at = 0;
         let skip_white_with_builder = |builder: &mut GreenNodeBuilder<'_>, at: &mut usize| {
@@ -309,7 +342,6 @@ impl<T: TokenTrait> Parser<T> {
                 self.bump();
                 self.done = List::default();
                 self.res.error_value -= error / 2 + 1;
-                // self.suggesting = true;
                 return;
             }
 
@@ -371,7 +403,6 @@ impl<T: TokenTrait> Parser<T> {
         while let Some(token) = self.tokens.head()
             && self.skip_token(token)
         {
-            // self.res.steps = self.res.steps.prepend(Step::bump());
             self.tokens = self.tokens.tail().unwrap().clone();
         }
     }

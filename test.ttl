@@ -1,4 +1,11 @@
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?name
- WHERE { ?x foaf:name  ?name
-         FILTER REGEX(?name "^ali") }
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix ex: <http://example.org/>.
+
+ex:alice a foaf:Person;
+  foaf:name "Alice"
+  foaf:knows [
+    a foaf:Person;
+    foaf:name "Bob";
+    foaf:age 30;
+  ].
+

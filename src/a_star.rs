@@ -3,7 +3,7 @@ use std::{
     fmt::Debug,
 };
 
-use crate::{Error, FatToken, Parse, Step, TokenTrait, list::List};
+use crate::{Error, FatToken, Step, TokenTrait, list::List};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 struct Fingerprint(u128);
@@ -13,27 +13,22 @@ fn descend(fp: Fingerprint, branch_id: u32) -> Fingerprint {
     Fingerprint(fp.0.wrapping_mul(M) ^ (branch_id as u128).wrapping_add(0xD6E8FEB86659FD93))
 }
 
-pub trait ParserTrait: Debug + 'static {
+pub trait ParserTrait: Debug + Sized + 'static {
     type Kind: 'static + TokenTrait;
 
-    fn step(&self, el: &Element<Self::Kind>, state: &mut AStar<Self::Kind>);
+    fn step(&self, el: &Element<Self>, state: &mut AStar<Self>);
     fn at(&self) -> usize;
+    fn element_kind(&self) -> Self::Kind;
 }
 
-pub trait ParserTraitConsts: ParserTrait {
-    const ELEMENT: Self::Kind;
-
-    fn new() -> Self;
-}
-
-pub struct AStar<'a, T: TokenTrait> {
+pub struct AStar<'a, R: ParserTrait> {
     done: HashSet<(Fingerprint, usize, usize)>,
-    tokens: &'a [FatToken<T>],
-    todo: BinaryHeap<Element<T>>,
+    tokens: &'a [FatToken<R::Kind>],
+    todo: BinaryHeap<Element<R>>,
 }
 
-impl<'a, T: TokenTrait> AStar<'a, T> {
-    fn new(tokens: &'a [FatToken<T>]) -> Self {
+impl<'a, R: ParserTrait> AStar<'a, R> {
+    fn new(tokens: &'a [FatToken<R::Kind>]) -> Self {
         Self {
             tokens,
             done: HashSet::new(),
@@ -41,36 +36,27 @@ impl<'a, T: TokenTrait> AStar<'a, T> {
         }
     }
 
-    pub fn consume(&mut self) -> Option<List<Step<T>>> {
-        if let Some(e) = self.todo.pop() {
+    pub fn consume(&mut self) -> Option<List<Step<R::Kind>>> {
+        loop {
+            let e = self.todo.pop()?;
+
             if e.state.1 == self.tokens.len() && e.parent.len() == 1 {
                 return Some(e.list);
             }
 
             if let Some((head, _)) = e.parent.head() {
-                println!(
-                    "consuming {:?} {} {}/{}",
-                    head,
-                    e.score,
-                    e.state.1,
-                    self.tokens.len()
-                );
                 let state = (e.state.0, e.state.1, head.at());
                 if self.done.contains(&state) {
-                    return self.consume();
+                    continue;
                 }
 
                 self.done.insert(state);
                 head.step(&e, self);
             }
-
-            None
-        } else {
-            panic!("Expected more")
         }
     }
 
-    pub fn add_element(&mut self, element: Element<T>) -> bool {
+    pub fn add_element(&mut self, element: Element<R>) -> bool {
         let at = element.parent.head().map(|x| x.0.at()).unwrap_or(0);
         let state = (element.state.0, element.state.1, at);
 
@@ -78,11 +64,17 @@ impl<'a, T: TokenTrait> AStar<'a, T> {
             return false;
         }
 
+
         self.todo.push(element);
         true
     }
 
-    pub fn expect_as(&self, element: &Element<T>, token: T, error_value: isize) -> Element<T> {
+    pub fn expect_as(
+        &self,
+        element: &Element<R>,
+        token: R::Kind,
+        error_value: isize,
+    ) -> Element<R> {
         let mut idx = element.state.1;
         if let Some(found) = self.tokens.get(idx) {
             if found.kind == token {
@@ -116,23 +108,21 @@ impl<'a, T: TokenTrait> AStar<'a, T> {
     }
 }
 
-type Rule<T> = Box<dyn ParserTrait<Kind = T>>;
-
 #[derive(Debug)]
-pub struct Element<T: TokenTrait> {
-    list: List<Step<T>>,
-    parent: List<(Rule<T>, Fingerprint)>,
+pub struct Element<R: ParserTrait> {
+    list: List<Step<R::Kind>>,
+    parent: List<(R, Fingerprint)>,
     score: isize,
     state: (Fingerprint, usize),
 }
-impl<T: TokenTrait> PartialEq for Element<T> {
+impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
-        self.list == other.list && self.score == other.score && self.state == other.state
+        self.score == other.score && self.parent.len() == other.parent.len()
     }
 }
-impl<T: TokenTrait> Eq for Element<T> {}
-impl<T: TokenTrait> Element<T> {
-    fn new(current: Rule<T>) -> Self {
+impl<R: ParserTrait> Eq for Element<R> {}
+impl<R: ParserTrait> Element<R> {
+    fn new(current: R) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
         Self {
@@ -143,9 +133,9 @@ impl<T: TokenTrait> Element<T> {
         }
     }
 
-    pub fn pop_push<P: ParserTraitConsts<Kind = T> + 'static>(&self, rule: P) -> Self {
+    pub fn pop_push(&self, rule: R) -> Self {
         let ((_, f), tail) = self.parent.slice().unwrap();
-        let parent = tail.prepend((Box::new(rule), *f));
+        let parent = tail.prepend((rule, *f));
         Self {
             parent,
             list: self.list.clone(),
@@ -154,11 +144,12 @@ impl<T: TokenTrait> Element<T> {
         }
     }
 
-    pub fn push<P: ParserTraitConsts<Kind = T> + 'static>(&self, rule: P) -> Self {
+    pub fn push(&self, rule: R) -> Self {
+        let kind = rule.element_kind();
         let (s, a) = self.state;
-        let parent = self.parent.prepend((Box::new(rule), s));
-        let list = self.list.prepend(Step::start(P::ELEMENT));
-        let s = descend(s, P::ELEMENT.branch());
+        let parent = self.parent.prepend((rule, s));
+        let list = self.list.prepend(Step::start(kind.clone()));
+        let s = descend(s, kind.branch());
         Self {
             parent,
             list,
@@ -168,7 +159,7 @@ impl<T: TokenTrait> Element<T> {
     }
 
     pub fn pop(&self) -> Option<Self> {
-        let ((_, f), parent) = self.parent.slice()?.clone();
+        let ((_, f), parent) = self.parent.slice()?;
         let list = self.list.prepend(Step::end());
         let (_, a) = self.state;
         Some(Self {
@@ -180,29 +171,21 @@ impl<T: TokenTrait> Element<T> {
     }
 }
 
-impl<T: TokenTrait> Ord for Element<T> {
+impl<R: ParserTrait> Ord for Element<R> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.score
             .cmp(&other.score)
             .then(self.parent.len().cmp(&other.parent.len()))
     }
 }
-impl<T: TokenTrait> PartialOrd for Element<T> {
+impl<R: ParserTrait> PartialOrd for Element<R> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-pub fn a_star<P: ParserTrait + 'static>(
-    root: P,
-    tokens: &[FatToken<P::Kind>],
-) -> List<Step<P::Kind>> {
+pub fn a_star<R: ParserTrait>(root: R, tokens: &[FatToken<R::Kind>]) -> List<Step<R::Kind>> {
     let mut state = AStar::new(tokens);
-    state.todo.push(Element::new(Box::new(root)));
-
-    loop {
-        if let Some(o) = state.consume() {
-            return o;
-        }
-    }
+    state.todo.push(Element::new(root));
+    state.consume().unwrap_or_default()
 }

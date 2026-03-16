@@ -1,14 +1,12 @@
 use ariadne::{Report, ReportKind, Source};
-use chumsky::container::Seq;
 use chumsky::error::Rich;
-use proc_macro::TokenStream;
 use proc_macro2::{Span, token_stream};
 use quote::quote;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::ops::Range;
-use std::{io::Cursor, path::PathBuf};
-use syn::{LitStr, parse_macro_input};
+use std::io::Cursor;
+use syn::LitStr;
 
 use crate::parser::{Config, Expr, Mark, Rule};
 use crate::regex::{order_rules_by_references, to_regex};
@@ -127,6 +125,62 @@ fn to_impl(
     imp
 }
 
+fn push_rule(
+    next: usize,
+    n: &proc_macro2::Ident,
+    initial_state: usize,
+) -> token_stream::TokenStream {
+    quote! {
+        state.add_element(
+            element.pop_push(Rule { kind: self.kind, state: #next })
+                .push(Rule { kind: SyntaxKind::#n, state: #initial_state })
+        );
+    }
+}
+
+/// Mirrors the state-counter allocation in `add_impl` without generating code,
+/// returning the entry state for the given expression.
+fn compute_entry_state(expr: &Expr, state_count: &mut usize, next: usize) -> usize {
+    let id = *state_count;
+    match expr {
+        Expr::Marked(inner, Mark::Option) => {
+            *state_count += 1;
+            compute_entry_state(inner, state_count, next);
+            id
+        }
+        Expr::Marked(inner, Mark::Plus) => {
+            *state_count += 1;
+            let done_once = *state_count;
+            *state_count += 1;
+            compute_entry_state(inner, state_count, done_once);
+            id
+        }
+        Expr::Marked(inner, Mark::Star) => {
+            *state_count += 1;
+            compute_entry_state(inner, state_count, id);
+            id
+        }
+        Expr::Either(exprs) => {
+            *state_count += 1;
+            for e in exprs {
+                compute_entry_state(e, state_count, next);
+            }
+            id
+        }
+        Expr::Seq(exprs) => {
+            let mut target = next;
+            for e in exprs.iter().rev() {
+                target = compute_entry_state(e, state_count, target);
+            }
+            target
+        }
+        Expr::Literal(_, _) | Expr::Reference(_) => {
+            *state_count += 1;
+            id
+        }
+    }
+}
+
 fn add_impl(
     expr: &Expr,
     ctx: &Config,
@@ -134,6 +188,8 @@ fn add_impl(
     state_count: &mut usize,
     next: usize,
     impls: &mut HashMap<usize, token_stream::TokenStream>,
+    reachable: &mut HashSet<usize>,
+    initial_states: &HashMap<String, usize>,
 ) -> usize {
     fn as_tt(
         impls: &mut HashMap<usize, proc_macro2::TokenStream>,
@@ -145,26 +201,20 @@ fn add_impl(
             }
         } else {
             quote! {
-                state.add_element(element.pop_push(Self { state: #x  }));
+                state.add_element(element.pop_push(Rule { kind: self.kind, state: #x }));
             }
         }
     }
     let id = *state_count;
-    let comment = format!(" {:?}", expr);
     let exp = match expr {
         Expr::Marked(expr, Mark::Option) => {
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, next, impls);
+            let thing = add_impl(expr, ctx, terminals, state_count, next, impls, reachable, initial_states);
             let tt = as_tt(impls, thing);
             let next = as_tt(impls, next);
 
-            let once = format!(" Execute ({:?}) at once", expr);
-            let never = format!(" Never execute ({:?})", expr);
             quote! {
-                #[doc = #comment]
-                #[doc = #never]
                 #next
-                #[doc = #once]
                 #tt
             }
         }
@@ -172,42 +222,30 @@ fn add_impl(
             *state_count += 1;
             let done_once = *state_count;
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, done_once, impls);
+            let thing = add_impl(expr, ctx, terminals, state_count, done_once, impls, reachable, initial_states);
             let tt = as_tt(impls, thing);
 
             let next = as_tt(impls, next);
 
-            let once_more = format!(" Execute ({:?}) once more", expr);
-            let at_least_once = format!(" Execute ({:?}) at least once", expr);
-
             impls.insert(
                 done_once,
                 quote! {
-                    #[doc = #comment]
-                    #[doc = #once_more]
                     #tt
-                    #[doc = " Break, goto next"]
                     #next
                 },
             );
 
             quote! {
-                #[doc = #comment]
-                #[doc = #at_least_once]
                 #tt
             }
         }
         Expr::Marked(expr, Mark::Star) => {
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, id, impls);
+            let thing = add_impl(expr, ctx, terminals, state_count, id, impls, reachable, initial_states);
             let tt = as_tt(impls, thing);
             let next = as_tt(impls, next);
-            let once_more = format!(" Execute ({:?}) once more", expr);
             quote! {
-                #[doc = #comment]
-                #[doc = #once_more]
                 #tt
-                #[doc = " Break, goto next"]
                 #next
             }
         }
@@ -215,20 +253,19 @@ fn add_impl(
             *state_count += 1;
             let things: Vec<_> = exprs
                 .iter()
-                .map(|e| add_impl(e, ctx, terminals, state_count, next, impls))
+                .map(|e| add_impl(e, ctx, terminals, state_count, next, impls, reachable, initial_states))
                 .collect();
 
             let things = things.into_iter().map(|x| as_tt(impls, x));
 
             quote! {
-                #[doc = #comment]
                 #( #things )*
             }
         }
         Expr::Seq(exprs) => {
             let mut target = next;
             for e in exprs.iter().rev() {
-                target = add_impl(e, ctx, terminals, state_count, target, impls);
+                target = add_impl(e, ctx, terminals, state_count, target, impls, reachable, initial_states);
             }
 
             return target;
@@ -238,28 +275,23 @@ fn add_impl(
             terminals.insert(Terminal::Literal(f.clone()));
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
-
-            quote! {
-                #[doc = #comment]
-                state.add_element(
-                    element.pop_push(Self { state: #next }).push(#n::new())
-                );
-            }
+            reachable.insert(next);
+            push_rule(next, &n, 0) // literals are always terminals; initial state is 0
         }
         Expr::Reference(re) => {
             *state_count += 1;
-            if !ctx.rules.producing.iter().any(|r| &r.name == re) {
+            let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == re);
+            if is_terminal {
                 terminals.insert(Terminal::Ref(re.clone()));
             }
-
             let n = ctx.context.ident_for(re);
-
-            quote! {
-                #[doc = #comment]
-                state.add_element(
-                    element.pop_push(Self { state: #next }).push(#n::new())
-                );
-            }
+            let entry = if is_terminal {
+                0 // terminals always start at state 0
+            } else {
+                *initial_states.get(re).unwrap_or_else(|| panic!("unknown rule: {re}"))
+            };
+            reachable.insert(next);
+            push_rule(next, &n, entry)
         }
     };
 
@@ -268,17 +300,15 @@ fn add_impl(
     id
 }
 
-fn producing_trait_impl(
+fn producing_rule_arms(
     rule: &Rule,
     ctx: &Config,
     terminals: &mut HashSet<Terminal>,
-) -> token_stream::TokenStream {
+    initial_states: &HashMap<String, usize>,
+) -> (token_stream::TokenStream, token_stream::TokenStream) {
     let n = ctx.context.ident_for(&rule.name);
     let mut state_count = 1;
     let mut impls = HashMap::new();
-    // This implementation should be something like
-    // If no tokens were consumed, and I shouldn't be empty
-    // update steps with expected me
     impls.insert(
         0,
         quote! {
@@ -287,6 +317,7 @@ fn producing_trait_impl(
             }
         },
     );
+    let mut reachable = HashSet::new();
     let imp = add_impl(
         &rule.expression,
         ctx,
@@ -294,47 +325,27 @@ fn producing_trait_impl(
         &mut state_count,
         0,
         &mut impls,
+        &mut reachable,
+        initial_states,
     );
+    reachable.insert(imp); // entry state used by Rule::new
 
-    let impls = impls.into_iter().map(|(k, v)| quote! { #k => { #v } });
+    let step_arms = impls
+        .into_iter()
+        .filter(|(k, _)| reachable.contains(k))
+        .map(|(k, v)| quote! { (SyntaxKind::#n, #k) => { #v } });
 
-    // const FIRST_ITEMS: &'static [SyntaxKind] = &[ #( #fi, )* ];
-    // const LAST_ITEMS: &'static [SyntaxKind] = &[ #( #li, )* ];
-    quote! {
-        #[derive(Debug)]
-        pub struct #n {
-            state: usize
-        }
+    let new_arm = quote! { SyntaxKind::#n => Rule { kind, state: #imp }, };
 
-        impl crate::a_star::ParserTrait for #n {
-            type Kind = SyntaxKind;
-
-            fn step(&self, element: &crate::a_star::Element<Self::Kind>, state: &mut crate::a_star::AStar<Self::Kind>)
-            {
-                match self.state {
-                    #( #impls )*
-                    _ => panic!("Aaaah unexpected state"),
-                }
-            }
-
-            fn at(&self) -> usize {
-                self.state
-            }
-        }
-        impl crate::a_star::ParserTraitConsts for #n {
-            const ELEMENT: SyntaxKind = SyntaxKind::#n;
-
-            fn new() -> Self {
-                Self {
-                    state: #imp
-                }
-            }
-        }
-    }
+    (quote! { #( #step_arms )* }, new_arm)
 }
 
-fn terminal_trait_impl(terminal: &str, is_kw: bool, ctx: &Config) -> token_stream::TokenStream {
-    let n = ctx.context.ident_for(&terminal);
+fn terminal_rule_arms(
+    terminal: &str,
+    is_kw: bool,
+    ctx: &Config,
+) -> (token_stream::TokenStream, token_stream::TokenStream) {
+    let n = ctx.context.ident_for(terminal);
     let defa = if is_kw { 10 } else { 2 };
     let error = ctx
         .context
@@ -342,37 +353,19 @@ fn terminal_trait_impl(terminal: &str, is_kw: bool, ctx: &Config) -> token_strea
         .get(terminal)
         .copied()
         .unwrap_or(defa);
-    quote! {
-        #[derive(Debug)]
-        pub struct #n;
 
-        impl crate::a_star::ParserTrait for #n {
-            type Kind = SyntaxKind;
-
-            /// terminal
-            fn step(&self, element: &crate::a_star::Element<Self::Kind>, state: &mut crate::a_star::AStar<Self::Kind>)
-            {
-                let added = state.expect_as(element, SyntaxKind::#n, #error);
-                if let Some(parent) = added.pop() {
-                    state.add_element(parent);
-                } else {
-                    println!("Failed to add parent {:?}", self);
-                }
-            }
-            fn at(&self) -> usize {
-                0
+    let step_arm = quote! {
+        (SyntaxKind::#n, _) => {
+            let added = state.expect_as(element, SyntaxKind::#n, #error);
+            if let Some(parent) = added.pop() {
+                state.add_element(parent);
             }
         }
+    };
 
+    let new_arm = quote! { SyntaxKind::#n => Rule { kind, state: 0 }, };
 
-        impl crate::a_star::ParserTraitConsts for #n {
-            const ELEMENT: SyntaxKind = SyntaxKind::#n;
-
-            fn new() -> Self {
-                Self
-            }
-        }
-    }
+    (step_arm, new_arm)
 }
 
 #[derive(Hash, PartialEq, PartialOrd, Debug, Clone, Eq)]
@@ -537,33 +530,14 @@ fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>)
     }
 }
 
-#[proc_macro]
-pub fn include_path_code(input: TokenStream) -> TokenStream {
-    // 1) Parse input tokens as a string literal: "some/path"
-    let lit = parse_macro_input!(input as LitStr);
-    let rel_path = lit.value();
-
-    // 2) Resolve path relative to the crate that *invokes* the macro.
-    // CARGO_MANIFEST_DIR here refers to the *current compilation unit*;
-    // in a proc-macro, std::env::var points to the caller crate's env at expansion time.
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
-    let full_path: PathBuf = PathBuf::from(manifest_dir).join(&rel_path);
-
-    // 3) Do “some parsing” / processing. Here: read file contents at compile time.
-    let contents = std::fs::read_to_string(&full_path)
-        .unwrap_or_else(|e| panic!("Failed to read {}: {e}", full_path.display()));
-
-    let config = match crate::parser::parse(&contents) {
+/// Generate Rust source code from a grammar file.
+/// `path` is used only for error reporting; `contents` is the grammar text.
+pub fn generate(path: &str, contents: &str) -> String {
+    let config = match crate::parser::parse(contents) {
         Ok(r) => r,
         Err(es) => {
-            let rendered = render_ariadne_reports(&full_path.display().to_string(), &contents, &es);
-
-            // Make the compiler show the pretty report.
-            // (Yes: compile_error! is the usual stable approach for proc-macros.)
-            return quote! {
-                compile_error!(#rendered);
-            }
-            .into();
+            let rendered = render_ariadne_reports(path, contents, &es);
+            panic!("Grammar parse error in {}:\n{}", path, rendered);
         }
     };
 
@@ -580,18 +554,30 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         set_last_possible_item(&r.name, &config, &mut last_items, &mut can_be_empty, 0);
     }
 
-    let mut terminals = HashSet::new();
-
-    let definitions: Vec<_> = config
+    // Pre-compute the entry state for each producing rule so that push_rule can
+    // emit `Rule { kind: X, state: N }` directly instead of `Rule::new(X)`.
+    let initial_states: HashMap<String, usize> = config
         .rules
         .producing
         .iter()
-        .map(|value| producing_trait_impl(value, &config, &mut terminals))
+        .map(|rule| {
+            let entry = compute_entry_state(&rule.expression, &mut 1usize, 0);
+            (rule.name.clone(), entry)
+        })
         .collect();
+
+    let mut terminals = HashSet::new();
+
+    let (producing_step_arms, producing_new_arms): (Vec<_>, Vec<_>) = config
+        .rules
+        .producing
+        .iter()
+        .map(|value| producing_rule_arms(value, &config, &mut terminals, &initial_states))
+        .unzip();
 
     let sub_pattersn = get_sub_patterns(&config.rules.terminals);
 
-    let terminal_definitions: Vec<_> = terminals
+    let (terminal_step_arms, terminal_new_arms): (Vec<_>, Vec<_>) = terminals
         .iter()
         .map(|x| {
             let ident = x.ident(&config);
@@ -599,7 +585,32 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
                 Terminal::Literal(_) => true,
                 Terminal::Ref(_) => false,
             };
-            terminal_trait_impl(&ident, is_kw, &config)
+            terminal_rule_arms(&ident, is_kw, &config)
+        })
+        .unzip();
+
+    let first_token_producing_arms: Vec<_> = first_items
+        .iter()
+        .filter(|(name, _)| config.rules.producing.iter().any(|r| &r.name == *name))
+        .map(|(name, items)| {
+            let n = config.context.ident_for(name);
+            let toks: Vec<_> = items
+                .iter()
+                .filter_map(|item| match item {
+                    Item::Terminal(t) => Some(config.context.ident_for(t)),
+                    Item::NonTerminal(_) => None,
+                })
+                .collect();
+            quote! { SyntaxKind::#n => &[#( SyntaxKind::#toks ),*], }
+        })
+        .collect();
+
+    let first_token_terminal_arms: Vec<_> = terminals
+        .iter()
+        .map(|x| {
+            let name = x.ident(&config);
+            let n = config.context.ident_for(&name);
+            quote! { SyntaxKind::#n => &[SyntaxKind::#n], }
         })
         .collect();
 
@@ -687,15 +698,55 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
     }
 
     mod definitions {
-        use crate::a_star::ParserTraitConsts as _;
         use super::*;
-        #(
-            #definitions
-        )*
 
-        #(
-            #terminal_definitions
-        )*
+        #[derive(Debug, Clone, Copy)]
+        pub struct Rule {
+            pub kind: SyntaxKind,
+            pub state: usize,
+        }
+
+        impl Rule {
+            pub fn new(kind: SyntaxKind) -> Self {
+                match kind {
+                    #( #producing_new_arms )*
+                    #( #terminal_new_arms )*
+                    _ => panic!("Unknown rule kind {:?}", kind),
+                }
+            }
+        }
+
+        pub fn first_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+            match kind {
+                #( #first_token_producing_arms )*
+                #( #first_token_terminal_arms )*
+                _ => &[],
+            }
+        }
+
+        impl crate::a_star::ParserTrait for Rule {
+            type Kind = SyntaxKind;
+
+            fn step(
+                &self,
+                element: &crate::a_star::Element<Self>,
+                state: &mut crate::a_star::AStar<Self>,
+            ) {
+                match (self.kind, self.state) {
+                    #( #producing_step_arms )*
+                    #( #terminal_step_arms )*
+                    _ => panic!("Aaaah unexpected state {:?}", self),
+                }
+            }
+
+            fn at(&self) -> usize {
+                self.state
+            }
+
+            fn element_kind(&self) -> SyntaxKind {
+                self.kind
+            }
+        }
     }
     pub use definitions::*;
 
@@ -717,24 +768,18 @@ pub fn include_path_code(input: TokenStream) -> TokenStream {
         }
 
         fn starting_tokens(&self) -> &'static [SyntaxKind] {
-            use crate::ParserTrait as _;
-            match self {
-                _ => &[],
-            }
+            &[]
         }
 
         fn ending_tokens(&self) -> &'static [SyntaxKind] {
-            use crate::ParserTrait as _;
-            match self {
-                _ => &[],
-            }
+            &[]
         }
     }
 
 
         };
 
-    out.into()
+    out.to_string()
 }
 
 fn get_sub_patterns(rules: &[Rule]) -> Vec<proc_macro2::TokenStream> {

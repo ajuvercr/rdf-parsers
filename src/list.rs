@@ -56,7 +56,7 @@ impl<T> Inner<T> {
 
     pub fn prepend(self: &List<T>, value: T) -> List<T> {
         let at = match self.as_ref() {
-            Inner::Nil => 0,
+            Inner::Nil => 1,
             Inner::Cons(_, _, at) => at + 1,
         };
         Rc::new(Inner::Cons(value, self.clone(), at))
