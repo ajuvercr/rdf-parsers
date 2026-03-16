@@ -125,6 +125,165 @@ fn to_impl(
     imp
 }
 
+// ── Expression compaction ─────────────────────────────────────────────────────
+
+/// Build a Seq, flattening any nested Seqs and collapsing single-element results.
+fn make_seq(parts: Vec<Expr>) -> Expr {
+    let flat: Vec<Expr> = parts
+        .into_iter()
+        .flat_map(|e| if let Expr::Seq(p) = e { p } else { vec![e] })
+        .collect();
+    match flat.len() {
+        0 => panic!("make_seq: empty"),
+        1 => flat.into_iter().next().unwrap(),
+        _ => Expr::Seq(flat),
+    }
+}
+
+/// Build an Either, flattening nested Eithers and collapsing single-element results.
+fn make_either(alts: Vec<Expr>) -> Expr {
+    let flat: Vec<Expr> = alts
+        .into_iter()
+        .flat_map(|e| if let Expr::Either(a) = e { a } else { vec![e] })
+        .collect();
+    match flat.len() {
+        0 => panic!("make_either: empty"),
+        1 => flat.into_iter().next().unwrap(),
+        _ => Expr::Either(flat),
+    }
+}
+
+/// Unwrap a Seq into its parts, or wrap a non-Seq in a single-element Vec.
+fn seq_parts(e: Expr) -> Vec<Expr> {
+    match e {
+        Expr::Seq(p) => p,
+        other => vec![other],
+    }
+}
+
+/// Compact an expression by recursively factoring common prefixes and suffixes
+/// out of `Either` alternatives.
+pub fn compact(expr: Expr) -> Expr {
+    match expr {
+        Expr::Marked(inner, mark) => Expr::Marked(Box::new(compact(*inner)), mark),
+        Expr::Seq(parts) => make_seq(parts.into_iter().map(compact).collect()),
+        Expr::Either(alts) => {
+            // Compact children first, then flatten nested Eithers.
+            let alts: Vec<Expr> = alts
+                .into_iter()
+                .map(compact)
+                .flat_map(|e| if let Expr::Either(a) = e { a } else { vec![e] })
+                .collect();
+            if alts.len() == 1 {
+                return alts.into_iter().next().unwrap();
+            }
+            // Normalise each alternative to a flat sequence and factor.
+            let seqs: Vec<Vec<Expr>> = alts
+                .into_iter()
+                .map(|e| if let Expr::Seq(p) = e { p } else { vec![e] })
+                .collect();
+            factor_seqs(seqs)
+        }
+        other => other,
+    }
+}
+
+/// Given a list of sequences that are alternatives of an Either, apply
+/// suffix-factoring then prefix-factoring to reduce duplication.
+fn factor_seqs(seqs: Vec<Vec<Expr>>) -> Expr {
+    if seqs.len() == 1 {
+        return make_seq(seqs.into_iter().next().unwrap());
+    }
+
+    // ── Suffix factoring: group by last element ───────────────────────────────
+    // Only factor a group when *all* of its prefixes are non-empty; otherwise
+    // a single-token alternative like [A] would produce an unrepresentable ε
+    // prefix after removing A.
+    let mut suffix_groups: Vec<(Expr, Vec<Vec<Expr>>)> = Vec::new();
+    for seq in &seqs {
+        if seq.is_empty() {
+            // ε alternative — skip suffix factoring entirely for this call.
+            return make_either(seqs.into_iter().map(make_seq).collect());
+        }
+        let last = seq.last().unwrap().clone();
+        let prefix = seq[..seq.len() - 1].to_vec();
+        match suffix_groups.iter_mut().find(|(k, _)| k == &last) {
+            Some(g) => g.1.push(prefix),
+            None => suffix_groups.push((last, vec![prefix])),
+        }
+    }
+    let can_suffix = suffix_groups
+        .iter()
+        .any(|(_, ps)| ps.len() > 1 && ps.iter().all(|p| !p.is_empty()));
+    if can_suffix {
+        let parts: Vec<Expr> = suffix_groups
+            .into_iter()
+            .flat_map(|(last, prefixes)| -> Vec<Expr> {
+                if prefixes.len() > 1 && prefixes.iter().all(|p| !p.is_empty()) {
+                    // Factor: compact the shared prefixes, then append the common last.
+                    let inner = factor_seqs(prefixes);
+                    let mut parts = seq_parts(inner);
+                    parts.push(last);
+                    vec![make_seq(parts)]
+                } else {
+                    // Cannot factor this group — restore the original sequences.
+                    prefixes
+                        .into_iter()
+                        .map(|mut p| {
+                            p.push(last.clone());
+                            make_seq(p)
+                        })
+                        .collect()
+                }
+            })
+            .collect();
+        return make_either(parts);
+    }
+
+    // ── Prefix factoring: group by first element ──────────────────────────────
+    let mut prefix_groups: Vec<(Expr, Vec<Vec<Expr>>)> = Vec::new();
+    for seq in &seqs {
+        let first = seq[0].clone();
+        let tail = seq[1..].to_vec();
+        match prefix_groups.iter_mut().find(|(k, _)| k == &first) {
+            Some(g) => g.1.push(tail),
+            None => prefix_groups.push((first, vec![tail])),
+        }
+    }
+    let can_prefix = prefix_groups
+        .iter()
+        .any(|(_, ts)| ts.len() > 1 && ts.iter().all(|t| !t.is_empty()));
+    if can_prefix {
+        let parts: Vec<Expr> = prefix_groups
+            .into_iter()
+            .flat_map(|(first, tails)| -> Vec<Expr> {
+                if tails.len() > 1 && tails.iter().all(|t| !t.is_empty()) {
+                    let inner = factor_seqs(tails);
+                    let mut parts = vec![first];
+                    parts.extend(seq_parts(inner));
+                    vec![make_seq(parts)]
+                } else {
+                    // Cannot factor this group — restore the original sequences.
+                    tails
+                        .into_iter()
+                        .map(|t| {
+                            let mut s = vec![first.clone()];
+                            s.extend(t);
+                            make_seq(s)
+                        })
+                        .collect()
+                }
+            })
+            .collect();
+        return make_either(parts);
+    }
+
+    // No factoring possible.
+    make_either(seqs.into_iter().map(make_seq).collect())
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 fn push_rule(
     next: usize,
     n: &proc_macro2::Ident,
@@ -302,6 +461,7 @@ fn add_impl(
 
 fn producing_rule_arms(
     rule: &Rule,
+    expr: &Expr,
     ctx: &Config,
     terminals: &mut HashSet<Terminal>,
     initial_states: &HashMap<String, usize>,
@@ -319,7 +479,7 @@ fn producing_rule_arms(
     );
     let mut reachable = HashSet::new();
     let imp = add_impl(
-        &rule.expression,
+        expr,
         ctx,
         terminals,
         &mut state_count,
@@ -554,14 +714,23 @@ pub fn generate(path: &str, contents: &str) -> String {
         set_last_possible_item(&r.name, &config, &mut last_items, &mut can_be_empty, 0);
     }
 
+    // Compact each rule's expression before code generation.
+    let compacted: Vec<Expr> = config
+        .rules
+        .producing
+        .iter()
+        .map(|r| compact(r.expression.clone()))
+        .collect();
+
     // Pre-compute the entry state for each producing rule so that push_rule can
     // emit `Rule { kind: X, state: N }` directly instead of `Rule::new(X)`.
     let initial_states: HashMap<String, usize> = config
         .rules
         .producing
         .iter()
-        .map(|rule| {
-            let entry = compute_entry_state(&rule.expression, &mut 1usize, 0);
+        .zip(compacted.iter())
+        .map(|(rule, expr)| {
+            let entry = compute_entry_state(expr, &mut 1usize, 0);
             (rule.name.clone(), entry)
         })
         .collect();
@@ -572,7 +741,8 @@ pub fn generate(path: &str, contents: &str) -> String {
         .rules
         .producing
         .iter()
-        .map(|value| producing_rule_arms(value, &config, &mut terminals, &initial_states))
+        .zip(compacted.iter())
+        .map(|(value, expr)| producing_rule_arms(value, expr, &config, &mut terminals, &initial_states))
         .unzip();
 
     let sub_pattersn = get_sub_patterns(&config.rules.terminals);

@@ -12,21 +12,21 @@ pub struct Rule {
     pub expression: Expr,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Mark {
     Option,
     Star,
     Plus,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LiteralType {
     Single,
     Double,
     Regex,
     Hex,
 }
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum Expr {
     Marked(Box<Self>, Mark),
     Either(Vec<Self>),

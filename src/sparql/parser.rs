@@ -182,330 +182,330 @@ pub enum SyntaxKind {
     Iri,
     IriOrFunction,
     #[doc = r" terminals"]
-    #[token("OFFSET")]
-    OffsetLit,
-    #[token("?")]
-    Questionmark,
-    #[token("SEPARATOR")]
-    SeparatorLit,
-    #[token("NOT")]
-    NotLit,
-    #[token("NAMED")]
-    NamedLit,
-    #[token("STRSTARTS")]
-    StrstartsLit,
-    #[regex("(?&DECIMAL_NEGATIVE)")]
-    DecimalNegative,
-    #[token("GROUP")]
-    GroupLit,
-    #[token("DELETE DATA")]
-    DeleteDataLit,
-    #[token("REDUCED")]
-    ReducedLit,
-    #[token("INSERT DATA")]
-    InsertDataLit,
-    #[token("RAND")]
-    RandLit,
-    #[regex("(?&IRIREF)")]
-    Iriref,
-    #[token("{")]
-    ClOpen,
-    #[token("CREATE")]
-    CreateLit,
-    #[token("BY")]
-    ByLit,
-    #[token("COALESCE")]
-    CoalesceLit,
-    #[token("sameTerm")]
-    SameTermLit,
-    #[token("isBLANK")]
-    IsBlankLit,
-    #[regex("(?&BLANK_NODE_LABEL)")]
-    BlankNodeLabel,
-    #[token("^^")]
-    Datatype,
-    #[token("SELECT")]
-    SelectLit,
-    #[token("DEFAULT")]
-    DefaultLit,
-    #[token("UNDEF")]
-    UndefLit,
-    #[token("isNUMERIC")]
-    IsNumericLit,
-    #[token("COPY")]
-    CopyLit,
-    #[token("MINUTES")]
-    MinutesLit,
-    #[regex("(?&PNAME_LN)")]
-    PnameLn,
-    #[token("isURI")]
-    IsUriLit,
-    #[token("AS")]
-    AsLit,
-    #[token("WITH")]
-    WithLit,
-    #[token("REGEX")]
-    RegexLit,
-    #[token("SAMPLE")]
-    SampleLit,
-    #[token("|")]
-    Pipe,
-    #[token("SUBSTR")]
-    SubstrLit,
-    #[regex("(?&LANGTAG)")]
-    Langtag,
-    #[token("FILTER")]
-    FilterLit,
-    #[token("ENCODE_FOR_URI")]
-    EncodeForUriLit,
-    #[token("SECONDS")]
-    SecondsLit,
-    #[token("ROUND")]
-    RoundLit,
-    #[token("*")]
-    Star,
-    #[token("UCASE")]
-    UcaseLit,
-    #[token("UNION")]
-    UnionLit,
-    #[token("IF")]
-    IfLit,
-    #[regex("(?&STRING_LITERAL_LONG1)")]
-    StringLiteralLong1,
     #[token("CONCAT")]
     ConcatLit,
-    #[token("CLEAR")]
-    ClearLit,
-    #[token("ALL")]
-    AllLit,
-    #[token("DESCRIBE")]
-    DescribeLit,
-    #[token("STRBEFORE")]
-    StrbeforeLit,
-    #[token("MIN")]
-    MinLit,
-    #[token("SILENT")]
-    SilentLit,
-    #[token("<")]
-    Lt,
-    #[token("a")]
-    Alit,
-    #[token("INTO")]
-    IntoLit,
-    #[regex("(?&ANON)")]
-    Anon,
-    #[token("-")]
-    Bar,
-    #[token("NOW")]
-    NowLit,
-    #[token("DAY")]
-    DayLit,
-    #[token("MAX")]
-    MaxLit,
-    #[regex("(?&DOUBLE)")]
-    Double,
-    #[token("^")]
-    Hat,
-    #[token("HAVING")]
-    HavingLit,
-    #[token("true")]
-    TrueLit,
-    #[token("<=")]
-    Lte,
-    #[token("CONSTRUCT")]
-    ConstructLit,
-    #[token("ADD")]
-    AddLit,
-    #[regex("(?&INTEGER)")]
-    Integer,
-    #[token("TIMEZONE")]
-    TimezoneLit,
-    #[regex("(?&VAR1)")]
-    Var1,
-    #[token("LOAD")]
-    LoadLit,
-    #[token("OPTIONAL")]
-    OptionalLit,
-    #[token("BOUND")]
-    BoundLit,
-    #[regex("(?&NIL)")]
-    Nil,
-    #[token("STRLEN")]
-    StrlenLit,
-    #[token("IRI")]
-    IriLit,
-    #[token("TZ")]
-    TzLit,
-    #[token("SHA512")]
-    Sha512Lit,
-    #[token(".")]
-    Stop,
-    #[token("||")]
-    Pipe2,
-    #[token("LCASE")]
-    LcaseLit,
-    #[token("SUM")]
-    SumLit,
-    #[token("TO")]
-    ToLit,
-    #[token("REPLACE")]
-    ReplaceLit,
-    #[token("GROUP_CONCAT")]
-    GroupConcatLit,
-    #[regex("(?&STRING_LITERAL1)")]
-    StringLiteral1,
-    #[token("SHA256")]
-    Sha256Lit,
-    #[token("LANGMATCHES")]
-    LangmatchesLit,
-    #[token("STRAFTER")]
-    StrafterLit,
-    #[token("SERVICE")]
-    ServiceLit,
-    #[token("ABS")]
-    AbsLit,
-    #[token("false")]
-    FalseLit,
-    #[token(",")]
-    Comma,
-    #[regex("(?&INTEGER_POSITIVE)")]
-    IntegerPositive,
-    #[token("[")]
-    SqOpen,
-    #[token("AVG")]
-    AvgLit,
-    #[token("ASK")]
-    AskLit,
-    #[token("LANG")]
-    LangLit,
+    #[token("LIMIT")]
+    LimitLit,
+    #[regex("(?&DOUBLE_NEGATIVE)")]
+    DoubleNegative,
+    #[token("&&")]
+    Amp2,
+    #[token("DELETE WHERE")]
+    DeleteWhereLit,
     #[token("DELETE")]
     DeleteLit,
-    #[regex("(?&STRING_LITERAL2)")]
-    StringLiteral2,
-    #[token("USING")]
-    UsingLit,
-    #[token("HOURS")]
-    HoursLit,
-    #[token("isIRI")]
-    IsIriLit,
-    #[regex("(?&STRING_LITERAL_LONG2)")]
-    StringLiteralLong2,
-    #[token("]")]
-    SqClose,
-    #[regex("(?&VAR2)")]
-    Var2,
-    #[token(">")]
-    Gt,
-    #[token("IN")]
-    InLit,
-    #[token("URI")]
-    UriLit,
-    #[regex("(?&INTEGER_NEGATIVE)")]
-    IntegerNegative,
+    #[token("MAX")]
+    MaxLit,
+    #[token("SEPARATOR")]
+    SeparatorLit,
+    #[token("^^")]
+    Datatype,
+    #[token("ASK")]
+    AskLit,
+    #[token("!=")]
+    Neq,
+    #[token("MD5")]
+    Md5Lit,
+    #[regex("(?&STRING_LITERAL_LONG1)")]
+    StringLiteralLong1,
+    #[token("ALL")]
+    AllLit,
+    #[token("||")]
+    Pipe2,
+    #[token("UNDEF")]
+    UndefLit,
+    #[token("MINUTES")]
+    MinutesLit,
+    #[token("SUM")]
+    SumLit,
+    #[token(",")]
+    Comma,
+    #[token("OPTIONAL")]
+    OptionalLit,
+    #[token("^")]
+    Hat,
+    #[regex("(?&VAR1)")]
+    Var1,
+    #[regex("(?&INTEGER_POSITIVE)")]
+    IntegerPositive,
     #[token("DISTINCT")]
     DistinctLit,
-    #[token("CONTAINS")]
-    ContainsLit,
-    #[token("UUID")]
-    UuidLit,
-    #[token("DROP")]
-    DropLit,
-    #[token("(")]
-    BrOpen,
-    #[token("FLOOR")]
-    FloorLit,
-    #[regex("(?&DECIMAL_POSITIVE)")]
-    DecimalPositive,
-    #[token("GRAPH")]
-    GraphLit,
-    #[token("MINUS")]
-    MinusLit,
+    #[token("CREATE")]
+    CreateLit,
+    #[token("DAY")]
+    DayLit,
+    #[token(">=")]
+    Gte,
+    #[token("UNION")]
+    UnionLit,
+    #[token("BIND")]
+    BindLit,
+    #[token("IF")]
+    IfLit,
+    #[token("GROUP")]
+    GroupLit,
+    #[token("DESCRIBE")]
+    DescribeLit,
+    #[regex("(?&VAR2)")]
+    Var2,
+    #[token("DESC")]
+    DescLit,
+    #[token("/")]
+    Div,
+    #[token("PREFIX")]
+    SparqlPrefixToken,
+    #[token(";")]
+    Colon,
+    #[regex("(?&INTEGER_NEGATIVE)")]
+    IntegerNegative,
+    #[token("AVG")]
+    AvgLit,
+    #[token("LANG")]
+    LangLit,
+    #[token("!")]
+    Bang,
+    #[token("TIMEZONE")]
+    TimezoneLit,
+    #[token("{")]
+    ClOpen,
+    #[token("*")]
+    Star,
+    #[token("FILTER")]
+    FilterLit,
+    #[regex("(?&STRING_LITERAL1)")]
+    StringLiteral1,
+    #[regex("(?&STRING_LITERAL2)")]
+    StringLiteral2,
+    #[token("DEFAULT")]
+    DefaultLit,
+    #[token("OFFSET")]
+    OffsetLit,
+    #[token("true")]
+    TrueLit,
+    #[regex("(?&BLANK_NODE_LABEL)")]
+    BlankNodeLabel,
+    #[token("CEIL")]
+    CeilLit,
+    #[token(">")]
+    Gt,
+    #[token("SAMPLE")]
+    SampleLit,
+    #[token("STRLEN")]
+    StrlenLit,
     #[token("STRENDS")]
     StrendsLit,
+    #[token("MOVE")]
+    MoveLit,
+    #[token("DELETE DATA")]
+    DeleteDataLit,
+    #[token("STRBEFORE")]
+    StrbeforeLit,
+    #[regex("(?&DOUBLE)")]
+    Double,
+    #[token("INSERT")]
+    InsertLit,
+    #[token("COALESCE")]
+    CoalesceLit,
+    #[token("GROUP_CONCAT")]
+    GroupConcatLit,
+    #[token("NAMED")]
+    NamedLit,
+    #[token("ROUND")]
+    RoundLit,
+    #[regex("(?&DECIMAL)")]
+    Decimal,
     #[token("BNODE")]
     BnodeLit,
+    #[token("+")]
+    Plus,
+    #[token("NOT")]
+    NotLit,
+    #[token("CLEAR")]
+    ClearLit,
+    #[token("YEAR")]
+    YearLit,
+    #[token("INTO")]
+    IntoLit,
+    #[regex("(?&DECIMAL_POSITIVE)")]
+    DecimalPositive,
+    #[regex("(?&NIL)")]
+    Nil,
+    #[token("IN")]
+    InLit,
+    #[token("STRLANG")]
+    StrlangLit,
+    #[token(".")]
+    Stop,
+    #[token("a")]
+    Alit,
+    #[token("BOUND")]
+    BoundLit,
+    #[regex("(?&STRING_LITERAL_LONG2)")]
+    StringLiteralLong2,
+    #[token("LANGMATCHES")]
+    LangmatchesLit,
+    #[token(")")]
+    BrClose,
+    #[token("HAVING")]
+    HavingLit,
+    #[token("ASC")]
+    AscLit,
+    #[token("ADD")]
+    AddLit,
+    #[token("STRSTARTS")]
+    StrstartsLit,
+    #[token("sameTerm")]
+    SameTermLit,
+    #[token("RAND")]
+    RandLit,
+    #[token("(")]
+    BrOpen,
+    #[token("STRUUID")]
+    StruuidLit,
+    #[token("MIN")]
+    MinLit,
+    #[token("MONTH")]
+    MonthLit,
+    #[token("HOURS")]
+    HoursLit,
+    #[token("}")]
+    ClClose,
+    #[token("[")]
+    SqOpen,
+    #[regex("(?&INTEGER)")]
+    Integer,
+    #[token("<")]
+    Lt,
+    #[regex("(?&DECIMAL_NEGATIVE)")]
+    DecimalNegative,
+    #[token("STR")]
+    StrLit,
+    #[token("BY")]
+    ByLit,
+    #[token("SHA384")]
+    Sha384Lit,
+    #[token("REDUCED")]
+    ReducedLit,
+    #[token("DROP")]
+    DropLit,
+    #[token("ORDER")]
+    OrderLit,
+    #[token("BASE")]
+    SparqlBaseToken,
+    #[token("LOAD")]
+    LoadLit,
+    #[token("STRAFTER")]
+    StrafterLit,
+    #[token("INSERT DATA")]
+    InsertDataLit,
+    #[regex("(?&PNAME_NS)")]
+    PnameNs,
+    #[token("SHA256")]
+    Sha256Lit,
+    #[token("isBLANK")]
+    IsBlankLit,
+    #[token("ENCODE_FOR_URI")]
+    EncodeForUriLit,
+    #[token("CONTAINS")]
+    ContainsLit,
+    #[token("REPLACE")]
+    ReplaceLit,
+    #[token("<=")]
+    Lte,
+    #[regex("(?&PNAME_LN)")]
+    PnameLn,
+    #[token("SECONDS")]
+    SecondsLit,
+    #[token("GRAPH")]
+    GraphLit,
     #[token("EXISTS")]
     ExistsLit,
     #[token("FROM")]
     FromLit,
-    #[token("CEIL")]
-    CeilLit,
-    #[token("DELETE WHERE")]
-    DeleteWhereLit,
-    #[token("SHA1")]
-    Sha1Lit,
-    #[token("/")]
-    Div,
-    #[token("STRLANG")]
-    StrlangLit,
-    #[regex("(?&DECIMAL)")]
-    Decimal,
-    #[token(">=")]
-    Gte,
-    #[token("WHERE")]
-    WhereLit,
-    #[token("MD5")]
-    Md5Lit,
-    #[token(")")]
-    BrClose,
-    #[token("=")]
-    Eq,
-    #[token("ASC")]
-    AscLit,
-    #[token("YEAR")]
-    YearLit,
-    #[token("VALUES")]
-    ValuesLit,
-    #[token("}")]
-    ClClose,
-    #[token(";")]
-    Colon,
-    #[token("STRUUID")]
-    StruuidLit,
-    #[token("STRDT")]
-    StrdtLit,
-    #[token("MOVE")]
-    MoveLit,
-    #[token("isLITERAL")]
-    IsLiteralLit,
+    #[token("isIRI")]
+    IsIriLit,
+    #[token("isURI")]
+    IsUriLit,
+    #[token("WITH")]
+    WithLit,
+    #[token("]")]
+    SqClose,
+    #[token("NOW")]
+    NowLit,
     #[regex("(?&DOUBLE_POSITIVE)")]
     DoublePositive,
-    #[token("MONTH")]
-    MonthLit,
-    #[token("DATATYPE")]
-    DatatypeLit,
-    #[token("INSERT")]
-    InsertLit,
-    #[token("PREFIX")]
-    SparqlPrefixToken,
-    #[token("BIND")]
-    BindLit,
-    #[token("STR")]
-    StrLit,
     #[token("COUNT")]
     CountLit,
-    #[token("SHA384")]
-    Sha384Lit,
-    #[regex("(?&DOUBLE_NEGATIVE)")]
-    DoubleNegative,
-    #[token("!")]
-    Bang,
-    #[token("BASE")]
-    SparqlBaseToken,
-    #[regex("(?&PNAME_NS)")]
-    PnameNs,
-    #[token("ORDER")]
-    OrderLit,
-    #[token("LIMIT")]
-    LimitLit,
-    #[token("&&")]
-    Amp2,
-    #[token("DESC")]
-    DescLit,
-    #[token("!=")]
-    Neq,
-    #[token("+")]
-    Plus,
+    #[token("SHA512")]
+    Sha512Lit,
+    #[token("false")]
+    FalseLit,
+    #[token("LCASE")]
+    LcaseLit,
+    #[token("|")]
+    Pipe,
+    #[token("UUID")]
+    UuidLit,
+    #[token("COPY")]
+    CopyLit,
+    #[token("SILENT")]
+    SilentLit,
+    #[token("URI")]
+    UriLit,
+    #[token("SHA1")]
+    Sha1Lit,
+    #[token("STRDT")]
+    StrdtLit,
+    #[token("DATATYPE")]
+    DatatypeLit,
+    #[token("MINUS")]
+    MinusLit,
+    #[regex("(?&IRIREF)")]
+    Iriref,
+    #[token("SERVICE")]
+    ServiceLit,
+    #[token("SUBSTR")]
+    SubstrLit,
+    #[token("SELECT")]
+    SelectLit,
+    #[token("VALUES")]
+    ValuesLit,
+    #[token("USING")]
+    UsingLit,
+    #[token("?")]
+    Questionmark,
+    #[token("-")]
+    Bar,
+    #[token("ABS")]
+    AbsLit,
+    #[token("TZ")]
+    TzLit,
+    #[regex("(?&LANGTAG)")]
+    Langtag,
+    #[token("UCASE")]
+    UcaseLit,
+    #[regex("(?&ANON)")]
+    Anon,
+    #[token("CONSTRUCT")]
+    ConstructLit,
+    #[token("WHERE")]
+    WhereLit,
+    #[token("=")]
+    Eq,
+    #[token("isNUMERIC")]
+    IsNumericLit,
+    #[token("AS")]
+    AsLit,
+    #[token("isLITERAL")]
+    IsLiteralLit,
+    #[token("FLOOR")]
+    FloorLit,
+    #[token("IRI")]
+    IriLit,
+    #[token("TO")]
+    ToLit,
+    #[token("REGEX")]
+    RegexLit,
     Error,
     ROOT,
 }
@@ -580,7 +580,7 @@ mod definitions {
                 },
                 SyntaxKind::ConstructQuery => Rule {
                     kind,
-                    state: 15usize,
+                    state: 14usize,
                 },
                 SyntaxKind::DescribeQuery => Rule {
                     kind,
@@ -992,7 +992,7 @@ mod definitions {
                 },
                 SyntaxKind::RelationalExpression => Rule {
                     kind,
-                    state: 20usize,
+                    state: 16usize,
                 },
                 SyntaxKind::NumericExpression => Rule {
                     kind,
@@ -1000,11 +1000,11 @@ mod definitions {
                 },
                 SyntaxKind::AdditiveExpression => Rule {
                     kind,
-                    state: 16usize,
+                    state: 15usize,
                 },
                 SyntaxKind::MultiplicativeExpression => Rule {
                     kind,
-                    state: 7usize,
+                    state: 6usize,
                 },
                 SyntaxKind::UnaryExpression => Rule {
                     kind,
@@ -1044,7 +1044,7 @@ mod definitions {
                 },
                 SyntaxKind::Aggregate => Rule {
                     kind,
-                    state: 1usize,
+                    state: 2usize,
                 },
                 SyntaxKind::IriOrFunction => Rule {
                     kind,
@@ -1090,1357 +1090,981 @@ mod definitions {
                     kind,
                     state: 1usize,
                 },
-                SyntaxKind::OffsetLit => Rule { kind, state: 0 },
-                SyntaxKind::Questionmark => Rule { kind, state: 0 },
-                SyntaxKind::SeparatorLit => Rule { kind, state: 0 },
-                SyntaxKind::NotLit => Rule { kind, state: 0 },
-                SyntaxKind::NamedLit => Rule { kind, state: 0 },
-                SyntaxKind::StrstartsLit => Rule { kind, state: 0 },
-                SyntaxKind::DecimalNegative => Rule { kind, state: 0 },
-                SyntaxKind::GroupLit => Rule { kind, state: 0 },
-                SyntaxKind::DeleteDataLit => Rule { kind, state: 0 },
-                SyntaxKind::ReducedLit => Rule { kind, state: 0 },
-                SyntaxKind::InsertDataLit => Rule { kind, state: 0 },
-                SyntaxKind::RandLit => Rule { kind, state: 0 },
-                SyntaxKind::Iriref => Rule { kind, state: 0 },
-                SyntaxKind::ClOpen => Rule { kind, state: 0 },
-                SyntaxKind::CreateLit => Rule { kind, state: 0 },
-                SyntaxKind::ByLit => Rule { kind, state: 0 },
-                SyntaxKind::CoalesceLit => Rule { kind, state: 0 },
-                SyntaxKind::SameTermLit => Rule { kind, state: 0 },
-                SyntaxKind::IsBlankLit => Rule { kind, state: 0 },
-                SyntaxKind::BlankNodeLabel => Rule { kind, state: 0 },
-                SyntaxKind::Datatype => Rule { kind, state: 0 },
-                SyntaxKind::SelectLit => Rule { kind, state: 0 },
-                SyntaxKind::DefaultLit => Rule { kind, state: 0 },
-                SyntaxKind::UndefLit => Rule { kind, state: 0 },
-                SyntaxKind::IsNumericLit => Rule { kind, state: 0 },
-                SyntaxKind::CopyLit => Rule { kind, state: 0 },
-                SyntaxKind::MinutesLit => Rule { kind, state: 0 },
-                SyntaxKind::PnameLn => Rule { kind, state: 0 },
-                SyntaxKind::IsUriLit => Rule { kind, state: 0 },
-                SyntaxKind::AsLit => Rule { kind, state: 0 },
-                SyntaxKind::WithLit => Rule { kind, state: 0 },
-                SyntaxKind::RegexLit => Rule { kind, state: 0 },
-                SyntaxKind::SampleLit => Rule { kind, state: 0 },
-                SyntaxKind::Pipe => Rule { kind, state: 0 },
-                SyntaxKind::SubstrLit => Rule { kind, state: 0 },
-                SyntaxKind::Langtag => Rule { kind, state: 0 },
-                SyntaxKind::FilterLit => Rule { kind, state: 0 },
-                SyntaxKind::EncodeForUriLit => Rule { kind, state: 0 },
-                SyntaxKind::SecondsLit => Rule { kind, state: 0 },
-                SyntaxKind::RoundLit => Rule { kind, state: 0 },
-                SyntaxKind::Star => Rule { kind, state: 0 },
-                SyntaxKind::UcaseLit => Rule { kind, state: 0 },
-                SyntaxKind::UnionLit => Rule { kind, state: 0 },
-                SyntaxKind::IfLit => Rule { kind, state: 0 },
-                SyntaxKind::StringLiteralLong1 => Rule { kind, state: 0 },
                 SyntaxKind::ConcatLit => Rule { kind, state: 0 },
-                SyntaxKind::ClearLit => Rule { kind, state: 0 },
-                SyntaxKind::AllLit => Rule { kind, state: 0 },
-                SyntaxKind::DescribeLit => Rule { kind, state: 0 },
-                SyntaxKind::StrbeforeLit => Rule { kind, state: 0 },
-                SyntaxKind::MinLit => Rule { kind, state: 0 },
-                SyntaxKind::SilentLit => Rule { kind, state: 0 },
-                SyntaxKind::Lt => Rule { kind, state: 0 },
-                SyntaxKind::Alit => Rule { kind, state: 0 },
-                SyntaxKind::IntoLit => Rule { kind, state: 0 },
-                SyntaxKind::Anon => Rule { kind, state: 0 },
-                SyntaxKind::Bar => Rule { kind, state: 0 },
-                SyntaxKind::NowLit => Rule { kind, state: 0 },
-                SyntaxKind::DayLit => Rule { kind, state: 0 },
-                SyntaxKind::MaxLit => Rule { kind, state: 0 },
-                SyntaxKind::Double => Rule { kind, state: 0 },
-                SyntaxKind::Hat => Rule { kind, state: 0 },
-                SyntaxKind::HavingLit => Rule { kind, state: 0 },
-                SyntaxKind::TrueLit => Rule { kind, state: 0 },
-                SyntaxKind::Lte => Rule { kind, state: 0 },
-                SyntaxKind::ConstructLit => Rule { kind, state: 0 },
-                SyntaxKind::AddLit => Rule { kind, state: 0 },
-                SyntaxKind::Integer => Rule { kind, state: 0 },
-                SyntaxKind::TimezoneLit => Rule { kind, state: 0 },
-                SyntaxKind::Var1 => Rule { kind, state: 0 },
-                SyntaxKind::LoadLit => Rule { kind, state: 0 },
-                SyntaxKind::OptionalLit => Rule { kind, state: 0 },
-                SyntaxKind::BoundLit => Rule { kind, state: 0 },
-                SyntaxKind::Nil => Rule { kind, state: 0 },
-                SyntaxKind::StrlenLit => Rule { kind, state: 0 },
-                SyntaxKind::IriLit => Rule { kind, state: 0 },
-                SyntaxKind::TzLit => Rule { kind, state: 0 },
-                SyntaxKind::Sha512Lit => Rule { kind, state: 0 },
-                SyntaxKind::Stop => Rule { kind, state: 0 },
-                SyntaxKind::Pipe2 => Rule { kind, state: 0 },
-                SyntaxKind::LcaseLit => Rule { kind, state: 0 },
-                SyntaxKind::SumLit => Rule { kind, state: 0 },
-                SyntaxKind::ToLit => Rule { kind, state: 0 },
-                SyntaxKind::ReplaceLit => Rule { kind, state: 0 },
-                SyntaxKind::GroupConcatLit => Rule { kind, state: 0 },
-                SyntaxKind::StringLiteral1 => Rule { kind, state: 0 },
-                SyntaxKind::Sha256Lit => Rule { kind, state: 0 },
-                SyntaxKind::LangmatchesLit => Rule { kind, state: 0 },
-                SyntaxKind::StrafterLit => Rule { kind, state: 0 },
-                SyntaxKind::ServiceLit => Rule { kind, state: 0 },
-                SyntaxKind::AbsLit => Rule { kind, state: 0 },
-                SyntaxKind::FalseLit => Rule { kind, state: 0 },
-                SyntaxKind::Comma => Rule { kind, state: 0 },
-                SyntaxKind::IntegerPositive => Rule { kind, state: 0 },
-                SyntaxKind::SqOpen => Rule { kind, state: 0 },
-                SyntaxKind::AvgLit => Rule { kind, state: 0 },
-                SyntaxKind::AskLit => Rule { kind, state: 0 },
-                SyntaxKind::LangLit => Rule { kind, state: 0 },
+                SyntaxKind::LimitLit => Rule { kind, state: 0 },
+                SyntaxKind::DoubleNegative => Rule { kind, state: 0 },
+                SyntaxKind::Amp2 => Rule { kind, state: 0 },
+                SyntaxKind::DeleteWhereLit => Rule { kind, state: 0 },
                 SyntaxKind::DeleteLit => Rule { kind, state: 0 },
-                SyntaxKind::StringLiteral2 => Rule { kind, state: 0 },
-                SyntaxKind::UsingLit => Rule { kind, state: 0 },
-                SyntaxKind::HoursLit => Rule { kind, state: 0 },
-                SyntaxKind::IsIriLit => Rule { kind, state: 0 },
-                SyntaxKind::StringLiteralLong2 => Rule { kind, state: 0 },
-                SyntaxKind::SqClose => Rule { kind, state: 0 },
-                SyntaxKind::Var2 => Rule { kind, state: 0 },
-                SyntaxKind::Gt => Rule { kind, state: 0 },
-                SyntaxKind::InLit => Rule { kind, state: 0 },
-                SyntaxKind::UriLit => Rule { kind, state: 0 },
-                SyntaxKind::IntegerNegative => Rule { kind, state: 0 },
+                SyntaxKind::MaxLit => Rule { kind, state: 0 },
+                SyntaxKind::SeparatorLit => Rule { kind, state: 0 },
+                SyntaxKind::Datatype => Rule { kind, state: 0 },
+                SyntaxKind::AskLit => Rule { kind, state: 0 },
+                SyntaxKind::Neq => Rule { kind, state: 0 },
+                SyntaxKind::Md5Lit => Rule { kind, state: 0 },
+                SyntaxKind::StringLiteralLong1 => Rule { kind, state: 0 },
+                SyntaxKind::AllLit => Rule { kind, state: 0 },
+                SyntaxKind::Pipe2 => Rule { kind, state: 0 },
+                SyntaxKind::UndefLit => Rule { kind, state: 0 },
+                SyntaxKind::MinutesLit => Rule { kind, state: 0 },
+                SyntaxKind::SumLit => Rule { kind, state: 0 },
+                SyntaxKind::Comma => Rule { kind, state: 0 },
+                SyntaxKind::OptionalLit => Rule { kind, state: 0 },
+                SyntaxKind::Hat => Rule { kind, state: 0 },
+                SyntaxKind::Var1 => Rule { kind, state: 0 },
+                SyntaxKind::IntegerPositive => Rule { kind, state: 0 },
                 SyntaxKind::DistinctLit => Rule { kind, state: 0 },
-                SyntaxKind::ContainsLit => Rule { kind, state: 0 },
-                SyntaxKind::UuidLit => Rule { kind, state: 0 },
-                SyntaxKind::DropLit => Rule { kind, state: 0 },
-                SyntaxKind::BrOpen => Rule { kind, state: 0 },
-                SyntaxKind::FloorLit => Rule { kind, state: 0 },
-                SyntaxKind::DecimalPositive => Rule { kind, state: 0 },
-                SyntaxKind::GraphLit => Rule { kind, state: 0 },
-                SyntaxKind::MinusLit => Rule { kind, state: 0 },
+                SyntaxKind::CreateLit => Rule { kind, state: 0 },
+                SyntaxKind::DayLit => Rule { kind, state: 0 },
+                SyntaxKind::Gte => Rule { kind, state: 0 },
+                SyntaxKind::UnionLit => Rule { kind, state: 0 },
+                SyntaxKind::BindLit => Rule { kind, state: 0 },
+                SyntaxKind::IfLit => Rule { kind, state: 0 },
+                SyntaxKind::GroupLit => Rule { kind, state: 0 },
+                SyntaxKind::DescribeLit => Rule { kind, state: 0 },
+                SyntaxKind::Var2 => Rule { kind, state: 0 },
+                SyntaxKind::DescLit => Rule { kind, state: 0 },
+                SyntaxKind::Div => Rule { kind, state: 0 },
+                SyntaxKind::SparqlPrefixToken => Rule { kind, state: 0 },
+                SyntaxKind::Colon => Rule { kind, state: 0 },
+                SyntaxKind::IntegerNegative => Rule { kind, state: 0 },
+                SyntaxKind::AvgLit => Rule { kind, state: 0 },
+                SyntaxKind::LangLit => Rule { kind, state: 0 },
+                SyntaxKind::Bang => Rule { kind, state: 0 },
+                SyntaxKind::TimezoneLit => Rule { kind, state: 0 },
+                SyntaxKind::ClOpen => Rule { kind, state: 0 },
+                SyntaxKind::Star => Rule { kind, state: 0 },
+                SyntaxKind::FilterLit => Rule { kind, state: 0 },
+                SyntaxKind::StringLiteral1 => Rule { kind, state: 0 },
+                SyntaxKind::StringLiteral2 => Rule { kind, state: 0 },
+                SyntaxKind::DefaultLit => Rule { kind, state: 0 },
+                SyntaxKind::OffsetLit => Rule { kind, state: 0 },
+                SyntaxKind::TrueLit => Rule { kind, state: 0 },
+                SyntaxKind::BlankNodeLabel => Rule { kind, state: 0 },
+                SyntaxKind::CeilLit => Rule { kind, state: 0 },
+                SyntaxKind::Gt => Rule { kind, state: 0 },
+                SyntaxKind::SampleLit => Rule { kind, state: 0 },
+                SyntaxKind::StrlenLit => Rule { kind, state: 0 },
                 SyntaxKind::StrendsLit => Rule { kind, state: 0 },
+                SyntaxKind::MoveLit => Rule { kind, state: 0 },
+                SyntaxKind::DeleteDataLit => Rule { kind, state: 0 },
+                SyntaxKind::StrbeforeLit => Rule { kind, state: 0 },
+                SyntaxKind::Double => Rule { kind, state: 0 },
+                SyntaxKind::InsertLit => Rule { kind, state: 0 },
+                SyntaxKind::CoalesceLit => Rule { kind, state: 0 },
+                SyntaxKind::GroupConcatLit => Rule { kind, state: 0 },
+                SyntaxKind::NamedLit => Rule { kind, state: 0 },
+                SyntaxKind::RoundLit => Rule { kind, state: 0 },
+                SyntaxKind::Decimal => Rule { kind, state: 0 },
                 SyntaxKind::BnodeLit => Rule { kind, state: 0 },
+                SyntaxKind::Plus => Rule { kind, state: 0 },
+                SyntaxKind::NotLit => Rule { kind, state: 0 },
+                SyntaxKind::ClearLit => Rule { kind, state: 0 },
+                SyntaxKind::YearLit => Rule { kind, state: 0 },
+                SyntaxKind::IntoLit => Rule { kind, state: 0 },
+                SyntaxKind::DecimalPositive => Rule { kind, state: 0 },
+                SyntaxKind::Nil => Rule { kind, state: 0 },
+                SyntaxKind::InLit => Rule { kind, state: 0 },
+                SyntaxKind::StrlangLit => Rule { kind, state: 0 },
+                SyntaxKind::Stop => Rule { kind, state: 0 },
+                SyntaxKind::Alit => Rule { kind, state: 0 },
+                SyntaxKind::BoundLit => Rule { kind, state: 0 },
+                SyntaxKind::StringLiteralLong2 => Rule { kind, state: 0 },
+                SyntaxKind::LangmatchesLit => Rule { kind, state: 0 },
+                SyntaxKind::BrClose => Rule { kind, state: 0 },
+                SyntaxKind::HavingLit => Rule { kind, state: 0 },
+                SyntaxKind::AscLit => Rule { kind, state: 0 },
+                SyntaxKind::AddLit => Rule { kind, state: 0 },
+                SyntaxKind::StrstartsLit => Rule { kind, state: 0 },
+                SyntaxKind::SameTermLit => Rule { kind, state: 0 },
+                SyntaxKind::RandLit => Rule { kind, state: 0 },
+                SyntaxKind::BrOpen => Rule { kind, state: 0 },
+                SyntaxKind::StruuidLit => Rule { kind, state: 0 },
+                SyntaxKind::MinLit => Rule { kind, state: 0 },
+                SyntaxKind::MonthLit => Rule { kind, state: 0 },
+                SyntaxKind::HoursLit => Rule { kind, state: 0 },
+                SyntaxKind::ClClose => Rule { kind, state: 0 },
+                SyntaxKind::SqOpen => Rule { kind, state: 0 },
+                SyntaxKind::Integer => Rule { kind, state: 0 },
+                SyntaxKind::Lt => Rule { kind, state: 0 },
+                SyntaxKind::DecimalNegative => Rule { kind, state: 0 },
+                SyntaxKind::StrLit => Rule { kind, state: 0 },
+                SyntaxKind::ByLit => Rule { kind, state: 0 },
+                SyntaxKind::Sha384Lit => Rule { kind, state: 0 },
+                SyntaxKind::ReducedLit => Rule { kind, state: 0 },
+                SyntaxKind::DropLit => Rule { kind, state: 0 },
+                SyntaxKind::OrderLit => Rule { kind, state: 0 },
+                SyntaxKind::SparqlBaseToken => Rule { kind, state: 0 },
+                SyntaxKind::LoadLit => Rule { kind, state: 0 },
+                SyntaxKind::StrafterLit => Rule { kind, state: 0 },
+                SyntaxKind::InsertDataLit => Rule { kind, state: 0 },
+                SyntaxKind::PnameNs => Rule { kind, state: 0 },
+                SyntaxKind::Sha256Lit => Rule { kind, state: 0 },
+                SyntaxKind::IsBlankLit => Rule { kind, state: 0 },
+                SyntaxKind::EncodeForUriLit => Rule { kind, state: 0 },
+                SyntaxKind::ContainsLit => Rule { kind, state: 0 },
+                SyntaxKind::ReplaceLit => Rule { kind, state: 0 },
+                SyntaxKind::Lte => Rule { kind, state: 0 },
+                SyntaxKind::PnameLn => Rule { kind, state: 0 },
+                SyntaxKind::SecondsLit => Rule { kind, state: 0 },
+                SyntaxKind::GraphLit => Rule { kind, state: 0 },
                 SyntaxKind::ExistsLit => Rule { kind, state: 0 },
                 SyntaxKind::FromLit => Rule { kind, state: 0 },
-                SyntaxKind::CeilLit => Rule { kind, state: 0 },
-                SyntaxKind::DeleteWhereLit => Rule { kind, state: 0 },
-                SyntaxKind::Sha1Lit => Rule { kind, state: 0 },
-                SyntaxKind::Div => Rule { kind, state: 0 },
-                SyntaxKind::StrlangLit => Rule { kind, state: 0 },
-                SyntaxKind::Decimal => Rule { kind, state: 0 },
-                SyntaxKind::Gte => Rule { kind, state: 0 },
-                SyntaxKind::WhereLit => Rule { kind, state: 0 },
-                SyntaxKind::Md5Lit => Rule { kind, state: 0 },
-                SyntaxKind::BrClose => Rule { kind, state: 0 },
-                SyntaxKind::Eq => Rule { kind, state: 0 },
-                SyntaxKind::AscLit => Rule { kind, state: 0 },
-                SyntaxKind::YearLit => Rule { kind, state: 0 },
-                SyntaxKind::ValuesLit => Rule { kind, state: 0 },
-                SyntaxKind::ClClose => Rule { kind, state: 0 },
-                SyntaxKind::Colon => Rule { kind, state: 0 },
-                SyntaxKind::StruuidLit => Rule { kind, state: 0 },
-                SyntaxKind::StrdtLit => Rule { kind, state: 0 },
-                SyntaxKind::MoveLit => Rule { kind, state: 0 },
-                SyntaxKind::IsLiteralLit => Rule { kind, state: 0 },
+                SyntaxKind::IsIriLit => Rule { kind, state: 0 },
+                SyntaxKind::IsUriLit => Rule { kind, state: 0 },
+                SyntaxKind::WithLit => Rule { kind, state: 0 },
+                SyntaxKind::SqClose => Rule { kind, state: 0 },
+                SyntaxKind::NowLit => Rule { kind, state: 0 },
                 SyntaxKind::DoublePositive => Rule { kind, state: 0 },
-                SyntaxKind::MonthLit => Rule { kind, state: 0 },
-                SyntaxKind::DatatypeLit => Rule { kind, state: 0 },
-                SyntaxKind::InsertLit => Rule { kind, state: 0 },
-                SyntaxKind::SparqlPrefixToken => Rule { kind, state: 0 },
-                SyntaxKind::BindLit => Rule { kind, state: 0 },
-                SyntaxKind::StrLit => Rule { kind, state: 0 },
                 SyntaxKind::CountLit => Rule { kind, state: 0 },
-                SyntaxKind::Sha384Lit => Rule { kind, state: 0 },
-                SyntaxKind::DoubleNegative => Rule { kind, state: 0 },
-                SyntaxKind::Bang => Rule { kind, state: 0 },
-                SyntaxKind::SparqlBaseToken => Rule { kind, state: 0 },
-                SyntaxKind::PnameNs => Rule { kind, state: 0 },
-                SyntaxKind::OrderLit => Rule { kind, state: 0 },
-                SyntaxKind::LimitLit => Rule { kind, state: 0 },
-                SyntaxKind::Amp2 => Rule { kind, state: 0 },
-                SyntaxKind::DescLit => Rule { kind, state: 0 },
-                SyntaxKind::Neq => Rule { kind, state: 0 },
-                SyntaxKind::Plus => Rule { kind, state: 0 },
+                SyntaxKind::Sha512Lit => Rule { kind, state: 0 },
+                SyntaxKind::FalseLit => Rule { kind, state: 0 },
+                SyntaxKind::LcaseLit => Rule { kind, state: 0 },
+                SyntaxKind::Pipe => Rule { kind, state: 0 },
+                SyntaxKind::UuidLit => Rule { kind, state: 0 },
+                SyntaxKind::CopyLit => Rule { kind, state: 0 },
+                SyntaxKind::SilentLit => Rule { kind, state: 0 },
+                SyntaxKind::UriLit => Rule { kind, state: 0 },
+                SyntaxKind::Sha1Lit => Rule { kind, state: 0 },
+                SyntaxKind::StrdtLit => Rule { kind, state: 0 },
+                SyntaxKind::DatatypeLit => Rule { kind, state: 0 },
+                SyntaxKind::MinusLit => Rule { kind, state: 0 },
+                SyntaxKind::Iriref => Rule { kind, state: 0 },
+                SyntaxKind::ServiceLit => Rule { kind, state: 0 },
+                SyntaxKind::SubstrLit => Rule { kind, state: 0 },
+                SyntaxKind::SelectLit => Rule { kind, state: 0 },
+                SyntaxKind::ValuesLit => Rule { kind, state: 0 },
+                SyntaxKind::UsingLit => Rule { kind, state: 0 },
+                SyntaxKind::Questionmark => Rule { kind, state: 0 },
+                SyntaxKind::Bar => Rule { kind, state: 0 },
+                SyntaxKind::AbsLit => Rule { kind, state: 0 },
+                SyntaxKind::TzLit => Rule { kind, state: 0 },
+                SyntaxKind::Langtag => Rule { kind, state: 0 },
+                SyntaxKind::UcaseLit => Rule { kind, state: 0 },
+                SyntaxKind::Anon => Rule { kind, state: 0 },
+                SyntaxKind::ConstructLit => Rule { kind, state: 0 },
+                SyntaxKind::WhereLit => Rule { kind, state: 0 },
+                SyntaxKind::Eq => Rule { kind, state: 0 },
+                SyntaxKind::IsNumericLit => Rule { kind, state: 0 },
+                SyntaxKind::AsLit => Rule { kind, state: 0 },
+                SyntaxKind::IsLiteralLit => Rule { kind, state: 0 },
+                SyntaxKind::FloorLit => Rule { kind, state: 0 },
+                SyntaxKind::IriLit => Rule { kind, state: 0 },
+                SyntaxKind::ToLit => Rule { kind, state: 0 },
+                SyntaxKind::RegexLit => Rule { kind, state: 0 },
                 _ => panic!("Unknown rule kind {:?}", kind),
             }
         }
     }
     pub fn first_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
         match kind {
-            SyntaxKind::DataBlockValue => &[
-                SyntaxKind::FalseLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-            ],
-            SyntaxKind::PathMod => &[SyntaxKind::Star, SyntaxKind::Questionmark, SyntaxKind::Plus],
-            SyntaxKind::Query => &[
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SelectLit,
-                SyntaxKind::DescribeLit,
-                SyntaxKind::AskLit,
-                SyntaxKind::ConstructLit,
-                SyntaxKind::SparqlBaseToken,
-            ],
-            SyntaxKind::ConditionalOrExpression => &[
-                SyntaxKind::RegexLit,
-                SyntaxKind::Bar,
-                SyntaxKind::HoursLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::Bang,
-                SyntaxKind::TrueLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::Plus,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::LangLit,
+            SyntaxKind::QuadPattern => &[SyntaxKind::ClOpen],
+            SyntaxKind::PropertyList => &[SyntaxKind::Alit],
+            SyntaxKind::GroupGraphPatternSub => &[
                 SyntaxKind::BrOpen,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::ContainsLit,
+                SyntaxKind::OptionalLit,
+                SyntaxKind::GraphLit,
+                SyntaxKind::SqOpen,
+                SyntaxKind::ServiceLit,
+                SyntaxKind::ClOpen,
+                SyntaxKind::FalseLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::FilterLit,
+                SyntaxKind::MinusLit,
+                SyntaxKind::BindLit,
+                SyntaxKind::ValuesLit,
             ],
             SyntaxKind::DeleteClause => &[SyntaxKind::DeleteLit],
-            SyntaxKind::UsingClause => &[SyntaxKind::UsingLit],
-            SyntaxKind::QuadData => &[SyntaxKind::ClOpen],
-            SyntaxKind::ObjectPath => &[
-                SyntaxKind::SqOpen,
-                SyntaxKind::TrueLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::FalseLit,
-            ],
-            SyntaxKind::PathOneInPropertySet => &[SyntaxKind::Alit, SyntaxKind::Hat],
-            SyntaxKind::RegexExpression => &[SyntaxKind::RegexLit],
-            SyntaxKind::Create => &[SyntaxKind::CreateLit],
-            SyntaxKind::OffsetClause => &[SyntaxKind::OffsetLit],
-            SyntaxKind::ValueLogical => &[
-                SyntaxKind::StrafterLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::Bang,
-                SyntaxKind::FalseLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Bar,
-                SyntaxKind::FloorLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::Plus,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::ContainsLit,
-            ],
-            SyntaxKind::AskQuery => &[SyntaxKind::AskLit],
-            SyntaxKind::DataBlock => &[SyntaxKind::BrOpen],
-            SyntaxKind::NumericLiteralUnsigned => &[],
-            SyntaxKind::NumericLiteralPositive => &[],
-            SyntaxKind::UpdateUnit => &[
-                SyntaxKind::AddLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::DropLit,
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::MoveLit,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::CreateLit,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::ClearLit,
-                SyntaxKind::CopyLit,
-            ],
-            SyntaxKind::MyString => &[],
-            SyntaxKind::DeleteData => &[SyntaxKind::DeleteDataLit],
-            SyntaxKind::LimitClause => &[SyntaxKind::LimitLit],
-            SyntaxKind::MinusGraphPattern => &[SyntaxKind::MinusLit],
-            SyntaxKind::Path => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Hat,
-                SyntaxKind::Bang,
-                SyntaxKind::BrOpen,
-            ],
-            SyntaxKind::NumericExpression => &[
-                SyntaxKind::SampleLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::Bar,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::Bang,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::IriLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::Plus,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::NotLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::SumLit,
-                SyntaxKind::NowLit,
-            ],
-            SyntaxKind::GraphTerm => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
-            SyntaxKind::Verb => &[SyntaxKind::Alit],
-            SyntaxKind::PathElt => &[SyntaxKind::Alit, SyntaxKind::BrOpen, SyntaxKind::Bang],
-            SyntaxKind::SourceSelector => &[],
-            SyntaxKind::Prologue => &[SyntaxKind::SparqlPrefixToken, SyntaxKind::SparqlBaseToken],
-            SyntaxKind::PathNegatedPropertySet => {
-                &[SyntaxKind::Alit, SyntaxKind::BrOpen, SyntaxKind::Hat]
-            }
-            SyntaxKind::VerbPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Hat,
-            ],
-            SyntaxKind::MultiplicativeExpression => &[
-                SyntaxKind::HoursLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Bang,
-                SyntaxKind::NotLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::Bar,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::Plus,
-                SyntaxKind::DayLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::EncodeForUriLit,
-            ],
-            SyntaxKind::NotExistsFunc => &[SyntaxKind::NotLit],
-            SyntaxKind::PrimaryExpression => &[
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::AbsLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::QuadPattern => &[SyntaxKind::ClOpen],
-            SyntaxKind::Var => &[],
+            SyntaxKind::GroupClause => &[SyntaxKind::GroupLit],
             SyntaxKind::GroupCondition => &[
-                SyntaxKind::AvgLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::CeilLit,
                 SyntaxKind::DatatypeLit,
-                SyntaxKind::SubstrLit,
                 SyntaxKind::RoundLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::ConcatLit,
-            ],
-            SyntaxKind::UnaryExpression => &[
-                SyntaxKind::IsUriLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::StrbeforeLit,
                 SyntaxKind::AvgLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::CountLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::Plus,
-                SyntaxKind::Bar,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::Bang,
-                SyntaxKind::AbsLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::FloorLit,
+                SyntaxKind::ExistsLit,
                 SyntaxKind::StruuidLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StrafterLit,
+                SyntaxKind::Md5Lit,
                 SyntaxKind::StrstartsLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::SampleLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::ExistsLit,
-            ],
-            SyntaxKind::ArgList => &[SyntaxKind::BrOpen],
-            SyntaxKind::InlineData => &[SyntaxKind::ValuesLit],
-            SyntaxKind::AdditiveExpression => &[
-                SyntaxKind::SecondsLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::UriLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::LcaseLit,
                 SyntaxKind::NotLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SumLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::TimezoneLit,
                 SyntaxKind::CountLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::HoursLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::RegexLit,
                 SyntaxKind::StrafterLit,
                 SyntaxKind::StrlenLit,
-                SyntaxKind::BnodeLit,
                 SyntaxKind::CoalesceLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::UuidLit,
                 SyntaxKind::IsUriLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::AbsLit,
                 SyntaxKind::LangLit,
                 SyntaxKind::Sha256Lit,
+                SyntaxKind::YearLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::UriLit,
                 SyntaxKind::UcaseLit,
-                SyntaxKind::Bar,
-                SyntaxKind::TzLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::IsNumericLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::DayLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::Sha384Lit,
+            ],
+            SyntaxKind::PrimaryExpression => &[
+                SyntaxKind::IsUriLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::EncodeForUriLit,
                 SyntaxKind::AvgLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::ExistsLit,
                 SyntaxKind::IfLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::Sha1Lit,
                 SyntaxKind::MonthLit,
                 SyntaxKind::StrdtLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::Plus,
-                SyntaxKind::YearLit,
-                SyntaxKind::NowLit,
-            ],
-            SyntaxKind::GraphRef => &[SyntaxKind::GraphLit],
-            SyntaxKind::TriplesBlock => &[
-                SyntaxKind::SqOpen,
-                SyntaxKind::FalseLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Rdfliteral => &[],
-            SyntaxKind::TriplesNode => &[SyntaxKind::BrOpen, SyntaxKind::SqOpen],
-            SyntaxKind::PathAlternative => &[
-                SyntaxKind::BrOpen,
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::Hat,
-            ],
-            SyntaxKind::SubstringExpression => &[SyntaxKind::SubstrLit],
-            SyntaxKind::Collection => &[SyntaxKind::BrOpen],
-            SyntaxKind::NumericLiteralNegative => &[],
-            SyntaxKind::DatasetClause => &[SyntaxKind::FromLit],
-            SyntaxKind::Update1 => &[
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::AddLit,
-                SyntaxKind::DropLit,
-                SyntaxKind::ClearLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::MoveLit,
-                SyntaxKind::CopyLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::CreateLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::WithLit,
-            ],
-            SyntaxKind::Move => &[SyntaxKind::MoveLit],
-            SyntaxKind::HavingClause => &[SyntaxKind::HavingLit],
-            SyntaxKind::Bind => &[SyntaxKind::BindLit],
-            SyntaxKind::TriplesNodePath => &[SyntaxKind::SqOpen, SyntaxKind::BrOpen],
-            SyntaxKind::ExistsFunc => &[SyntaxKind::ExistsLit],
-            SyntaxKind::GraphOrDefault => &[SyntaxKind::DefaultLit, SyntaxKind::GraphLit],
-            SyntaxKind::DeleteWhere => &[SyntaxKind::DeleteWhereLit],
-            SyntaxKind::BlankNodePropertyListPath => &[SyntaxKind::SqOpen],
-            SyntaxKind::GroupOrUnionGraphPattern => &[SyntaxKind::ClOpen],
-            SyntaxKind::OrderClause => &[SyntaxKind::OrderLit],
-            SyntaxKind::OptionalGraphPattern => &[SyntaxKind::OptionalLit],
-            SyntaxKind::FunctionCall => &[],
-            SyntaxKind::InsertClause => &[SyntaxKind::InsertLit],
-            SyntaxKind::StrReplaceExpression => &[SyntaxKind::ReplaceLit],
-            SyntaxKind::PathPrimary => &[SyntaxKind::BrOpen, SyntaxKind::Bang, SyntaxKind::Alit],
-            SyntaxKind::Load => &[SyntaxKind::LoadLit],
-            SyntaxKind::Clear => &[SyntaxKind::ClearLit],
-            SyntaxKind::GroupGraphPattern => &[SyntaxKind::ClOpen],
-            SyntaxKind::BrackettedExpression => &[SyntaxKind::BrOpen],
-            SyntaxKind::DescribeQuery => &[SyntaxKind::DescribeLit],
-            SyntaxKind::ValuesClause => &[SyntaxKind::ValuesLit],
-            SyntaxKind::TriplesTemplate => &[
-                SyntaxKind::SqOpen,
-                SyntaxKind::BrOpen,
-                SyntaxKind::FalseLit,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::GraphPatternNotTriples => &[
-                SyntaxKind::MinusLit,
-                SyntaxKind::BindLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::ClOpen,
-                SyntaxKind::GraphLit,
-                SyntaxKind::ServiceLit,
-            ],
-            SyntaxKind::GroupGraphPatternSub => &[
-                SyntaxKind::TrueLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::BindLit,
-                SyntaxKind::ClOpen,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::SqOpen,
-                SyntaxKind::BrOpen,
-            ],
-            SyntaxKind::Aggregate => &[
-                SyntaxKind::CountLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::SumLit,
+                SyntaxKind::IsNumericLit,
                 SyntaxKind::MaxLit,
-                SyntaxKind::AvgLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::HoursLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::CoalesceLit,
                 SyntaxKind::SampleLit,
-                SyntaxKind::MinLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::RoundLit,
+            ],
+            SyntaxKind::GraphTerm => &[SyntaxKind::TrueLit, SyntaxKind::FalseLit],
+            SyntaxKind::QueryUnit => &[
+                SyntaxKind::AskLit,
+                SyntaxKind::SparqlPrefixToken,
+                SyntaxKind::DescribeLit,
+                SyntaxKind::ConstructLit,
+                SyntaxKind::SparqlBaseToken,
+                SyntaxKind::SelectLit,
             ],
             SyntaxKind::Constraint => &[
-                SyntaxKind::StrdtLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::MinLit,
                 SyntaxKind::DayLit,
-                SyntaxKind::SampleLit,
+                SyntaxKind::SumLit,
                 SyntaxKind::ContainsLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::BrOpen,
+                SyntaxKind::StrdtLit,
                 SyntaxKind::ExistsLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::StruuidLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::UriLit,
+                SyntaxKind::CountLit,
                 SyntaxKind::StrLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::Md5Lit,
+                SyntaxKind::TimezoneLit,
                 SyntaxKind::ReplaceLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::StrendsLit,
                 SyntaxKind::IsLiteralLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::StrafterLit,
                 SyntaxKind::YearLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::TzLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::IriLit,
+            ],
+            SyntaxKind::GroupGraphPattern => &[SyntaxKind::ClOpen],
+            SyntaxKind::Filter => &[SyntaxKind::FilterLit],
+            SyntaxKind::PathOneInPropertySet => &[SyntaxKind::Alit, SyntaxKind::Hat],
+            SyntaxKind::DataBlock => &[SyntaxKind::BrOpen],
+            SyntaxKind::SelectQuery => &[SyntaxKind::SelectLit],
+            SyntaxKind::Prologue => &[SyntaxKind::SparqlBaseToken, SyntaxKind::SparqlPrefixToken],
+            SyntaxKind::RelationalExpression => &[
+                SyntaxKind::NotLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::SampleLit,
                 SyntaxKind::CoalesceLit,
                 SyntaxKind::IsIriLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::UriLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::DayLit,
                 SyntaxKind::SubstrLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::SecondsLit,
                 SyntaxKind::StrendsLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::Bang,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::Bar,
                 SyntaxKind::RoundLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::StrLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::IfLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::Plus,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::UuidLit,
             ],
-            SyntaxKind::VarOrIri => &[],
-            SyntaxKind::BaseDecl => &[SyntaxKind::SparqlBaseToken],
-            SyntaxKind::BlankNode => &[],
-            SyntaxKind::InsertData => &[SyntaxKind::InsertDataLit],
-            SyntaxKind::NumericLiteral => &[],
-            SyntaxKind::QueryUnit => &[
-                SyntaxKind::SelectLit,
-                SyntaxKind::ConstructLit,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::AskLit,
-                SyntaxKind::DescribeLit,
-                SyntaxKind::SparqlBaseToken,
-            ],
-            SyntaxKind::Copy => &[SyntaxKind::CopyLit],
-            SyntaxKind::Update => &[
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::DropLit,
-                SyntaxKind::InsertDataLit,
+            SyntaxKind::AskQuery => &[SyntaxKind::AskLit],
+            SyntaxKind::UsingClause => &[SyntaxKind::UsingLit],
+            SyntaxKind::WhereClause => &[SyntaxKind::ClOpen, SyntaxKind::WhereLit],
+            SyntaxKind::Modify => &[
+                SyntaxKind::WithLit,
                 SyntaxKind::DeleteLit,
                 SyntaxKind::InsertLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::MoveLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::CreateLit,
-                SyntaxKind::AddLit,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::ClearLit,
-                SyntaxKind::CopyLit,
             ],
-            SyntaxKind::BuiltInCall => &[
-                SyntaxKind::SecondsLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::SubstrLit,
+            SyntaxKind::BaseDecl => &[SyntaxKind::SparqlBaseToken],
+            SyntaxKind::PrefixDecl => &[SyntaxKind::SparqlPrefixToken],
+            SyntaxKind::NumericLiteralUnsigned => &[],
+            SyntaxKind::BlankNode => &[],
+            SyntaxKind::TriplesSameSubject => &[
+                SyntaxKind::FalseLit,
+                SyntaxKind::SqOpen,
+                SyntaxKind::BrOpen,
+                SyntaxKind::TrueLit,
+            ],
+            SyntaxKind::NumericExpression => &[
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::ContainsLit,
                 SyntaxKind::FloorLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::IriLit,
+                SyntaxKind::Plus,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::StrafterLit,
                 SyntaxKind::UcaseLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::SumLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::MaxLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::Md5Lit,
                 SyntaxKind::RegexLit,
-                SyntaxKind::TzLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::StrstartsLit,
                 SyntaxKind::ExistsLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::Bar,
+                SyntaxKind::StrLit,
+                SyntaxKind::Bang,
+                SyntaxKind::UuidLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::StrlenLit,
+            ],
+            SyntaxKind::NotExistsFunc => &[SyntaxKind::NotLit],
+            SyntaxKind::ValueLogical => &[
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::SumLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Plus,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::CountLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::YearLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::Bang,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::Bar,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::IfLit,
+            ],
+            SyntaxKind::SourceSelector => &[],
+            SyntaxKind::BrackettedExpression => &[SyntaxKind::BrOpen],
+            SyntaxKind::TriplesSameSubjectPath => &[
+                SyntaxKind::BrOpen,
+                SyntaxKind::TrueLit,
+                SyntaxKind::SqOpen,
+                SyntaxKind::FalseLit,
+            ],
+            SyntaxKind::GroupOrUnionGraphPattern => &[SyntaxKind::ClOpen],
+            SyntaxKind::BooleanLiteral => &[SyntaxKind::TrueLit, SyntaxKind::FalseLit],
+            SyntaxKind::MinusGraphPattern => &[SyntaxKind::MinusLit],
+            SyntaxKind::ServiceGraphPattern => &[SyntaxKind::ServiceLit],
+            SyntaxKind::VarOrTerm => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
+            SyntaxKind::PathElt => &[SyntaxKind::Alit, SyntaxKind::Bang, SyntaxKind::BrOpen],
+            SyntaxKind::DeleteData => &[SyntaxKind::DeleteDataLit],
+            SyntaxKind::Copy => &[SyntaxKind::CopyLit],
+            SyntaxKind::DefaultGraphClause => &[],
+            SyntaxKind::NumericLiteralPositive => &[],
+            SyntaxKind::SolutionModifier => &[
+                SyntaxKind::LimitLit,
+                SyntaxKind::HavingLit,
+                SyntaxKind::OffsetLit,
+                SyntaxKind::OrderLit,
+                SyntaxKind::GroupLit,
+            ],
+            SyntaxKind::GraphGraphPattern => &[SyntaxKind::GraphLit],
+            SyntaxKind::Verb => &[SyntaxKind::Alit],
+            SyntaxKind::PathPrimary => &[SyntaxKind::Alit, SyntaxKind::Bang, SyntaxKind::BrOpen],
+            SyntaxKind::Drop => &[SyntaxKind::DropLit],
+            SyntaxKind::IriOrFunction => &[],
+            SyntaxKind::ConditionalAndExpression => &[
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::FloorLit,
                 SyntaxKind::IsLiteralLit,
                 SyntaxKind::SampleLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::AvgLit,
                 SyntaxKind::MaxLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::IfLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::MinutesLit,
                 SyntaxKind::DayLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::StrlenLit,
+                SyntaxKind::IsUriLit,
                 SyntaxKind::BoundLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::SumLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::FalseLit,
+                SyntaxKind::Bang,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::MinLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::Plus,
+                SyntaxKind::NowLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Bar,
+                SyntaxKind::UriLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::DatatypeLit,
             ],
-            SyntaxKind::PathEltOrInverse => &[
+            SyntaxKind::InsertData => &[SyntaxKind::InsertDataLit],
+            SyntaxKind::LimitClause => &[SyntaxKind::LimitLit],
+            SyntaxKind::PathAlternative => &[
+                SyntaxKind::BrOpen,
                 SyntaxKind::Hat,
                 SyntaxKind::Alit,
                 SyntaxKind::Bang,
-                SyntaxKind::BrOpen,
             ],
-            SyntaxKind::OrderCondition => &[
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::DescLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::UriLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::StrafterLit,
+            SyntaxKind::AdditiveExpression => &[
                 SyntaxKind::Md5Lit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::StrlenLit,
+                SyntaxKind::Bang,
                 SyntaxKind::DayLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::Plus,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::MinLit,
                 SyntaxKind::StrlangLit,
-                SyntaxKind::IsUriLit,
-            ],
-            SyntaxKind::ConstructTriples => &[
-                SyntaxKind::TrueLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::UriLit,
                 SyntaxKind::FalseLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::IriLit,
                 SyntaxKind::BrOpen,
-                SyntaxKind::SqOpen,
+                SyntaxKind::Bar,
+                SyntaxKind::StrLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::SumLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::StrlenLit,
             ],
+            SyntaxKind::OffsetClause => &[SyntaxKind::OffsetLit],
+            SyntaxKind::TriplesNodePath => &[SyntaxKind::BrOpen, SyntaxKind::SqOpen],
+            SyntaxKind::GraphPatternNotTriples => &[
+                SyntaxKind::MinusLit,
+                SyntaxKind::ClOpen,
+                SyntaxKind::GraphLit,
+                SyntaxKind::BindLit,
+                SyntaxKind::FilterLit,
+                SyntaxKind::ServiceLit,
+                SyntaxKind::ValuesLit,
+                SyntaxKind::OptionalLit,
+            ],
+            SyntaxKind::GraphRef => &[SyntaxKind::GraphLit],
+            SyntaxKind::TriplesTemplate => &[
+                SyntaxKind::FalseLit,
+                SyntaxKind::SqOpen,
+                SyntaxKind::BrOpen,
+                SyntaxKind::TrueLit,
+            ],
+            SyntaxKind::DescribeQuery => &[SyntaxKind::DescribeLit],
+            SyntaxKind::QuadsNotTriples => &[SyntaxKind::GraphLit],
             SyntaxKind::PathSequence => &[
                 SyntaxKind::Hat,
-                SyntaxKind::BrOpen,
                 SyntaxKind::Alit,
+                SyntaxKind::BrOpen,
                 SyntaxKind::Bang,
             ],
-            SyntaxKind::PropertyListNotEmpty => &[SyntaxKind::Alit],
-            SyntaxKind::ConstructTemplate => &[SyntaxKind::ClOpen],
-            SyntaxKind::IriOrFunction => &[],
-            SyntaxKind::ObjectListPath => &[
-                SyntaxKind::FalseLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::TrueLit,
+            SyntaxKind::Query => &[
+                SyntaxKind::AskLit,
+                SyntaxKind::DescribeLit,
+                SyntaxKind::SelectLit,
+                SyntaxKind::SparqlPrefixToken,
+                SyntaxKind::SparqlBaseToken,
+                SyntaxKind::ConstructLit,
+            ],
+            SyntaxKind::Iri => &[],
+            SyntaxKind::NumericLiteralNegative => &[],
+            SyntaxKind::HavingClause => &[SyntaxKind::HavingLit],
+            SyntaxKind::ObjectList => &[
                 SyntaxKind::SqOpen,
-            ],
-            SyntaxKind::GraphRefAll => &[
-                SyntaxKind::AllLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::NamedLit,
-            ],
-            SyntaxKind::SelectQuery => &[SyntaxKind::SelectLit],
-            SyntaxKind::BlankNodePropertyList => &[SyntaxKind::SqOpen],
-            SyntaxKind::ConstructQuery => &[SyntaxKind::ConstructLit],
-            SyntaxKind::NamedGraphClause => &[SyntaxKind::NamedLit],
-            SyntaxKind::Filter => &[SyntaxKind::FilterLit],
-            SyntaxKind::DefaultGraphClause => &[],
-            SyntaxKind::BooleanLiteral => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
-            SyntaxKind::PropertyList => &[SyntaxKind::Alit],
-            SyntaxKind::PrefixedName => &[],
-            SyntaxKind::VerbSimple => &[],
-            SyntaxKind::ConditionalAndExpression => &[
-                SyntaxKind::HoursLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Plus,
-                SyntaxKind::NowLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::UuidLit,
                 SyntaxKind::TrueLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::Sha512Lit,
                 SyntaxKind::BrOpen,
-                SyntaxKind::RegexLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::UcaseLit,
+                SyntaxKind::FalseLit,
+            ],
+            SyntaxKind::OrderCondition => &[
+                SyntaxKind::StrendsLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::AscLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::Sha512Lit,
                 SyntaxKind::IsBlankLit,
                 SyntaxKind::Md5Lit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::StrstartsLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::LangLit,
                 SyntaxKind::MinLit,
                 SyntaxKind::BnodeLit,
-                SyntaxKind::Bar,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::Bang,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::IfLit,
-            ],
-            SyntaxKind::Expression => &[
-                SyntaxKind::BrOpen,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::UuidLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::IsIriLit,
                 SyntaxKind::FloorLit,
                 SyntaxKind::StrLit,
-                SyntaxKind::IsUriLit,
+                SyntaxKind::RandLit,
                 SyntaxKind::IfLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::Bar,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::IsIriLit,
                 SyntaxKind::IsLiteralLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::TrueLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::BoundLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::Sha1Lit,
                 SyntaxKind::UriLit,
                 SyntaxKind::AvgLit,
-                SyntaxKind::Plus,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::CeilLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::DescLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::StruuidLit,
                 SyntaxKind::Sha384Lit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::TzLit,
+                SyntaxKind::LangmatchesLit,
+            ],
+            SyntaxKind::UnaryExpression => &[
+                SyntaxKind::SampleLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::BoundLit,
                 SyntaxKind::NowLit,
                 SyntaxKind::Bang,
-                SyntaxKind::RegexLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::StrlangLit,
                 SyntaxKind::ReplaceLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::DayLit,
-            ],
-            SyntaxKind::HavingCondition => &[
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::UcaseLit,
                 SyntaxKind::StruuidLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::TzLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::DayLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::StrLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::SameTermLit,
                 SyntaxKind::NotLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::MinLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Plus,
+                SyntaxKind::RegexLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::ConcatLit,
                 SyntaxKind::ExistsLit,
-                SyntaxKind::MonthLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::Bar,
+                SyntaxKind::SumLit,
                 SyntaxKind::MaxLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::IfLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::IsLiteralLit,
                 SyntaxKind::IsNumericLit,
+                SyntaxKind::IsUriLit,
                 SyntaxKind::StrstartsLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::AbsLit,
                 SyntaxKind::TimezoneLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::LcaseLit,
             ],
             SyntaxKind::GraphNode => &[
                 SyntaxKind::TrueLit,
@@ -2448,315 +2072,691 @@ mod definitions {
                 SyntaxKind::SqOpen,
                 SyntaxKind::BrOpen,
             ],
-            SyntaxKind::Drop => &[SyntaxKind::DropLit],
-            SyntaxKind::Add => &[SyntaxKind::AddLit],
-            SyntaxKind::GroupClause => &[SyntaxKind::GroupLit],
-            SyntaxKind::PropertyListPath => &[
-                SyntaxKind::Hat,
-                SyntaxKind::Bang,
+            SyntaxKind::DataBlockValue => &[
+                SyntaxKind::TrueLit,
+                SyntaxKind::UndefLit,
+                SyntaxKind::FalseLit,
+            ],
+            SyntaxKind::Rdfliteral => &[],
+            SyntaxKind::Var => &[],
+            SyntaxKind::Clear => &[SyntaxKind::ClearLit],
+            SyntaxKind::BlankNodePropertyListPath => &[SyntaxKind::SqOpen],
+            SyntaxKind::ConstructTriples => &[
+                SyntaxKind::FalseLit,
                 SyntaxKind::BrOpen,
+                SyntaxKind::SqOpen,
+                SyntaxKind::TrueLit,
+            ],
+            SyntaxKind::ConstructQuery => &[SyntaxKind::ConstructLit],
+            SyntaxKind::StrReplaceExpression => &[SyntaxKind::ReplaceLit],
+            SyntaxKind::PrefixedName => &[],
+            SyntaxKind::Aggregate => &[
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::SampleLit,
+            ],
+            SyntaxKind::VerbPath => &[
+                SyntaxKind::Hat,
+                SyntaxKind::BrOpen,
+                SyntaxKind::Bang,
                 SyntaxKind::Alit,
             ],
-            SyntaxKind::VarOrTerm => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
+            SyntaxKind::DatasetClause => &[SyntaxKind::FromLit],
+            SyntaxKind::FunctionCall => &[],
+            SyntaxKind::NumericLiteral => &[],
+            SyntaxKind::Update => &[
+                SyntaxKind::CopyLit,
+                SyntaxKind::LoadLit,
+                SyntaxKind::AddLit,
+                SyntaxKind::InsertLit,
+                SyntaxKind::InsertDataLit,
+                SyntaxKind::DropLit,
+                SyntaxKind::SparqlPrefixToken,
+                SyntaxKind::ClearLit,
+                SyntaxKind::WithLit,
+                SyntaxKind::CreateLit,
+                SyntaxKind::DeleteDataLit,
+                SyntaxKind::DeleteLit,
+                SyntaxKind::SparqlBaseToken,
+                SyntaxKind::MoveLit,
+                SyntaxKind::DeleteWhereLit,
+            ],
+            SyntaxKind::BlankNodePropertyList => &[SyntaxKind::SqOpen],
+            SyntaxKind::ConstructTemplate => &[SyntaxKind::ClOpen],
             SyntaxKind::Object => &[
                 SyntaxKind::FalseLit,
-                SyntaxKind::SqOpen,
                 SyntaxKind::BrOpen,
                 SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::ObjectList => &[
-                SyntaxKind::FalseLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::BrOpen,
                 SyntaxKind::SqOpen,
             ],
-            SyntaxKind::RelationalExpression => &[
-                SyntaxKind::TzLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::YearLit,
-                SyntaxKind::NotLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::AbsLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Plus,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrOpen,
-                SyntaxKind::FalseLit,
-                SyntaxKind::RandLit,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::MinLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::Bar,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::StrLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::LangLit,
-            ],
-            SyntaxKind::InlineDataOneVar => &[],
-            SyntaxKind::ServiceGraphPattern => &[SyntaxKind::ServiceLit],
             SyntaxKind::PropertyListPathNotEmpty => &[
-                SyntaxKind::Alit,
                 SyntaxKind::Bang,
+                SyntaxKind::Alit,
                 SyntaxKind::BrOpen,
                 SyntaxKind::Hat,
             ],
-            SyntaxKind::ExpressionList => &[SyntaxKind::BrOpen],
-            SyntaxKind::GraphNodePath => &[
-                SyntaxKind::BrOpen,
-                SyntaxKind::FalseLit,
-                SyntaxKind::SqOpen,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::CollectionPath => &[SyntaxKind::BrOpen],
-            SyntaxKind::TriplesSameSubject => &[
-                SyntaxKind::SqOpen,
-                SyntaxKind::FalseLit,
-                SyntaxKind::BrOpen,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Modify => &[
-                SyntaxKind::DeleteLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::InsertLit,
-            ],
-            SyntaxKind::PrefixDecl => &[SyntaxKind::SparqlPrefixToken],
-            SyntaxKind::WhereClause => &[SyntaxKind::ClOpen, SyntaxKind::WhereLit],
-            SyntaxKind::SolutionModifier => &[
-                SyntaxKind::GroupLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::HavingLit,
-                SyntaxKind::OffsetLit,
-            ],
-            SyntaxKind::TriplesSameSubjectPath => &[
-                SyntaxKind::TrueLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::SqOpen,
-                SyntaxKind::BrOpen,
-            ],
-            SyntaxKind::QuadsNotTriples => &[SyntaxKind::GraphLit],
-            SyntaxKind::Iri => &[],
-            SyntaxKind::GraphGraphPattern => &[SyntaxKind::GraphLit],
-            SyntaxKind::SubSelect => &[SyntaxKind::SelectLit],
-            SyntaxKind::LimitOffsetClauses => &[SyntaxKind::OffsetLit, SyntaxKind::LimitLit],
             SyntaxKind::SelectClause => &[SyntaxKind::SelectLit],
-            SyntaxKind::InlineDataFull => &[SyntaxKind::BrOpen],
-            SyntaxKind::Quads => &[
-                SyntaxKind::TrueLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::FalseLit,
+            SyntaxKind::GraphNodePath => &[
+                SyntaxKind::SqOpen,
                 SyntaxKind::BrOpen,
+                SyntaxKind::FalseLit,
+                SyntaxKind::TrueLit,
+            ],
+            SyntaxKind::MultiplicativeExpression => &[
+                SyntaxKind::StrlenLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::FalseLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::IfLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::Bar,
+                SyntaxKind::Bang,
+                SyntaxKind::IriLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::UriLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::CountLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::Plus,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::StrdtLit,
+            ],
+            SyntaxKind::ConditionalOrExpression => &[
+                SyntaxKind::RoundLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::Bang,
+                SyntaxKind::LangLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Bar,
+                SyntaxKind::UriLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::Plus,
+                SyntaxKind::TzLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::FalseLit,
+            ],
+            SyntaxKind::ExpressionList => &[SyntaxKind::BrOpen],
+            SyntaxKind::NamedGraphClause => &[SyntaxKind::NamedLit],
+            SyntaxKind::ObjectListPath => &[
+                SyntaxKind::SqOpen,
+                SyntaxKind::BrOpen,
+                SyntaxKind::FalseLit,
+                SyntaxKind::TrueLit,
+            ],
+            SyntaxKind::TriplesBlock => &[
+                SyntaxKind::TrueLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::FalseLit,
                 SyntaxKind::SqOpen,
             ],
-            SyntaxKind::OffsetLit => &[SyntaxKind::OffsetLit],
-            SyntaxKind::Questionmark => &[SyntaxKind::Questionmark],
-            SyntaxKind::SeparatorLit => &[SyntaxKind::SeparatorLit],
-            SyntaxKind::NotLit => &[SyntaxKind::NotLit],
-            SyntaxKind::NamedLit => &[SyntaxKind::NamedLit],
-            SyntaxKind::StrstartsLit => &[SyntaxKind::StrstartsLit],
-            SyntaxKind::DecimalNegative => &[SyntaxKind::DecimalNegative],
-            SyntaxKind::GroupLit => &[SyntaxKind::GroupLit],
-            SyntaxKind::DeleteDataLit => &[SyntaxKind::DeleteDataLit],
-            SyntaxKind::ReducedLit => &[SyntaxKind::ReducedLit],
-            SyntaxKind::InsertDataLit => &[SyntaxKind::InsertDataLit],
-            SyntaxKind::RandLit => &[SyntaxKind::RandLit],
-            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
-            SyntaxKind::ClOpen => &[SyntaxKind::ClOpen],
-            SyntaxKind::CreateLit => &[SyntaxKind::CreateLit],
-            SyntaxKind::ByLit => &[SyntaxKind::ByLit],
-            SyntaxKind::CoalesceLit => &[SyntaxKind::CoalesceLit],
-            SyntaxKind::SameTermLit => &[SyntaxKind::SameTermLit],
-            SyntaxKind::IsBlankLit => &[SyntaxKind::IsBlankLit],
-            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
-            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
-            SyntaxKind::SelectLit => &[SyntaxKind::SelectLit],
-            SyntaxKind::DefaultLit => &[SyntaxKind::DefaultLit],
-            SyntaxKind::UndefLit => &[SyntaxKind::UndefLit],
-            SyntaxKind::IsNumericLit => &[SyntaxKind::IsNumericLit],
-            SyntaxKind::CopyLit => &[SyntaxKind::CopyLit],
-            SyntaxKind::MinutesLit => &[SyntaxKind::MinutesLit],
-            SyntaxKind::PnameLn => &[SyntaxKind::PnameLn],
-            SyntaxKind::IsUriLit => &[SyntaxKind::IsUriLit],
-            SyntaxKind::AsLit => &[SyntaxKind::AsLit],
-            SyntaxKind::WithLit => &[SyntaxKind::WithLit],
-            SyntaxKind::RegexLit => &[SyntaxKind::RegexLit],
-            SyntaxKind::SampleLit => &[SyntaxKind::SampleLit],
-            SyntaxKind::Pipe => &[SyntaxKind::Pipe],
-            SyntaxKind::SubstrLit => &[SyntaxKind::SubstrLit],
-            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
-            SyntaxKind::FilterLit => &[SyntaxKind::FilterLit],
-            SyntaxKind::EncodeForUriLit => &[SyntaxKind::EncodeForUriLit],
-            SyntaxKind::SecondsLit => &[SyntaxKind::SecondsLit],
-            SyntaxKind::RoundLit => &[SyntaxKind::RoundLit],
-            SyntaxKind::Star => &[SyntaxKind::Star],
-            SyntaxKind::UcaseLit => &[SyntaxKind::UcaseLit],
-            SyntaxKind::UnionLit => &[SyntaxKind::UnionLit],
-            SyntaxKind::IfLit => &[SyntaxKind::IfLit],
-            SyntaxKind::StringLiteralLong1 => &[SyntaxKind::StringLiteralLong1],
+            SyntaxKind::UpdateUnit => &[
+                SyntaxKind::DeleteDataLit,
+                SyntaxKind::DeleteWhereLit,
+                SyntaxKind::InsertDataLit,
+                SyntaxKind::SparqlPrefixToken,
+                SyntaxKind::SparqlBaseToken,
+                SyntaxKind::CreateLit,
+                SyntaxKind::CopyLit,
+                SyntaxKind::DeleteLit,
+                SyntaxKind::MoveLit,
+                SyntaxKind::LoadLit,
+                SyntaxKind::ClearLit,
+                SyntaxKind::AddLit,
+                SyntaxKind::DropLit,
+                SyntaxKind::InsertLit,
+                SyntaxKind::WithLit,
+            ],
+            SyntaxKind::DeleteWhere => &[SyntaxKind::DeleteWhereLit],
+            SyntaxKind::RegexExpression => &[SyntaxKind::RegexLit],
+            SyntaxKind::HavingCondition => &[
+                SyntaxKind::MonthLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::IriLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::StrLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::TzLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::LangLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::MinLit,
+            ],
+            SyntaxKind::PropertyListPath => &[
+                SyntaxKind::Alit,
+                SyntaxKind::Bang,
+                SyntaxKind::Hat,
+                SyntaxKind::BrOpen,
+            ],
+            SyntaxKind::Collection => &[SyntaxKind::BrOpen],
+            SyntaxKind::Create => &[SyntaxKind::CreateLit],
+            SyntaxKind::ExistsFunc => &[SyntaxKind::ExistsLit],
+            SyntaxKind::PathMod => &[SyntaxKind::Questionmark, SyntaxKind::Star, SyntaxKind::Plus],
+            SyntaxKind::InlineDataFull => &[SyntaxKind::BrOpen],
+            SyntaxKind::LimitOffsetClauses => &[SyntaxKind::OffsetLit, SyntaxKind::LimitLit],
+            SyntaxKind::ObjectPath => &[
+                SyntaxKind::BrOpen,
+                SyntaxKind::FalseLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::SqOpen,
+            ],
+            SyntaxKind::Update1 => &[
+                SyntaxKind::InsertDataLit,
+                SyntaxKind::MoveLit,
+                SyntaxKind::DeleteWhereLit,
+                SyntaxKind::WithLit,
+                SyntaxKind::DropLit,
+                SyntaxKind::DeleteDataLit,
+                SyntaxKind::DeleteLit,
+                SyntaxKind::CreateLit,
+                SyntaxKind::CopyLit,
+                SyntaxKind::InsertLit,
+                SyntaxKind::LoadLit,
+                SyntaxKind::AddLit,
+                SyntaxKind::ClearLit,
+            ],
+            SyntaxKind::OrderClause => &[SyntaxKind::OrderLit],
+            SyntaxKind::MyString => &[],
+            SyntaxKind::PropertyListNotEmpty => &[SyntaxKind::Alit],
+            SyntaxKind::GraphOrDefault => &[SyntaxKind::DefaultLit, SyntaxKind::GraphLit],
+            SyntaxKind::GraphRefAll => &[
+                SyntaxKind::NamedLit,
+                SyntaxKind::AllLit,
+                SyntaxKind::DefaultLit,
+                SyntaxKind::GraphLit,
+            ],
+            SyntaxKind::InsertClause => &[SyntaxKind::InsertLit],
+            SyntaxKind::BuiltInCall => &[
+                SyntaxKind::MonthLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::StrLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::LangLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::MaxLit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::NowLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::RegexLit,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::SumLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::AbsLit,
+            ],
+            SyntaxKind::InlineData => &[SyntaxKind::ValuesLit],
+            SyntaxKind::InlineDataOneVar => &[],
+            SyntaxKind::Move => &[SyntaxKind::MoveLit],
+            SyntaxKind::TriplesNode => &[SyntaxKind::BrOpen, SyntaxKind::SqOpen],
+            SyntaxKind::Quads => &[
+                SyntaxKind::FalseLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::TrueLit,
+                SyntaxKind::SqOpen,
+                SyntaxKind::GraphLit,
+            ],
+            SyntaxKind::PathNegatedPropertySet => {
+                &[SyntaxKind::Hat, SyntaxKind::Alit, SyntaxKind::BrOpen]
+            }
+            SyntaxKind::PathEltOrInverse => &[
+                SyntaxKind::Alit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::Hat,
+                SyntaxKind::Bang,
+            ],
+            SyntaxKind::VerbSimple => &[],
+            SyntaxKind::Expression => &[
+                SyntaxKind::MaxLit,
+                SyntaxKind::IfLit,
+                SyntaxKind::TrueLit,
+                SyntaxKind::IsIriLit,
+                SyntaxKind::EncodeForUriLit,
+                SyntaxKind::Md5Lit,
+                SyntaxKind::Bang,
+                SyntaxKind::FalseLit,
+                SyntaxKind::UriLit,
+                SyntaxKind::HoursLit,
+                SyntaxKind::StrstartsLit,
+                SyntaxKind::IsBlankLit,
+                SyntaxKind::AbsLit,
+                SyntaxKind::CountLit,
+                SyntaxKind::UuidLit,
+                SyntaxKind::AvgLit,
+                SyntaxKind::TzLit,
+                SyntaxKind::IsNumericLit,
+                SyntaxKind::Plus,
+                SyntaxKind::CoalesceLit,
+                SyntaxKind::YearLit,
+                SyntaxKind::DayLit,
+                SyntaxKind::FloorLit,
+                SyntaxKind::RandLit,
+                SyntaxKind::UcaseLit,
+                SyntaxKind::MonthLit,
+                SyntaxKind::StrbeforeLit,
+                SyntaxKind::LangmatchesLit,
+                SyntaxKind::CeilLit,
+                SyntaxKind::IriLit,
+                SyntaxKind::LcaseLit,
+                SyntaxKind::BoundLit,
+                SyntaxKind::BrOpen,
+                SyntaxKind::RegexLit,
+                SyntaxKind::StrdtLit,
+                SyntaxKind::Sha512Lit,
+                SyntaxKind::LangLit,
+                SyntaxKind::ContainsLit,
+                SyntaxKind::SecondsLit,
+                SyntaxKind::StruuidLit,
+                SyntaxKind::NotLit,
+                SyntaxKind::StrendsLit,
+                SyntaxKind::Sha1Lit,
+                SyntaxKind::ReplaceLit,
+                SyntaxKind::GroupConcatLit,
+                SyntaxKind::DatatypeLit,
+                SyntaxKind::MinLit,
+                SyntaxKind::SampleLit,
+                SyntaxKind::StrafterLit,
+                SyntaxKind::SameTermLit,
+                SyntaxKind::Bar,
+                SyntaxKind::SubstrLit,
+                SyntaxKind::BnodeLit,
+                SyntaxKind::ConcatLit,
+                SyntaxKind::NowLit,
+                SyntaxKind::RoundLit,
+                SyntaxKind::IsLiteralLit,
+                SyntaxKind::StrlangLit,
+                SyntaxKind::Sha256Lit,
+                SyntaxKind::StrlenLit,
+                SyntaxKind::SumLit,
+                SyntaxKind::Sha384Lit,
+                SyntaxKind::MinutesLit,
+                SyntaxKind::TimezoneLit,
+                SyntaxKind::ExistsLit,
+                SyntaxKind::IsUriLit,
+                SyntaxKind::StrLit,
+            ],
+            SyntaxKind::SubSelect => &[SyntaxKind::SelectLit],
+            SyntaxKind::QuadData => &[SyntaxKind::ClOpen],
+            SyntaxKind::Bind => &[SyntaxKind::BindLit],
+            SyntaxKind::Path => &[
+                SyntaxKind::Hat,
+                SyntaxKind::BrOpen,
+                SyntaxKind::Bang,
+                SyntaxKind::Alit,
+            ],
+            SyntaxKind::ValuesClause => &[SyntaxKind::ValuesLit],
+            SyntaxKind::ArgList => &[SyntaxKind::BrOpen],
+            SyntaxKind::VarOrIri => &[],
+            SyntaxKind::Load => &[SyntaxKind::LoadLit],
+            SyntaxKind::CollectionPath => &[SyntaxKind::BrOpen],
+            SyntaxKind::Add => &[SyntaxKind::AddLit],
+            SyntaxKind::SubstringExpression => &[SyntaxKind::SubstrLit],
+            SyntaxKind::OptionalGraphPattern => &[SyntaxKind::OptionalLit],
             SyntaxKind::ConcatLit => &[SyntaxKind::ConcatLit],
-            SyntaxKind::ClearLit => &[SyntaxKind::ClearLit],
-            SyntaxKind::AllLit => &[SyntaxKind::AllLit],
-            SyntaxKind::DescribeLit => &[SyntaxKind::DescribeLit],
-            SyntaxKind::StrbeforeLit => &[SyntaxKind::StrbeforeLit],
-            SyntaxKind::MinLit => &[SyntaxKind::MinLit],
-            SyntaxKind::SilentLit => &[SyntaxKind::SilentLit],
-            SyntaxKind::Lt => &[SyntaxKind::Lt],
-            SyntaxKind::Alit => &[SyntaxKind::Alit],
-            SyntaxKind::IntoLit => &[SyntaxKind::IntoLit],
-            SyntaxKind::Anon => &[SyntaxKind::Anon],
-            SyntaxKind::Bar => &[SyntaxKind::Bar],
-            SyntaxKind::NowLit => &[SyntaxKind::NowLit],
-            SyntaxKind::DayLit => &[SyntaxKind::DayLit],
-            SyntaxKind::MaxLit => &[SyntaxKind::MaxLit],
-            SyntaxKind::Double => &[SyntaxKind::Double],
-            SyntaxKind::Hat => &[SyntaxKind::Hat],
-            SyntaxKind::HavingLit => &[SyntaxKind::HavingLit],
-            SyntaxKind::TrueLit => &[SyntaxKind::TrueLit],
-            SyntaxKind::Lte => &[SyntaxKind::Lte],
-            SyntaxKind::ConstructLit => &[SyntaxKind::ConstructLit],
-            SyntaxKind::AddLit => &[SyntaxKind::AddLit],
-            SyntaxKind::Integer => &[SyntaxKind::Integer],
-            SyntaxKind::TimezoneLit => &[SyntaxKind::TimezoneLit],
-            SyntaxKind::Var1 => &[SyntaxKind::Var1],
-            SyntaxKind::LoadLit => &[SyntaxKind::LoadLit],
-            SyntaxKind::OptionalLit => &[SyntaxKind::OptionalLit],
-            SyntaxKind::BoundLit => &[SyntaxKind::BoundLit],
-            SyntaxKind::Nil => &[SyntaxKind::Nil],
-            SyntaxKind::StrlenLit => &[SyntaxKind::StrlenLit],
-            SyntaxKind::IriLit => &[SyntaxKind::IriLit],
-            SyntaxKind::TzLit => &[SyntaxKind::TzLit],
-            SyntaxKind::Sha512Lit => &[SyntaxKind::Sha512Lit],
-            SyntaxKind::Stop => &[SyntaxKind::Stop],
-            SyntaxKind::Pipe2 => &[SyntaxKind::Pipe2],
-            SyntaxKind::LcaseLit => &[SyntaxKind::LcaseLit],
-            SyntaxKind::SumLit => &[SyntaxKind::SumLit],
-            SyntaxKind::ToLit => &[SyntaxKind::ToLit],
-            SyntaxKind::ReplaceLit => &[SyntaxKind::ReplaceLit],
-            SyntaxKind::GroupConcatLit => &[SyntaxKind::GroupConcatLit],
-            SyntaxKind::StringLiteral1 => &[SyntaxKind::StringLiteral1],
-            SyntaxKind::Sha256Lit => &[SyntaxKind::Sha256Lit],
-            SyntaxKind::LangmatchesLit => &[SyntaxKind::LangmatchesLit],
-            SyntaxKind::StrafterLit => &[SyntaxKind::StrafterLit],
-            SyntaxKind::ServiceLit => &[SyntaxKind::ServiceLit],
-            SyntaxKind::AbsLit => &[SyntaxKind::AbsLit],
-            SyntaxKind::FalseLit => &[SyntaxKind::FalseLit],
-            SyntaxKind::Comma => &[SyntaxKind::Comma],
-            SyntaxKind::IntegerPositive => &[SyntaxKind::IntegerPositive],
-            SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
-            SyntaxKind::AvgLit => &[SyntaxKind::AvgLit],
-            SyntaxKind::AskLit => &[SyntaxKind::AskLit],
-            SyntaxKind::LangLit => &[SyntaxKind::LangLit],
+            SyntaxKind::LimitLit => &[SyntaxKind::LimitLit],
+            SyntaxKind::DoubleNegative => &[SyntaxKind::DoubleNegative],
+            SyntaxKind::Amp2 => &[SyntaxKind::Amp2],
+            SyntaxKind::DeleteWhereLit => &[SyntaxKind::DeleteWhereLit],
             SyntaxKind::DeleteLit => &[SyntaxKind::DeleteLit],
-            SyntaxKind::StringLiteral2 => &[SyntaxKind::StringLiteral2],
-            SyntaxKind::UsingLit => &[SyntaxKind::UsingLit],
-            SyntaxKind::HoursLit => &[SyntaxKind::HoursLit],
-            SyntaxKind::IsIriLit => &[SyntaxKind::IsIriLit],
-            SyntaxKind::StringLiteralLong2 => &[SyntaxKind::StringLiteralLong2],
-            SyntaxKind::SqClose => &[SyntaxKind::SqClose],
-            SyntaxKind::Var2 => &[SyntaxKind::Var2],
-            SyntaxKind::Gt => &[SyntaxKind::Gt],
-            SyntaxKind::InLit => &[SyntaxKind::InLit],
-            SyntaxKind::UriLit => &[SyntaxKind::UriLit],
-            SyntaxKind::IntegerNegative => &[SyntaxKind::IntegerNegative],
+            SyntaxKind::MaxLit => &[SyntaxKind::MaxLit],
+            SyntaxKind::SeparatorLit => &[SyntaxKind::SeparatorLit],
+            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
+            SyntaxKind::AskLit => &[SyntaxKind::AskLit],
+            SyntaxKind::Neq => &[SyntaxKind::Neq],
+            SyntaxKind::Md5Lit => &[SyntaxKind::Md5Lit],
+            SyntaxKind::StringLiteralLong1 => &[SyntaxKind::StringLiteralLong1],
+            SyntaxKind::AllLit => &[SyntaxKind::AllLit],
+            SyntaxKind::Pipe2 => &[SyntaxKind::Pipe2],
+            SyntaxKind::UndefLit => &[SyntaxKind::UndefLit],
+            SyntaxKind::MinutesLit => &[SyntaxKind::MinutesLit],
+            SyntaxKind::SumLit => &[SyntaxKind::SumLit],
+            SyntaxKind::Comma => &[SyntaxKind::Comma],
+            SyntaxKind::OptionalLit => &[SyntaxKind::OptionalLit],
+            SyntaxKind::Hat => &[SyntaxKind::Hat],
+            SyntaxKind::Var1 => &[SyntaxKind::Var1],
+            SyntaxKind::IntegerPositive => &[SyntaxKind::IntegerPositive],
             SyntaxKind::DistinctLit => &[SyntaxKind::DistinctLit],
-            SyntaxKind::ContainsLit => &[SyntaxKind::ContainsLit],
-            SyntaxKind::UuidLit => &[SyntaxKind::UuidLit],
-            SyntaxKind::DropLit => &[SyntaxKind::DropLit],
-            SyntaxKind::BrOpen => &[SyntaxKind::BrOpen],
-            SyntaxKind::FloorLit => &[SyntaxKind::FloorLit],
-            SyntaxKind::DecimalPositive => &[SyntaxKind::DecimalPositive],
-            SyntaxKind::GraphLit => &[SyntaxKind::GraphLit],
-            SyntaxKind::MinusLit => &[SyntaxKind::MinusLit],
+            SyntaxKind::CreateLit => &[SyntaxKind::CreateLit],
+            SyntaxKind::DayLit => &[SyntaxKind::DayLit],
+            SyntaxKind::Gte => &[SyntaxKind::Gte],
+            SyntaxKind::UnionLit => &[SyntaxKind::UnionLit],
+            SyntaxKind::BindLit => &[SyntaxKind::BindLit],
+            SyntaxKind::IfLit => &[SyntaxKind::IfLit],
+            SyntaxKind::GroupLit => &[SyntaxKind::GroupLit],
+            SyntaxKind::DescribeLit => &[SyntaxKind::DescribeLit],
+            SyntaxKind::Var2 => &[SyntaxKind::Var2],
+            SyntaxKind::DescLit => &[SyntaxKind::DescLit],
+            SyntaxKind::Div => &[SyntaxKind::Div],
+            SyntaxKind::SparqlPrefixToken => &[SyntaxKind::SparqlPrefixToken],
+            SyntaxKind::Colon => &[SyntaxKind::Colon],
+            SyntaxKind::IntegerNegative => &[SyntaxKind::IntegerNegative],
+            SyntaxKind::AvgLit => &[SyntaxKind::AvgLit],
+            SyntaxKind::LangLit => &[SyntaxKind::LangLit],
+            SyntaxKind::Bang => &[SyntaxKind::Bang],
+            SyntaxKind::TimezoneLit => &[SyntaxKind::TimezoneLit],
+            SyntaxKind::ClOpen => &[SyntaxKind::ClOpen],
+            SyntaxKind::Star => &[SyntaxKind::Star],
+            SyntaxKind::FilterLit => &[SyntaxKind::FilterLit],
+            SyntaxKind::StringLiteral1 => &[SyntaxKind::StringLiteral1],
+            SyntaxKind::StringLiteral2 => &[SyntaxKind::StringLiteral2],
+            SyntaxKind::DefaultLit => &[SyntaxKind::DefaultLit],
+            SyntaxKind::OffsetLit => &[SyntaxKind::OffsetLit],
+            SyntaxKind::TrueLit => &[SyntaxKind::TrueLit],
+            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
+            SyntaxKind::CeilLit => &[SyntaxKind::CeilLit],
+            SyntaxKind::Gt => &[SyntaxKind::Gt],
+            SyntaxKind::SampleLit => &[SyntaxKind::SampleLit],
+            SyntaxKind::StrlenLit => &[SyntaxKind::StrlenLit],
             SyntaxKind::StrendsLit => &[SyntaxKind::StrendsLit],
+            SyntaxKind::MoveLit => &[SyntaxKind::MoveLit],
+            SyntaxKind::DeleteDataLit => &[SyntaxKind::DeleteDataLit],
+            SyntaxKind::StrbeforeLit => &[SyntaxKind::StrbeforeLit],
+            SyntaxKind::Double => &[SyntaxKind::Double],
+            SyntaxKind::InsertLit => &[SyntaxKind::InsertLit],
+            SyntaxKind::CoalesceLit => &[SyntaxKind::CoalesceLit],
+            SyntaxKind::GroupConcatLit => &[SyntaxKind::GroupConcatLit],
+            SyntaxKind::NamedLit => &[SyntaxKind::NamedLit],
+            SyntaxKind::RoundLit => &[SyntaxKind::RoundLit],
+            SyntaxKind::Decimal => &[SyntaxKind::Decimal],
             SyntaxKind::BnodeLit => &[SyntaxKind::BnodeLit],
+            SyntaxKind::Plus => &[SyntaxKind::Plus],
+            SyntaxKind::NotLit => &[SyntaxKind::NotLit],
+            SyntaxKind::ClearLit => &[SyntaxKind::ClearLit],
+            SyntaxKind::YearLit => &[SyntaxKind::YearLit],
+            SyntaxKind::IntoLit => &[SyntaxKind::IntoLit],
+            SyntaxKind::DecimalPositive => &[SyntaxKind::DecimalPositive],
+            SyntaxKind::Nil => &[SyntaxKind::Nil],
+            SyntaxKind::InLit => &[SyntaxKind::InLit],
+            SyntaxKind::StrlangLit => &[SyntaxKind::StrlangLit],
+            SyntaxKind::Stop => &[SyntaxKind::Stop],
+            SyntaxKind::Alit => &[SyntaxKind::Alit],
+            SyntaxKind::BoundLit => &[SyntaxKind::BoundLit],
+            SyntaxKind::StringLiteralLong2 => &[SyntaxKind::StringLiteralLong2],
+            SyntaxKind::LangmatchesLit => &[SyntaxKind::LangmatchesLit],
+            SyntaxKind::BrClose => &[SyntaxKind::BrClose],
+            SyntaxKind::HavingLit => &[SyntaxKind::HavingLit],
+            SyntaxKind::AscLit => &[SyntaxKind::AscLit],
+            SyntaxKind::AddLit => &[SyntaxKind::AddLit],
+            SyntaxKind::StrstartsLit => &[SyntaxKind::StrstartsLit],
+            SyntaxKind::SameTermLit => &[SyntaxKind::SameTermLit],
+            SyntaxKind::RandLit => &[SyntaxKind::RandLit],
+            SyntaxKind::BrOpen => &[SyntaxKind::BrOpen],
+            SyntaxKind::StruuidLit => &[SyntaxKind::StruuidLit],
+            SyntaxKind::MinLit => &[SyntaxKind::MinLit],
+            SyntaxKind::MonthLit => &[SyntaxKind::MonthLit],
+            SyntaxKind::HoursLit => &[SyntaxKind::HoursLit],
+            SyntaxKind::ClClose => &[SyntaxKind::ClClose],
+            SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
+            SyntaxKind::Integer => &[SyntaxKind::Integer],
+            SyntaxKind::Lt => &[SyntaxKind::Lt],
+            SyntaxKind::DecimalNegative => &[SyntaxKind::DecimalNegative],
+            SyntaxKind::StrLit => &[SyntaxKind::StrLit],
+            SyntaxKind::ByLit => &[SyntaxKind::ByLit],
+            SyntaxKind::Sha384Lit => &[SyntaxKind::Sha384Lit],
+            SyntaxKind::ReducedLit => &[SyntaxKind::ReducedLit],
+            SyntaxKind::DropLit => &[SyntaxKind::DropLit],
+            SyntaxKind::OrderLit => &[SyntaxKind::OrderLit],
+            SyntaxKind::SparqlBaseToken => &[SyntaxKind::SparqlBaseToken],
+            SyntaxKind::LoadLit => &[SyntaxKind::LoadLit],
+            SyntaxKind::StrafterLit => &[SyntaxKind::StrafterLit],
+            SyntaxKind::InsertDataLit => &[SyntaxKind::InsertDataLit],
+            SyntaxKind::PnameNs => &[SyntaxKind::PnameNs],
+            SyntaxKind::Sha256Lit => &[SyntaxKind::Sha256Lit],
+            SyntaxKind::IsBlankLit => &[SyntaxKind::IsBlankLit],
+            SyntaxKind::EncodeForUriLit => &[SyntaxKind::EncodeForUriLit],
+            SyntaxKind::ContainsLit => &[SyntaxKind::ContainsLit],
+            SyntaxKind::ReplaceLit => &[SyntaxKind::ReplaceLit],
+            SyntaxKind::Lte => &[SyntaxKind::Lte],
+            SyntaxKind::PnameLn => &[SyntaxKind::PnameLn],
+            SyntaxKind::SecondsLit => &[SyntaxKind::SecondsLit],
+            SyntaxKind::GraphLit => &[SyntaxKind::GraphLit],
             SyntaxKind::ExistsLit => &[SyntaxKind::ExistsLit],
             SyntaxKind::FromLit => &[SyntaxKind::FromLit],
-            SyntaxKind::CeilLit => &[SyntaxKind::CeilLit],
-            SyntaxKind::DeleteWhereLit => &[SyntaxKind::DeleteWhereLit],
-            SyntaxKind::Sha1Lit => &[SyntaxKind::Sha1Lit],
-            SyntaxKind::Div => &[SyntaxKind::Div],
-            SyntaxKind::StrlangLit => &[SyntaxKind::StrlangLit],
-            SyntaxKind::Decimal => &[SyntaxKind::Decimal],
-            SyntaxKind::Gte => &[SyntaxKind::Gte],
-            SyntaxKind::WhereLit => &[SyntaxKind::WhereLit],
-            SyntaxKind::Md5Lit => &[SyntaxKind::Md5Lit],
-            SyntaxKind::BrClose => &[SyntaxKind::BrClose],
-            SyntaxKind::Eq => &[SyntaxKind::Eq],
-            SyntaxKind::AscLit => &[SyntaxKind::AscLit],
-            SyntaxKind::YearLit => &[SyntaxKind::YearLit],
-            SyntaxKind::ValuesLit => &[SyntaxKind::ValuesLit],
-            SyntaxKind::ClClose => &[SyntaxKind::ClClose],
-            SyntaxKind::Colon => &[SyntaxKind::Colon],
-            SyntaxKind::StruuidLit => &[SyntaxKind::StruuidLit],
-            SyntaxKind::StrdtLit => &[SyntaxKind::StrdtLit],
-            SyntaxKind::MoveLit => &[SyntaxKind::MoveLit],
-            SyntaxKind::IsLiteralLit => &[SyntaxKind::IsLiteralLit],
+            SyntaxKind::IsIriLit => &[SyntaxKind::IsIriLit],
+            SyntaxKind::IsUriLit => &[SyntaxKind::IsUriLit],
+            SyntaxKind::WithLit => &[SyntaxKind::WithLit],
+            SyntaxKind::SqClose => &[SyntaxKind::SqClose],
+            SyntaxKind::NowLit => &[SyntaxKind::NowLit],
             SyntaxKind::DoublePositive => &[SyntaxKind::DoublePositive],
-            SyntaxKind::MonthLit => &[SyntaxKind::MonthLit],
-            SyntaxKind::DatatypeLit => &[SyntaxKind::DatatypeLit],
-            SyntaxKind::InsertLit => &[SyntaxKind::InsertLit],
-            SyntaxKind::SparqlPrefixToken => &[SyntaxKind::SparqlPrefixToken],
-            SyntaxKind::BindLit => &[SyntaxKind::BindLit],
-            SyntaxKind::StrLit => &[SyntaxKind::StrLit],
             SyntaxKind::CountLit => &[SyntaxKind::CountLit],
-            SyntaxKind::Sha384Lit => &[SyntaxKind::Sha384Lit],
-            SyntaxKind::DoubleNegative => &[SyntaxKind::DoubleNegative],
-            SyntaxKind::Bang => &[SyntaxKind::Bang],
-            SyntaxKind::SparqlBaseToken => &[SyntaxKind::SparqlBaseToken],
-            SyntaxKind::PnameNs => &[SyntaxKind::PnameNs],
-            SyntaxKind::OrderLit => &[SyntaxKind::OrderLit],
-            SyntaxKind::LimitLit => &[SyntaxKind::LimitLit],
-            SyntaxKind::Amp2 => &[SyntaxKind::Amp2],
-            SyntaxKind::DescLit => &[SyntaxKind::DescLit],
-            SyntaxKind::Neq => &[SyntaxKind::Neq],
-            SyntaxKind::Plus => &[SyntaxKind::Plus],
+            SyntaxKind::Sha512Lit => &[SyntaxKind::Sha512Lit],
+            SyntaxKind::FalseLit => &[SyntaxKind::FalseLit],
+            SyntaxKind::LcaseLit => &[SyntaxKind::LcaseLit],
+            SyntaxKind::Pipe => &[SyntaxKind::Pipe],
+            SyntaxKind::UuidLit => &[SyntaxKind::UuidLit],
+            SyntaxKind::CopyLit => &[SyntaxKind::CopyLit],
+            SyntaxKind::SilentLit => &[SyntaxKind::SilentLit],
+            SyntaxKind::UriLit => &[SyntaxKind::UriLit],
+            SyntaxKind::Sha1Lit => &[SyntaxKind::Sha1Lit],
+            SyntaxKind::StrdtLit => &[SyntaxKind::StrdtLit],
+            SyntaxKind::DatatypeLit => &[SyntaxKind::DatatypeLit],
+            SyntaxKind::MinusLit => &[SyntaxKind::MinusLit],
+            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
+            SyntaxKind::ServiceLit => &[SyntaxKind::ServiceLit],
+            SyntaxKind::SubstrLit => &[SyntaxKind::SubstrLit],
+            SyntaxKind::SelectLit => &[SyntaxKind::SelectLit],
+            SyntaxKind::ValuesLit => &[SyntaxKind::ValuesLit],
+            SyntaxKind::UsingLit => &[SyntaxKind::UsingLit],
+            SyntaxKind::Questionmark => &[SyntaxKind::Questionmark],
+            SyntaxKind::Bar => &[SyntaxKind::Bar],
+            SyntaxKind::AbsLit => &[SyntaxKind::AbsLit],
+            SyntaxKind::TzLit => &[SyntaxKind::TzLit],
+            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
+            SyntaxKind::UcaseLit => &[SyntaxKind::UcaseLit],
+            SyntaxKind::Anon => &[SyntaxKind::Anon],
+            SyntaxKind::ConstructLit => &[SyntaxKind::ConstructLit],
+            SyntaxKind::WhereLit => &[SyntaxKind::WhereLit],
+            SyntaxKind::Eq => &[SyntaxKind::Eq],
+            SyntaxKind::IsNumericLit => &[SyntaxKind::IsNumericLit],
+            SyntaxKind::AsLit => &[SyntaxKind::AsLit],
+            SyntaxKind::IsLiteralLit => &[SyntaxKind::IsLiteralLit],
+            SyntaxKind::FloorLit => &[SyntaxKind::FloorLit],
+            SyntaxKind::IriLit => &[SyntaxKind::IriLit],
+            SyntaxKind::ToLit => &[SyntaxKind::ToLit],
+            SyntaxKind::RegexLit => &[SyntaxKind::RegexLit],
             _ => &[],
         }
     }
@@ -2768,6 +2768,11 @@ mod definitions {
             state: &mut crate::a_star::AStar<Self>,
         ) {
             match (self.kind, self.state) {
+                (SyntaxKind::QueryUnit, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::QueryUnit, 1usize) => {
                     state.add_element(
                         element
@@ -2781,10 +2786,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::QueryUnit, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                (SyntaxKind::Query, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ValuesClause,
+                                state: 1usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::Query, 0usize) => {
                     if let Some(parent) = element.pop() {
@@ -2800,19 +2813,6 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Prologue,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Query, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ValuesClause,
                                 state: 1usize,
                             }),
                     );
@@ -2837,7 +2837,7 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::ConstructQuery,
-                                state: 15usize,
+                                state: 14usize,
                             }),
                     );
                     state.add_element(
@@ -2908,10 +2908,18 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::BaseDecl, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                (SyntaxKind::BaseDecl, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iriref,
+                                state: 0usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::BaseDecl, 2usize) => {
                     state.add_element(
@@ -2926,15 +2934,20 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BaseDecl, 1usize) => {
+                (SyntaxKind::BaseDecl, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PrefixDecl, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 0usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Iriref,
+                                kind: SyntaxKind::PnameNs,
                                 state: 0usize,
                             }),
                     );
@@ -2965,19 +2978,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PrefixDecl, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PnameNs,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::PrefixDecl, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -2995,11 +2995,6 @@ mod definitions {
                                 state: 16usize,
                             }),
                     );
-                }
-                (SyntaxKind::SelectQuery, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::SelectQuery, 1usize) => {
                     state.add_element(
@@ -3038,6 +3033,42 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::SelectQuery, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SubSelect, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SolutionModifier,
+                                state: 7usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubSelect, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WhereClause,
+                                state: 2usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubSelect, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::SubSelect, 4usize) => {
                     state.add_element(
                         element
@@ -3064,37 +3095,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::SubSelect, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SolutionModifier,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SubSelect, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SubSelect, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WhereClause,
-                                state: 2usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::SelectClause, 7usize) => {
                     state.add_element(
                         element
@@ -3105,6 +3105,107 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Var,
                                 state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SelectClause, 16usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 12usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SelectLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SelectClause, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 9usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SelectClause, 9usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 8usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SelectClause, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 9usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Star,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SelectClause, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -3183,68 +3284,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::SelectClause, 1usize) => {
+                (SyntaxKind::ConstructQuery, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 3usize,
+                                state: 4usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Var,
-                                state: 1usize,
+                                kind: SyntaxKind::ConstructTemplate,
+                                state: 4usize,
                             }),
                     );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 9usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Star,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SelectClause, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SelectClause, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SelectClause, 16usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -3252,37 +3303,76 @@ mod definitions {
                                 state: 12usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::SelectLit,
+                                kind: SyntaxKind::DatasetClause,
+                                state: 4usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 10usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WhereLit,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::SelectClause, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Var,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 9usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
+                (SyntaxKind::ConstructQuery, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::ConstructQuery, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SolutionModifier,
+                                state: 7usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ConstructQuery, 10usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 8usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ConstructQuery, 8usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClClose,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TriplesTemplate,
+                                state: 5usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::ConstructQuery, 4usize) => {
                     state.add_element(
@@ -3300,7 +3390,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::WhereClause,
@@ -3308,147 +3398,20 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ConstructQuery, 9usize) => {
+                (SyntaxKind::ConstructQuery, 14usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 7usize,
+                                state: 2usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ClClose,
+                                kind: SyntaxKind::ConstructLit,
                                 state: 0usize,
                             }),
                     );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::TriplesTemplate,
-                                state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 11usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 9usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ConstructTemplate,
-                                state: 4usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 13usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DatasetClause,
-                                state: 4usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 11usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WhereLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SolutionModifier,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 8usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 13usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 13usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DatasetClause,
-                                state: 4usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 11usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WhereLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::ConstructQuery, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SolutionModifier,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructQuery, 15usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -3456,7 +3419,31 @@ mod definitions {
                                 state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ConstructLit,
+                                kind: SyntaxKind::ClClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ConstructQuery, 12usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 12usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::DatasetClause,
+                                state: 4usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 10usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WhereLit,
                                 state: 0usize,
                             }),
                     );
@@ -3496,6 +3483,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::DescribeQuery, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::DescribeQuery, 6usize) => {
                     state.add_element(
                         element
@@ -3517,6 +3509,19 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Star,
                                 state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::DescribeQuery, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SolutionModifier,
+                                state: 7usize,
                             }),
                     );
                 }
@@ -3579,7 +3584,25 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::DescribeQuery, 1usize) => {
+                (SyntaxKind::AskQuery, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::AskLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::AskQuery, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::AskQuery, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -3591,16 +3614,6 @@ mod definitions {
                                 state: 7usize,
                             }),
                     );
-                }
-                (SyntaxKind::DescribeQuery, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AskQuery, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::AskQuery, 3usize) => {
                     state.add_element(
@@ -3626,31 +3639,10 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::AskQuery, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SolutionModifier,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::AskQuery, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::AskLit,
-                                state: 0usize,
-                            }),
-                    );
+                (SyntaxKind::DatasetClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::DatasetClause, 1usize) => {
                     state.add_element(
@@ -3675,11 +3667,6 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                }
-                (SyntaxKind::DatasetClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::DatasetClause, 4usize) => {
                     state.add_element(
@@ -3725,11 +3712,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::NamedGraphClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::NamedGraphClause, 1usize) => {
                     state.add_element(
                         element
@@ -3743,6 +3725,16 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::NamedGraphClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SourceSelector, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::SourceSelector, 1usize) => {
                     state.add_element(
                         element
@@ -3753,24 +3745,6 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Iri,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SourceSelector, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::WhereClause, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupGraphPattern,
-                                state: 5usize,
                             }),
                     );
                 }
@@ -3798,6 +3772,19 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::WhereClause, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GroupGraphPattern,
+                                state: 5usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::WhereClause, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -3807,6 +3794,49 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::SolutionModifier, 1usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::LimitOffsetClauses,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SolutionModifier, 3usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::LimitOffsetClauses,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::OrderClause,
+                                state: 5usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::SolutionModifier, 7usize) => {
                     if let Some(parent) = element.pop() {
@@ -3857,22 +3887,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::SolutionModifier, 1usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::LimitOffsetClauses,
-                                state: 1usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::SolutionModifier, 5usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -3911,46 +3925,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::SolutionModifier, 3usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::LimitOffsetClauses,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::OrderClause,
-                                state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupClause, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ByLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::GroupClause, 2usize) => {
                     state.add_element(
                         element
@@ -3966,6 +3940,19 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::GroupClause, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ByLit,
+                                state: 0usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::GroupClause, 5usize) => {
                     state.add_element(
@@ -3989,6 +3976,74 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::GroupCondition,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GroupCondition, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::GroupCondition, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GroupCondition, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GroupCondition, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 6usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::AsLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GroupCondition, 8usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 5usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
                                 state: 1usize,
                             }),
                     );
@@ -4039,84 +4094,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::GroupCondition, 6usize) => {
+                (SyntaxKind::HavingClause, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Var,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupCondition, 8usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 5usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupCondition, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GroupCondition, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
+                                kind: SyntaxKind::HavingLit,
                                 state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::AsLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupCondition, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::HavingClause, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::HavingCondition,
-                                state: 1usize,
                             }),
                     );
                 }
@@ -4136,16 +4123,16 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::HavingClause, 4usize) => {
+                (SyntaxKind::HavingClause, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 2usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::HavingLit,
-                                state: 0usize,
+                                kind: SyntaxKind::HavingCondition,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -4163,6 +4150,32 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Constraint,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::OrderClause, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::OrderLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::OrderClause, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::OrderCondition,
                                 state: 1usize,
                             }),
                     );
@@ -4195,50 +4208,6 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::OrderClause, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::OrderCondition,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::OrderClause, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::OrderLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::OrderCondition, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::OrderCondition, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrackettedExpression,
-                                state: 3usize,
-                            }),
-                    );
                 }
                 (SyntaxKind::OrderCondition, 1usize) => {
                     state.add_element(
@@ -4286,7 +4255,25 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::LimitOffsetClauses, 5usize) => {
+                (SyntaxKind::OrderCondition, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrackettedExpression,
+                                state: 3usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::OrderCondition, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::LimitOffsetClauses, 2usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -4297,7 +4284,7 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::LimitClause,
+                                kind: SyntaxKind::OffsetClause,
                                 state: 2usize,
                             }),
                     );
@@ -4331,7 +4318,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::LimitOffsetClauses, 2usize) => {
+                (SyntaxKind::LimitOffsetClauses, 5usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -4342,7 +4329,7 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::OffsetClause,
+                                kind: SyntaxKind::LimitClause,
                                 state: 2usize,
                             }),
                     );
@@ -4351,19 +4338,6 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::LimitClause, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Integer,
-                                state: 0usize,
-                            }),
-                    );
                 }
                 (SyntaxKind::LimitClause, 2usize) => {
                     state.add_element(
@@ -4374,6 +4348,19 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::LimitLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::LimitClause, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Integer,
                                 state: 0usize,
                             }),
                     );
@@ -4391,11 +4378,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::OffsetClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::OffsetClause, 2usize) => {
                     state.add_element(
                         element
@@ -4408,6 +4390,16 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
+                }
+                (SyntaxKind::OffsetClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ValuesClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::ValuesClause, 1usize) => {
                     if let Some(parent) = element.pop() {
@@ -4435,27 +4427,6 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::DataBlock,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ValuesClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Update, 2usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Colon,
-                                state: 0usize,
                             }),
                     );
                 }
@@ -4493,6 +4464,22 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::Update, 2usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Colon,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::Update, 3usize) => {
                     state.add_element(
                         element
@@ -4505,6 +4492,11 @@ mod definitions {
                                 state: 6usize,
                             }),
                     );
+                }
+                (SyntaxKind::Update1, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::Update1, 1usize) => {
                     state.add_element(
@@ -4629,58 +4621,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Update1, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Load, 1usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IntoLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Load, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Iri,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Load, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphRef,
-                                state: 2usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Load, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::Load, 5usize) => {
                     state.add_element(
                         element
@@ -4718,7 +4658,28 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Clear, 4usize) => {
+                (SyntaxKind::Load, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iri,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Load, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Load, 1usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -4726,17 +4687,12 @@ mod definitions {
                                 state: 2usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ClearLit,
+                                kind: SyntaxKind::IntoLit,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::Clear, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Clear, 1usize) => {
+                (SyntaxKind::Load, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -4744,10 +4700,15 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::GraphRefAll,
-                                state: 1usize,
+                                kind: SyntaxKind::GraphRef,
+                                state: 2usize,
                             }),
                     );
+                }
+                (SyntaxKind::Clear, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::Clear, 2usize) => {
                     state.add_element(
@@ -4769,6 +4730,45 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::SilentLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Clear, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClearLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Clear, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphRefAll,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Drop, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::DropLit,
                                 state: 0usize,
                             }),
                     );
@@ -4815,19 +4815,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Drop, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DropLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::Create, 2usize) => {
                     state.add_element(
                         element
@@ -4865,11 +4852,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Create, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::Create, 1usize) => {
                     state.add_element(
                         element
@@ -4883,21 +4865,39 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::Create, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::Add, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Add, 1usize) => {
+                (SyntaxKind::Add, 3usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 0usize,
+                                state: 2usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::GraphOrDefault,
                                 state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Add, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::AddLit,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -4914,12 +4914,12 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Add, 3usize) => {
+                (SyntaxKind::Add, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 0usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::GraphOrDefault,
@@ -4951,7 +4951,20 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Add, 6usize) => {
+                (SyntaxKind::Move, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ToLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Move, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -4959,8 +4972,34 @@ mod definitions {
                                 state: 4usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::AddLit,
+                                kind: SyntaxKind::MoveLit,
                                 state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Move, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphOrDefault,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Move, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphOrDefault,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -4988,106 +5027,10 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Move, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MoveLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Move, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ToLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::Move, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::Move, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphOrDefault,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Move, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphOrDefault,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Copy, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphOrDefault,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Copy, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphOrDefault,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Copy, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Copy, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ToLit,
-                                state: 0usize,
-                            }),
-                    );
                 }
                 (SyntaxKind::Copy, 4usize) => {
                     state.add_element(
@@ -5125,6 +5068,50 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
+                }
+                (SyntaxKind::Copy, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ToLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Copy, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphOrDefault,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Copy, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphOrDefault,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Copy, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::InsertData, 1usize) => {
                     state.add_element(
@@ -5201,11 +5188,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::DeleteWhere, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::DeleteWhere, 2usize) => {
                     state.add_element(
                         element
@@ -5219,66 +5201,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Modify, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DeleteClause,
-                                state: 2usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::InsertClause,
-                                state: 2usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Modify, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UsingClause,
-                                state: 5usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WhereLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::InsertClause,
-                                state: 2usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Modify, 0usize) => {
+                (SyntaxKind::DeleteWhere, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -5293,43 +5216,6 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Iri,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Modify, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UsingClause,
-                                state: 5usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WhereLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Modify, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupGraphPattern,
-                                state: 5usize,
                             }),
                     );
                 }
@@ -5368,6 +5254,107 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::Modify, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Modify, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::UsingClause,
+                                state: 5usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WhereLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::InsertClause,
+                                state: 2usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Modify, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GroupGraphPattern,
+                                state: 5usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Modify, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 6usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::DeleteClause,
+                                state: 2usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::InsertClause,
+                                state: 2usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Modify, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::UsingClause,
+                                state: 5usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WhereLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::DeleteClause, 1usize) => {
                     state.add_element(
                         element
@@ -5380,6 +5367,11 @@ mod definitions {
                                 state: 3usize,
                             }),
                     );
+                }
+                (SyntaxKind::DeleteClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::DeleteClause, 2usize) => {
                     state.add_element(
@@ -5394,11 +5386,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::DeleteClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::InsertClause, 2usize) => {
                     state.add_element(
                         element
@@ -5411,11 +5398,6 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::InsertClause, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::InsertClause, 1usize) => {
                     state.add_element(
@@ -5430,7 +5412,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::UsingClause, 0usize) => {
+                (SyntaxKind::InsertClause, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -5461,6 +5443,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::UsingClause, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::UsingClause, 1usize) => {
                     state.add_element(
                         element
@@ -5482,24 +5469,6 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::NamedLit,
                                 state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GraphOrDefault, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GraphOrDefault, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Iri,
-                                state: 1usize,
                             }),
                     );
                 }
@@ -5538,6 +5507,24 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::GraphOrDefault, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iri,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GraphOrDefault, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::GraphRef, 2usize) => {
                     state.add_element(
                         element
@@ -5551,6 +5538,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::GraphRef, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::GraphRef, 1usize) => {
                     state.add_element(
                         element
@@ -5563,11 +5555,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::GraphRef, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::GraphRefAll, 0usize) => {
                     if let Some(parent) = element.pop() {
@@ -5620,6 +5607,32 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::QuadPattern, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::QuadPattern, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Quads,
+                                state: 7usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::QuadPattern, 1usize) => {
                     state.add_element(
                         element
@@ -5638,37 +5651,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::QuadPattern, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Quads,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::QuadPattern, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::QuadData, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::QuadData, 2usize) => {
                     state.add_element(
                         element
@@ -5679,6 +5661,24 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Quads,
                                 state: 7usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::QuadData, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::QuadData, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClOpen,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -5695,16 +5695,46 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::QuadData, 3usize) => {
+                (SyntaxKind::Quads, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 4usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ClOpen,
-                                state: 0usize,
+                                kind: SyntaxKind::QuadsNotTriples,
+                                state: 6usize,
+                            }),
+                    );
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Quads, 7usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::QuadsNotTriples,
+                                state: 6usize,
+                            }),
+                    );
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TriplesTemplate,
+                                state: 5usize,
                             }),
                     );
                 }
@@ -5753,90 +5783,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Quads, 7usize) => {
+                (SyntaxKind::QuadsNotTriples, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::QuadsNotTriples,
-                                state: 6usize,
-                            }),
-                    );
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::TriplesTemplate,
                                 state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Quads, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::QuadsNotTriples,
-                                state: 6usize,
-                            }),
-                    );
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::QuadsNotTriples, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
+                                kind: SyntaxKind::GraphLit,
                                 state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::QuadsNotTriples, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::QuadsNotTriples, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::QuadsNotTriples, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::VarOrIri,
-                                state: 1usize,
                             }),
                     );
                 }
@@ -5864,28 +5820,20 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::QuadsNotTriples, 6usize) => {
+                (SyntaxKind::QuadsNotTriples, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 2usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::GraphLit,
+                                kind: SyntaxKind::ClOpen,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::TriplesTemplate, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TriplesTemplate, 2usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                (SyntaxKind::QuadsNotTriples, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -5893,8 +5841,26 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::TriplesTemplate,
-                                state: 5usize,
+                                kind: SyntaxKind::ClClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::QuadsNotTriples, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::QuadsNotTriples, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::VarOrIri,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -5927,6 +5893,40 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::TriplesTemplate, 2usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TriplesTemplate,
+                                state: 5usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::TriplesTemplate, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::GroupGraphPattern, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::GroupGraphPattern, 2usize) => {
                     state.add_element(
                         element
@@ -5951,6 +5951,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::GroupGraphPattern, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::GroupGraphPattern, 5usize) => {
                     state.add_element(
                         element
@@ -5964,25 +5969,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::GroupGraphPattern, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupGraphPattern, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GroupGraphPatternSub, 7usize) => {
+                (SyntaxKind::GroupGraphPatternSub, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -5997,6 +5984,12 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::GroupGraphPatternSub, 2usize) => {
+                    state.add_element(element.pop_push(Rule {
+                        kind: self.kind,
+                        state: 1usize,
+                    }));
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6037,24 +6030,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::GroupGraphPatternSub, 2usize) => {
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 1usize,
-                    }));
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::TriplesBlock,
-                                state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::GroupGraphPatternSub, 1usize) => {
+                (SyntaxKind::GroupGraphPatternSub, 7usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6069,27 +6045,22 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::TriplesBlock, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TriplesBlock, 2usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 0usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::TriplesBlock,
                                 state: 5usize,
                             }),
                     );
+                }
+                (SyntaxKind::TriplesBlock, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::TriplesBlock, 1usize) => {
                     if let Some(parent) = element.pop() {
@@ -6104,6 +6075,22 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Stop,
                                 state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::TriplesBlock, 2usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TriplesBlock,
+                                state: 5usize,
                             }),
                     );
                 }
@@ -6220,19 +6207,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::OptionalGraphPattern, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupGraphPattern,
-                                state: 5usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::OptionalGraphPattern, 2usize) => {
                     state.add_element(
                         element
@@ -6246,16 +6220,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::GraphGraphPattern, 3usize) => {
+                (SyntaxKind::OptionalGraphPattern, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::GraphLit,
-                                state: 0usize,
+                                kind: SyntaxKind::GroupGraphPattern,
+                                state: 5usize,
                             }),
                     );
                 }
@@ -6272,12 +6246,38 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::GraphGraphPattern, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::VarOrIri,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GraphGraphPattern, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::GraphGraphPattern, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::GraphGraphPattern, 2usize) => {
+                (SyntaxKind::ServiceGraphPattern, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6294,19 +6294,6 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::ServiceGraphPattern, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ServiceLit,
-                                state: 0usize,
-                            }),
-                    );
                 }
                 (SyntaxKind::ServiceGraphPattern, 3usize) => {
                     state.add_element(
@@ -6332,16 +6319,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ServiceGraphPattern, 2usize) => {
+                (SyntaxKind::ServiceGraphPattern, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 3usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::VarOrIri,
-                                state: 1usize,
+                                kind: SyntaxKind::ServiceLit,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -6358,16 +6345,29 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Bind, 2usize) => {
+                (SyntaxKind::Bind, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 4usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Var,
-                                state: 1usize,
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Bind, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::AsLit,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -6397,16 +6397,21 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Bind, 3usize) => {
+                (SyntaxKind::Bind, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Bind, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::AsLit,
-                                state: 0usize,
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -6423,20 +6428,20 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Bind, 5usize) => {
+                (SyntaxKind::InlineData, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 4usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrOpen,
+                                kind: SyntaxKind::ValuesLit,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::Bind, 0usize) => {
+                (SyntaxKind::InlineData, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -6454,23 +6459,10 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::InlineData, 0usize) => {
+                (SyntaxKind::DataBlock, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                }
-                (SyntaxKind::InlineData, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ValuesLit,
-                                state: 0usize,
-                            }),
-                    );
                 }
                 (SyntaxKind::DataBlock, 1usize) => {
                     state.add_element(
@@ -6496,10 +6488,23 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::DataBlock, 0usize) => {
+                (SyntaxKind::InlineDataOneVar, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::InlineDataOneVar, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClOpen,
+                                state: 0usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::InlineDataOneVar, 5usize) => {
                     state.add_element(
@@ -6513,11 +6518,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::InlineDataOneVar, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::InlineDataOneVar, 2usize) => {
                     state.add_element(
@@ -6543,15 +6543,26 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::InlineDataOneVar, 4usize) => {
+                (SyntaxKind::InlineDataFull, 13usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 13usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ClOpen,
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 9usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
                                 state: 0usize,
                             }),
                     );
@@ -6589,30 +6600,6 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::ClOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::InlineDataFull, 10usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 9usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 13usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
                                 state: 0usize,
                             }),
                     );
@@ -6657,18 +6644,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::InlineDataFull, 13usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 13usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Var,
-                                state: 1usize,
-                            }),
-                    );
+                (SyntaxKind::InlineDataFull, 10usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6676,15 +6652,21 @@ mod definitions {
                                 state: 9usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrClose,
+                                kind: SyntaxKind::Nil,
                                 state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::DataBlockValue, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::DataBlockValue, 1usize) => {
                     state.add_element(
@@ -6743,18 +6725,10 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::MinusGraphPattern, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupGraphPattern,
-                                state: 5usize,
-                            }),
-                    );
+                (SyntaxKind::DataBlockValue, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::MinusGraphPattern, 0usize) => {
                     if let Some(parent) = element.pop() {
@@ -6771,6 +6745,19 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::MinusLit,
                                 state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::MinusGraphPattern, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GroupGraphPattern,
+                                state: 5usize,
                             }),
                     );
                 }
@@ -6816,6 +6803,11 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::Filter, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::Filter, 2usize) => {
                     state.add_element(
                         element
@@ -6828,11 +6820,6 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::Filter, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::Filter, 1usize) => {
                     state.add_element(
@@ -6900,6 +6887,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::FunctionCall, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::FunctionCall, 1usize) => {
                     state.add_element(
                         element
@@ -6913,12 +6905,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::FunctionCall, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ArgList, 7usize) => {
+                (SyntaxKind::ArgList, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6931,7 +6918,60 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ArgList, 5usize) => {
+                (SyntaxKind::ArgList, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ArgList, 8usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::DistinctLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ArgList, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 5usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Comma,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ArgList, 7usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -6968,109 +7008,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ArgList, 8usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ArgList, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ArgList, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 5usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ExpressionList, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ExpressionList, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ExpressionList, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::ExpressionList, 4usize) => {
                     state.add_element(
                         element
@@ -7100,10 +7037,73 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::ExpressionList, 7usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ExpressionList, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Nil,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::ExpressionList, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::ConstructTemplate, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::ConstructTemplate, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ClClose,
+                                state: 0usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::ConstructTemplate, 2usize) => {
                     state.add_element(
@@ -7126,19 +7126,6 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::ConstructTriples,
                                 state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ConstructTemplate, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ClClose,
-                                state: 0usize,
                             }),
                     );
                 }
@@ -7184,6 +7171,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::ConstructTriples, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::ConstructTriples, 1usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -7200,24 +7192,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ConstructTriples, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TriplesSameSubject, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PropertyListNotEmpty,
-                                state: 7usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::TriplesSameSubject, 4usize) => {
                     state.add_element(
                         element
@@ -7231,10 +7205,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::TriplesSameSubject, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                (SyntaxKind::TriplesSameSubject, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PropertyListNotEmpty,
+                                state: 7usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::TriplesSameSubject, 1usize) => {
                     state.add_element(
@@ -7260,6 +7242,16 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::TriplesSameSubject, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PropertyList, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::PropertyList, 1usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -7276,7 +7268,31 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PropertyList, 0usize) => {
+                (SyntaxKind::PropertyListNotEmpty, 7usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 6usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Verb,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::PropertyListNotEmpty, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Colon,
+                                state: 0usize,
+                            }),
+                    );
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -7298,20 +7314,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PropertyListNotEmpty, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Verb,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PropertyListNotEmpty, 6usize) => {
+                (SyntaxKind::PropertyListNotEmpty, 3usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7324,23 +7327,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PropertyListNotEmpty, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Colon,
-                                state: 0usize,
-                            }),
-                    );
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::PropertyListNotEmpty, 3usize) => {
+                (SyntaxKind::PropertyListNotEmpty, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7382,7 +7369,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ObjectList, 2usize) => {
+                (SyntaxKind::ObjectList, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7411,7 +7398,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ObjectList, 4usize) => {
+                (SyntaxKind::ObjectList, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7442,12 +7429,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::TriplesSameSubjectPath, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TriplesSameSubjectPath, 4usize) => {
+                (SyntaxKind::TriplesSameSubjectPath, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7455,8 +7437,8 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::PropertyListPath,
-                                state: 1usize,
+                                kind: SyntaxKind::PropertyListPathNotEmpty,
+                                state: 9usize,
                             }),
                     );
                 }
@@ -7484,7 +7466,12 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::TriplesSameSubjectPath, 2usize) => {
+                (SyntaxKind::TriplesSameSubjectPath, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::TriplesSameSubjectPath, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7492,8 +7479,8 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::PropertyListPathNotEmpty,
-                                state: 9usize,
+                                kind: SyntaxKind::PropertyListPath,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -7518,6 +7505,19 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::PropertyListPathNotEmpty, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ObjectList,
+                                state: 4usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::PropertyListPathNotEmpty, 8usize) => {
                     state.add_element(
                         element
@@ -7530,6 +7530,22 @@ mod definitions {
                                 state: 4usize,
                             }),
                     );
+                }
+                (SyntaxKind::PropertyListPathNotEmpty, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Colon,
+                                state: 0usize,
+                            }),
+                    );
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::PropertyListPathNotEmpty, 9usize) => {
                     state.add_element(
@@ -7554,35 +7570,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::PropertyListPathNotEmpty, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ObjectList,
-                                state: 4usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PropertyListPathNotEmpty, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Colon,
-                                state: 0usize,
-                            }),
-                    );
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::PropertyListPathNotEmpty, 2usize) => {
                     state.add_element(element.pop_push(Rule {
@@ -7612,11 +7599,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::VerbPath, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::VerbPath, 1usize) => {
                     state.add_element(
                         element
@@ -7629,6 +7611,11 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::VerbPath, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::VerbSimple, 1usize) => {
                     state.add_element(
@@ -7648,21 +7635,18 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ObjectListPath, 1usize) => {
+                (SyntaxKind::ObjectListPath, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
+                                kind: SyntaxKind::ObjectPath,
+                                state: 1usize,
                             }),
                     );
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::ObjectListPath, 4usize) => {
                     state.add_element(
@@ -7677,20 +7661,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ObjectListPath, 2usize) => {
+                (SyntaxKind::ObjectListPath, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 2usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ObjectPath,
-                                state: 1usize,
+                                kind: SyntaxKind::Comma,
+                                state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::ObjectPath, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -7708,7 +7690,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Path, 0usize) => {
+                (SyntaxKind::ObjectPath, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
@@ -7726,6 +7708,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::Path, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::PathAlternative, 1usize) => {
                     state.add_element(
                         element
@@ -7742,7 +7729,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::PathAlternative, 2usize) => {
+                (SyntaxKind::PathAlternative, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7755,7 +7742,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PathAlternative, 4usize) => {
+                (SyntaxKind::PathAlternative, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -7784,19 +7771,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::PathSequence, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PathEltOrInverse,
-                                state: 1usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::PathSequence, 2usize) => {
                     state.add_element(
                         element
@@ -7810,6 +7784,24 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::PathSequence, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PathEltOrInverse,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::PathElt, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::PathElt, 3usize) => {
                     state.add_element(
                         element
@@ -7822,11 +7814,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::PathElt, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::PathElt, 1usize) => {
                     if let Some(parent) = element.pop() {
@@ -7843,11 +7830,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::PathEltOrInverse, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::PathEltOrInverse, 1usize) => {
                     state.add_element(
@@ -7872,6 +7854,11 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
+                }
+                (SyntaxKind::PathEltOrInverse, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::PathEltOrInverse, 3usize) => {
                     state.add_element(
@@ -7926,50 +7913,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PathPrimary, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PathNegatedPropertySet,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PathPrimary, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::PathPrimary, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PathPrimary, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Path,
-                                state: 1usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::PathPrimary, 1usize) => {
                     state.add_element(
                         element
@@ -8016,7 +7959,33 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PathNegatedPropertySet, 4usize) => {
+                (SyntaxKind::PathPrimary, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PathNegatedPropertySet,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::PathPrimary, 7usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 6usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Path,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::PathPrimary, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -8028,17 +7997,11 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 5usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PathOneInPropertySet,
-                                state: 1usize,
-                            }),
-                    );
+                }
+                (SyntaxKind::PathPrimary, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::PathNegatedPropertySet, 1usize) => {
                     state.add_element(
@@ -8064,6 +8027,48 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::PathNegatedPropertySet, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 5usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PathOneInPropertySet,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::PathNegatedPropertySet, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PathNegatedPropertySet, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 5usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PathOneInPropertySet,
+                                state: 1usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::PathNegatedPropertySet, 5usize) => {
                     state.add_element(
                         element
@@ -8084,48 +8089,6 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PathNegatedPropertySet, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 5usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PathOneInPropertySet,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::PathNegatedPropertySet, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::PathOneInPropertySet, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Iri,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Alit,
                                 state: 0usize,
                             }),
                     );
@@ -8170,6 +8133,30 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::PathOneInPropertySet, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iri,
+                                state: 1usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Alit,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::TriplesNode, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -8199,24 +8186,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BlankNodePropertyList, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BlankNodePropertyList, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SqClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::BlankNodePropertyList, 3usize) => {
                     state.add_element(
                         element
@@ -8240,6 +8209,24 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::PropertyListNotEmpty,
                                 state: 7usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BlankNodePropertyList, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BlankNodePropertyList, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SqClose,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -8272,16 +8259,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BlankNodePropertyListPath, 1usize) => {
+                (SyntaxKind::BlankNodePropertyListPath, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 0usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::SqClose,
-                                state: 0usize,
+                                kind: SyntaxKind::PropertyListPathNotEmpty,
+                                state: 9usize,
                             }),
                     );
                 }
@@ -8303,41 +8290,15 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BlankNodePropertyListPath, 2usize) => {
+                (SyntaxKind::BlankNodePropertyListPath, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::PropertyListPathNotEmpty,
-                                state: 9usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Collection, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GraphNode,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Collection, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
+                                kind: SyntaxKind::SqClose,
                                 state: 0usize,
                             }),
                     );
@@ -8370,6 +8331,37 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
+                }
+                (SyntaxKind::Collection, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GraphNode,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Collection, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::CollectionPath, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::CollectionPath, 3usize) => {
                     state.add_element(
@@ -8421,16 +8413,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::CollectionPath, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GraphNode, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::GraphNode, 1usize) => {
                     state.add_element(
                         element
@@ -8454,6 +8436,11 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::GraphNode, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::GraphNodePath, 1usize) => {
                     state.add_element(
@@ -8513,11 +8500,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::VarOrIri, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::VarOrIri, 1usize) => {
                     state.add_element(
                         element
@@ -8541,6 +8523,11 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::VarOrIri, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::Var, 0usize) => {
                     if let Some(parent) = element.pop() {
@@ -8678,6 +8665,19 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::ConditionalOrExpression, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ConditionalAndExpression,
+                                state: 4usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::ConditionalOrExpression, 4usize) => {
                     state.add_element(
                         element
@@ -8691,7 +8691,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::ConditionalOrExpression, 2usize) => {
+                (SyntaxKind::ConditionalAndExpression, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -8699,8 +8699,8 @@ mod definitions {
                                 state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ConditionalAndExpression,
-                                state: 4usize,
+                                kind: SyntaxKind::ValueLogical,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -8733,19 +8733,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ConditionalAndExpression, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ValueLogical,
-                                state: 1usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::ValueLogical, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -8760,11 +8747,11 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::RelationalExpression,
-                                state: 20usize,
+                                state: 16usize,
                             }),
                     );
                 }
-                (SyntaxKind::RelationalExpression, 5usize) => {
+                (SyntaxKind::RelationalExpression, 3usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -8773,115 +8760,6 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::RelationalExpression, 18usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 17usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::InLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 20usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 11usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 13usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 15usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ExpressionList,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RelationalExpression, 17usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ExpressionList,
                                 state: 1usize,
                             }),
                     );
@@ -8905,7 +8783,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Neq,
@@ -8916,7 +8794,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 7usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Lt,
@@ -8927,7 +8805,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 9usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Gt,
@@ -8938,7 +8816,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 11usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Lte,
@@ -8949,7 +8827,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 13usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Gte,
@@ -8960,7 +8838,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 15usize,
+                                state: 11usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::InLit,
@@ -8971,7 +8849,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 18usize,
+                                state: 14usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::NotLit,
@@ -8979,7 +8857,38 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::RelationalExpression, 3usize) => {
+                (SyntaxKind::RelationalExpression, 14usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 11usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::InLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::RelationalExpression, 16usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::NumericExpression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::RelationalExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::RelationalExpression, 11usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -8987,10 +8896,15 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::NumericExpression,
+                                kind: SyntaxKind::ExpressionList,
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::NumericExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::NumericExpression, 1usize) => {
                     state.add_element(
@@ -9001,51 +8915,7 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::AdditiveExpression,
-                                state: 16usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::NumericExpression, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AdditiveExpression, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UnaryExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::AdditiveExpression, 11usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UnaryExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::AdditiveExpression, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MultiplicativeExpression,
-                                state: 7usize,
+                                state: 15usize,
                             }),
                     );
                 }
@@ -9054,7 +8924,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 9usize,
+                                state: 8usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Star,
@@ -9065,7 +8935,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 11usize,
+                                state: 8usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Div,
@@ -9077,7 +8947,7 @@ mod definitions {
                         state: 1usize,
                     }));
                 }
-                (SyntaxKind::AdditiveExpression, 16usize) => {
+                (SyntaxKind::AdditiveExpression, 3usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -9086,7 +8956,20 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::MultiplicativeExpression,
+                                state: 6usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::AdditiveExpression, 8usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
                                 state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::UnaryExpression,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -9106,7 +8989,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Bar,
@@ -9139,7 +9022,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::AdditiveExpression, 5usize) => {
+                (SyntaxKind::AdditiveExpression, 15usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -9148,20 +9031,7 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::MultiplicativeExpression,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::MultiplicativeExpression, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UnaryExpression,
-                                state: 1usize,
+                                state: 6usize,
                             }),
                     );
                 }
@@ -9170,7 +9040,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 3usize,
+                                state: 2usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Star,
@@ -9181,7 +9051,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 2usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Div,
@@ -9192,7 +9062,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::MultiplicativeExpression, 7usize) => {
+                (SyntaxKind::MultiplicativeExpression, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -9205,7 +9075,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::MultiplicativeExpression, 3usize) => {
+                (SyntaxKind::MultiplicativeExpression, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -9214,19 +9084,6 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::UnaryExpression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::UnaryExpression, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PrimaryExpression,
                                 state: 1usize,
                             }),
                     );
@@ -9243,6 +9100,11 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::UnaryExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::UnaryExpression, 4usize) => {
                     state.add_element(
@@ -9303,10 +9165,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::UnaryExpression, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
+                (SyntaxKind::UnaryExpression, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PrimaryExpression,
+                                state: 1usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::PrimaryExpression, 1usize) => {
                     state.add_element(
@@ -9392,24 +9262,6 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::BrackettedExpression, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BrackettedExpression, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::BrackettedExpression, 1usize) => {
                     state.add_element(
                         element
@@ -9419,6 +9271,19 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BrackettedExpression, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
                                 state: 0usize,
                             }),
                     );
@@ -9436,818 +9301,17 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 84usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 83usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 77usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 95usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 172usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 171usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 108usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 107usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 71usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 70usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 182usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 181usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 167usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 73usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 46usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 45usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 21usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 178usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 177usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 210usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 209usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 57usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ExpressionList,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 96usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 95usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 86usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 85usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 121usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 120usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 136usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 135usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 31usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 30usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 47usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 46usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 195usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 194usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 199usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 198usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 70usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 69usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 30usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 29usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 141usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 150usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 149usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 109usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 108usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 197usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 190usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 189usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 203usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 202usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 62usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 61usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 101usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 207usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 206usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 79usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 78usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 155usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 154usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 15usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 14usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 18usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 17usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 170usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 169usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 81usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 80usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 125usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 124usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 165usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ExpressionList,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 193usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 123usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 132usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 131usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 211usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 210usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 83usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 4usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 175usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 181usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 12usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 11usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 98usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 97usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 29usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 158usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 157usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 209usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 11usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 25usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 147usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 146usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 163usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 162usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 184usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 183usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
+                (SyntaxKind::BrackettedExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::BuiltInCall, 43usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 42usize,
+                                state: 41usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrOpen,
@@ -10255,64 +9319,12 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 22usize) => {
+                (SyntaxKind::BuiltInCall, 40usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 21usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Var,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 93usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 92usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 26usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 25usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 67usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 66usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 189usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 188usize,
+                                state: 5usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Comma,
@@ -10320,33 +9332,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 143usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 127usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 119usize) => {
+                (SyntaxKind::BuiltInCall, 3usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -10364,7 +9350,44 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 60usize,
+                                state: 63usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Nil,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BuiltInCall, 58usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Var,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BuiltInCall, 55usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 54usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
@@ -10372,155 +9395,12 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 74usize) => {
+                (SyntaxKind::BuiltInCall, 56usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 73usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 112usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 111usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 66usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 65usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 97usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 96usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 49usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 35usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 34usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 13usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 12usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 145usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 157usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 65usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 169usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 168usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 173usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 172usize,
+                                state: 55usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrOpen,
@@ -10528,25 +9408,56 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 177usize) => {
+                (SyntaxKind::BuiltInCall, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BuiltInCall, 63usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 176usize,
+                                state: 62usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Comma,
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BuiltInCall, 41usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 40usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::BuiltInCall, 62usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 179usize) => {
+                (SyntaxKind::BuiltInCall, 7usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 178usize,
+                                state: 5usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrOpen,
@@ -10554,7 +9465,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 149usize) => {
+                (SyntaxKind::BuiltInCall, 67usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -10562,316 +9473,17 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrClose,
+                                kind: SyntaxKind::Nil,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 87usize) => {
+                (SyntaxKind::BuiltInCall, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 86usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 146usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 145usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 183usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 182usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 187usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 188usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 187usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 75usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 74usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 206usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 205usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 54usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 53usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 8usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 45usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 50usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 49usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 105usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 104usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 162usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 161usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 104usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 103usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 19usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 18usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 60usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 133usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 132usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 135usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 102usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 101usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 120usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 119usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 131usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 53usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 154usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 153usize,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
@@ -10888,14 +9500,14 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Aggregate,
-                                state: 1usize,
+                                state: 2usize,
                             }),
                     );
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::StrLit,
@@ -10906,7 +9518,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 9usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::LangLit,
@@ -10917,18 +9529,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 15usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::LangmatchesLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 19usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::DatatypeLit,
@@ -10939,18 +9540,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 23usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BoundLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 27usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::IriLit,
@@ -10961,7 +9551,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 31usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::UriLit,
@@ -10972,29 +9562,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 33usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BnodeLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 39usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::RandLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 43usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::AbsLit,
@@ -11005,7 +9573,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 47usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::CeilLit,
@@ -11016,7 +9584,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 51usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::FloorLit,
@@ -11027,7 +9595,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 55usize,
+                                state: 7usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::RoundLit,
@@ -11038,10 +9606,439 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 57usize,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrlenLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::UcaseLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::LcaseLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::EncodeForUriLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::YearLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::MonthLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::DayLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::HoursLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::MinutesLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SecondsLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TimezoneLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TzLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Md5Lit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Sha1Lit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Sha256Lit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Sha384Lit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Sha512Lit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IsIriLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IsUriLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IsBlankLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IsLiteralLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IsNumericLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::LangmatchesLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ContainsLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrstartsLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrendsLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrbeforeLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrafterLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrlangLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StrdtLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 43usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SameTermLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 56usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::IfLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 59usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BoundLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 61usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BnodeLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 67usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::RandLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 67usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::NowLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 67usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::UuidLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 67usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::StruuidLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 73usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::ConcatLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 73usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::CoalesceLit,
                                 state: 0usize,
                             }),
                     );
@@ -11060,396 +10057,11 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 62usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrlenLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
                                 state: 0usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::StrReplaceExpression,
                                 state: 11usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 67usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UcaseLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 71usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::LcaseLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 75usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::EncodeForUriLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 81usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ContainsLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 87usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrstartsLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 93usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrendsLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 99usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrbeforeLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 105usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrafterLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 109usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::YearLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 113usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MonthLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 117usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DayLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 121usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::HoursLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 125usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MinutesLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 129usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SecondsLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 133usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::TimezoneLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 137usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::TzLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 139usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::NowLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 141usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::UuidLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 143usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StruuidLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 147usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Md5Lit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 151usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Sha1Lit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 155usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Sha256Lit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 159usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Sha384Lit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 163usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Sha512Lit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 165usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::CoalesceLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 173usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IfLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 179usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrlangLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 185usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::StrdtLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 191usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SameTermLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 195usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IsIriLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 199usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IsUriLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 203usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IsBlankLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 207usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IsLiteralLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 211usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::IsNumericLit,
-                                state: 0usize,
                             }),
                     );
                     state.add_element(
@@ -11486,7 +10098,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 42usize) => {
+                (SyntaxKind::BuiltInCall, 54usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -11494,204 +10106,30 @@ mod definitions {
                                 state: 41usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 153usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 176usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 175usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 201usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 107usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 117usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 116usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BuiltInCall, 69usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 171usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 170usize,
-                            })
-                            .push(Rule {
                                 kind: SyntaxKind::Comma,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 194usize) => {
+                (SyntaxKind::BuiltInCall, 73usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 193usize,
+                                state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
+                                kind: SyntaxKind::ExpressionList,
                                 state: 1usize,
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 198usize) => {
+                (SyntaxKind::BuiltInCall, 59usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 197usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 91usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 90usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 124usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 123usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 17usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 41usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 14usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 13usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 51usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 50usize,
+                                state: 58usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BrOpen,
@@ -11699,411 +10137,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::BuiltInCall, 89usize) => {
+                (SyntaxKind::RegexExpression, 9usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 0usize,
+                                state: 8usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrClose,
+                                kind: SyntaxKind::RegexLit,
                                 state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::BuiltInCall, 128usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 127usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 55usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 54usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 139usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 205usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 23usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 22usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 99usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 98usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 161usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 129usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 128usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 103usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 102usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 78usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 77usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 151usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 150usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 80usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 79usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 90usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 89usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 202usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 201usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 34usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 85usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 84usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 92usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 91usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 137usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 136usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 33usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 35usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 111usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 159usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 158usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 115usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 39usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Nil,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 168usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 167usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 185usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 184usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 27usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 26usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 191usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 190usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 116usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 115usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::BuiltInCall, 113usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 112usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RegexExpression, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::RegexExpression, 7usize) => {
                     state.add_element(
@@ -12118,32 +10163,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::RegexExpression, 8usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 7usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RegexExpression, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::RegexExpression, 6usize) => {
                     state.add_element(
                         element
@@ -12154,6 +10173,19 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Comma,
                                 state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::RegexExpression, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -12181,59 +10213,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::RegexExpression, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::RegexLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RegexExpression, 5usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 2usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::RegexExpression, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SubstringExpression, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SubstringExpression, 1usize) => {
+                (SyntaxKind::RegexExpression, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -12246,51 +10226,25 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::SubstringExpression, 0usize) => {
+                (SyntaxKind::RegexExpression, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::SubstringExpression, 3usize) => {
+                (SyntaxKind::RegexExpression, 8usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 7usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SubstringExpression, 6usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 5usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
+                                kind: SyntaxKind::BrOpen,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::SubstringExpression, 9usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SubstrLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::SubstringExpression, 5usize) => {
+                (SyntaxKind::RegexExpression, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -12316,6 +10270,89 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::SubstringExpression, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 9usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 8usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SubstrLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 7usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 6usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 6usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 5usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Comma,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 5usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::SubstringExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::SubstringExpression, 2usize) => {
                     state.add_element(
                         element
@@ -12340,12 +10377,54 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::StrReplaceExpression, 8usize) => {
+                (SyntaxKind::StrReplaceExpression, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrReplaceExpression, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 7usize,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::StrReplaceExpression, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::StrReplaceExpression, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrClose,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 3usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Comma,
@@ -12363,6 +10442,32 @@ mod definitions {
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
                                 state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::StrReplaceExpression, 11usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 10usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::ReplaceLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::StrReplaceExpression, 8usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 7usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Comma,
+                                state: 0usize,
                             }),
                     );
                 }
@@ -12392,16 +10497,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::StrReplaceExpression, 11usize) => {
+                (SyntaxKind::StrReplaceExpression, 7usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 10usize,
+                                state: 6usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::ReplaceLit,
-                                state: 0usize,
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
                             }),
                     );
                 }
@@ -12418,71 +10523,21 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::StrReplaceExpression, 7usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 6usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::StrReplaceExpression, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::StrReplaceExpression, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Comma,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::StrReplaceExpression, 0usize) => {
+                (SyntaxKind::ExistsFunc, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StrReplaceExpression, 3usize) => {
+                (SyntaxKind::ExistsFunc, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 1usize,
+                                state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
+                                kind: SyntaxKind::GroupGraphPattern,
+                                state: 5usize,
                             }),
                     );
                 }
@@ -12498,42 +10553,6 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
-                }
-                (SyntaxKind::ExistsFunc, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupGraphPattern,
-                                state: 5usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::ExistsFunc, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::NotExistsFunc, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::ExistsLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::NotExistsFunc, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::NotExistsFunc, 3usize) => {
                     state.add_element(
@@ -12561,38 +10580,122 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 49usize) => {
+                (SyntaxKind::NotExistsFunc, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::NotExistsFunc, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 47usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrOpen,
+                                kind: SyntaxKind::ExistsLit,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 14usize) => {
+                (SyntaxKind::Aggregate, 10usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 12usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::BrOpen,
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Aggregate, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 8usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::CountLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SumLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::MinLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::MaxLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::AvgLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 13usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SampleLit,
+                                state: 0usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 28usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::GroupConcatLit,
                                 state: 0usize,
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 36usize) => {
+                (SyntaxKind::Aggregate, 26usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 34usize,
+                                state: 20usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
@@ -12603,7 +10706,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 35usize,
+                                state: 25usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::DistinctLit,
@@ -12611,42 +10714,16 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 35usize) => {
+                (SyntaxKind::Aggregate, 25usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 34usize,
+                                state: 20usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 43usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 42usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Eq,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 32usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 30usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
                             }),
                     );
                 }
@@ -12663,101 +10740,12 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 11usize) => {
+                (SyntaxKind::Aggregate, 21usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 10usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
                                 state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 18usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 16usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 17usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 20usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 18usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 2usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 40usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 29usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 28usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 42usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 40usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::MyString,
@@ -12765,33 +10753,18 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 44usize) => {
+                (SyntaxKind::Aggregate, 11usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 43usize,
+                                state: 1usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::SeparatorLit,
-                                state: 0usize,
+                                kind: SyntaxKind::Expression,
+                                state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::Aggregate, 34usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 12usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -12799,83 +10772,7 @@ mod definitions {
                                 state: 10usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 11usize,
-                            })
-                            .push(Rule {
                                 kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 17usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 16usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 38usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 36usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 46usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 41usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 28usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 22usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
                                 state: 0usize,
                             }),
                     );
@@ -12885,7 +10782,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Star,
@@ -12896,7 +10793,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
@@ -12904,136 +10801,7 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 26usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 24usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrOpen,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 47usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 41usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 46usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 8usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::CountLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 14usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SumLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 20usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MinLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 26usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::MaxLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 32usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::AvgLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 38usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::SampleLit,
-                                state: 0usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 49usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::GroupConcatLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 16usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::BrClose,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 41usize) => {
+                (SyntaxKind::Aggregate, 20usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -13049,7 +10817,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 44usize,
+                                state: 23usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Colon,
@@ -13062,7 +10830,20 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Aggregate, 10usize) => {
+                (SyntaxKind::Aggregate, 22usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 21usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Eq,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Aggregate, 1usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -13075,12 +10856,51 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::Aggregate, 28usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 26usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Aggregate, 13usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 11usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::BrOpen,
+                                state: 0usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Aggregate, 23usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 22usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::SeparatorLit,
+                                state: 0usize,
+                            }),
+                    );
+                }
                 (SyntaxKind::Aggregate, 6usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Star,
@@ -13091,7 +10911,7 @@ mod definitions {
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 2usize,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::Expression,
@@ -13110,71 +10930,23 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Aggregate, 23usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 22usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 24usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 22usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 23usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Aggregate, 30usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 28usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Expression,
-                                state: 1usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 29usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::DistinctLit,
-                                state: 0usize,
-                            }),
-                    );
-                }
                 (SyntaxKind::IriOrFunction, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
+                }
+                (SyntaxKind::IriOrFunction, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iri,
+                                state: 1usize,
+                            }),
+                    );
                 }
                 (SyntaxKind::IriOrFunction, 1usize) => {
                     if let Some(parent) = element.pop() {
@@ -13191,37 +10963,6 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                }
-                (SyntaxKind::IriOrFunction, 3usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 1usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Iri,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Rdfliteral, 4usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::Iri,
-                                state: 1usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::Rdfliteral, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
                 }
                 (SyntaxKind::Rdfliteral, 1usize) => {
                     if let Some(parent) = element.pop() {
@@ -13263,6 +11004,24 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::Rdfliteral, 4usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::Iri,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::Rdfliteral, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::NumericLiteral, 0usize) => {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
@@ -13303,11 +11062,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::NumericLiteralUnsigned, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::NumericLiteralUnsigned, 1usize) => {
                     state.add_element(
                         element
@@ -13342,6 +11096,11 @@ mod definitions {
                                 state: 0usize,
                             }),
                     );
+                }
+                (SyntaxKind::NumericLiteralUnsigned, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::NumericLiteralPositive, 0usize) => {
                     if let Some(parent) = element.pop() {
@@ -13452,6 +11211,11 @@ mod definitions {
                             }),
                     );
                 }
+                (SyntaxKind::MyString, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::MyString, 1usize) => {
                     state.add_element(
                         element
@@ -13498,16 +11262,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::MyString, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Iri, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::Iri, 1usize) => {
                     state.add_element(
                         element
@@ -13531,6 +11285,16 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
+                }
+                (SyntaxKind::Iri, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PrefixedName, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
                 }
                 (SyntaxKind::PrefixedName, 1usize) => {
                     state.add_element(
@@ -13556,16 +11320,6 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::PrefixedName, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BlankNode, 0usize) => {
-                    if let Some(parent) = element.pop() {
-                        state.add_element(parent);
-                    }
-                }
                 (SyntaxKind::BlankNode, 1usize) => {
                     state.add_element(
                         element
@@ -13590,273 +11344,8 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::OffsetLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OffsetLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Questionmark, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Questionmark, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SeparatorLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SeparatorLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::NotLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NotLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::NamedLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NamedLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StrstartsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrstartsLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::DecimalNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DecimalNegative, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GroupLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GroupLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::DeleteDataLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DeleteDataLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ReducedLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ReducedLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::InsertDataLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InsertDataLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::RandLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RandLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Iriref, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Iriref, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ClOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClOpen, 8isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::CreateLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CreateLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ByLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ByLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::CoalesceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CoalesceLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SameTermLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SameTermLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IsBlankLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsBlankLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BlankNodeLabel, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BlankNodeLabel, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Datatype, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Datatype, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SelectLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SelectLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::DefaultLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DefaultLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::UndefLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UndefLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IsNumericLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsNumericLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::CopyLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CopyLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::MinutesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinutesLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::PnameLn, _) => {
-                    let added = state.expect_as(element, SyntaxKind::PnameLn, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IsUriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsUriLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AsLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::WithLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::WithLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::RegexLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RegexLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SampleLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SampleLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Pipe, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Pipe, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SubstrLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SubstrLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Langtag, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Langtag, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::FilterLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FilterLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::EncodeForUriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::EncodeForUriLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SecondsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SecondsLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::RoundLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RoundLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Star, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Star, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::UcaseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UcaseLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::UnionLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UnionLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IfLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IfLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StringLiteralLong1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong1, 2isize);
-                    if let Some(parent) = added.pop() {
+                (SyntaxKind::BlankNode, 0usize) => {
+                    if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
                 }
@@ -13866,314 +11355,26 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ClearLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClearLit, 10isize);
+                (SyntaxKind::LimitLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::LimitLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::AllLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AllLit, 10isize);
+                (SyntaxKind::DoubleNegative, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DoubleNegative, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DescribeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DescribeLit, 10isize);
+                (SyntaxKind::Amp2, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Amp2, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StrbeforeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrbeforeLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::MinLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SilentLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SilentLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Lt, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Lt, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Alit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Alit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IntoLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntoLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Anon, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Anon, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Bar, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Bar, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::NowLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NowLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::DayLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DayLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::MaxLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MaxLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Double, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Double, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Hat, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Hat, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::HavingLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::HavingLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TrueLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TrueLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Lte, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Lte, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ConstructLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ConstructLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AddLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AddLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Integer, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Integer, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TimezoneLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TimezoneLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Var1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Var1, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::LoadLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LoadLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::OptionalLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OptionalLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BoundLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BoundLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Nil, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Nil, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StrlenLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrlenLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IriLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::TzLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TzLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Sha512Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha512Lit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Stop, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Stop, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Pipe2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Pipe2, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::LcaseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LcaseLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SumLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SumLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ToLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ToLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ReplaceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ReplaceLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::GroupConcatLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GroupConcatLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StringLiteral1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteral1, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Sha256Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha256Lit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::LangmatchesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LangmatchesLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StrafterLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrafterLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ServiceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ServiceLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AbsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AbsLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::FalseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FalseLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Comma, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Comma, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IntegerPositive, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntegerPositive, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::SqOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SqOpen, 8isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AvgLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AvgLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AskLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AskLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::LangLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LangLit, 10isize);
+                (SyntaxKind::DeleteWhereLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DeleteWhereLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14184,68 +11385,104 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StringLiteral2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteral2, 2isize);
+                (SyntaxKind::MaxLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MaxLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::UsingLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UsingLit, 10isize);
+                (SyntaxKind::SeparatorLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SeparatorLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::HoursLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::HoursLit, 10isize);
+                (SyntaxKind::Datatype, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Datatype, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::IsIriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsIriLit, 10isize);
+                (SyntaxKind::AskLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AskLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StringLiteralLong2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong2, 2isize);
+                (SyntaxKind::Neq, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Neq, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::SqClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SqClose, 8isize);
+                (SyntaxKind::Md5Lit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Md5Lit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Var2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Var2, 2isize);
+                (SyntaxKind::StringLiteralLong1, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong1, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Gt, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Gt, 10isize);
+                (SyntaxKind::AllLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AllLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::InLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InLit, 10isize);
+                (SyntaxKind::Pipe2, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Pipe2, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::UriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UriLit, 10isize);
+                (SyntaxKind::UndefLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UndefLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::IntegerNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntegerNegative, 2isize);
+                (SyntaxKind::MinutesLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MinutesLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SumLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SumLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Comma, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Comma, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::OptionalLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::OptionalLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Hat, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Hat, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Var1, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Var1, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IntegerPositive, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IntegerPositive, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14256,50 +11493,188 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::ContainsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ContainsLit, 10isize);
+                (SyntaxKind::CreateLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::CreateLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::UuidLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UuidLit, 10isize);
+                (SyntaxKind::DayLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DayLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DropLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DropLit, 10isize);
+                (SyntaxKind::Gte, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Gte, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::BrOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BrOpen, 8isize);
+                (SyntaxKind::UnionLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UnionLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::FloorLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FloorLit, 10isize);
+                (SyntaxKind::BindLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::BindLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DecimalPositive, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DecimalPositive, 2isize);
+                (SyntaxKind::IfLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IfLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::GraphLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GraphLit, 10isize);
+                (SyntaxKind::GroupLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::GroupLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::MinusLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinusLit, 10isize);
+                (SyntaxKind::DescribeLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DescribeLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Var2, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Var2, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DescLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DescLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Div, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Div, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SparqlPrefixToken, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SparqlPrefixToken, 100isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Colon, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Colon, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IntegerNegative, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IntegerNegative, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::AvgLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AvgLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::LangLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::LangLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Bang, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Bang, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::TimezoneLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::TimezoneLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ClOpen, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ClOpen, 8isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Star, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Star, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::FilterLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::FilterLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StringLiteral1, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StringLiteral1, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StringLiteral2, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StringLiteral2, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DefaultLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DefaultLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::OffsetLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::OffsetLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::TrueLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::TrueLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BlankNodeLabel, _) => {
+                    let added = state.expect_as(element, SyntaxKind::BlankNodeLabel, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::CeilLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::CeilLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Gt, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Gt, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SampleLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SampleLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrlenLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrlenLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14310,8 +11685,374 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
+                (SyntaxKind::MoveLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MoveLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DeleteDataLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DeleteDataLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrbeforeLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrbeforeLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Double, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Double, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::InsertLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::InsertLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::CoalesceLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::CoalesceLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::GroupConcatLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::GroupConcatLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::NamedLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::NamedLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::RoundLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::RoundLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Decimal, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Decimal, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
                 (SyntaxKind::BnodeLit, _) => {
                     let added = state.expect_as(element, SyntaxKind::BnodeLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Plus, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Plus, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::NotLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::NotLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ClearLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ClearLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::YearLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::YearLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IntoLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IntoLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DecimalPositive, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DecimalPositive, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Nil, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Nil, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::InLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::InLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrlangLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrlangLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Stop, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Stop, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Alit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Alit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BoundLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::BoundLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StringLiteralLong2, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong2, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::LangmatchesLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::LangmatchesLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BrClose, _) => {
+                    let added = state.expect_as(element, SyntaxKind::BrClose, 8isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::HavingLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::HavingLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::AscLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AscLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::AddLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AddLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrstartsLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrstartsLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SameTermLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SameTermLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::RandLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::RandLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::BrOpen, _) => {
+                    let added = state.expect_as(element, SyntaxKind::BrOpen, 8isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StruuidLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StruuidLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::MinLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MinLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::MonthLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MonthLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::HoursLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::HoursLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ClClose, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ClClose, 8isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SqOpen, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SqOpen, 8isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Integer, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Integer, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Lt, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Lt, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DecimalNegative, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DecimalNegative, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ByLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ByLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Sha384Lit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Sha384Lit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ReducedLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ReducedLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::DropLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::DropLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::OrderLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::OrderLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SparqlBaseToken, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SparqlBaseToken, 100isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::LoadLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::LoadLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrafterLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrafterLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::InsertDataLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::InsertDataLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PnameNs, _) => {
+                    let added = state.expect_as(element, SyntaxKind::PnameNs, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Sha256Lit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Sha256Lit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IsBlankLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IsBlankLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::EncodeForUriLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::EncodeForUriLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ContainsLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ContainsLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ReplaceLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ReplaceLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Lte, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Lte, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::PnameLn, _) => {
+                    let added = state.expect_as(element, SyntaxKind::PnameLn, 2isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SecondsLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SecondsLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::GraphLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::GraphLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14328,122 +12069,32 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::CeilLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CeilLit, 10isize);
+                (SyntaxKind::IsIriLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IsIriLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DeleteWhereLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DeleteWhereLit, 10isize);
+                (SyntaxKind::IsUriLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IsUriLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Sha1Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha1Lit, 10isize);
+                (SyntaxKind::WithLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::WithLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Div, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Div, 10isize);
+                (SyntaxKind::SqClose, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SqClose, 8isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StrlangLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrlangLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Decimal, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Decimal, 2isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Gte, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Gte, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::WhereLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::WhereLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Md5Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Md5Lit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::BrClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BrClose, 8isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Eq, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Eq, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AscLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AscLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::YearLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::YearLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ValuesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ValuesLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::ClClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClClose, 8isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::Colon, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Colon, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StruuidLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StruuidLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::StrdtLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrdtLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::MoveLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MoveLit, 10isize);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::IsLiteralLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsLiteralLit, 10isize);
+                (SyntaxKind::NowLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::NowLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14454,8 +12105,68 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::MonthLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MonthLit, 10isize);
+                (SyntaxKind::CountLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::CountLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Sha512Lit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Sha512Lit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::FalseLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::FalseLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::LcaseLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::LcaseLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Pipe, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Pipe, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::UuidLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UuidLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::CopyLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::CopyLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::SilentLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SilentLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::UriLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UriLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Sha1Lit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Sha1Lit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::StrdtLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::StrdtLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -14466,98 +12177,146 @@ mod definitions {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::InsertLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InsertLit, 10isize);
+                (SyntaxKind::MinusLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::MinusLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::SparqlPrefixToken, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SparqlPrefixToken, 100isize);
+                (SyntaxKind::Iriref, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Iriref, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::BindLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BindLit, 10isize);
+                (SyntaxKind::ServiceLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ServiceLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::StrLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrLit, 10isize);
+                (SyntaxKind::SubstrLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SubstrLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::CountLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CountLit, 10isize);
+                (SyntaxKind::SelectLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::SelectLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Sha384Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha384Lit, 10isize);
+                (SyntaxKind::ValuesLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ValuesLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DoubleNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DoubleNegative, 2isize);
+                (SyntaxKind::UsingLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UsingLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Bang, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Bang, 10isize);
+                (SyntaxKind::Questionmark, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Questionmark, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::SparqlBaseToken, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SparqlBaseToken, 100isize);
+                (SyntaxKind::Bar, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Bar, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::PnameNs, _) => {
-                    let added = state.expect_as(element, SyntaxKind::PnameNs, 2isize);
+                (SyntaxKind::AbsLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AbsLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::OrderLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OrderLit, 10isize);
+                (SyntaxKind::TzLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::TzLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::LimitLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LimitLit, 10isize);
+                (SyntaxKind::Langtag, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Langtag, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Amp2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Amp2, 10isize);
+                (SyntaxKind::UcaseLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::UcaseLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::DescLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DescLit, 10isize);
+                (SyntaxKind::Anon, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Anon, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Neq, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Neq, 10isize);
+                (SyntaxKind::ConstructLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ConstructLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
-                (SyntaxKind::Plus, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Plus, 10isize);
+                (SyntaxKind::WhereLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::WhereLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::Eq, _) => {
+                    let added = state.expect_as(element, SyntaxKind::Eq, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IsNumericLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IsNumericLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::AsLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::AsLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IsLiteralLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IsLiteralLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::FloorLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::FloorLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::IriLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::IriLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::ToLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::ToLit, 10isize);
+                    if let Some(parent) = added.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::RegexLit, _) => {
+                    let added = state.expect_as(element, SyntaxKind::RegexLit, 10isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
