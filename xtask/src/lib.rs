@@ -297,6 +297,22 @@ fn push_rule(
     }
 }
 
+/// Generate an inlined terminal match: matches the token and wraps it in CST
+/// Start/End nodes in one call, without pushing a separate rule onto the stack.
+fn inline_terminal_rule(
+    next: usize,
+    n: &proc_macro2::Ident,
+    error_value: isize,
+) -> token_stream::TokenStream {
+    quote! {
+        let (matched, fb) = state.expect_as_inline(element, SyntaxKind::#n, #error_value);
+        state.add_element(matched.pop_push(Rule { kind: self.kind, state: #next }));
+        if let Some(fb) = fb {
+            state.add_element(fb.pop_push(Rule { kind: self.kind, state: #next }));
+        }
+    }
+}
+
 /// Mirrors the state-counter allocation in `add_impl` without generating code,
 /// returning the entry state for the given expression.
 fn compute_entry_state(expr: &Expr, state_count: &mut usize, next: usize) -> usize {
@@ -435,7 +451,8 @@ fn add_impl(
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
             reachable.insert(next);
-            push_rule(next, &n, 0) // literals are always terminals; initial state is 0
+            let error_value = ctx.context.error_values.get(&name).copied().unwrap_or(10isize);
+            inline_terminal_rule(next, &n, error_value)
         }
         Expr::Reference(re) => {
             *state_count += 1;
@@ -444,13 +461,14 @@ fn add_impl(
                 terminals.insert(Terminal::Ref(re.clone()));
             }
             let n = ctx.context.ident_for(re);
-            let entry = if is_terminal {
-                0 // terminals always start at state 0
-            } else {
-                *initial_states.get(re).unwrap_or_else(|| panic!("unknown rule: {re}"))
-            };
             reachable.insert(next);
-            push_rule(next, &n, entry)
+            if is_terminal {
+                let error_value = ctx.context.error_values.get(re.as_str()).copied().unwrap_or(2isize);
+                inline_terminal_rule(next, &n, error_value)
+            } else {
+                let entry = *initial_states.get(re).unwrap_or_else(|| panic!("unknown rule: {re}"));
+                push_rule(next, &n, entry)
+            }
         }
     };
 

@@ -1,9 +1,9 @@
 use std::{
-    collections::{BinaryHeap, HashSet},
+    collections::{BinaryHeap, HashMap},
     fmt::Debug,
 };
 
-use crate::{Error, FatToken, IncrementalBias, Step, TokenTrait, list::List};
+use crate::{Error, FatToken, IncrementalBias, Step, TermType, TokenTrait, list::List};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 struct Fingerprint(u128);
@@ -22,7 +22,10 @@ pub trait ParserTrait: Debug + Sized + 'static {
 }
 
 pub struct AStar<'a, R: ParserTrait> {
-    done: HashSet<(Fingerprint, usize, usize)>,
+    /// Maps each state key to the best score seen so far (queued or processed).
+    /// Used for lazy-deletion dedup: elements with worse scores are rejected
+    /// early in `add_element`; stale heap entries are skipped in `consume`.
+    done: HashMap<(Fingerprint, usize, usize), isize>,
     tokens: &'a [FatToken<R::Kind>],
     todo: BinaryHeap<Element<R>>,
     pub bias: IncrementalBias,
@@ -32,7 +35,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias) -> Self {
         Self {
             tokens,
-            done: HashSet::new(),
+            done: HashMap::new(),
             todo: BinaryHeap::new(),
             bias,
         }
@@ -42,17 +45,20 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         loop {
             let e = self.todo.pop()?;
 
-            if e.state.1 == self.tokens.len() && e.parent.len() == 1 {
-                return Some(e.list);
-            }
-
-            if let Some((head, _)) = e.parent.head() {
+            if let Some((head, _, _)) = e.parent.head() {
                 let state = (e.state.0, e.state.1, head.at());
-                if self.done.contains(&state) {
-                    continue;
+
+                // Skip stale entries: a better-scoring element for this state
+                // was enqueued after this one.
+                match self.done.get(&state) {
+                    Some(&best) if best > e.score => continue,
+                    _ => {}
                 }
 
-                self.done.insert(state);
+                if e.state.1 == self.tokens.len() && e.parent.len() == 1 {
+                    return Some(e.list);
+                }
+
                 head.step(&e, self);
             }
         }
@@ -62,10 +68,17 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         let at = element.parent.head().map(|x| x.0.at()).unwrap_or(0);
         let state = (element.state.0, element.state.1, at);
 
-        if self.done.contains(&state) {
-            return false;
+        match self.done.entry(state) {
+            std::collections::hash_map::Entry::Occupied(mut e) => {
+                if element.score <= *e.get() {
+                    return false; // reject: equal-or-worse duplicate
+                }
+                *e.get_mut() = element.score; // better path found
+            }
+            std::collections::hash_map::Entry::Vacant(v) => {
+                v.insert(element.score);
+            }
         }
-
 
         self.todo.push(element);
         true
@@ -91,41 +104,21 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     idx += 1;
                 }
 
-                // Compute incremental bias: compare the token's previous
-                // TermType (old_kind) with the TermType implied by the
-                // current parse context (innermost ancestor with a TermType).
-                let context_term_type = element
-                    .parent
-                    .iter()
-                    .find_map(|(rule, _)| rule.element_kind().term_type());
-                let bias = match (found.old_kind(), context_term_type) {
+                // Compute incremental bias using the cached term_type.
+                let bias = match (found.old_kind(), element.cached_term_type) {
                     (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
                     (Some(_), Some(_)) => self.bias.conflict_penalty,
                     _ => 0,
                 };
 
-                // When conflict_penalty is active, also enqueue an error-
-                // fallback element that leaves this token unconsumed.  This
-                // lets the A* explore parses where the conflicting token
-                // begins a new parse context (e.g. as the Subject of the
-                // next statement) rather than being forced into the current
-                // grammar slot.
                 if bias == self.bias.conflict_penalty && self.bias.conflict_penalty < 0 {
-                    // Reward the fallback for preserving the token's known role
-                    // in a better context (+match_bonus), rather than penalizing
-                    // it (-error_value).  The actual error node in the tree still
-                    // records the missing slot; the score bonus just ensures the
-                    // A* prefers role-preserving paths over unrelated error
-                    // recoveries (e.g. treating an IRI as a BASE directive).
                     let fallback = Element {
                         list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
                         score: element.score + self.bias.match_bonus,
                         state: (element.state.0, element.state.1),
+                        cached_term_type: element.cached_term_type,
                     };
-                    // Pop the terminal rule before enqueuing so the fallback
-                    // has a different `done` key (restored Fingerprint) and
-                    // is not rejected by `add_element`.
                     if let Some(popped) = fallback.pop() {
                         self.add_element(popped);
                     }
@@ -136,6 +129,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     parent: element.parent.clone(),
                     score: element.score + 2 + error_value + bias,
                     state: (element.state.0, idx),
+                    cached_term_type: element.cached_term_type,
                 };
             }
         }
@@ -147,16 +141,115 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             parent: element.parent.clone(),
             score: element.score - error_value,
             state: (element.state.0, idx),
+            cached_term_type: element.cached_term_type,
         }
+    }
+
+    /// Match a terminal token and wrap it in CST Start/End nodes inline,
+    /// without pushing a separate rule onto the parent stack.
+    ///
+    /// This replaces the push_rule + terminal step + pop cycle for terminals,
+    /// eliminating ~3 Rc allocations, 2 BinaryHeap operations, and 1
+    /// fingerprint computation per terminal token.
+    ///
+    /// Returns `(main, fallback)`. When a conflict_penalty bias applies,
+    /// `fallback` is `Some(element)` representing the error/no-consume path.
+    /// The caller must apply `pop_push(next_rule)` to both before enqueuing:
+    /// this gives the fallback a different `done` key (head.at() = NEXT ≠ K).
+    pub fn expect_as_inline(
+        &mut self,
+        element: &Element<R>,
+        token: R::Kind,
+        error_value: isize,
+    ) -> (Element<R>, Option<Element<R>>) {
+        let mut idx = element.state.1;
+        if let Some(found) = self.tokens.get(idx) {
+            if found.kind == token {
+                idx += 1;
+                while self
+                    .tokens
+                    .get(idx)
+                    .map(|x| x.kind.skips())
+                    .unwrap_or(false)
+                {
+                    idx += 1;
+                }
+
+                // Compute incremental bias using the cached term_type.
+                let bias = match (found.old_kind(), element.cached_term_type) {
+                    (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
+                    (Some(_), Some(_)) => self.bias.conflict_penalty,
+                    _ => 0,
+                };
+
+                // When conflict_penalty applies, produce a fallback that records
+                // an error without consuming the token. The caller applies
+                // pop_push(NEXT) to both, so the fallback key becomes
+                // (fp, same_pos, NEXT) which differs from current key (fp, pos, K).
+                let fallback = if bias == self.bias.conflict_penalty && self.bias.conflict_penalty < 0 {
+                    let fb_list = element.list
+                        .prepend(Step::start(token.clone()))
+                        .prepend(Step::error(Error::Expected(token.clone())))
+                        .prepend(Step::end());
+                    Some(Element {
+                        list: fb_list,
+                        parent: element.parent.clone(),
+                        score: element.score + self.bias.match_bonus,
+                        state: element.state,
+                        cached_term_type: element.cached_term_type,
+                    })
+                } else {
+                    None
+                };
+
+                // Build list: prepend Start, Bump, End (End at head).
+                // After reversal in from_steps: Start, Bump, End — correct CST.
+                let list = element.list
+                    .prepend(Step::start(token))
+                    .prepend(Step::bump())
+                    .prepend(Step::end());
+
+                return (
+                    Element {
+                        list,
+                        parent: element.parent.clone(),
+                        score: element.score + 2 + error_value + bias,
+                        state: (element.state.0, idx),
+                        cached_term_type: element.cached_term_type,
+                    },
+                    fallback,
+                );
+            }
+        }
+
+        // Error: token not present or wrong kind.
+        let list = element.list
+            .prepend(Step::start(token.clone()))
+            .prepend(Step::error(Error::Expected(token)))
+            .prepend(Step::end());
+
+        (
+            Element {
+                list,
+                parent: element.parent.clone(),
+                score: element.score - error_value,
+                state: (element.state.0, idx),
+                cached_term_type: element.cached_term_type,
+            },
+            None,
+        )
     }
 }
 
 #[derive(Debug)]
 pub struct Element<R: ParserTrait> {
     list: List<Step<R::Kind>>,
-    parent: List<(R, Fingerprint)>,
+    parent: List<(R, Fingerprint, Option<TermType>)>,
     score: isize,
     state: (Fingerprint, usize),
+    /// Cached term_type: the innermost ancestor TermType, maintained through
+    /// push/pop/pop_push to avoid an O(depth) parent-chain walk per token.
+    cached_term_type: Option<TermType>,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -168,29 +261,34 @@ impl<R: ParserTrait> Element<R> {
     fn new(current: R) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
+        let cached_term_type = current.element_kind().term_type();
         Self {
             list: List::default(),
-            parent: parent.prepend((current, head)),
+            parent: parent.prepend((current, head, None)),
             score: 0,
             state: (Fingerprint(1), 0),
+            cached_term_type,
         }
     }
 
     pub fn pop_push(&self, rule: R) -> Self {
-        let ((_, f), tail) = self.parent.slice().unwrap();
-        let parent = tail.prepend((rule, *f));
+        let ((_, f, old_tt), tail) = self.parent.slice().unwrap();
+        let cached_term_type = rule.element_kind().term_type().or(*old_tt);
+        let parent = tail.prepend((rule, *f, *old_tt));
         Self {
             parent,
             list: self.list.clone(),
             score: self.score,
             state: self.state.clone(),
+            cached_term_type,
         }
     }
 
     pub fn push(&self, rule: R) -> Self {
         let kind = rule.element_kind();
         let (s, a) = self.state;
-        let parent = self.parent.prepend((rule, s));
+        let cached_term_type = kind.term_type().or(self.cached_term_type);
+        let parent = self.parent.prepend((rule, s, self.cached_term_type));
         let list = self.list.prepend(Step::start(kind.clone()));
         let s = descend(s, kind.branch());
         Self {
@@ -198,11 +296,12 @@ impl<R: ParserTrait> Element<R> {
             list,
             score: self.score,
             state: (s, a),
+            cached_term_type,
         }
     }
 
     pub fn pop(&self) -> Option<Self> {
-        let ((_, f), parent) = self.parent.slice()?;
+        let ((_, f, old_tt), parent) = self.parent.slice()?;
         let list = self.list.prepend(Step::end());
         let (_, a) = self.state;
         Some(Self {
@@ -210,6 +309,7 @@ impl<R: ParserTrait> Element<R> {
             list,
             score: self.score,
             state: (*f, a),
+            cached_term_type: *old_tt,
         })
     }
 }

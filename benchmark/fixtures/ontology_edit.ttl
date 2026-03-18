@@ -1,0 +1,66 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org/ontology#> .
+
+ex:Ontology a owl:Ontology ;
+    rdfs:label "Example Ontology" ;
+    rdfs:comment "A small ontology for benchmarking." .
+
+ex:Agent a owl:Class ;
+    rdfs:label "Agent" ;
+    rdfs:comment "A thing that acts." .
+
+ex:Person a owl:Class ;
+    rdfs:subClassOf ex:Agent ;
+    rdfs:label "Person" ;
+    rdfs:comment "A human being." .
+
+ex:Organization a owl:Class ;
+    rdfs:subClassOf ex:Agent ;
+    rdfs:label "Organization" .
+
+ex:name a owl:DatatypeProperty ;
+    rdfs:domain ex:Agent ;
+    rdfs:range xsd:string ;
+    rdfs:label "name" .
+
+ex:age a owl:DatatypeProperty ;
+    rdfs:domain ex:Person ;
+<<<<<<< before
+    rdfs:range xsd:integer ;
+    rdfs:label "age" ;
+    rdfs:comment "Age in years." .
+=======
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "age" ;
+    rdfs:comment "Age in whole years (non-negative)." .
+>>>>>>> after
+
+ex:knows a owl:ObjectProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Person ;
+    rdfs:label "knows" .
+
+ex:memberOf a owl:ObjectProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Organization ;
+    rdfs:label "member of" .
+
+ex:alice a ex:Person ;
+    ex:name "Alice" ;
+<<<<<<< before
+    ex:age 30 ;
+=======
+    ex:age 31 ;
+>>>>>>> after
+    ex:knows ex:bob .
+
+ex:bob a ex:Person ;
+    ex:name "Bob" ;
+    ex:age 25 ;
+    ex:memberOf ex:AcmeCorp .
+
+ex:AcmeCorp a ex:Organization ;
+    ex:name "Acme Corporation" .

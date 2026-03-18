@@ -1,3 +1,6 @@
+[workspace]
+members = ["benchmark", "xtask"]
+
 [package]
 name = "turtle"
 version = "0.1.0"

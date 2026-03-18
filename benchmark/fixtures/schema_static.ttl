@@ -1,0 +1,49 @@
+@prefix schema: <https://schema.org/> .
+@prefix ex: <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:AcmeCorp a schema:Organization ;
+    schema:name "Acme Corporation" ;
+    schema:url <http://www.acme.example.org> ;
+    schema:email "info@acme.example.org" ;
+    schema:telephone "+1-800-555-0100" ;
+    schema:address ex:AcmeAddress ;
+    schema:employee ex:alice , ex:bob , ex:carol .
+
+ex:AcmeAddress a schema:PostalAddress ;
+    schema:streetAddress "123 Main Street" ;
+    schema:addressLocality "Springfield" ;
+    schema:addressRegion "IL" ;
+    schema:postalCode "62701" ;
+    schema:addressCountry "US" .
+
+ex:alice a schema:Person ;
+    schema:name "Alice Smith" ;
+    schema:jobTitle "Software Engineer" ;
+    schema:email "alice@acme.example.org" ;
+    schema:worksFor ex:AcmeCorp .
+
+ex:bob a schema:Person ;
+    schema:name "Bob Jones" ;
+    schema:jobTitle "Product Manager" ;
+    schema:email "bob@acme.example.org" ;
+    schema:worksFor ex:AcmeCorp .
+
+ex:carol a schema:Person ;
+    schema:name "Carol White" ;
+    schema:jobTitle "Data Scientist" ;
+    schema:email "carol@acme.example.org" ;
+    schema:worksFor ex:AcmeCorp .
+
+ex:ProductA a schema:Product ;
+    schema:name "Widget Pro" ;
+    schema:description "A professional-grade widget for enterprise use." ;
+    schema:sku "WP-1001" ;
+    schema:offers ex:OfferA .
+
+ex:OfferA a schema:Offer ;
+    schema:price "299.99"^^xsd:decimal ;
+    schema:priceCurrency "USD" ;
+    schema:availability schema:InStock ;
+    schema:seller ex:AcmeCorp .

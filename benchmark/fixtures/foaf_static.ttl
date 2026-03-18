@@ -1,0 +1,32 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:alice a foaf:Person ;
+    foaf:name "Alice Smith" ;
+    foaf:mbox <mailto:alice@example.org> ;
+    foaf:homepage <http://example.org/alice> ;
+    foaf:age "30"^^xsd:integer ;
+    foaf:knows ex:bob , ex:carol , ex:dave .
+
+ex:bob a foaf:Person ;
+    foaf:name "Bob Jones" ;
+    foaf:mbox <mailto:bob@example.org> ;
+    foaf:age "25"^^xsd:integer ;
+    foaf:knows ex:alice .
+
+ex:carol a foaf:Person ;
+    foaf:name "Carol White" ;
+    foaf:homepage <http://example.org/carol> ;
+    foaf:knows ex:alice , ex:dave .
+
+ex:dave a foaf:Person ;
+    foaf:name "Dave Brown" ;
+    foaf:mbox <mailto:dave@example.org> ;
+    foaf:age "40"^^xsd:integer .
+
+ex:AliceProfile a foaf:PersonalProfileDocument ;
+    foaf:maker ex:alice ;
+    foaf:primaryTopic ex:alice ;
+    rdfs:label "Alice's FOAF profile" .

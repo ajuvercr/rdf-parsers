@@ -1,0 +1,19 @@
+[package]
+name = "benchmark"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+lang-turtle = { version = "0.1.0", path = "../../../swls/swls/lang-turtle" }
+# tower-lsp (pulled in by lang-turtle → lsp-core) needs a runtime feature to compile
+tower-lsp = { version = "0.19", default-features = false, features = ["runtime-tokio"] }
+turtle = { path = ".." }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+lsp-types = "0.94"
+oxttl = "0.2"
+
+[[bench]]
+name = "turtle_parse"
+harness = false

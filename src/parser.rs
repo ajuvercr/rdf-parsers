@@ -89,7 +89,12 @@ impl Parse {
         let mut errors = List::default();
         let mut builder = GreenNodeBuilder::new();
         builder.start_node(T::ROOT.into());
-        let steps: Vec<_> = steps.iter().cloned().collect();
+        let step_count = steps.len();
+        let steps: Vec<_> = {
+            let mut v = Vec::with_capacity(step_count);
+            v.extend(steps.iter().cloned());
+            v
+        };
         for step in steps.into_iter().rev() {
             match step {
                 Step::Start(syntax_kind) => {
