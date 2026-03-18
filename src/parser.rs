@@ -15,6 +15,18 @@ impl<T: TokenTrait> FatToken<T> {
             old_kind: None,
         }
     }
+
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    pub fn old_kind(&self) -> Option<TermType> {
+        self.old_kind
+    }
+
+    pub fn set_old_kind(&mut self, kind: Option<TermType>) {
+        self.old_kind = kind;
+    }
 }
 
 #[derive(PartialEq, Eq, Debug, Copy, Clone)]
@@ -122,6 +134,34 @@ use std::{collections::HashSet, ops::Range};
 use rowan::{GreenNode, GreenNodeBuilder, Language};
 
 use crate::{Context, ParserTrait, TokenTrait, list::List};
+
+/// Walk a rowan `SyntaxNode` tree and extract the `TermType` for each
+/// non-whitespace/non-error token by finding the innermost ancestor whose
+/// kind maps to a `TermType` via `term_type_of`.
+///
+/// Returns `Vec<Option<TermType>>` indexed by token position (skipping
+/// whitespace/error tokens to match the token-vec indices used by the A*
+/// parser).
+pub fn extract_term_types<L: rowan::Language>(
+    root: &rowan::SyntaxNode<L>,
+    term_type_of: impl Fn(L::Kind) -> Option<TermType>,
+) -> Vec<Option<TermType>>
+where
+    L::Kind: Into<rowan::SyntaxKind>,
+{
+    let mut result = Vec::new();
+    for token in root.descendants_with_tokens() {
+        let rowan::NodeOrToken::Token(tok) = token else {
+            continue;
+        };
+        // Walk up ancestors to find the innermost one with a TermType.
+        let tt = tok
+            .parent_ancestors()
+            .find_map(|ancestor| term_type_of(ancestor.kind()));
+        result.push(tt);
+    }
+    result
+}
 
 #[derive(Clone, Debug)]
 pub struct Parser<T: TokenTrait> {

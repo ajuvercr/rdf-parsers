@@ -815,6 +815,19 @@ pub fn generate(path: &str, contents: &str) -> String {
         .map(|x| config.context.ident_for(x))
         .collect();
 
+    let term_type_arms: Vec<_> = config
+        .context
+        .term_types
+        .iter()
+        .map(|(rule, variant)| {
+            let rule_ident = config.context.ident_for(rule);
+            let variant_ident = syn::Ident::new(variant, Span::call_site());
+            quote! {
+                SyntaxKind::#rule_ident => Some(crate::TermType::#variant_ident),
+            }
+        })
+        .collect();
+
     let enum_definition = quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
         #(#sub_pattersn)*
@@ -943,6 +956,13 @@ pub fn generate(path: &str, contents: &str) -> String {
 
         fn ending_tokens(&self) -> &'static [SyntaxKind] {
             &[]
+        }
+
+        fn term_type(&self) -> Option<crate::TermType> {
+            match self {
+                #( #term_type_arms )*
+                _ => None,
+            }
         }
     }
 

@@ -95,6 +95,8 @@ pub trait TokenTrait:
 
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
+
+    fn term_type(&self) -> Option<TermType>;
 }
 
 pub struct Context {
@@ -105,7 +107,7 @@ pub struct Context {
 /// these two SyntaxKind types, allowing for a nicer SyntaxNode API where
 /// "kinds" are values from our `enum SyntaxKind`, instead of plain u16 values.
 
-fn tokenize<'a, K>(text: &'a str) -> Vec<FatToken<K>>
+pub fn tokenize<'a, K>(text: &'a str) -> Vec<FatToken<K>>
 where
     K: TokenTrait + Logos<'a, Source = str>,
     <K as Logos<'a>>::Extras: Default,
@@ -141,6 +143,97 @@ where
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
     let tokens = tokenize::<T::Kind>(text);
-    let list = a_star::a_star(root, &tokens);
+    let list = a_star::a_star(
+        root,
+        &tokens,
+        IncrementalBias {
+            match_bonus: 0,
+            conflict_penalty: 0,
+        },
+    );
+    Parse::from_steps(&tokens, list)
+}
+
+/// Information from a previous parse needed for incremental re-parsing.
+pub struct PrevParseInfo<K: TokenTrait> {
+    pub tokens: Vec<FatToken<K>>,
+    pub term_types: Vec<Option<TermType>>,
+}
+
+/// Score adjustments applied in A* `expect_as` when a token's previous
+/// `TermType` (from `FatToken::old_kind`) agrees or conflicts with the
+/// current parse context.
+///
+/// The defaults are conservative: a small bonus for agreement and a modest
+/// penalty for conflict.  Callers that need stronger bias (e.g. to recover a
+/// whole subject–predicate–object triple from a two-token edit) should
+/// increase the magnitudes — a `conflict_penalty` around `-(N * match_bonus)`
+/// where N is the number of preserved tokens is a reasonable starting point.
+#[derive(Debug, Clone, Copy)]
+pub struct IncrementalBias {
+    /// Added to the A* score when `old_kind == current TermType`.
+    pub match_bonus: isize,
+    /// Added to the A* score when `old_kind != current TermType`
+    /// (should be negative).
+    pub conflict_penalty: isize,
+}
+
+impl Default for IncrementalBias {
+    fn default() -> Self {
+        Self {
+            match_bonus: 4,
+            conflict_penalty: -5,
+        }
+    }
+}
+
+/// Like `parse_t_2` but, when `prev` is provided, diffs the token stream
+/// against the previous one and copies each old token's `TermType` onto the
+/// matching new token via `FatToken::set_old_kind`.  The A* scorer then uses
+/// `bias` to adjust scores for parses that agree or disagree with the
+/// previous token roles.
+pub fn parse_t_2_incremental<'a, T: a_star::ParserTrait + 'static>(
+    root: T,
+    text: &'a str,
+    prev: Option<&PrevParseInfo<T::Kind>>,
+    bias: IncrementalBias,
+) -> Parse
+where
+    T::Kind: Logos<'a, Source = str>,
+    <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
+{
+    let mut tokens = tokenize::<T::Kind>(text);
+
+    if let Some(prev) = prev {
+        // Build text slices for the differ.
+        let old_texts: Vec<&str> = prev.tokens.iter().map(|t| t.text()).collect();
+        let new_texts: Vec<&str> = tokens.iter().map(|t| t.text()).collect();
+
+        // Map new token index → old token index for Equal (unchanged) regions.
+        use similar::{Algorithm, DiffOp, capture_diff_slices};
+        let ops = capture_diff_slices(Algorithm::Myers, &old_texts, &new_texts);
+        let mut new_to_old = std::collections::HashMap::<usize, usize>::new();
+        for op in &ops {
+            if let DiffOp::Equal {
+                old_index,
+                new_index,
+                len,
+            } = op
+            {
+                for i in 0..*len {
+                    new_to_old.insert(new_index + i, old_index + i);
+                }
+            }
+        }
+
+        // Copy the old TermType onto each unchanged new token.
+        for (new_idx, tok) in tokens.iter_mut().enumerate() {
+            if let Some(&old_idx) = new_to_old.get(&new_idx) {
+                tok.set_old_kind(prev.term_types.get(old_idx).copied().flatten());
+            }
+        }
+    }
+
+    let list = a_star::a_star(root, &tokens, bias);
     Parse::from_steps(&tokens, list)
 }

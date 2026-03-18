@@ -3,7 +3,7 @@ use std::{
     fmt::Debug,
 };
 
-use crate::{Error, FatToken, Step, TokenTrait, list::List};
+use crate::{Error, FatToken, IncrementalBias, Step, TokenTrait, list::List};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 struct Fingerprint(u128);
@@ -25,14 +25,16 @@ pub struct AStar<'a, R: ParserTrait> {
     done: HashSet<(Fingerprint, usize, usize)>,
     tokens: &'a [FatToken<R::Kind>],
     todo: BinaryHeap<Element<R>>,
+    pub bias: IncrementalBias,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
-    fn new(tokens: &'a [FatToken<R::Kind>]) -> Self {
+    fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias) -> Self {
         Self {
             tokens,
             done: HashSet::new(),
             todo: BinaryHeap::new(),
+            bias,
         }
     }
 
@@ -70,7 +72,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     }
 
     pub fn expect_as(
-        &self,
+        &mut self,
         element: &Element<R>,
         token: R::Kind,
         error_value: isize,
@@ -88,10 +90,51 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 {
                     idx += 1;
                 }
+
+                // Compute incremental bias: compare the token's previous
+                // TermType (old_kind) with the TermType implied by the
+                // current parse context (innermost ancestor with a TermType).
+                let context_term_type = element
+                    .parent
+                    .iter()
+                    .find_map(|(rule, _)| rule.element_kind().term_type());
+                let bias = match (found.old_kind(), context_term_type) {
+                    (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
+                    (Some(_), Some(_)) => self.bias.conflict_penalty,
+                    _ => 0,
+                };
+
+                // When conflict_penalty is active, also enqueue an error-
+                // fallback element that leaves this token unconsumed.  This
+                // lets the A* explore parses where the conflicting token
+                // begins a new parse context (e.g. as the Subject of the
+                // next statement) rather than being forced into the current
+                // grammar slot.
+                if bias == self.bias.conflict_penalty && self.bias.conflict_penalty < 0 {
+                    // Reward the fallback for preserving the token's known role
+                    // in a better context (+match_bonus), rather than penalizing
+                    // it (-error_value).  The actual error node in the tree still
+                    // records the missing slot; the score bonus just ensures the
+                    // A* prefers role-preserving paths over unrelated error
+                    // recoveries (e.g. treating an IRI as a BASE directive).
+                    let fallback = Element {
+                        list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
+                        parent: element.parent.clone(),
+                        score: element.score + self.bias.match_bonus,
+                        state: (element.state.0, element.state.1),
+                    };
+                    // Pop the terminal rule before enqueuing so the fallback
+                    // has a different `done` key (restored Fingerprint) and
+                    // is not rejected by `add_element`.
+                    if let Some(popped) = fallback.pop() {
+                        self.add_element(popped);
+                    }
+                }
+
                 return Element {
                     list,
                     parent: element.parent.clone(),
-                    score: element.score + 2 + error_value,
+                    score: element.score + 2 + error_value + bias,
                     state: (element.state.0, idx),
                 };
             }
@@ -184,8 +227,12 @@ impl<R: ParserTrait> PartialOrd for Element<R> {
     }
 }
 
-pub fn a_star<R: ParserTrait>(root: R, tokens: &[FatToken<R::Kind>]) -> List<Step<R::Kind>> {
-    let mut state = AStar::new(tokens);
+pub fn a_star<R: ParserTrait>(
+    root: R,
+    tokens: &[FatToken<R::Kind>],
+    bias: IncrementalBias,
+) -> List<Step<R::Kind>> {
+    let mut state = AStar::new(tokens, bias);
     state.todo.push(Element::new(root));
     state.consume().unwrap_or_default()
 }

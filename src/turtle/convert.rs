@@ -33,12 +33,12 @@ pub fn convert(root: &Node) -> Turtle {
 
     for stmt in children(root, SyntaxKind::Statement) {
         if let Some(dir) = child(&stmt, SyntaxKind::Directive) {
-            if let Some(b) = child(&dir, SyntaxKind::Base)
-                .or_else(|| child(&dir, SyntaxKind::SparqlBase))
+            if let Some(b) =
+                child(&dir, SyntaxKind::Base).or_else(|| child(&dir, SyntaxKind::SparqlBase))
             {
                 base = Some(Spanned(convert_base(&b), text_range(&b)));
-            } else if let Some(p) = child(&dir, SyntaxKind::PrefixId)
-                .or_else(|| child(&dir, SyntaxKind::SparqlPrefix))
+            } else if let Some(p) =
+                child(&dir, SyntaxKind::PrefixId).or_else(|| child(&dir, SyntaxKind::SparqlPrefix))
             {
                 prefixes.push(Spanned(convert_prefix(&p), text_range(&p)));
             }
@@ -106,7 +106,10 @@ fn convert_triples(node: &Node) -> Triple {
     let (subject, po_node) = if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
         let range = text_range(&bpl);
         let subject = convert_blank_node_property_list(&bpl);
-        (Spanned(subject, range), child(node, SyntaxKind::PredicateObjectList))
+        (
+            Spanned(subject, range),
+            child(node, SyntaxKind::PredicateObjectList),
+        )
     } else if let Some(subj) = child(node, SyntaxKind::Subject) {
         let range = text_range(&subj);
         (
@@ -328,7 +331,10 @@ fn convert_rdf_literal(node: &Node) -> RDFLiteral {
 }
 
 fn strip_string_delimiters(text: &str) -> (&str, StringStyle) {
-    if let Some(inner) = text.strip_prefix("\"\"\"").and_then(|s| s.strip_suffix("\"\"\"")) {
+    if let Some(inner) = text
+        .strip_prefix("\"\"\"")
+        .and_then(|s| s.strip_suffix("\"\"\""))
+    {
         (inner, StringStyle::DoubleLong)
     } else if let Some(inner) = text.strip_prefix("'''").and_then(|s| s.strip_suffix("'''")) {
         (inner, StringStyle::SingleLong)
@@ -469,10 +475,14 @@ mod tests {
 
     #[test]
     fn test_a_shorthand() {
-        let doc =
-            parse("@prefix foaf: <http://xmlns.com/foaf/0.1/> . <http://example.org/alice> a foaf:Person .");
+        let doc = parse(
+            "@prefix foaf: <http://xmlns.com/foaf/0.1/> . <http://example.org/alice> a foaf:Person .",
+        );
         let t = doc.triples[0].value();
-        assert!(matches!(t.po[0].predicate.value(), Term::NamedNode(NamedNode::A(_))));
+        assert!(matches!(
+            t.po[0].predicate.value(),
+            Term::NamedNode(NamedNode::A(_))
+        ));
         assert!(nn_eq(
             term_nn(t.po[0].object[0].value()),
             &prefixed("foaf", "Person")
@@ -483,34 +493,39 @@ mod tests {
 
     #[test]
     fn test_prefixed_name_subject() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob .",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob .");
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
-        assert!(nn_eq(term_nn(t.po[0].object[0].value()), &prefixed("ex", "bob")));
+        assert!(nn_eq(
+            term_nn(t.po[0].object[0].value()),
+            &prefixed("ex", "bob")
+        ));
     }
 
     // ── multiple predicate-object pairs (`;`) ────────────────────────────────
 
     #[test]
     fn test_multiple_po_pairs() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\" ; ex:age 30 .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\" ; ex:age 30 .");
         let t = doc.triples[0].value();
         assert_eq!(t.po.len(), 2);
-        assert!(nn_eq(term_nn(t.po[0].predicate.value()), &prefixed("ex", "name")));
-        assert!(nn_eq(term_nn(t.po[1].predicate.value()), &prefixed("ex", "age")));
+        assert!(nn_eq(
+            term_nn(t.po[0].predicate.value()),
+            &prefixed("ex", "name")
+        ));
+        assert!(nn_eq(
+            term_nn(t.po[1].predicate.value()),
+            &prefixed("ex", "age")
+        ));
     }
 
     // ── multiple objects (`,`) ────────────────────────────────────────────────
 
     #[test]
     fn test_multiple_objects() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob , ex:carol .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob , ex:carol .");
         let t = doc.triples[0].value();
         assert_eq!(t.po[0].object.len(), 2);
         assert!(nn_eq(
@@ -535,8 +550,7 @@ mod tests {
 
     #[test]
     fn test_string_literal_with_lang() {
-        let doc =
-            parse("@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\"@en .");
+        let doc = parse("@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\"@en .");
         let t = doc.triples[0].value();
         match term_lit(t.po[0].object[0].value()) {
             Literal::RDF(r) => {
@@ -588,8 +602,7 @@ mod tests {
 
     #[test]
     fn test_named_blank_node() {
-        let doc =
-            parse("@prefix ex: <http://example.org/> . _:b0 ex:knows ex:alice .");
+        let doc = parse("@prefix ex: <http://example.org/> . _:b0 ex:knows ex:alice .");
         let t = doc.triples[0].value();
         match term_bn(t.subject.value()) {
             BlankNode::Named(name, _) => assert_eq!(name, "b0"),
@@ -601,9 +614,8 @@ mod tests {
 
     #[test]
     fn test_anon_blank_node_property_list() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:knows [ ex:name \"Bob\" ] .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:knows [ ex:name \"Bob\" ] .");
         let t = doc.triples[0].value();
         match term_bn(t.po[0].object[0].value()) {
             BlankNode::Unnamed(pos, _, _) => {
@@ -623,7 +635,10 @@ mod tests {
     fn test_blank_node_subject_property_list() {
         let doc = parse("@prefix ex: <http://example.org/> . [ ex:name \"Alice\" ] ex:age 30 .");
         let t = doc.triples[0].value();
-        assert!(matches!(t.subject.value(), Term::BlankNode(BlankNode::Unnamed(_, _, _))));
+        assert!(matches!(
+            t.subject.value(),
+            Term::BlankNode(BlankNode::Unnamed(_, _, _))
+        ));
         assert_eq!(t.po.len(), 1);
     }
 
@@ -631,9 +646,8 @@ mod tests {
 
     #[test]
     fn test_collection() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:list ( ex:a ex:b ex:c ) .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:list ( ex:a ex:b ex:c ) .");
         let t = doc.triples[0].value();
         match t.po[0].object[0].value() {
             Term::Collection(items) => {
@@ -661,7 +675,10 @@ mod tests {
     #[test]
     fn test_missing_trailing_dot_reports_error() {
         let p = parse_raw("@prefix ex: <http://example.org/> . ex:alice ex:age 30");
-        assert!(p.errors.len() > 0, "missing trailing dot should produce an error");
+        assert!(
+            p.errors.len() > 0,
+            "missing trailing dot should produce an error"
+        );
         // The error should mention the Stop (`.`) terminal
         assert!(
             p.errors.iter().any(|e| e.contains("Stop")),
@@ -674,7 +691,10 @@ mod tests {
     fn test_missing_prefix_iri_reports_error() {
         // `@prefix ex:` with no IRI — missing the Iriref token
         let p = parse_raw("@prefix ex: .");
-        assert!(p.errors.len() > 0, "missing prefix IRI should produce an error");
+        assert!(
+            p.errors.len() > 0,
+            "missing prefix IRI should produce an error"
+        );
     }
 
     #[test]
@@ -719,9 +739,8 @@ mod tests {
 
     #[test]
     fn test_multiple_triples() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:age 30 . ex:bob ex:age 25 .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:age 30 . ex:bob ex:age 25 .");
         assert_eq!(doc.triples.len(), 2);
         assert!(nn_eq(
             term_nn(doc.triples[0].subject.value()),
@@ -731,5 +750,147 @@ mod tests {
             term_nn(doc.triples[1].subject.value()),
             &prefixed("ex", "bob")
         ));
+    }
+
+    // ── incremental parsing ───────────────────────────────────────────────────
+
+    use crate::{
+        IncrementalBias, PrevParseInfo, TokenTrait as _, extract_term_types, parse_t_2_incremental,
+        tokenize,
+    };
+
+    fn prev_info(text: &str) -> PrevParseInfo<lang::SyntaxKind> {
+        let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
+        let root = parse.syntax::<lang::Lang>();
+        let tokens = tokenize::<lang::SyntaxKind>(text);
+        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
+        PrevParseInfo { tokens, term_types }
+    }
+
+    fn roles(
+        text: &str,
+        prev: Option<&PrevParseInfo<lang::SyntaxKind>>,
+        bias: IncrementalBias,
+    ) -> Vec<(String, Option<crate::TermType>)> {
+        let parse = parse_t_2_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            text,
+            prev,
+            bias,
+        );
+        let root = parse.syntax::<lang::Lang>();
+        let tokens = tokenize::<lang::SyntaxKind>(text);
+        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
+        tokens
+            .iter()
+            .zip(term_types.iter())
+            .filter(|(t, _)| !t.kind.skips())
+            .map(|(t, tt)| (t.text().to_owned(), *tt))
+            .collect()
+    }
+
+    /// Without incremental hints, the baseline A* parses `<a> <b> <c> <d> .`
+    /// (invalid Turtle) as: subject=`<a>`, predicate=`<b>`, then resolves
+    /// the extra tokens `<c>` and `<d>` as two objects in the same objectList
+    /// (error: missing comma).
+    #[test]
+    fn test_incremental_baseline_roles() {
+        let r = roles("<a> <b> <c> <d> .", None, IncrementalBias::default());
+        let role_of = |tok: &str| r.iter().find(|(t, _)| t == tok).unwrap().1;
+
+        assert_eq!(role_of("<a>"), Some(crate::TermType::Subject));
+        assert_eq!(role_of("<b>"), Some(crate::TermType::Predicate));
+        assert_eq!(role_of("<c>"), Some(crate::TermType::Object));
+        assert_eq!(role_of("<d>"), Some(crate::TermType::Object));
+    }
+
+    /// Verify that tokens inside a nested blank node get the innermost
+    /// TermType, not the outer one.
+    /// `[ <p1> [ <p2> <o2> ] ] <q> <r> .`
+    /// - `<p2>` is the predicate of the inner blank node → Predicate
+    /// - `<o2>` is the object of the inner blank node    → Object
+    #[test]
+    fn test_extract_term_types_nested_blank_nodes() {
+        let text = "[ <p1> [ <p2> <o2> ] ] <q> <r> .";
+        let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
+        let root = parse.syntax::<lang::Lang>();
+        let tokens = tokenize::<lang::SyntaxKind>(text);
+        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
+
+        // Build a map of token text → TermType for convenient lookup.
+        use std::collections::HashMap;
+        let map: HashMap<&str, Option<crate::TermType>> = tokens
+            .iter()
+            .zip(term_types.iter())
+            .filter(|(t, _)| !t.kind.skips())
+            .map(|(t, tt)| (t.text(), *tt))
+            .collect();
+
+        assert_eq!(
+            map.get("<p2>").copied().flatten(),
+            Some(crate::TermType::Predicate),
+            "<p2> should be Predicate (innermost blank node context)"
+        );
+        assert_eq!(
+            map.get("<o2>").copied().flatten(),
+            Some(crate::TermType::Object),
+            "<o2> should be Object (innermost blank node context)"
+        );
+        // <p1> is the predicate of the outer blank-node property list.
+        assert_eq!(
+            map.get("<p1>").copied().flatten(),
+            Some(crate::TermType::Predicate),
+            "<p1> should be Predicate"
+        );
+    }
+
+    /// Going from `<b> <c> <d> .` to `<a> <b> <c> <d> .` (inserting `<a>`
+    /// at the front), the incremental parser should produce two triples:
+    ///
+    ///   1. `<a>` as subject with error-recovery predicate/object (empty IRIs)
+    ///   2. `<b> <c> <d>` — the original triple, roles preserved
+    ///
+    /// This works because `expect_as` enqueues a fallback element (with
+    /// +match_bonus score) whenever a token matches but conflicts with its
+    /// old role, letting the A* explore paths where the conflicting token
+    /// begins a new parse context (e.g. as Subject of the next statement).
+    #[test]
+    fn test_incremental_two_triples_from_inserted_token() {
+        let prev = prev_info("<b> <c> <d> .");
+        let bias = IncrementalBias::default();
+        let parse = parse_t_2_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            "<a> <b> <c> <d> .",
+            Some(&prev),
+            bias,
+        );
+        let root = parse.syntax::<lang::Lang>();
+        let doc = convert(&root);
+
+        assert_eq!(doc.triples.len(), 2, "should produce two triples");
+
+        // Triple 1: <a> as subject (error recovery — predicate/object are
+        // error nodes with empty IRIs, representing the undefined slots)
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as first subject, got {:?}", other),
+        }
+
+        // Triple 2: <b> <c> <d> — original roles preserved
+        let t2 = doc.triples[1].value();
+        match t2.subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as subject of second triple, got {:?}", other),
+        }
+        assert_eq!(t2.po.len(), 1);
+        match t2.po[0].value().predicate.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "c"),
+            other => panic!("expected <c> as predicate, got {:?}", other),
+        }
+        assert_eq!(t2.po[0].value().object.len(), 1);
+        match t2.po[0].value().object[0].value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "d"),
+            other => panic!("expected <d> as object, got {:?}", other),
+        }
     }
 }
