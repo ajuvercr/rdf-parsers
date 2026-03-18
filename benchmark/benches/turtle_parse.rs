@@ -1,6 +1,11 @@
 use benchmark::{Fixture, load_fixtures};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
-use lang_turtle::lang::parse_source as lang_turtle_parse_source;
+use lang_turtle::lang::{
+    context::{Context, TokenIdx},
+    parse_source as lang_turtle_parse_source,
+    parser::parse_turtle as chumsky_parse_turtle,
+    tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
+};
 use lsp_types::Url;
 use oxttl::TurtleParser;
 use turtle::{
@@ -130,6 +135,49 @@ fn bench_incremental(c: &mut Criterion) {
             BenchmarkId::new("fresh_after", &fix.name),
             fix,
             |b, fix| b.iter(|| chumsky_turtle_parse(&url, &fix.after)),
+        );
+    }
+    group.finish();
+
+    // "warm": parse "after" with chumsky context from "before" parse.
+    let mut group = c.benchmark_group("incremental/warm_chumsky_turtle");
+    for fix in &edit_fixtures {
+        group.bench_with_input(
+            BenchmarkId::new("incremental_after", &fix.name),
+            fix,
+            |b, fix| {
+                b.iter_batched(
+                    || {
+                        let (raw_tokens, _) = chumsky_parse_tokens_str(&fix.before);
+                        let tokens: Vec<_> =
+                            raw_tokens.into_iter().filter(|x| !x.is_invalid()).collect();
+                        let mut context = Context::new();
+                        let (turtle, _) = chumsky_parse_turtle(
+                            &url,
+                            tokens.clone(),
+                            fix.before.len(),
+                            context.ctx(),
+                        );
+                        context.clear();
+                        turtle.set_context(&mut context);
+                        (tokens, context)
+                    },
+                    |(before_tokens, mut context)| {
+                        let (raw_tokens, _) = chumsky_parse_tokens_str(&fix.after);
+                        let after_tokens: Vec<_> =
+                            raw_tokens.into_iter().filter(|x| !x.is_invalid()).collect();
+                        let len = after_tokens.len();
+                        context.setup_current_to_prev(
+                            TokenIdx { tokens: &after_tokens },
+                            len,
+                            TokenIdx { tokens: &before_tokens },
+                            before_tokens.len(),
+                        );
+                        chumsky_parse_turtle(&url, after_tokens, fix.after.len(), context.ctx())
+                    },
+                    BatchSize::SmallInput,
+                )
+            },
         );
     }
     group.finish();

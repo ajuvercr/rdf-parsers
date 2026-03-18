@@ -235,10 +235,14 @@ checksum = "3a8241f3ebb85c056b509d4327ad0358fbbba6ffb340bf388f26350aeda225b1"
 name = "benchmark"
 version = "0.1.0"
 dependencies = [
+ "ariadne",
+ "chumsky 0.9.3",
  "criterion",
  "lang-turtle",
+ "lsp-core",
  "lsp-types",
  "oxttl",
+ "rowan",
  "tower-lsp",
  "turtle",
 ]

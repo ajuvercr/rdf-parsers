@@ -5,9 +5,13 @@ edition = "2024"
 
 [dependencies]
 lang-turtle = { version = "0.1.0", path = "../../../swls/swls/lang-turtle" }
+lsp-core = { version = "0.1.0", path = "../../../swls/swls/core" }
 # tower-lsp (pulled in by lang-turtle → lsp-core) needs a runtime feature to compile
 tower-lsp = { version = "0.19", default-features = false, features = ["runtime-tokio"] }
 turtle = { path = ".." }
+rowan = "0.16.1"
+ariadne = { version = "0.6.0", features = ["auto-color"] }
+chumsky = "0.9.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

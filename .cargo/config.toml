@@ -1,2 +1,4 @@
 [alias]
-xtask = "run --manifest-path xtask/Cargo.toml --"
+codegen = "run --manifest-path xtask/Cargo.toml -- codegen"
+benchmark = "bench -p benchmark"
+print = "run -p benchmark --bin conflict_lint --"
