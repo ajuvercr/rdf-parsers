@@ -1,0 +1,15 @@
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+turtle = { path = ".." }
+wasm-bindgen = "0.2"
+rowan = "0.16.1"
+ariadne = "0.6.0"
+concolor = { version = "0.1", features = ["api"] }
+console_error_panic_hook = "0.1"

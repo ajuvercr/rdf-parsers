@@ -668,7 +668,7 @@ mod definitions {
                 }
                 (SyntaxKind::WrappedGraph, 1usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CurlyClose, 8isize);
+                        state.expect_as_inline(element, SyntaxKind::CurlyClose, 100isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -682,7 +682,7 @@ mod definitions {
                 }
                 (SyntaxKind::WrappedGraph, 2usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CurlyClose, 8isize);
+                        state.expect_as_inline(element, SyntaxKind::CurlyClose, 100isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -707,7 +707,7 @@ mod definitions {
                 }
                 (SyntaxKind::WrappedGraph, 4usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CurlyOpen, 8isize);
+                        state.expect_as_inline(element, SyntaxKind::CurlyOpen, 100isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -1868,13 +1868,13 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::CurlyOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CurlyOpen, 8isize);
+                    let added = state.expect_as(element, SyntaxKind::CurlyOpen, 100isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CurlyClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CurlyClose, 8isize);
+                    let added = state.expect_as(element, SyntaxKind::CurlyClose, 100isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }

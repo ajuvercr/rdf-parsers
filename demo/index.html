@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDF Parser Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.25rem;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #a8d8ea;
+            letter-spacing: 0.05em;
+        }
+
+        .lang-tabs {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .lang-tab {
+            padding: 0.35rem 0.85rem;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+
+        .lang-tab:hover {
+            color: #ccc;
+            border-color: #4a90d9;
+        }
+
+        .lang-tab.active {
+            background: #0f3460;
+            color: #a8d8ea;
+            border-color: #4a90d9;
+        }
+
+        .status {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #666;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        .status.ok {
+            color: #4caf50;
+        }
+
+        .status.err {
+            color: #f44336;
+        }
+
+        .status.loading {
+            color: #888;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pane-label {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            flex-shrink: 0;
+        }
+
+        .pane+.pane {
+            border-left: 1px solid #0f3460;
+        }
+
+        /* CodeMirror host — fills the remaining flex space */
+        .editor-wrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .CodeMirror {
+            position: absolute;
+            inset: 0;
+            height: 100%;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        #output {
+            flex: 1;
+            background: #282a36;
+            /* matches Dracula background */
+            color: #f8f8f2;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            overflow: auto;
+            white-space: pre;
+        }
+
+        #output.no-errors {
+            color: #50fa7b;
+        }
+
+        #output.loading {
+            color: #555;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>RDF Parser Demo</h1>
+        <div class="lang-tabs">
+            <button class="lang-tab active" data-lang="turtle">Turtle</button>
+            <button class="lang-tab" data-lang="sparql">SPARQL</button>
+            <button class="lang-tab" data-lang="trig">TriG</button>
+            <button class="lang-tab" data-lang="ntriples">N-Triples</button>
+        </div>
+        <span class="status loading" id="status">Loading WASM…</span>
+    </header>
+
+    <main>
+        <div class="pane">
+            <div class="pane-label">Input</div>
+            <div class="editor-wrap">
+                <textarea id="editor"></textarea>
+            </div>
+        </div>
+        <div class="pane">
+            <div class="pane-label">Ariadne diagnostics</div>
+            <pre id="output" class="loading">Initializing…</pre>
+        </div>
+    </main>
+
+    <!-- CodeMirror core + modes (synchronous, must precede the module script) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/turtle/turtle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sparql/sparql.min.js"></script>
+
+    <script type="module">
+        import init, {parse} from './pkg/demo.js';
+        import {AnsiUp} from 'https://cdn.jsdelivr.net/npm/ansi_up@6.0.2/ansi_up.js';
+
+        const SAMPLES = {
+            turtle: `@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+ex:Alice a foaf:Person ;
+    foaf:name "Alice" ;
+    foaf:knows ex:Bob .
+
+ex:Bob a foaf:Person ;
+    foaf:name "Bob" ;
+    foaf:age 30 .
+`,
+            sparql: `PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . }
+  FILTER(?name != "")
+}
+ORDER BY ?name
+`,
+            trig: `@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+GRAPH ex:people {
+  ex:Alice a foaf:Person ;
+    foaf:name "Alice" ;
+    foaf:knows ex:Bob .
+}
+
+GRAPH ex:metadata {
+  ex:people ex:createdBy ex:Alice ;
+    ex:version "1.0" .
+}
+`,
+            ntriples: `<http://example.org/Alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
+<http://example.org/Alice> <http://xmlns.com/foaf/0.1/name> "Alice" .
+<http://example.org/Alice> <http://xmlns.com/foaf/0.1/knows> <http://example.org/Bob> .
+<http://example.org/Bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
+<http://example.org/Bob> <http://xmlns.com/foaf/0.1/name> "Bob" .
+`,
+        };
+
+        const MODES = {
+            turtle: 'text/turtle',
+            sparql: 'application/sparql-query',
+            trig: 'text/turtle',
+            ntriples: 'text/turtle',
+        };
+
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        const tabs = document.querySelectorAll('.lang-tab');
+        const ansiUp = new AnsiUp();
+
+        const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
+            mode: MODES.turtle,
+            theme: 'dracula',
+            lineNumbers: true,
+            tabSize: 2,
+            indentWithTabs: false,
+            spellcheck: false,
+        });
+
+        let currentLang = 'turtle';
+        let wasmReady = false;
+        let debounceTimer = null;
+
+        function runParse() {
+            if (!wasmReady) return;
+            const text = cm.getValue();
+            const t0 = performance.now();
+            const result = parse(currentLang, text);
+            const elapsed = (performance.now() - t0).toFixed(1);
+
+            const noErrors = result.startsWith('No errors');
+            output.innerHTML = ansiUp.ansi_to_html(result);
+            output.className = noErrors ? 'no-errors' : '';
+            status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;
+            status.className = 'status ' + (noErrors ? 'ok' : 'err');
+        }
+
+        function scheduleParse() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(runParse, 120);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
+            cm.setOption('mode', MODES[lang]);
+            cm.setValue(SAMPLES[lang]);
+            runParse();
+        }
+
+        tabs.forEach(tab => tab.addEventListener('click', () => switchLang(tab.dataset.lang)));
+        cm.on('change', scheduleParse);
+
+        await init();
+        wasmReady = true;
+        cm.setValue(SAMPLES[currentLang]);
+        status.textContent = 'Ready';
+        status.className = 'status';
+        runParse();
+    </script>
+
+</body>
+
+</html>

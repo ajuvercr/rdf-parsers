@@ -87,8 +87,8 @@ cl_open -> 8
 cl_close -> 8
 sq_open -> 8
 sq_close -> 8
-curly_open -> 8
-curly_close -> 8
+curly_open -> 100
+curly_close -> 100
 === term_type ===
 subject -> Subject
 predicate -> Predicate
