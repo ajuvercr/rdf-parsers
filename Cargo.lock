@@ -142,6 +142,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "arraydeque"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d902e3d592a523def97af8f317b08ce16b7ab854c1985a0c671e6f15cebc236"
+
+[[package]]
 name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -888,6 +894,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "encoding_rs"
+version = "0.8.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1173,6 +1188,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hashlink"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7382cf6263419f2d8df38c55d7da83da5c18aef87fc7a7fc1fb1e344edfe14c1"
+dependencies = [
+ "hashbrown 0.15.5",
+]
+
+[[package]]
 name = "heapless"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1444,6 +1468,7 @@ dependencies = [
 [[package]]
 name = "iri_s"
 version = "0.1.137"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "getrandom 0.3.4",
  "oxiri",
@@ -1735,6 +1760,20 @@ name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
+
+[[package]]
+name = "mie"
+version = "0.1.127"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
+dependencies = [
+ "hashlink",
+ "iri_s",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+ "yaml-rust2",
+]
 
 [[package]]
 name = "minimal-lexical"
@@ -2130,6 +2169,7 @@ dependencies = [
 [[package]]
 name = "prefixmap"
 version = "0.1.145"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "colored",
  "indexmap",
@@ -2843,6 +2883,7 @@ dependencies = [
 [[package]]
 name = "shacl_ast"
 version = "0.1.135"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "const_format",
  "iri_s",
@@ -2857,6 +2898,7 @@ dependencies = [
 [[package]]
 name = "shacl_ir"
 version = "0.1.141"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "either",
  "iri_s",
@@ -2875,6 +2917,7 @@ dependencies = [
 [[package]]
 name = "shacl_rdf"
 version = "0.1.135"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "const_format",
  "iri_s",
@@ -2891,6 +2934,7 @@ dependencies = [
 [[package]]
 name = "shacl_validation"
 version = "0.1.143"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "anyhow",
  "clap",
@@ -2903,6 +2947,7 @@ dependencies = [
  "shacl_ast",
  "shacl_ir",
  "shacl_rdf",
+ "sparql_service",
  "srdf",
  "tabled",
  "thiserror",
@@ -3065,6 +3110,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "sparql_service"
+version = "0.1.142"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
+dependencies = [
+ "colored",
+ "const_format",
+ "iri_s",
+ "itertools 0.14.0",
+ "mie",
+ "oxigraph",
+ "oxrdf",
+ "oxrdfio",
+ "oxsdatatypes",
+ "prefixmap",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "sparesults",
+ "srdf",
+ "thiserror",
+ "toml",
+ "tracing",
+]
+
+[[package]]
 name = "spin"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3076,6 +3146,7 @@ dependencies = [
 [[package]]
 name = "srdf"
 version = "0.1.146"
+source = "git+https://github.com/ajuvercr/rudof?branch=feat%2Fwasm-2#572fe8c085264c0076a44a3ce76394c6666b3bab"
 dependencies = [
  "async-trait",
  "colored",
@@ -4047,6 +4118,17 @@ dependencies = [
  "quote",
  "regex",
  "syn 2.0.114",
+]
+
+[[package]]
+name = "yaml-rust2"
+version = "0.10.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2462ea039c445496d8793d052e13787f2b90e750b833afee748e601c17621ed9"
+dependencies = [
+ "arraydeque",
+ "encoding_rs",
+ "hashlink",
 ]
 
 [[package]]

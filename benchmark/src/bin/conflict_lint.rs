@@ -31,11 +31,11 @@ fn print_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) {
     let mut colors = ColorGenerator::from_state([10000, 15000, 15000], 0.8);
 
     let report = errors.iter().rev().fold(
-        Report::build(ReportKind::Error, (loc, s - 1..e)),
+        Report::build(ReportKind::Error, (loc, s..e)),
         |report: ReportBuilder<(&str, Range<usize>)>, (span, msg): &(Range<usize>, String)| {
             let (s, e) = (span.start, span.end);
             report.with_label(
-                Label::new((loc, s - 1..e))
+                Label::new((loc, s..e))
                     .with_message(msg)
                     .with_color(colors.next()),
             )
@@ -70,31 +70,62 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
         .collect();
 
     let root = parse.syntax::<Lang>();
+
+    // Collect all non-whitespace, non-error token end positions once, sorted.
+    // We use this to find the last meaningful token before each ERROR node.
+    let mut token_ends: Vec<usize> = root
+        .descendants_with_tokens()
+        .filter_map(|nt| match nt {
+            NodeOrToken::Token(t) if !t.kind().skips() && t.kind() != SyntaxKind::Error => {
+                Some(usize::from(t.text_range().end()))
+            }
+            _ => None,
+        })
+        .collect();
+    token_ends.sort_unstable();
+
     let ranges: Vec<Range<usize>> = root
         .descendants()
         .filter(|n| n.kind() == SyntaxKind::Error)
         .map(|n| {
-            // ERROR nodes are zero-width; point at the next sibling token.
-            let next = n.next_sibling_or_token().and_then(|nt| match nt {
-                NodeOrToken::Token(t) => {
-                    let r = t.text_range();
-                    Some(usize::from(r.start())..usize::from(r.end()))
-                }
-                NodeOrToken::Node(child) => child.first_token().map(|t| {
-                    let r = t.text_range();
-                    usize::from(r.start())..usize::from(r.end())
-                }),
-            });
-            next.unwrap_or_else(|| {
-                let pos = usize::from(n.text_range().start());
-                let end = text[pos..]
+            let error_start = usize::from(n.text_range().start());
+
+            // Find the end of the last non-whitespace token before this error.
+            let prev_end = token_ends.partition_point(|&e| e <= error_start);
+            let span = if prev_end > 0 {
+                let end = token_ends[prev_end - 1].min(text.len());
+                // Point at the first character after that token (in the gap).
+                let next_char_end = text[end..]
                     .char_indices()
-                    .nth(1)
-                    .map(|(i, _)| pos + i)
-                    .unwrap_or(pos + 1)
-                    .min(text.len().max(1));
-                pos..end
-            })
+                    .next()
+                    .map(|(i, c)| end + i + c.len_utf8())
+                    .unwrap_or(end + 1)
+                    .min(text.len());
+                end..next_char_end
+            } else {
+                // Error at very start of input: fall back to the next sibling.
+                let next = n.next_sibling_or_token().and_then(|nt| match nt {
+                    NodeOrToken::Token(t) => {
+                        let r = t.text_range();
+                        Some(usize::from(r.start())..usize::from(r.end()))
+                    }
+                    NodeOrToken::Node(child) => child.first_token().map(|t| {
+                        let r = t.text_range();
+                        usize::from(r.start())..usize::from(r.end())
+                    }),
+                });
+                next.unwrap_or_else(|| {
+                    let pos = usize::from(n.text_range().start());
+                    let end = text[pos..]
+                        .char_indices()
+                        .nth(1)
+                        .map(|(i, _)| pos + i)
+                        .unwrap_or(pos + 1)
+                        .min(text.len().max(1));
+                    pos..end
+                })
+            };
+            span
         })
         .collect();
 
