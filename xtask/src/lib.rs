@@ -14,7 +14,7 @@ use crate::regex::{order_rules_by_references, to_regex};
 mod parser;
 mod regex;
 
-#[derive(Debug, Hash, Eq, PartialEq, PartialOrd)]
+#[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 enum Terminal {
     Literal(String),
     Ref(String),
@@ -508,10 +508,12 @@ fn producing_rule_arms(
     );
     reachable.insert(imp); // entry state used by Rule::new
 
-    let step_arms = impls
+    let mut step_arms_vec: Vec<_> = impls
         .into_iter()
         .filter(|(k, _)| reachable.contains(k))
-        .map(|(k, v)| quote! { (SyntaxKind::#n, #k) => { #v } });
+        .collect();
+    step_arms_vec.sort_by_key(|(k, _)| *k);
+    let step_arms = step_arms_vec.into_iter().map(|(k, v)| quote! { (SyntaxKind::#n, #k) => { #v } });
 
     let new_arm = quote! { SyntaxKind::#n => Rule { kind, state: #imp }, };
 
@@ -546,7 +548,7 @@ fn terminal_rule_arms(
     (step_arm, new_arm)
 }
 
-#[derive(Hash, PartialEq, PartialOrd, Debug, Clone, Eq)]
+#[derive(Hash, PartialEq, PartialOrd, Debug, Clone, Eq, Ord)]
 enum Item {
     Terminal(String),
     NonTerminal(String),
@@ -765,7 +767,10 @@ pub fn generate(path: &str, contents: &str) -> String {
 
     let sub_pattersn = get_sub_patterns(&config.rules.terminals);
 
-    let (terminal_step_arms, terminal_new_arms): (Vec<_>, Vec<_>) = terminals
+    let mut sorted_terminals: Vec<_> = terminals.iter().collect();
+    sorted_terminals.sort();
+
+    let (terminal_step_arms, terminal_new_arms): (Vec<_>, Vec<_>) = sorted_terminals
         .iter()
         .map(|x| {
             let ident = x.ident(&config);
@@ -777,23 +782,29 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .unzip();
 
-    let first_token_producing_arms: Vec<_> = first_items
+    let mut sorted_first_items: Vec<_> = first_items
         .iter()
         .filter(|(name, _)| config.rules.producing.iter().any(|r| &r.name == *name))
+        .collect();
+    sorted_first_items.sort_by_key(|(name, _)| name.as_str());
+
+    let first_token_producing_arms: Vec<_> = sorted_first_items
+        .iter()
         .map(|(name, items)| {
             let n = config.context.ident_for(name);
-            let toks: Vec<_> = items
+            let mut toks: Vec<_> = items
                 .iter()
                 .filter_map(|item| match item {
                     Item::Terminal(t) => Some(config.context.ident_for(t)),
                     Item::NonTerminal(_) => None,
                 })
                 .collect();
+            toks.sort_by_key(|id| id.to_string());
             quote! { SyntaxKind::#n => &[#( SyntaxKind::#toks ),*], }
         })
         .collect();
 
-    let first_token_terminal_arms: Vec<_> = terminals
+    let first_token_terminal_arms: Vec<_> = sorted_terminals
         .iter()
         .map(|x| {
             let name = x.ident(&config);
@@ -805,7 +816,7 @@ pub fn generate(path: &str, contents: &str) -> String {
     let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
     producing.sort();
 
-    let terminals: Vec<_> = terminals
+    let terminals: Vec<_> = sorted_terminals
         .iter()
         .flat_map(|x| match x {
             Terminal::Literal(x) => {
@@ -833,9 +844,10 @@ pub fn generate(path: &str, contents: &str) -> String {
         .map(|x| config.context.ident_for(x))
         .collect();
 
-    let term_type_arms: Vec<_> = config
-        .context
-        .term_types
+    let mut sorted_term_types: Vec<_> = config.context.term_types.iter().collect();
+    sorted_term_types.sort_by_key(|(k, _)| k.as_str());
+
+    let term_type_arms: Vec<_> = sorted_term_types
         .iter()
         .map(|(rule, variant)| {
             let rule_ident = config.context.ident_for(rule);
