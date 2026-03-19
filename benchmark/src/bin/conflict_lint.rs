@@ -12,9 +12,13 @@ use lsp_core::util::token::Token as ChumskyToken;
 use rowan::NodeOrToken;
 use tower_lsp::lsp_types::Url;
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait as _, extract_term_types, parse_t_2,
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_term_types, parse_t_2,
     parse_t_2_incremental, tokenize,
     turtle::parser::{Lang, Rule, SyntaxKind},
+    sparql::parser::{
+        Lang as SparqlLang, Rule as SparqlRule,
+        SyntaxKind as SparqlSyntaxKind,
+    },
 };
 
 // ── ariadne output ────────────────────────────────────────────────────────────
@@ -47,7 +51,7 @@ fn print_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) {
 
 // ── A* helpers ────────────────────────────────────────────────────────────────
 
-fn astar_build_prev(text: &str) -> PrevParseInfo<SyntaxKind> {
+fn astar_build_prev_turtle(text: &str) -> PrevParseInfo<SyntaxKind> {
     let parse = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
@@ -55,10 +59,22 @@ fn astar_build_prev(text: &str) -> PrevParseInfo<SyntaxKind> {
     PrevParseInfo { tokens, term_types }
 }
 
+fn astar_build_prev_sparql(text: &str) -> PrevParseInfo<SparqlSyntaxKind> {
+    let parse = parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
+    let root = parse.syntax::<SparqlLang>();
+    let tokens = tokenize::<SparqlSyntaxKind>(text);
+    let term_types = extract_term_types(&root, |k: SparqlSyntaxKind| k.term_type());
+    PrevParseInfo { tokens, term_types }
+}
+
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
 /// every Error node in source order. Error coalescing (grouping per-rule rather
 /// than per-token) already happened inside `Parse::from_steps`.
-fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String)> {
+fn astar_pairs_from_parse<L>(parse: Parse, text: &str) -> Vec<(Range<usize>, String)>
+where
+    L: rowan::Language,
+    L::Kind: TokenTrait,
+{
     // List is prepend-ordered (newest first); reverse to match DFS order.
     let msgs: Vec<String> = parse
         .errors
@@ -69,7 +85,7 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
         .rev()
         .collect();
 
-    let root = parse.syntax::<Lang>();
+    let root = parse.syntax::<L>();
 
     // Collect all non-whitespace token end positions, used to point the span
     // just after the last real token before each Error node.
@@ -86,7 +102,7 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
 
     let ranges: Vec<Range<usize>> = root
         .descendants()
-        .filter(|n| n.kind() == SyntaxKind::Error)
+        .filter(|n| n.kind() == L::Kind::ERROR)
         .map(|n| {
             let pos = usize::from(n.text_range().start());
             let prev_end = token_ends.partition_point(|&e| e <= pos);
@@ -169,7 +185,7 @@ fn run_astar(fixture: &Fixture, loc: &str) {
 
     if fixture.is_static {
         println!("=== (static) ===");
-        let pairs = astar_pairs_from_parse(
+        let pairs = astar_pairs_from_parse::<Lang>(
             parse_t_2(Rule::new(SyntaxKind::TurtleDoc), &fixture.before),
             &fixture.before,
         );
@@ -180,8 +196,8 @@ fn run_astar(fixture: &Fixture, loc: &str) {
 
     // before — fresh parse
     println!("=== before ===");
-    let prev = astar_build_prev(&fixture.before);
-    let before_pairs = astar_pairs_from_parse(
+    let prev = astar_build_prev_turtle(&fixture.before);
+    let before_pairs = astar_pairs_from_parse::<Lang>(
         parse_t_2(Rule::new(SyntaxKind::TurtleDoc), &fixture.before),
         &fixture.before,
     );
@@ -196,7 +212,44 @@ fn run_astar(fixture: &Fixture, loc: &str) {
         Some(&prev),
         bias,
     );
-    let after_pairs = astar_pairs_from_parse(after_parse, &fixture.after);
+    let after_pairs = astar_pairs_from_parse::<Lang>(after_parse, &fixture.after);
+    print_ariadne(&after_pairs, &fixture.after, loc);
+    println!();
+}
+
+fn run_astar_sparql(fixture: &Fixture, loc: &str) {
+    let bias = IncrementalBias::default();
+
+    if fixture.is_static {
+        println!("=== (static) ===");
+        let pairs = astar_pairs_from_parse::<SparqlLang>(
+            parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), &fixture.before),
+            &fixture.before,
+        );
+        print_ariadne(&pairs, &fixture.before, loc);
+        println!();
+        return;
+    }
+
+    // before — fresh parse
+    println!("=== before ===");
+    let prev = astar_build_prev_sparql(&fixture.before);
+    let before_pairs = astar_pairs_from_parse::<SparqlLang>(
+        parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), &fixture.before),
+        &fixture.before,
+    );
+    print_ariadne(&before_pairs, &fixture.before, loc);
+    println!();
+
+    // after — incremental parse using before as context
+    println!("=== after (incremental from before) ===");
+    let after_parse = parse_t_2_incremental(
+        SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+        &fixture.after,
+        Some(&prev),
+        bias,
+    );
+    let after_pairs = astar_pairs_from_parse::<SparqlLang>(after_parse, &fixture.after);
     print_ariadne(&after_pairs, &fixture.after, loc);
     println!();
 }
@@ -247,9 +300,10 @@ fn main() {
 
     match subcmd.as_str() {
         "astar" => run_astar(&fixture, &path),
+        "sparql" => run_astar_sparql(&fixture, &path),
         "chumsky" => run_chumsky(&fixture, &path),
         _ => {
-            eprintln!("Unknown subcommand: '{subcmd}'. Use 'astar' or 'chumsky'.");
+            eprintln!("Unknown subcommand: '{subcmd}'. Use 'astar', 'sparql', or 'chumsky'.");
             std::process::exit(1);
         }
     }

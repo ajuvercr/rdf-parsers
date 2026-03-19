@@ -1,0 +1,22 @@
+PREFIX wd:        <http://www.wikidata.org/entity/>
+PREFIX wdt:       <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase:  <http://wikiba.se/ontology#>
+PREFIX bd:        <http://www.bigdata.com/rdf#>
+
+SELECT ?item ?itemLabel ?population ?capital ?capitalLabel
+WHERE {
+  ?item wdt:P31 wd:Q6256 .
+  ?item wdt:P1082 ?population .
+  OPTIONAL { ?item wdt:P36 ?capital }
+<<<<<<< before
+  FILTER(?population > 1000000)
+=======
+  FILTER(?population > 5000000)
+>>>>>>> after
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en" .
+  }
+}
+ORDER BY DESC(?population)
+LIMIT 50

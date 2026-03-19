@@ -21,3 +21,7 @@ oxttl = "0.2"
 [[bench]]
 name = "turtle_parse"
 harness = false
+
+[[bench]]
+name = "sparql_parse"
+harness = false

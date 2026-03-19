@@ -1,0 +1,31 @@
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX schema: <http://schema.org/>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+SELECT DISTINCT ?person ?name ?email ?homepage ?knows
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+
+  OPTIONAL { ?person foaf:mbox ?email }
+  OPTIONAL { ?person foaf:homepage ?homepage }
+
+  ?person foaf:knows ?knows .
+  ?knows foaf:name ?knowsName .
+
+  FILTER(LANG(?name) = "en")
+  FILTER NOT EXISTS { ?person schema:deathDate ?d }
+
+  {
+    SELECT ?person (COUNT(?knows) AS ?friendCount)
+    WHERE {
+      ?person foaf:knows ?knows .
+    }
+    GROUP BY ?person
+    HAVING (COUNT(?knows) > 2)
+  }
+}
+ORDER BY ASC(?name)
+LIMIT 100
+OFFSET 0

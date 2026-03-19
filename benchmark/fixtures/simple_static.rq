@@ -1,0 +1,10 @@
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name ;
+          foaf:age ?age .
+  FILTER(?age > 18)
+}
+ORDER BY ?name

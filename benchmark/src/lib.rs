@@ -92,15 +92,15 @@ impl Fixture {
     }
 }
 
-/// Load all fixtures from the `fixtures/` directory relative to the crate root.
-pub fn load_fixtures(fixtures_dir: &str) -> Vec<Fixture> {
+/// Load all fixtures with the given extension from a directory.
+pub fn load_fixtures_ext(fixtures_dir: &str, ext: &str) -> Vec<Fixture> {
     let dir = std::path::Path::new(fixtures_dir);
     let mut fixtures: Vec<Fixture> = std::fs::read_dir(dir)
         .unwrap_or_else(|e| panic!("failed to read fixtures dir {}: {}", dir.display(), e))
         .filter_map(|entry| {
             let entry = entry.ok()?;
             let path = entry.path();
-            if path.extension()?.to_str()? == "ttl" {
+            if path.extension()?.to_str()? == ext {
                 Some(Fixture::from_file(&path))
             } else {
                 None
@@ -109,6 +109,11 @@ pub fn load_fixtures(fixtures_dir: &str) -> Vec<Fixture> {
         .collect();
     fixtures.sort_by(|a, b| a.name.cmp(&b.name));
     fixtures
+}
+
+/// Load all `.ttl` fixtures from a directory.
+pub fn load_fixtures(fixtures_dir: &str) -> Vec<Fixture> {
+    load_fixtures_ext(fixtures_dir, "ttl")
 }
 
 #[cfg(test)]
