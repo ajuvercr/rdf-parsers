@@ -115,7 +115,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     let fallback = Element {
                         list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
-                        score: element.score + self.bias.match_bonus,
+                        score: element.score - error_value,
                         state: (element.state.0, element.state.1),
                         cached_term_type: element.cached_term_type,
                     };
@@ -194,7 +194,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Some(Element {
                         list: fb_list,
                         parent: element.parent.clone(),
-                        score: element.score + self.bias.match_bonus,
+                        score: element.score - error_value,
                         state: element.state,
                         cached_term_type: element.cached_term_type,
                     })
