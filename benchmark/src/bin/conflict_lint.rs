@@ -56,8 +56,8 @@ fn astar_build_prev(text: &str) -> PrevParseInfo<SyntaxKind> {
 }
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
-/// every Error node in source order.  The range points at the next sibling
-/// token so ariadne has something to underline.
+/// every Error node in source order. Error coalescing (grouping per-rule rather
+/// than per-token) already happened inside `Parse::from_steps`.
 fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String)> {
     // List is prepend-ordered (newest first); reverse to match DFS order.
     let msgs: Vec<String> = parse
@@ -71,12 +71,12 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
 
     let root = parse.syntax::<Lang>();
 
-    // Collect all non-whitespace, non-error token end positions once, sorted.
-    // We use this to find the last meaningful token before each ERROR node.
+    // Collect all non-whitespace token end positions, used to point the span
+    // just after the last real token before each Error node.
     let mut token_ends: Vec<usize> = root
         .descendants_with_tokens()
         .filter_map(|nt| match nt {
-            NodeOrToken::Token(t) if !t.kind().skips() && t.kind() != SyntaxKind::Error => {
+            NodeOrToken::Token(t) if !t.kind().skips() => {
                 Some(usize::from(t.text_range().end()))
             }
             _ => None,
@@ -88,13 +88,10 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
         .descendants()
         .filter(|n| n.kind() == SyntaxKind::Error)
         .map(|n| {
-            let error_start = usize::from(n.text_range().start());
-
-            // Find the end of the last non-whitespace token before this error.
-            let prev_end = token_ends.partition_point(|&e| e <= error_start);
-            let span = if prev_end > 0 {
+            let pos = usize::from(n.text_range().start());
+            let prev_end = token_ends.partition_point(|&e| e <= pos);
+            if prev_end > 0 {
                 let end = token_ends[prev_end - 1].min(text.len());
-                // Point at the first character after that token (in the gap).
                 let next_char_end = text[end..]
                     .char_indices()
                     .next()
@@ -103,29 +100,14 @@ fn astar_pairs_from_parse(parse: Parse, text: &str) -> Vec<(Range<usize>, String
                     .min(text.len());
                 end..next_char_end
             } else {
-                // Error at very start of input: fall back to the next sibling.
-                let next = n.next_sibling_or_token().and_then(|nt| match nt {
-                    NodeOrToken::Token(t) => {
-                        let r = t.text_range();
-                        Some(usize::from(r.start())..usize::from(r.end()))
-                    }
-                    NodeOrToken::Node(child) => child.first_token().map(|t| {
-                        let r = t.text_range();
-                        usize::from(r.start())..usize::from(r.end())
-                    }),
-                });
-                next.unwrap_or_else(|| {
-                    let pos = usize::from(n.text_range().start());
-                    let end = text[pos..]
-                        .char_indices()
-                        .nth(1)
-                        .map(|(i, _)| pos + i)
-                        .unwrap_or(pos + 1)
-                        .min(text.len().max(1));
-                    pos..end
-                })
-            };
-            span
+                let end = text[pos..]
+                    .char_indices()
+                    .next()
+                    .map(|(i, c)| pos + i + c.len_utf8())
+                    .unwrap_or(pos + 1)
+                    .min(text.len());
+                pos..end
+            }
         })
         .collect();
 

@@ -36,6 +36,57 @@ pub enum TermType {
     Object,
 }
 
+/// Collapse rule nodes that consumed no tokens into a single `Expected(RuleName)` error.
+///
+/// Only the outermost failing rule under a successfully-parsed ancestor is collapsed:
+/// if a parent rule also has no bumps, it defers to the grandparent, and so on.
+/// This prevents showing dozens of low-level "Expected(Iriref)" errors when an
+/// entire `PredicateObjectList` is simply absent.
+fn coalesce_empty_rules<T: crate::TokenTrait>(steps: Vec<Step<T>>) -> Vec<Step<T>> {
+    let mut out: Vec<Step<T>> = Vec::with_capacity(steps.len());
+    // Stack entry: (kind, start_idx_in_out, has_bump, has_error)
+    let mut stack: Vec<(T, usize, bool, bool)> = Vec::new();
+
+    for step in steps {
+        match step {
+            Step::Start(ref kind) => {
+                stack.push((kind.clone(), out.len(), false, false));
+                out.push(step);
+            }
+            Step::Bump => {
+                for entry in &mut stack {
+                    entry.2 = true;
+                }
+                out.push(step);
+            }
+            Step::Error(_) => {
+                for entry in &mut stack {
+                    entry.3 = true;
+                }
+                out.push(step);
+            }
+            Step::End => {
+                let (kind, start_pos, has_bump, has_error) = stack.pop().expect("unmatched End");
+                // Coalesce only when:
+                // - this rule produced no real tokens (has_bump = false)
+                // - it contains at least one error (has_error = true)
+                // - its parent has real tokens (parent.has_bump = true), meaning
+                //   the parent will NOT itself be coalesced at a higher level.
+                let parent_has_bump = stack.last().map(|e| e.2).unwrap_or(false);
+                if !has_bump && has_error && parent_has_bump {
+                    out.truncate(start_pos);
+                    out.push(Step::Start(kind.clone()));
+                    out.push(Step::Error(Error::Expected(kind)));
+                    out.push(Step::End);
+                } else {
+                    out.push(Step::End);
+                }
+            }
+        }
+    }
+    out
+}
+
 pub struct Parse {
     pub green_node: GreenNode,
     pub errors: List<String>,
@@ -95,11 +146,12 @@ impl Parse {
             v.extend(steps.iter().cloned());
             v
         };
-        for step in steps.into_iter().rev() {
+        let steps = coalesce_empty_rules(steps.into_iter().rev().collect());
+        for step in steps.into_iter() {
             match step {
-                Step::Start(syntax_kind) => {
+                Step::Start(kind) => {
                     skip_white_with_builder(&mut builder, &mut at);
-                    builder.start_node(syntax_kind);
+                    builder.start_node(kind.into());
                 }
                 Step::End => builder.finish_node(),
                 Step::Error(e) => {
@@ -199,14 +251,14 @@ pub enum Error<T> {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Step<T> {
-    Start(rowan::SyntaxKind),
+    Start(T),
     Error(Error<T>),
     End,
     Bump,
 }
 impl<T: TokenTrait> Step<T> {
-    pub fn start(kind: impl Into<rowan::SyntaxKind>) -> Self {
-        Step::Start(kind.into())
+    pub fn start(kind: T) -> Self {
+        Step::Start(kind)
     }
     pub fn error(error: Error<T>) -> Self {
         Self::Error(error)
@@ -222,9 +274,9 @@ impl<T: TokenTrait> Step<T> {
 
     pub fn apply(&self, parser: &mut Parser<T>, builder: &mut GreenNodeBuilder<'_>) {
         match self {
-            Step::Start(syntax_kind) => {
+            Step::Start(kind) => {
                 parser.skip_white_with_builder(builder);
-                builder.start_node(*syntax_kind);
+                builder.start_node(kind.clone().into());
             }
             Step::End => builder.finish_node(),
             Step::Error(e) => {
@@ -270,7 +322,7 @@ impl<T: TokenTrait> ParseRes<T> {
         self.steps = self.steps.prepend(Step::end());
     }
 
-    pub fn start_node(&mut self, kind: rowan::SyntaxKind) {
+    pub fn start_node(&mut self, kind: T) {
         self.steps = self.steps.prepend(Step::start(kind));
     }
 }
@@ -320,7 +372,7 @@ impl<T: TokenTrait> Parser<T> {
 
         self.starting::<P>();
 
-        self.res.start_node(P::KIND.into());
+        self.res.start_node(P::KIND);
         let old_parser = self.clone();
         let on = old_parser.tokens.len();
 
@@ -414,8 +466,8 @@ impl<T: TokenTrait> Parser<T> {
         e
     }
 
-    pub fn start_node<K: Into<rowan::SyntaxKind>>(&mut self, kind: K) {
-        self.res.start_node(kind.into());
+    pub fn start_node(&mut self, kind: T) {
+        self.res.start_node(kind);
     }
     pub fn finish_node(&mut self) {
         self.res.finish_node();
