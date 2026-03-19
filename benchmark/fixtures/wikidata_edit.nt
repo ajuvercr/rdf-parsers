@@ -1,0 +1,10 @@
+<http://www.wikidata.org/entity/Q64> <http://www.wikidata.org/prop/direct/P31> <http://www.wikidata.org/entity/Q515> .
+<http://www.wikidata.org/entity/Q64> <http://www.wikidata.org/prop/direct/P17> <http://www.wikidata.org/entity/Q183> .
+<http://www.wikidata.org/entity/Q64> <http://www.w3.org/2000/01/rdf-schema#label> "Berlin"@en .
+<http://www.wikidata.org/entity/Q64> <http://www.w3.org/2000/01/rdf-schema#label> "Berlin"@de .
+<<<<<<< before
+<http://www.wikidata.org/entity/Q64> <http://www.wikidata.org/prop/direct/P1082> "3669491"^^<http://www.w3.org/2001/XMLSchema#integer> .
+=======
+<http://www.wikidata.org/entity/Q64> <http://www.wikidata.org/prop/direct/P1082> "3755251"^^<http://www.w3.org/2001/XMLSchema#integer> .
+>>>>>>> after
+<http://www.wikidata.org/entity/Q64> <http://www.wikidata.org/prop/direct/P36> <http://www.wikidata.org/entity/Q1054> .

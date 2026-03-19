@@ -1,0 +1,7 @@
+SELECT ?x WHERE {
+<<<<<<< before
+?x <p> <o>
+=======
+?x <p>
+>>>>>>> after
+    }

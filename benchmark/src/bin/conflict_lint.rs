@@ -19,6 +19,14 @@ use turtle::{
         Lang as SparqlLang, Rule as SparqlRule,
         SyntaxKind as SparqlSyntaxKind,
     },
+    trig::parser::{
+        Lang as TrigLang, Rule as TrigRule,
+        SyntaxKind as TrigSyntaxKind,
+    },
+    ntriples::parser::{
+        Lang as NTriplesLang, Rule as NTriplesRule,
+        SyntaxKind as NTriplesSyntaxKind,
+    },
 };
 
 // ── ariadne output ────────────────────────────────────────────────────────────
@@ -56,6 +64,22 @@ fn astar_build_prev_turtle(text: &str) -> PrevParseInfo<SyntaxKind> {
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
     let term_types = extract_term_types(&root, |k: SyntaxKind| k.term_type());
+    PrevParseInfo { tokens, term_types }
+}
+
+fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo<NTriplesSyntaxKind> {
+    let parse = parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
+    let root = parse.syntax::<NTriplesLang>();
+    let tokens = tokenize::<NTriplesSyntaxKind>(text);
+    let term_types = extract_term_types(&root, |k: NTriplesSyntaxKind| k.term_type());
+    PrevParseInfo { tokens, term_types }
+}
+
+fn astar_build_prev_trig(text: &str) -> PrevParseInfo<TrigSyntaxKind> {
+    let parse = parse_t_2(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
+    let root = parse.syntax::<TrigLang>();
+    let tokens = tokenize::<TrigSyntaxKind>(text);
+    let term_types = extract_term_types(&root, |k: TrigSyntaxKind| k.term_type());
     PrevParseInfo { tokens, term_types }
 }
 
@@ -254,6 +278,80 @@ fn run_astar_sparql(fixture: &Fixture, loc: &str) {
     println!();
 }
 
+fn run_astar_ntriples(fixture: &Fixture, loc: &str) {
+    let bias = IncrementalBias::default();
+
+    if fixture.is_static {
+        println!("=== (static) ===");
+        let pairs = astar_pairs_from_parse::<NTriplesLang>(
+            parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), &fixture.before),
+            &fixture.before,
+        );
+        print_ariadne(&pairs, &fixture.before, loc);
+        println!();
+        return;
+    }
+
+    // before — fresh parse
+    println!("=== before ===");
+    let prev = astar_build_prev_ntriples(&fixture.before);
+    let before_pairs = astar_pairs_from_parse::<NTriplesLang>(
+        parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), &fixture.before),
+        &fixture.before,
+    );
+    print_ariadne(&before_pairs, &fixture.before, loc);
+    println!();
+
+    // after — incremental parse using before as context
+    println!("=== after (incremental from before) ===");
+    let after_parse = parse_t_2_incremental(
+        NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+        &fixture.after,
+        Some(&prev),
+        bias,
+    );
+    let after_pairs = astar_pairs_from_parse::<NTriplesLang>(after_parse, &fixture.after);
+    print_ariadne(&after_pairs, &fixture.after, loc);
+    println!();
+}
+
+fn run_astar_trig(fixture: &Fixture, loc: &str) {
+    let bias = IncrementalBias::default();
+
+    if fixture.is_static {
+        println!("=== (static) ===");
+        let pairs = astar_pairs_from_parse::<TrigLang>(
+            parse_t_2(TrigRule::new(TrigSyntaxKind::TrigDoc), &fixture.before),
+            &fixture.before,
+        );
+        print_ariadne(&pairs, &fixture.before, loc);
+        println!();
+        return;
+    }
+
+    // before — fresh parse
+    println!("=== before ===");
+    let prev = astar_build_prev_trig(&fixture.before);
+    let before_pairs = astar_pairs_from_parse::<TrigLang>(
+        parse_t_2(TrigRule::new(TrigSyntaxKind::TrigDoc), &fixture.before),
+        &fixture.before,
+    );
+    print_ariadne(&before_pairs, &fixture.before, loc);
+    println!();
+
+    // after — incremental parse using before as context
+    println!("=== after (incremental from before) ===");
+    let after_parse = parse_t_2_incremental(
+        TrigRule::new(TrigSyntaxKind::TrigDoc),
+        &fixture.after,
+        Some(&prev),
+        bias,
+    );
+    let after_pairs = astar_pairs_from_parse::<TrigLang>(after_parse, &fixture.after);
+    print_ariadne(&after_pairs, &fixture.after, loc);
+    println!();
+}
+
 fn run_chumsky(fixture: &Fixture, loc: &str) {
     if fixture.is_static {
         println!("=== (static) ===");
@@ -283,11 +381,11 @@ fn main() {
     let mut args = std::env::args().skip(1);
 
     let subcmd = args.next().unwrap_or_else(|| {
-        eprintln!("Usage: conflict-lint <astar|chumsky> <file>");
+        eprintln!("Usage: conflict-lint <astar|sparql|trig|ntriples|chumsky> <file>");
         std::process::exit(1);
     });
     let path = args.next().unwrap_or_else(|| {
-        eprintln!("Usage: conflict-lint <astar|chumsky> <file>");
+        eprintln!("Usage: conflict-lint <astar|sparql|trig|ntriples|chumsky> <file>");
         std::process::exit(1);
     });
 
@@ -301,9 +399,11 @@ fn main() {
     match subcmd.as_str() {
         "astar" => run_astar(&fixture, &path),
         "sparql" => run_astar_sparql(&fixture, &path),
+        "trig" => run_astar_trig(&fixture, &path),
+        "ntriples" => run_astar_ntriples(&fixture, &path),
         "chumsky" => run_chumsky(&fixture, &path),
         _ => {
-            eprintln!("Unknown subcommand: '{subcmd}'. Use 'astar', 'sparql', or 'chumsky'.");
+            eprintln!("Unknown subcommand: '{subcmd}'. Use 'astar', 'sparql', 'trig', 'ntriples', or 'chumsky'.");
             std::process::exit(1);
         }
     }

@@ -10,7 +10,9 @@ pub use parser::*;
 mod a_star;
 mod list;
 mod parser;
+pub mod ntriples;
 pub mod sparql;
+pub mod trig;
 pub mod turtle;
 pub mod util;
 

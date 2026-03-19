@@ -1,0 +1,23 @@
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX pq: <http://www.wikidata.org/prop/qualifier/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+GRAPH <https://www.wikidata.org/wiki/Q64> {
+    wd:Q64 wdt:P31 wd:Q515 ;
+           wdt:P17 wd:Q183 ;
+           wdt:P18 <https://commons.wikimedia.org/wiki/File:Berlin_-_Brandenburger_Tor.jpg> ;
+           rdfs:label "Berlin"@en , "Berlin"@de , "Berlín"@es .
+
+    wd:Q64 p:P1082 [
+        ps:P1082 "3669491"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+<<<<<<< before
+        pq:P585 "2021-01-01"^^<http://www.w3.org/2001/XMLSchema#date>
+=======
+        pq:P585 "2022-01-01"^^<http://www.w3.org/2001/XMLSchema#date>
+>>>>>>> after
+    ] .
+}

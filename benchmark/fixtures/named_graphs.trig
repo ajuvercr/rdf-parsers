@@ -1,0 +1,19 @@
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+GRAPH ex:graph1 {
+    ex:alice foaf:name "Alice" ;
+             foaf:age 30 ;
+             foaf:knows ex:bob .
+
+    ex:bob foaf:name "Bob" ;
+           foaf:age 25 .
+}
+
+GRAPH ex:graph2 {
+    ex:carol foaf:name "Carol" ;
+             foaf:knows ex:alice , ex:bob .
+}
+
+ex:provenance ex:source <http://example.org/data> ;
+              ex:created "2024-01-01"^^<http://www.w3.org/2001/XMLSchema#date> .

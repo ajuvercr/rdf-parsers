@@ -25,3 +25,11 @@ harness = false
 [[bench]]
 name = "sparql_parse"
 harness = false
+
+[[bench]]
+name = "trig_parse"
+harness = false
+
+[[bench]]
+name = "ntriples_parse"
+harness = false
