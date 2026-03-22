@@ -3,7 +3,7 @@ use std::{
     fmt::Debug,
 };
 
-use crate::{Error, FatToken, IncrementalBias, Step, TermType, TokenTrait, list::List};
+use crate::{Error, FatToken, IncrementalBias, Step, TokenTrait, list::List};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 struct Fingerprint(u128);
@@ -104,8 +104,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     idx += 1;
                 }
 
-                // Compute incremental bias using the cached term_type.
-                let bias = match (found.old_kind(), element.cached_term_type) {
+                // Compute incremental bias using the cached role.
+                let bias = match (found.old_kind(), element.cached_role.as_ref()) {
                     (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
                     (Some(_), Some(_)) => self.bias.conflict_penalty,
                     _ => 0,
@@ -115,9 +115,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     let fallback = Element {
                         list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
-                        score: element.score - error_value,
+                        score: element.score + self.bias.match_bonus,
                         state: (element.state.0, element.state.1),
-                        cached_term_type: element.cached_term_type,
+                        cached_role: element.cached_role.clone(),
                     };
                     if let Some(popped) = fallback.pop() {
                         self.add_element(popped);
@@ -129,7 +129,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     parent: element.parent.clone(),
                     score: element.score + 2 + error_value + bias,
                     state: (element.state.0, idx),
-                    cached_term_type: element.cached_term_type,
+                    cached_role: element.cached_role.clone(),
                 };
             }
         }
@@ -141,7 +141,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             parent: element.parent.clone(),
             score: element.score - error_value,
             state: (element.state.0, idx),
-            cached_term_type: element.cached_term_type,
+            cached_role: element.cached_role.clone(),
         }
     }
 
@@ -175,8 +175,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     idx += 1;
                 }
 
-                // Compute incremental bias using the cached term_type.
-                let bias = match (found.old_kind(), element.cached_term_type) {
+                // Compute incremental bias using the cached role.
+                let bias = match (found.old_kind(), element.cached_role.as_ref()) {
                     (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
                     (Some(_), Some(_)) => self.bias.conflict_penalty,
                     _ => 0,
@@ -194,9 +194,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Some(Element {
                         list: fb_list,
                         parent: element.parent.clone(),
-                        score: element.score - error_value,
+                        score: element.score + self.bias.match_bonus,
                         state: element.state,
-                        cached_term_type: element.cached_term_type,
+                        cached_role: element.cached_role.clone(),
                     })
                 } else {
                     None
@@ -215,7 +215,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         parent: element.parent.clone(),
                         score: element.score + 2 + error_value + bias,
                         state: (element.state.0, idx),
-                        cached_term_type: element.cached_term_type,
+                        cached_role: element.cached_role.clone(),
                     },
                     fallback,
                 );
@@ -234,7 +234,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 parent: element.parent.clone(),
                 score: element.score - error_value,
                 state: (element.state.0, idx),
-                cached_term_type: element.cached_term_type,
+                cached_role: element.cached_role.clone(),
             },
             None,
         )
@@ -244,12 +244,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 #[derive(Debug)]
 pub struct Element<R: ParserTrait> {
     list: List<Step<R::Kind>>,
-    parent: List<(R, Fingerprint, Option<TermType>)>,
+    parent: List<(R, Fingerprint, Option<R::Kind>)>,
     score: isize,
     state: (Fingerprint, usize),
-    /// Cached term_type: the innermost ancestor TermType, maintained through
-    /// push/pop/pop_push to avoid an O(depth) parent-chain walk per token.
-    cached_term_type: Option<TermType>,
+    /// Cached role: the innermost significant ancestor rule kind, maintained
+    /// through push/pop/pop_push to avoid an O(depth) parent-chain walk per token.
+    cached_role: Option<R::Kind>,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -261,34 +261,36 @@ impl<R: ParserTrait> Element<R> {
     fn new(current: R) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
-        let cached_term_type = current.element_kind().term_type();
+        let kind = current.element_kind();
+        let cached_role = if kind.is_significant() { Some(kind) } else { None };
         Self {
             list: List::default(),
             parent: parent.prepend((current, head, None)),
             score: 0,
             state: (Fingerprint(1), 0),
-            cached_term_type,
+            cached_role,
         }
     }
 
     pub fn pop_push(&self, rule: R) -> Self {
         let ((_, f, old_tt), tail) = self.parent.slice().unwrap();
-        let cached_term_type = rule.element_kind().term_type().or(*old_tt);
-        let parent = tail.prepend((rule, *f, *old_tt));
+        let kind = rule.element_kind();
+        let cached_role = if kind.is_significant() { Some(kind) } else { old_tt.clone() };
+        let parent = tail.prepend((rule, *f, old_tt.clone()));
         Self {
             parent,
             list: self.list.clone(),
             score: self.score,
             state: self.state.clone(),
-            cached_term_type,
+            cached_role,
         }
     }
 
     pub fn push(&self, rule: R) -> Self {
         let kind = rule.element_kind();
         let (s, a) = self.state;
-        let cached_term_type = kind.term_type().or(self.cached_term_type);
-        let parent = self.parent.prepend((rule, s, self.cached_term_type));
+        let cached_role = if kind.is_significant() { Some(kind.clone()) } else { self.cached_role.clone() };
+        let parent = self.parent.prepend((rule, s, self.cached_role.clone()));
         let list = self.list.prepend(Step::start(kind.clone()));
         let s = descend(s, kind.branch());
         Self {
@@ -296,7 +298,7 @@ impl<R: ParserTrait> Element<R> {
             list,
             score: self.score,
             state: (s, a),
-            cached_term_type,
+            cached_role,
         }
     }
 
@@ -309,7 +311,7 @@ impl<R: ParserTrait> Element<R> {
             list,
             score: self.score,
             state: (*f, a),
-            cached_term_type: *old_tt,
+            cached_role: old_tt.clone(),
         })
     }
 }

@@ -273,8 +273,8 @@ PREFIX -> sparql_prefix_token
 === error_value ===
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-cl_open -> 100
-cl_close -> 100
+cl_open -> 8
+cl_close -> 8
 br_open -> 8
 br_close -> 8
 sq_open -> 8

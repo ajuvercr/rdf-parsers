@@ -25,6 +25,7 @@
             flex-direction: column;
         }
 
+        /* ── Header ── */
         header {
             display: flex;
             align-items: center;
@@ -35,6 +36,12 @@
             flex-shrink: 0;
         }
 
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
         header h1 {
             font-size: 1rem;
             font-weight: 600;
@@ -42,31 +49,10 @@
             letter-spacing: 0.05em;
         }
 
-        .lang-tabs {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .lang-tab {
-            padding: 0.35rem 0.85rem;
-            border: 1px solid #0f3460;
-            border-radius: 4px;
-            background: transparent;
-            color: #888;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.15s;
-        }
-
-        .lang-tab:hover {
-            color: #ccc;
-            border-color: #4a90d9;
-        }
-
-        .lang-tab.active {
-            background: #0f3460;
-            color: #a8d8ea;
-            border-color: #4a90d9;
+        .header-subtitle {
+            font-size: 0.7rem;
+            color: #667799;
+            letter-spacing: 0.03em;
         }
 
         .status {
@@ -76,29 +62,138 @@
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
         }
 
-        .status.ok {
-            color: #4caf50;
-        }
+        .status.ok    { color: #4caf50; }
+        .status.err   { color: #f44336; }
+        .status.loading { color: #888; }
 
-        .status.err {
-            color: #f44336;
-        }
-
-        .status.loading {
-            color: #888;
-        }
-
-        main {
+        /* ── Cards ── */
+        .cards {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            border-bottom: 1px solid #0f3460;
+            flex-shrink: 0;
+        }
+
+        .card {
+            padding: 1.4rem 2.5rem;
+            background: #12192e;
+            border-right: 1px solid #0f3460;
+            border-top: 2px solid transparent;
+            transition: background 0.2s, border-top-color 0.2s, opacity 0.2s;
+        }
+
+        .card:last-child {
+            border-right: none;
+        }
+
+        /* Side cards rest muted; center card always prominent */
+        .card:nth-child(1),
+        .card:nth-child(3) {
+            opacity: 0.82;
+        }
+
+        .card:nth-child(1):hover,
+        .card:nth-child(3):hover {
+            opacity: 1;
+            background: #141c30;
+        }
+
+        .card:nth-child(1):hover { border-top-color: #7ec8e3; }
+        .card:nth-child(3):hover { border-top-color: #d8a8ea; }
+
+        .card:nth-child(2) {
+            background: #131a2e;
+            border-top-color: #a8d8a0;
+        }
+
+        .card-heading {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .card:nth-child(1) .card-heading { color: #7ec8e3; }
+        .card:nth-child(2) .card-heading { color: #a8d8a0; }
+        .card:nth-child(3) .card-heading { color: #d8a8ea; }
+
+        .card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .card ul li {
+            font-size: 0.8rem;
+            color: #8899aa;
+            padding-left: 1rem;
+            position: relative;
+            line-height: 1.55;
+        }
+
+        .card ul li::before {
+            content: '·';
+            position: absolute;
+            left: 0;
+            color: #334455;
+        }
+
+        /* ── Workspace ── */
+        .workspace {
+            display: flex;
             flex: 1;
             overflow: hidden;
         }
 
+        /* ── Language sidebar ── */
+        .lang-sidebar {
+            display: flex;
+            flex-direction: column;
+            background: #16213e;
+            border-right: 1px solid #0f3460;
+            flex-shrink: 0;
+            padding: 0.5rem 0;
+            gap: 0.15rem;
+            width: 7rem;
+        }
+
+        .lang-tab {
+            padding: 0.55rem 1rem;
+            border: none;
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: #556;
+            cursor: pointer;
+            font-size: 0.82rem;
+            text-align: left;
+            transition: all 0.12s;
+            white-space: nowrap;
+        }
+
+        .lang-tab:hover {
+            color: #aac;
+            background: #1a2a4a;
+        }
+
+        .lang-tab.active {
+            color: #a8d8ea;
+            background: #1a2a4a;
+            border-left-color: #4a90d9;
+        }
+
+        /* ── Editor / output panes ── */
         .pane {
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            flex: 1;
+        }
+
+        .pane + .pane {
+            border-left: 1px solid #0f3460;
         }
 
         .pane-label {
@@ -106,17 +201,12 @@
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #555;
+            color: #445566;
             background: #16213e;
             border-bottom: 1px solid #0f3460;
             flex-shrink: 0;
         }
 
-        .pane+.pane {
-            border-left: 1px solid #0f3460;
-        }
-
-        /* CodeMirror host — fills the remaining flex space */
         .editor-wrap {
             flex: 1;
             position: relative;
@@ -135,7 +225,6 @@
         #output {
             flex: 1;
             background: #282a36;
-            /* matches Dracula background */
             color: #f8f8f2;
             padding: 1rem;
             font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -145,42 +234,68 @@
             white-space: pre;
         }
 
-        #output.no-errors {
-            color: #50fa7b;
-        }
-
-        #output.loading {
-            color: #555;
-            font-style: italic;
-        }
+        #output.no-errors { color: #50fa7b; }
+        #output.loading   { color: #555; font-style: italic; }
     </style>
 </head>
 
 <body>
 
     <header>
-        <h1>RDF Parser Demo</h1>
-        <div class="lang-tabs">
-            <button class="lang-tab active" data-lang="turtle">Turtle</button>
-            <button class="lang-tab" data-lang="sparql">SPARQL</button>
-            <button class="lang-tab" data-lang="trig">TriG</button>
-            <button class="lang-tab" data-lang="ntriples">N-Triples</button>
+        <div class="header-titles">
+            <h1>RDF Parser Demo</h1>
+            <span class="header-subtitle">Fault-tolerant semantic web parsers · powered by A*</span>
         </div>
         <span class="status loading" id="status">Loading WASM…</span>
     </header>
 
-    <main>
+    <div class="cards">
+        <div class="card">
+            <div class="card-heading">Why?</div>
+            <ul>
+                <li>RDF has many serialisation formats — Turtle, SPARQL, TriG, N-Triples, and more</li>
+                <li>All are being revised with RDF 1.2</li>
+                <li>Writing parsers by hand for each one is error-prone and hard to keep consistent</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-heading">How?</div>
+            <ul>
+                <li>Each language is defined once as an EBNF grammar</li>
+                <li>A code generator compiles each grammar into a state machine</li>
+                <li>The state machine runs an A* search — so it recovers from errors and keeps parsing</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-heading">Next?</div>
+            <ul>
+                <li>Integrate the parsers into a semantic web language server</li>
+                <li>Real-time diagnostics, completions, and hover docs in your editor</li>
+                <li>One grammar update covers all tooling when RDF 1.2 lands</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <nav class="lang-sidebar">
+            <button class="lang-tab active" data-lang="turtle">Turtle</button>
+            <button class="lang-tab" data-lang="sparql">SPARQL</button>
+            <button class="lang-tab" data-lang="trig">TriG</button>
+            <button class="lang-tab" data-lang="ntriples">N-Triples</button>
+        </nav>
+
         <div class="pane">
-            <div class="pane-label">Input</div>
+            <div class="pane-label">Input — try introducing a syntax error</div>
             <div class="editor-wrap">
                 <textarea id="editor"></textarea>
             </div>
         </div>
+
         <div class="pane">
-            <div class="pane-label">Ariadne diagnostics</div>
+            <div class="pane-label">Diagnostics — parser keeps going even with errors</div>
             <pre id="output" class="loading">Initializing…</pre>
         </div>
-    </main>
+    </div>
 
     <!-- CodeMirror core + modes (synchronous, must precede the module script) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
@@ -238,16 +353,16 @@ GRAPH ex:metadata {
         };
 
         const MODES = {
-            turtle: 'text/turtle',
-            sparql: 'application/sparql-query',
-            trig: 'text/turtle',
+            turtle:   'text/turtle',
+            sparql:   'application/sparql-query',
+            trig:     'text/turtle',
             ntriples: 'text/turtle',
         };
 
-        const output = document.getElementById('output');
-        const status = document.getElementById('status');
-        const tabs = document.querySelectorAll('.lang-tab');
-        const ansiUp = new AnsiUp();
+        const output  = document.getElementById('output');
+        const status  = document.getElementById('status');
+        const tabs    = document.querySelectorAll('.lang-tab');
+        const ansiUp  = new AnsiUp();
 
         const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
             mode: MODES.turtle,
@@ -258,22 +373,25 @@ GRAPH ex:metadata {
             spellcheck: false,
         });
 
-        let currentLang = 'turtle';
-        let wasmReady = false;
+        // Per-language saved content — starts from samples, preserves edits.
+        const savedContent = {...SAMPLES};
+
+        let currentLang   = 'turtle';
+        let wasmReady     = false;
         let debounceTimer = null;
 
         function runParse() {
             if (!wasmReady) return;
             const text = cm.getValue();
-            const t0 = performance.now();
-            const result = parse(currentLang, text);
+            const t0   = performance.now();
+            const result  = parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = result.startsWith('No errors');
             output.innerHTML = ansiUp.ansi_to_html(result);
             output.className = noErrors ? 'no-errors' : '';
             status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;
-            status.className = 'status ' + (noErrors ? 'ok' : 'err');
+            status.className   = 'status ' + (noErrors ? 'ok' : 'err');
         }
 
         function scheduleParse() {
@@ -282,10 +400,11 @@ GRAPH ex:metadata {
         }
 
         function switchLang(lang) {
+            savedContent[currentLang] = cm.getValue();   // persist edits
             currentLang = lang;
             tabs.forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
             cm.setOption('mode', MODES[lang]);
-            cm.setValue(SAMPLES[lang]);
+            cm.setValue(savedContent[lang]);              // restore saved content
             runParse();
         }
 
@@ -294,9 +413,9 @@ GRAPH ex:metadata {
 
         await init();
         wasmReady = true;
-        cm.setValue(SAMPLES[currentLang]);
+        cm.setValue(savedContent[currentLang]);
         status.textContent = 'Ready';
-        status.className = 'status';
+        status.className   = 'status';
         runParse();
     </script>
 

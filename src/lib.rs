@@ -9,8 +9,8 @@ pub use parser::*;
 
 mod a_star;
 mod list;
-mod parser;
 pub mod ntriples;
+mod parser;
 pub mod sparql;
 pub mod trig;
 pub mod turtle;
@@ -98,7 +98,7 @@ pub trait TokenTrait:
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
 
-    fn term_type(&self) -> Option<TermType>;
+    fn is_significant(&self) -> bool;
 }
 
 pub struct Context {
@@ -159,7 +159,7 @@ where
 /// Information from a previous parse needed for incremental re-parsing.
 pub struct PrevParseInfo<K: TokenTrait> {
     pub tokens: Vec<FatToken<K>>,
-    pub term_types: Vec<Option<TermType>>,
+    pub prev_roles: Vec<Option<K>>,
 }
 
 /// Score adjustments applied in A* `expect_as` when a token's previous
@@ -231,7 +231,7 @@ where
         // Copy the old TermType onto each unchanged new token.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
-                tok.set_old_kind(prev.term_types.get(old_idx).copied().flatten());
+                tok.set_old_kind(prev.prev_roles.get(old_idx).cloned().flatten());
             }
         }
     }

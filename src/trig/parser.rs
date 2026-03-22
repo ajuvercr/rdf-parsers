@@ -1992,14 +1992,7 @@ impl TokenTrait for SyntaxKind {
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn term_type(&self) -> Option<crate::TermType> {
-        match self {
-            SyntaxKind::LabelOrSubject => Some(crate::TermType::Subject),
-            SyntaxKind::Object => Some(crate::TermType::Object),
-            SyntaxKind::Predicate => Some(crate::TermType::Predicate),
-            SyntaxKind::Subject => Some(crate::TermType::Subject),
-            SyntaxKind::Verb => Some(crate::TermType::Predicate),
-            _ => None,
-        }
+    fn is_significant(&self) -> bool {
+        matches!(self, SyntaxKind::LabelOrSubject | SyntaxKind::Object | SyntaxKind::Predicate | SyntaxKind::Subject | SyntaxKind::Verb)
     }
 }

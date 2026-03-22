@@ -4,7 +4,7 @@ pub struct FatToken<T: TokenTrait> {
     pub kind: T,
     text: String,
     pub range: Range<usize>,
-    old_kind: Option<TermType>,
+    old_kind: Option<T>,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -20,20 +20,13 @@ impl<T: TokenTrait> FatToken<T> {
         &self.text
     }
 
-    pub fn old_kind(&self) -> Option<TermType> {
-        self.old_kind
+    pub fn old_kind(&self) -> Option<&T> {
+        self.old_kind.as_ref()
     }
 
-    pub fn set_old_kind(&mut self, kind: Option<TermType>) {
+    pub fn set_old_kind(&mut self, kind: Option<T>) {
         self.old_kind = kind;
     }
-}
-
-#[derive(PartialEq, Eq, Debug, Copy, Clone)]
-pub enum TermType {
-    Subject,
-    Predicate,
-    Object,
 }
 
 /// Collapse rule nodes that consumed no tokens into a single `Expected(RuleName)` error.
@@ -192,30 +185,31 @@ use rowan::{GreenNode, GreenNodeBuilder, Language};
 
 use crate::{Context, ParserTrait, TokenTrait, list::List};
 
-/// Walk a rowan `SyntaxNode` tree and extract the `TermType` for each
-/// non-whitespace/non-error token by finding the innermost ancestor whose
-/// kind maps to a `TermType` via `term_type_of`.
+/// Walk a rowan `SyntaxNode` tree and extract the grammar role for each token
+/// by finding the innermost ancestor whose kind is "significant" (i.e.
+/// `is_significant()` returns true).
 ///
-/// Returns `Vec<Option<TermType>>` indexed by token position (skipping
-/// whitespace/error tokens to match the token-vec indices used by the A*
-/// parser).
-pub fn extract_term_types<L: rowan::Language>(
+/// Returns `Vec<Option<L::Kind>>` indexed by token position, aligned with
+/// the token-vec produced by `tokenize`.
+pub fn extract_prev_roles<L: rowan::Language>(
     root: &rowan::SyntaxNode<L>,
-    term_type_of: impl Fn(L::Kind) -> Option<TermType>,
-) -> Vec<Option<TermType>>
+) -> Vec<Option<L::Kind>>
 where
-    L::Kind: Into<rowan::SyntaxKind>,
+    L::Kind: crate::TokenTrait,
 {
     let mut result = Vec::new();
     for token in root.descendants_with_tokens() {
         let rowan::NodeOrToken::Token(tok) = token else {
             continue;
         };
-        // Walk up ancestors to find the innermost one with a TermType.
-        let tt = tok
+        // Walk up ancestors to find the innermost significant one.
+        let role = tok
             .parent_ancestors()
-            .find_map(|ancestor| term_type_of(ancestor.kind()));
-        result.push(tt);
+            .find_map(|ancestor| {
+                let k = ancestor.kind();
+                if k.is_significant() { Some(k) } else { None }
+            });
+        result.push(role);
     }
     result
 }

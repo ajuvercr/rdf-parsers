@@ -755,7 +755,7 @@ mod tests {
     // ── incremental parsing ───────────────────────────────────────────────────
 
     use crate::{
-        IncrementalBias, PrevParseInfo, TokenTrait as _, extract_term_types, parse_t_2_incremental,
+        IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2_incremental,
         tokenize,
     };
 
@@ -763,15 +763,15 @@ mod tests {
         let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
         let root = parse.syntax::<lang::Lang>();
         let tokens = tokenize::<lang::SyntaxKind>(text);
-        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
-        PrevParseInfo { tokens, term_types }
+        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
+        PrevParseInfo { tokens, prev_roles }
     }
 
     fn roles(
         text: &str,
         prev: Option<&PrevParseInfo<lang::SyntaxKind>>,
         bias: IncrementalBias,
-    ) -> Vec<(String, Option<crate::TermType>)> {
+    ) -> Vec<(String, Option<lang::SyntaxKind>)> {
         let parse = parse_t_2_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             text,
@@ -780,10 +780,10 @@ mod tests {
         );
         let root = parse.syntax::<lang::Lang>();
         let tokens = tokenize::<lang::SyntaxKind>(text);
-        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
+        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
         tokens
             .iter()
-            .zip(term_types.iter())
+            .zip(prev_roles.iter())
             .filter(|(t, _)| !t.kind.skips())
             .map(|(t, tt)| (t.text().to_owned(), *tt))
             .collect()
@@ -798,10 +798,10 @@ mod tests {
         let r = roles("<a> <b> <c> <d> .", None, IncrementalBias::default());
         let role_of = |tok: &str| r.iter().find(|(t, _)| t == tok).unwrap().1;
 
-        assert_eq!(role_of("<a>"), Some(crate::TermType::Subject));
-        assert_eq!(role_of("<b>"), Some(crate::TermType::Predicate));
-        assert_eq!(role_of("<c>"), Some(crate::TermType::Object));
-        assert_eq!(role_of("<d>"), Some(crate::TermType::Object));
+        assert_eq!(role_of("<a>"), Some(lang::SyntaxKind::Subject));
+        assert_eq!(role_of("<b>"), Some(lang::SyntaxKind::Predicate));
+        assert_eq!(role_of("<c>"), Some(lang::SyntaxKind::Object));
+        assert_eq!(role_of("<d>"), Some(lang::SyntaxKind::Object));
     }
 
     /// Verify that tokens inside a nested blank node get the innermost
@@ -810,36 +810,36 @@ mod tests {
     /// - `<p2>` is the predicate of the inner blank node → Predicate
     /// - `<o2>` is the object of the inner blank node    → Object
     #[test]
-    fn test_extract_term_types_nested_blank_nodes() {
+    fn test_extract_prev_roles_nested_blank_nodes() {
         let text = "[ <p1> [ <p2> <o2> ] ] <q> <r> .";
         let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
         let root = parse.syntax::<lang::Lang>();
         let tokens = tokenize::<lang::SyntaxKind>(text);
-        let term_types = extract_term_types(&root, |k: lang::SyntaxKind| k.term_type());
+        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
 
-        // Build a map of token text → TermType for convenient lookup.
+        // Build a map of token text → SyntaxKind role for convenient lookup.
         use std::collections::HashMap;
-        let map: HashMap<&str, Option<crate::TermType>> = tokens
+        let map: HashMap<&str, Option<lang::SyntaxKind>> = tokens
             .iter()
-            .zip(term_types.iter())
+            .zip(prev_roles.iter())
             .filter(|(t, _)| !t.kind.skips())
             .map(|(t, tt)| (t.text(), *tt))
             .collect();
 
         assert_eq!(
             map.get("<p2>").copied().flatten(),
-            Some(crate::TermType::Predicate),
+            Some(lang::SyntaxKind::Predicate),
             "<p2> should be Predicate (innermost blank node context)"
         );
         assert_eq!(
             map.get("<o2>").copied().flatten(),
-            Some(crate::TermType::Object),
+            Some(lang::SyntaxKind::Object),
             "<o2> should be Object (innermost blank node context)"
         );
         // <p1> is the predicate of the outer blank-node property list.
         assert_eq!(
             map.get("<p1>").copied().flatten(),
-            Some(crate::TermType::Predicate),
+            Some(lang::SyntaxKind::Predicate),
             "<p1> should be Predicate"
         );
     }

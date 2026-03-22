@@ -1,7 +1,6 @@
-<graph> {
 <<<<<<< before
+@prefix foaf: <foaf>.
 <a> <b> <c>.
 =======
-<a>
+<a> <b> <c>.
 >>>>>>> after
-}

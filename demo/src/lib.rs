@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::io::Cursor;
 use std::ops::Range;
 
@@ -6,12 +7,20 @@ use rowan::NodeOrToken;
 use wasm_bindgen::prelude::*;
 
 use turtle::{
-    Parse, TokenTrait, parse_t_2,
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles, parse_t_2_incremental,
+    tokenize,
     ntriples::parser::{Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind},
     sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
 };
+
+thread_local! {
+    static PREV_TURTLE:   RefCell<Option<PrevParseInfo<SyntaxKind>>>         = RefCell::new(None);
+    static PREV_SPARQL:   RefCell<Option<PrevParseInfo<SparqlSyntaxKind>>>   = RefCell::new(None);
+    static PREV_TRIG:     RefCell<Option<PrevParseInfo<TrigSyntaxKind>>>     = RefCell::new(None);
+    static PREV_NTRIPLES: RefCell<Option<PrevParseInfo<NTriplesSyntaxKind>>> = RefCell::new(None);
+}
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -112,24 +121,61 @@ fn render_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) ->
 #[wasm_bindgen]
 pub fn parse(language: &str, text: &str) -> String {
     let loc = "input";
+    let bias = IncrementalBias::default();
     match language {
         "turtle" => {
-            let parse = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
+            let parse = PREV_TURTLE.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
+            });
+            let root = parse.syntax::<Lang>();
+            let prev_roles = extract_prev_roles::<Lang>(&root);
+            let tokens = tokenize::<SyntaxKind>(text);
+            PREV_TURTLE.with(|prev| {
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+            });
             let pairs = astar_pairs_from_parse::<Lang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "sparql" => {
-            let parse = parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
+            let parse = PREV_SPARQL.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text, p.as_ref(), bias)
+            });
+            let root = parse.syntax::<SparqlLang>();
+            let prev_roles = extract_prev_roles::<SparqlLang>(&root);
+            let tokens = tokenize::<SparqlSyntaxKind>(text);
+            PREV_SPARQL.with(|prev| {
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+            });
             let pairs = astar_pairs_from_parse::<SparqlLang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "trig" => {
-            let parse = parse_t_2(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
+            let parse = PREV_TRIG.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(TrigRule::new(TrigSyntaxKind::TrigDoc), text, p.as_ref(), bias)
+            });
+            let root = parse.syntax::<TrigLang>();
+            let prev_roles = extract_prev_roles::<TrigLang>(&root);
+            let tokens = tokenize::<TrigSyntaxKind>(text);
+            PREV_TRIG.with(|prev| {
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+            });
             let pairs = astar_pairs_from_parse::<TrigLang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "ntriples" => {
-            let parse = parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
+            let parse = PREV_NTRIPLES.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text, p.as_ref(), bias)
+            });
+            let root = parse.syntax::<NTriplesLang>();
+            let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
+            let tokens = tokenize::<NTriplesSyntaxKind>(text);
+            PREV_NTRIPLES.with(|prev| {
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+            });
             let pairs = astar_pairs_from_parse::<NTriplesLang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }

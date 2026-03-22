@@ -1,5 +1,5 @@
 [workspace]
-members = ["xtask", "demo"]
+members = ["xtask", "demo", "benchmark"]
 
 [package]
 name = "turtle"
