@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-swls-lang-turtle = { version = "0.1.0", path = "../../../swls/swls/lang-turtle" }
-swls-core = { version = "0.1.0", path = "../../../swls/swls/core" }
+swls-lang-turtle = "0.1.0"
+swls-core = "0.1.0"
 # tower-lsp (pulled in by lang-turtle → lsp-core) needs a runtime feature to compile
 tower-lsp = { version = "0.19", default-features = false, features = ["runtime-tokio"] }
 turtle = { path = ".." }

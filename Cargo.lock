@@ -3392,6 +3392,8 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "swls-core"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "196baa9ae27766f7d482254c00ce3909441cacb546d603adf66387109dba518f"
 dependencies = [
  "bevy_ecs",
  "chrono",
@@ -3421,6 +3423,8 @@ dependencies = [
 [[package]]
 name = "swls-lang-turtle"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c6f85b49d5e5808cdd4fb13d8f350c5e518e3742c90b490f5e511f12017e6b"
 dependencies = [
  "async-trait",
  "bevy_ecs",
@@ -3443,6 +3447,8 @@ dependencies = [
 [[package]]
 name = "swls-lov"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ddab25fa0d507a975bc22c0feeb4d0cf217e47ccdfee3ed0ed4733a4c6456d95"
 dependencies = [
  "bevy_ecs",
 ]
@@ -3450,6 +3456,8 @@ dependencies = [
 [[package]]
 name = "swls-token-helpers"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b5808b84322b36fe14ba1d93cd5ccb6dd83f93e7c1a669587a84c2a055bce3b"
 dependencies = [
  "chumsky 0.9.3",
  "swls-core",
