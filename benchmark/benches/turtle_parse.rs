@@ -1,6 +1,6 @@
 use benchmark::{Fixture, load_fixtures};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
-use lang_turtle::lang::{
+use swls_lang_turtle::lang::{
     context::{Context, TokenIdx},
     parse_source as lang_turtle_parse_source,
     parser::parse_turtle as chumsky_parse_turtle,
@@ -9,7 +9,7 @@ use lang_turtle::lang::{
 use lsp_types::Url;
 use oxttl::TurtleParser;
 use turtle::{
-    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_term_types, parse_t_2,
+    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2,
     parse_t_2_incremental, tokenize,
     turtle::parser::{Lang, Rule, SyntaxKind},
 };
@@ -36,8 +36,8 @@ fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
     let parse = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: SyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<Lang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ fn bench_incremental(c: &mut Criterion) {
     }
     group.finish();
 
-    // lang_turtle as non-incremental reference for edit fixtures.
+    // swls_lang_turtle as non-incremental reference for edit fixtures.
     let url = Url::parse("file:///benchmark/fixture.ttl").unwrap();
     let mut group = c.benchmark_group("incremental/cold_chumsky_turtle");
     for fix in &edit_fixtures {

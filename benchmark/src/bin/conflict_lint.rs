@@ -2,17 +2,17 @@ use std::ops::Range;
 
 use ariadne::{ColorGenerator, Label, Report, ReportBuilder, ReportKind, Source};
 use benchmark::Fixture;
-use lang_turtle::lang::{
+use swls_lang_turtle::lang::{
     context::{Context, TokenIdx},
     parser::parse_turtle as chumsky_parse_turtle,
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
 };
-use lsp_core::util::Spanned as ChumskySpanned;
-use lsp_core::util::token::Token as ChumskyToken;
+use swls_core::util::Spanned as ChumskySpanned;
+use swls_core::util::token::Token as ChumskyToken;
 use rowan::NodeOrToken;
 use tower_lsp::lsp_types::Url;
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_term_types, parse_t_2,
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles, parse_t_2,
     parse_t_2_incremental, tokenize,
     turtle::parser::{Lang, Rule, SyntaxKind},
     sparql::parser::{
@@ -63,32 +63,32 @@ fn astar_build_prev_turtle(text: &str) -> PrevParseInfo<SyntaxKind> {
     let parse = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: SyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<Lang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo<NTriplesSyntaxKind> {
     let parse = parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
     let root = parse.syntax::<NTriplesLang>();
     let tokens = tokenize::<NTriplesSyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: NTriplesSyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 fn astar_build_prev_trig(text: &str) -> PrevParseInfo<TrigSyntaxKind> {
     let parse = parse_t_2(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
     let root = parse.syntax::<TrigLang>();
     let tokens = tokenize::<TrigSyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: TrigSyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<TrigLang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 fn astar_build_prev_sparql(text: &str) -> PrevParseInfo<SparqlSyntaxKind> {
     let parse = parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
     let root = parse.syntax::<SparqlLang>();
     let tokens = tokenize::<SparqlSyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: SparqlSyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<SparqlLang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for

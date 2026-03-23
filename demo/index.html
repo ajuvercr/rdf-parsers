@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RDF Parser Demo</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
     <style>
@@ -62,9 +63,17 @@
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
         }
 
-        .status.ok    { color: #4caf50; }
-        .status.err   { color: #f44336; }
-        .status.loading { color: #888; }
+        .status.ok {
+            color: #4caf50;
+        }
+
+        .status.err {
+            color: #f44336;
+        }
+
+        .status.loading {
+            color: #888;
+        }
 
         /* ── Cards ── */
         .cards {
@@ -90,7 +99,7 @@
         /* Side cards rest muted; center card always prominent */
         .card:nth-child(1),
         .card:nth-child(3) {
-            opacity: 0.82;
+            opacity: 0.75;
         }
 
         .card:nth-child(1):hover,
@@ -99,8 +108,13 @@
             background: #141c30;
         }
 
-        .card:nth-child(1):hover { border-top-color: #7ec8e3; }
-        .card:nth-child(3):hover { border-top-color: #d8a8ea; }
+        .card:nth-child(1) {
+            border-top-color: #7ec8e3;
+        }
+
+        .card:nth-child(3) {
+            border-top-color: #d8a8ea;
+        }
 
         .card:nth-child(2) {
             background: #131a2e;
@@ -115,9 +129,17 @@
             margin-bottom: 0.75rem;
         }
 
-        .card:nth-child(1) .card-heading { color: #7ec8e3; }
-        .card:nth-child(2) .card-heading { color: #a8d8a0; }
-        .card:nth-child(3) .card-heading { color: #d8a8ea; }
+        .card:nth-child(1) .card-heading {
+            color: #7ec8e3;
+        }
+
+        .card:nth-child(2) .card-heading {
+            color: #a8d8a0;
+        }
+
+        .card:nth-child(3) .card-heading {
+            color: #d8a8ea;
+        }
 
         .card ul {
             list-style: none;
@@ -165,7 +187,7 @@
             border: none;
             border-left: 2px solid transparent;
             background: transparent;
-            color: #556;
+            color: #a8d8ea;
             cursor: pointer;
             font-size: 0.82rem;
             text-align: left;
@@ -174,12 +196,10 @@
         }
 
         .lang-tab:hover {
-            color: #aac;
             background: #1a2a4a;
         }
 
         .lang-tab.active {
-            color: #a8d8ea;
             background: #1a2a4a;
             border-left-color: #4a90d9;
         }
@@ -192,7 +212,7 @@
             flex: 1;
         }
 
-        .pane + .pane {
+        .pane+.pane {
             border-left: 1px solid #0f3460;
         }
 
@@ -222,7 +242,15 @@
             line-height: 1.6;
         }
 
-        #output {
+        .output-half {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+            min-height: 60px;
+        }
+
+        .output-panel {
             flex: 1;
             background: #282a36;
             color: #f8f8f2;
@@ -234,14 +262,42 @@
             white-space: pre;
         }
 
-        #output.no-errors { color: #50fa7b; }
-        #output.loading   { color: #555; font-style: italic; }
+        #output.no-errors {
+            color: #50fa7b;
+        }
+
+        .output-panel.loading {
+            color: #555;
+            font-style: italic;
+        }
+
+        #ast-output {
+            color: #bd93f9;
+        }
+
+        #diag-half {
+            flex: unset;
+        }
+
+        .split-handle {
+            height: 5px;
+            background: #0f3460;
+            cursor: row-resize;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .split-handle:hover,
+        .split-handle.dragging {
+            background: #4a90d9;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
+        <img src="favicon.svg" alt="Turtle logo" style="height:2.4rem;width:auto;flex-shrink:0;">
         <div class="header-titles">
             <h1>RDF Parser Demo</h1>
             <span class="header-subtitle">Fault-tolerant semantic web parsers · powered by A*</span>
@@ -291,9 +347,16 @@
             </div>
         </div>
 
-        <div class="pane">
-            <div class="pane-label">Diagnostics — parser keeps going even with errors</div>
-            <pre id="output" class="loading">Initializing…</pre>
+        <div class="pane" id="right-pane">
+            <div class="output-half" id="diag-half">
+                <div class="pane-label">Diagnostics — parser keeps going even with errors</div>
+                <pre id="output" class="output-panel loading">Initializing…</pre>
+            </div>
+            <div class="split-handle" id="split-handle"></div>
+            <div class="output-half" id="ast-half">
+                <div class="pane-label">AST — error nodes annotated with their message</div>
+                <pre id="ast-output" class="output-panel loading">Initializing…</pre>
+            </div>
         </div>
     </div>
 
@@ -303,7 +366,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sparql/sparql.min.js"></script>
 
     <script type="module">
-        import init, {parse} from './pkg/demo.js';
+        import init, {parse, parse_ast} from './pkg/demo.js';
         import {AnsiUp} from 'https://cdn.jsdelivr.net/npm/ansi_up@6.0.2/ansi_up.js';
 
         const SAMPLES = {
@@ -353,16 +416,44 @@ GRAPH ex:metadata {
         };
 
         const MODES = {
-            turtle:   'text/turtle',
-            sparql:   'application/sparql-query',
-            trig:     'text/turtle',
+            turtle: 'text/turtle',
+            sparql: 'application/sparql-query',
+            trig: 'text/turtle',
             ntriples: 'text/turtle',
         };
 
-        const output  = document.getElementById('output');
-        const status  = document.getElementById('status');
-        const tabs    = document.querySelectorAll('.lang-tab');
-        const ansiUp  = new AnsiUp();
+        const output = document.getElementById('output');
+        const astOutput = document.getElementById('ast-output');
+        const status = document.getElementById('status');
+        const tabs = document.querySelectorAll('.lang-tab');
+        const ansiUp = new AnsiUp();
+
+        // Draggable vertical split
+        const handle = document.getElementById('split-handle');
+        const diagHalf = document.getElementById('diag-half');
+        const astHalf = document.getElementById('ast-half');
+        let dragging = false, startY = 0, startDiagH = 0;
+        handle.addEventListener('mousedown', e => {
+            dragging = true;
+            startY = e.clientY;
+            startDiagH = diagHalf.getBoundingClientRect().height;
+            handle.classList.add('dragging');
+            document.body.style.userSelect = 'none';
+        });
+        document.addEventListener('mousemove', e => {
+            if (!dragging) return;
+            const paneH = diagHalf.parentElement.getBoundingClientRect().height;
+            const newH = Math.max(60, Math.min(paneH - 60 - 5, startDiagH + e.clientY - startY));
+            diagHalf.style.flex = 'none';
+            diagHalf.style.height = newH + 'px';
+            astHalf.style.flex = '1';
+        });
+        document.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            handle.classList.remove('dragging');
+            document.body.style.userSelect = '';
+        });
 
         const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
             mode: MODES.turtle,
@@ -376,22 +467,24 @@ GRAPH ex:metadata {
         // Per-language saved content — starts from samples, preserves edits.
         const savedContent = {...SAMPLES};
 
-        let currentLang   = 'turtle';
-        let wasmReady     = false;
+        let currentLang = 'turtle';
+        let wasmReady = false;
         let debounceTimer = null;
 
         function runParse() {
             if (!wasmReady) return;
             const text = cm.getValue();
-            const t0   = performance.now();
-            const result  = parse(currentLang, text);
+            const t0 = performance.now();
+            const result = parse(currentLang, text);
+            const ast = parse_ast(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = result.startsWith('No errors');
             output.innerHTML = ansiUp.ansi_to_html(result);
-            output.className = noErrors ? 'no-errors' : '';
+            output.className = 'output-panel' + (noErrors ? ' no-errors' : '');
+            astOutput.textContent = ast;
             status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;
-            status.className   = 'status ' + (noErrors ? 'ok' : 'err');
+            status.className = 'status ' + (noErrors ? 'ok' : 'err');
         }
 
         function scheduleParse() {
@@ -415,7 +508,7 @@ GRAPH ex:metadata {
         wasmReady = true;
         cm.setValue(savedContent[currentLang]);
         status.textContent = 'Ready';
-        status.className   = 'status';
+        status.className = 'status';
         runParse();
     </script>
 

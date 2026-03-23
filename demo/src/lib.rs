@@ -1,9 +1,11 @@
 use std::cell::RefCell;
+use std::collections::HashMap;
+use std::fmt::Write as FmtWrite;
 use std::io::Cursor;
 use std::ops::Range;
 
 use ariadne::{ColorGenerator, Config, Label, Report, ReportBuilder, ReportKind, Source};
-use rowan::NodeOrToken;
+use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
 use turtle::{
@@ -29,7 +31,7 @@ pub fn start() {
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
 /// every Error node in source order.
-fn astar_pairs_from_parse<L>(parse: Parse, text: &str) -> Vec<(Range<usize>, String)>
+fn astar_pairs_from_parse<L>(parse: &Parse, text: &str) -> Vec<(Range<usize>, String)>
 where
     L: rowan::Language,
     L::Kind: TokenTrait,
@@ -118,6 +120,92 @@ fn render_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) ->
     String::from_utf8(out.into_inner()).unwrap_or_default()
 }
 
+/// Recursively format a syntax node/token into `out`, annotating Error nodes
+/// with their error message.  `error_msgs` maps a node's tree-order index
+/// among all Error nodes to its message string.
+fn format_element<L>(
+    elem: SyntaxElement<L>,
+    error_msgs: &HashMap<usize, String>,
+    error_idx: &mut usize,
+    depth: usize,
+    out: &mut String,
+) where
+    L: rowan::Language,
+    L::Kind: TokenTrait + std::fmt::Debug,
+{
+    let indent = "  ".repeat(depth);
+    match elem {
+        NodeOrToken::Node(n) => {
+            let range = n.text_range();
+            let is_error = n.kind() == L::Kind::ERROR;
+            let _ = write!(
+                out,
+                "{}{:?}@{}..{}",
+                indent,
+                n.kind(),
+                u32::from(range.start()),
+                u32::from(range.end()),
+            );
+            if is_error {
+                if let Some(msg) = error_msgs.get(error_idx) {
+                    let _ = write!(out, "  // {}", msg);
+                }
+                *error_idx += 1;
+            }
+            out.push('\n');
+            for child in n.children_with_tokens() {
+                format_element(child, error_msgs, error_idx, depth + 1, out);
+            }
+        }
+        NodeOrToken::Token(t) => {
+            let range = t.text_range();
+            let text = t.text();
+            if text.len() > 40 {
+                let _ = writeln!(
+                    out,
+                    "{}{:?}@{}..{}  \"{} ...\"",
+                    indent,
+                    t.kind(),
+                    u32::from(range.start()),
+                    u32::from(range.end()),
+                    &text[..40],
+                );
+            } else {
+                let _ = writeln!(
+                    out,
+                    "{}{:?}@{}..{}  {:?}",
+                    indent,
+                    t.kind(),
+                    u32::from(range.start()),
+                    u32::from(range.end()),
+                    text,
+                );
+            }
+        }
+    }
+}
+
+fn render_ast<L>(parse: &Parse, pairs: &[(Range<usize>, String)]) -> String
+where
+    L: rowan::Language,
+    L::Kind: TokenTrait + std::fmt::Debug,
+{
+    // pairs[i] corresponds to the i-th Error node in pre-order traversal.
+    let error_msgs: HashMap<usize, String> =
+        pairs.iter().enumerate().map(|(i, (_, msg))| (i, msg.clone())).collect();
+
+    let root = parse.syntax::<L>();
+    let mut out = String::new();
+    format_element(
+        NodeOrToken::Node(root),
+        &error_msgs,
+        &mut 0,
+        0,
+        &mut out,
+    );
+    out
+}
+
 #[wasm_bindgen]
 pub fn parse(language: &str, text: &str) -> String {
     let loc = "input";
@@ -131,10 +219,10 @@ pub fn parse(language: &str, text: &str) -> String {
             let root = parse.syntax::<Lang>();
             let prev_roles = extract_prev_roles::<Lang>(&root);
             let tokens = tokenize::<SyntaxKind>(text);
+            let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
             PREV_TURTLE.with(|prev| {
                 *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
             });
-            let pairs = astar_pairs_from_parse::<Lang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "sparql" => {
@@ -145,10 +233,10 @@ pub fn parse(language: &str, text: &str) -> String {
             let root = parse.syntax::<SparqlLang>();
             let prev_roles = extract_prev_roles::<SparqlLang>(&root);
             let tokens = tokenize::<SparqlSyntaxKind>(text);
+            let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
             PREV_SPARQL.with(|prev| {
                 *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
             });
-            let pairs = astar_pairs_from_parse::<SparqlLang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "trig" => {
@@ -159,10 +247,10 @@ pub fn parse(language: &str, text: &str) -> String {
             let root = parse.syntax::<TrigLang>();
             let prev_roles = extract_prev_roles::<TrigLang>(&root);
             let tokens = tokenize::<TrigSyntaxKind>(text);
+            let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
             PREV_TRIG.with(|prev| {
                 *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
             });
-            let pairs = astar_pairs_from_parse::<TrigLang>(parse, text);
             render_ariadne(&pairs, text, loc)
         }
         "ntriples" => {
@@ -173,11 +261,51 @@ pub fn parse(language: &str, text: &str) -> String {
             let root = parse.syntax::<NTriplesLang>();
             let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
             let tokens = tokenize::<NTriplesSyntaxKind>(text);
+            let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
             PREV_NTRIPLES.with(|prev| {
                 *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
             });
-            let pairs = astar_pairs_from_parse::<NTriplesLang>(parse, text);
             render_ariadne(&pairs, text, loc)
+        }
+        _ => String::from("Unknown language"),
+    }
+}
+
+#[wasm_bindgen]
+pub fn parse_ast(language: &str, text: &str) -> String {
+    let bias = IncrementalBias::default();
+    match language {
+        "turtle" => {
+            let parse = PREV_TURTLE.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
+            render_ast::<Lang>(&parse, &pairs)
+        }
+        "sparql" => {
+            let parse = PREV_SPARQL.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
+            render_ast::<SparqlLang>(&parse, &pairs)
+        }
+        "trig" => {
+            let parse = PREV_TRIG.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(TrigRule::new(TrigSyntaxKind::TrigDoc), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
+            render_ast::<TrigLang>(&parse, &pairs)
+        }
+        "ntriples" => {
+            let parse = PREV_NTRIPLES.with(|prev| {
+                let p = prev.borrow();
+                parse_t_2_incremental(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
+            render_ast::<NTriplesLang>(&parse, &pairs)
         }
         _ => String::from("Unknown language"),
     }

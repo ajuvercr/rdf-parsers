@@ -2,5 +2,6 @@
 @prefix foaf: <foaf>.
 <a> <b> <c>.
 =======
+@prefix foaf: 
 <a> <b> <c>.
 >>>>>>> after

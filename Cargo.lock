@@ -244,11 +244,11 @@ dependencies = [
  "ariadne",
  "chumsky 0.9.3",
  "criterion",
- "lang-turtle",
- "lsp-core",
  "lsp-types",
  "oxttl",
  "rowan",
+ "swls-core",
+ "swls-lang-turtle",
  "tower-lsp",
  "turtle",
 ]
@@ -1644,28 +1644,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "574b0cd5e90ee2ba03a66d0611fc9a09c9a0c28b2ecc2dc8a181dd31a53ca5d7"
 
 [[package]]
-name = "lang-turtle"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "bevy_ecs",
- "bevy_tasks",
- "chumsky 0.9.3",
- "futures",
- "logos 0.15.1",
- "lov",
- "lsp-core",
- "ropey",
- "serde",
- "serde_json",
- "similar",
- "sophia_api",
- "sophia_iri",
- "token-helpers",
- "tracing",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1786,46 +1764,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "lov"
-version = "0.1.0"
-dependencies = [
- "bevy_ecs",
-]
-
-[[package]]
 name = "lru-slab"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112b39cec0b298b6c1999fee3e31427f74f676e4cb9879ed1a121b43661a4154"
-
-[[package]]
-name = "lsp-core"
-version = "0.1.0"
-dependencies = [
- "bevy_ecs",
- "chrono",
- "chumsky 0.9.3",
- "derive_more",
- "dirs",
- "futures",
- "iri_s",
- "lazy_static",
- "lov",
- "oxigraph",
- "oxrdf",
- "prefixmap",
- "ropey",
- "rudof_rdf",
- "serde",
- "serde_json",
- "shacl_ast",
- "shacl_ir",
- "shacl_rdf",
- "shacl_validation",
- "sophia_api",
- "tower-lsp",
- "tracing",
-]
 
 [[package]]
 name = "lsp-types"
@@ -3448,6 +3390,72 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
+name = "swls-core"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "chrono",
+ "chumsky 0.9.3",
+ "derive_more",
+ "dirs",
+ "futures",
+ "iri_s",
+ "lazy_static",
+ "oxigraph",
+ "oxrdf",
+ "prefixmap",
+ "ropey",
+ "rudof_rdf",
+ "serde",
+ "serde_json",
+ "shacl_ast",
+ "shacl_ir",
+ "shacl_rdf",
+ "shacl_validation",
+ "sophia_api",
+ "swls-lov",
+ "tower-lsp",
+ "tracing",
+]
+
+[[package]]
+name = "swls-lang-turtle"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "bevy_ecs",
+ "bevy_tasks",
+ "chumsky 0.9.3",
+ "futures",
+ "logos 0.15.1",
+ "ropey",
+ "serde",
+ "serde_json",
+ "similar",
+ "sophia_api",
+ "sophia_iri",
+ "swls-core",
+ "swls-lov",
+ "swls-token-helpers",
+ "tracing",
+]
+
+[[package]]
+name = "swls-lov"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+]
+
+[[package]]
+name = "swls-token-helpers"
+version = "0.1.0"
+dependencies = [
+ "chumsky 0.9.3",
+ "swls-core",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3633,14 +3641,6 @@ name = "tinyvec_macros"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
-
-[[package]]
-name = "token-helpers"
-version = "0.1.0"
-dependencies = [
- "chumsky 0.9.3",
- "lsp-core",
-]
 
 [[package]]
 name = "tokio"

@@ -1,7 +1,7 @@
 use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use turtle::{
-    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_term_types, parse_t_2,
+    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2,
     parse_t_2_incremental, tokenize,
     sparql::parser::{Lang, Rule, SyntaxKind},
 };
@@ -16,8 +16,8 @@ fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
     let parse = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
-    let term_types = extract_term_types(&root, |k: SyntaxKind| k.term_type());
-    PrevParseInfo { tokens, term_types }
+    let prev_roles = extract_prev_roles::<Lang>(&root);
+    PrevParseInfo { tokens, prev_roles }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────
