@@ -22,6 +22,7 @@
             background: #1a1a2e;
             color: #e0e0e0;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
         }
@@ -291,6 +292,97 @@
         .split-handle.dragging {
             background: #4a90d9;
         }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+            header {
+                padding: 0.5rem 0.75rem;
+                gap: 0.6rem;
+            }
+
+            header img {
+                height: 1.8rem;
+            }
+
+            .header-subtitle {
+                display: none;
+            }
+
+            /* Cards: horizontal snap-scroll strip */
+            .cards {
+                grid-template-columns: repeat(3, 82vw);
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .card {
+                scroll-snap-align: start;
+                padding: 1rem 1.25rem;
+                border-right: 1px solid #0f3460;
+            }
+
+            .card:nth-child(1),
+            .card:nth-child(3) {
+                opacity: 1;
+            }
+
+            /* Workspace: column */
+            .workspace {
+                flex-direction: column;
+                overflow: auto;
+            }
+
+            /* Lang sidebar: horizontal tab bar */
+            .lang-sidebar {
+                flex-direction: row;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #0f3460;
+                padding: 0;
+                gap: 0;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .lang-tab {
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                flex-shrink: 0;
+                padding: 0.65rem 1.1rem;
+                font-size: 0.85rem;
+            }
+
+            .lang-tab.active {
+                border-bottom-color: #4a90d9;
+                border-left-color: transparent;
+            }
+
+            /* Panes: stack */
+            .workspace > .pane {
+                flex: none;
+                height: 38vh;
+            }
+
+            .pane + .pane {
+                border-left: none;
+                border-top: 1px solid #0f3460;
+                flex: 1;
+            }
+
+            /* Bigger touch target for split handle */
+            .split-handle {
+                height: 10px;
+            }
+
+            .CodeMirror {
+                font-size: 0.8rem;
+            }
+
+            .output-panel {
+                font-size: 0.78rem;
+            }
+        }
     </style>
 </head>
 
@@ -433,27 +525,42 @@ GRAPH ex:metadata {
         const diagHalf = document.getElementById('diag-half');
         const astHalf = document.getElementById('ast-half');
         let dragging = false, startY = 0, startDiagH = 0;
-        handle.addEventListener('mousedown', e => {
+        function startDrag(clientY) {
             dragging = true;
-            startY = e.clientY;
+            startY = clientY;
             startDiagH = diagHalf.getBoundingClientRect().height;
             handle.classList.add('dragging');
             document.body.style.userSelect = 'none';
-        });
-        document.addEventListener('mousemove', e => {
+        }
+        function moveDrag(clientY) {
             if (!dragging) return;
             const paneH = diagHalf.parentElement.getBoundingClientRect().height;
-            const newH = Math.max(60, Math.min(paneH - 60 - 5, startDiagH + e.clientY - startY));
+            const newH = Math.max(60, Math.min(paneH - 60 - 5, startDiagH + clientY - startY));
             diagHalf.style.flex = 'none';
             diagHalf.style.height = newH + 'px';
             astHalf.style.flex = '1';
-        });
-        document.addEventListener('mouseup', () => {
+        }
+        function endDrag() {
             if (!dragging) return;
             dragging = false;
             handle.classList.remove('dragging');
             document.body.style.userSelect = '';
-        });
+        }
+
+        handle.addEventListener('mousedown', e => startDrag(e.clientY));
+        document.addEventListener('mousemove', e => moveDrag(e.clientY));
+        document.addEventListener('mouseup', endDrag);
+
+        handle.addEventListener('touchstart', e => {
+            startDrag(e.touches[0].clientY);
+            e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchmove', e => {
+            if (!dragging) return;
+            moveDrag(e.touches[0].clientY);
+            e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchend', endDrag);
 
         const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
             mode: MODES.turtle,
