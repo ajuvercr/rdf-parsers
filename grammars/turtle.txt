@@ -71,10 +71,12 @@ prefix_token -> 100
 base_token -> 100
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-cl_open -> 8
-cl_close -> 8
-sq_open -> 8
-sq_close -> 8
+cl_open -> 9
+cl_close -> 9
+sq_open -> 9
+sq_close -> 9
+colon -> 10
+comma -> 10
 === term_type ===
 subject -> Subject
 predicate -> Predicate

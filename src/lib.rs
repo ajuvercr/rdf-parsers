@@ -85,6 +85,13 @@ pub trait ParserTrait {
     fn parse(parser: &mut crate::Parser<Self::Kind>, context: &mut Context);
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TermType {
+    Subject,
+    Predicate,
+    Object,
+}
+
 pub trait TokenTrait:
     Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Eq + Hash + 'static
 {
@@ -98,7 +105,18 @@ pub trait TokenTrait:
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
 
-    fn is_significant(&self) -> bool;
+    fn is_significant(&self) -> bool {
+        self.term_type().is_some()
+    }
+
+    fn term_type(&self) -> Option<TermType>;
+
+    /// Maximum `error_value` for this token kind across all grammar rules that
+    /// may match it.  Used to compute the A* suffix-sum heuristic.
+    /// Defaults to 2 (the minimum terminal default).
+    fn max_error_value(&self) -> isize {
+        2
+    }
 }
 
 pub struct Context {
@@ -159,12 +177,13 @@ where
 /// Information from a previous parse needed for incremental re-parsing.
 pub struct PrevParseInfo<K: TokenTrait> {
     pub tokens: Vec<FatToken<K>>,
-    pub prev_roles: Vec<Option<K>>,
+    pub prev_roles: Vec<Option<TermType>>,
 }
 
-/// Score adjustments applied in A* `expect_as` when a token's previous
+/// Cost adjustments applied in A* `expect_as` when a token's previous
 /// `TermType` (from `FatToken::old_kind`) agrees or conflicts with the
-/// current parse context.
+/// current parse context.  The A* minimises cost, so subtracting reduces cost
+/// (good) and adding increases cost (bad).
 ///
 /// The defaults are conservative: a small bonus for agreement and a modest
 /// penalty for conflict.  Callers that need stronger bias (e.g. to recover a
@@ -173,10 +192,11 @@ pub struct PrevParseInfo<K: TokenTrait> {
 /// where N is the number of preserved tokens is a reasonable starting point.
 #[derive(Debug, Clone, Copy)]
 pub struct IncrementalBias {
-    /// Added to the A* score when `old_kind == current TermType`.
+    /// Subtracted from the A* cost when `old_kind == current TermType`
+    /// (agreement lowers cost = good).
     pub match_bonus: isize,
-    /// Added to the A* score when `old_kind != current TermType`
-    /// (should be negative).
+    /// Subtracted from the A* cost when `old_kind != current TermType`.
+    /// Should be negative so that subtracting it *increases* cost (bad).
     pub conflict_penalty: isize,
 }
 

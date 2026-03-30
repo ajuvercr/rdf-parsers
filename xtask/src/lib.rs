@@ -4,8 +4,8 @@ use proc_macro2::{Span, token_stream};
 use quote::quote;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use std::ops::Range;
 use std::io::Cursor;
+use std::ops::Range;
 use syn::LitStr;
 
 use crate::parser::{Config, Expr, Mark, Rule};
@@ -44,85 +44,6 @@ fn render_ariadne_reports(file_id: &str, src: &str, errs: &[Rich<char>]) -> Stri
     }
 
     unsafe { String::from_utf8_unchecked(out.into_inner()) }
-}
-
-fn to_impl(
-    expr: &Expr,
-    ctx: &Config,
-    terminals: &mut HashSet<Terminal>,
-) -> token_stream::TokenStream {
-    let imp = match expr {
-        Expr::Marked(expr, Mark::Option) => {
-            let imp = to_impl(expr, ctx, terminals);
-            quote! {
-                let func = |parser: &mut crate::Parser<SyntaxKind>| {
-                    #imp
-                };
-
-                parser.option(func);
-            }
-        }
-        Expr::Marked(expr, Mark::Star) => {
-            let imp = to_impl(expr, ctx, terminals);
-            quote! {
-                let func = |parser: &mut crate::Parser<SyntaxKind>| {
-                    #imp
-                };
-
-                parser.star(func);
-            }
-        }
-        Expr::Marked(expr, Mark::Plus) => {
-            let imp = to_impl(expr, ctx, terminals);
-            quote! {
-                let func = |parser: &mut crate::Parser<SyntaxKind>| {
-                    #imp
-                };
-
-                parser.plus(func);
-            }
-        }
-        Expr::Either(exprs) => {
-            let parts: Vec<_> = exprs.iter().map(|e| to_impl(e, ctx, terminals)).collect();
-            quote! {
-                let mut checker = crate::Checker::new(parser);
-
-                #(
-                    { #parts };
-                    checker.update(parser);
-                )*
-
-                *parser = checker.get();
-            }
-        }
-        Expr::Seq(exprs) => {
-            let parts = exprs.iter().map(|e| to_impl(e, ctx, terminals));
-            quote! {
-                #(
-                    {#parts};
-                )*
-            }
-        }
-        Expr::Literal(_literal_type, f) => {
-            terminals.insert(Terminal::Literal(f.clone()));
-            let name = ctx.context.with(f);
-            let n = ctx.context.ident_for(&name);
-            quote! {
-                #n::parse(parser, context)
-            }
-        }
-        Expr::Reference(re) => {
-            if !ctx.rules.producing.iter().any(|r| &r.name == re) {
-                terminals.insert(Terminal::Ref(re.clone()));
-            }
-
-            let n = ctx.context.ident_for(re);
-            quote! {
-                #n::parse(parser, context)
-            }
-        }
-    };
-    imp
 }
 
 // ── Expression compaction ─────────────────────────────────────────────────────
@@ -384,7 +305,16 @@ fn add_impl(
     let exp = match expr {
         Expr::Marked(expr, Mark::Option) => {
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, next, impls, reachable, initial_states);
+            let thing = add_impl(
+                expr,
+                ctx,
+                terminals,
+                state_count,
+                next,
+                impls,
+                reachable,
+                initial_states,
+            );
             let tt = as_tt(impls, thing);
             let next = as_tt(impls, next);
 
@@ -397,7 +327,16 @@ fn add_impl(
             *state_count += 1;
             let done_once = *state_count;
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, done_once, impls, reachable, initial_states);
+            let thing = add_impl(
+                expr,
+                ctx,
+                terminals,
+                state_count,
+                done_once,
+                impls,
+                reachable,
+                initial_states,
+            );
             let tt = as_tt(impls, thing);
 
             let next = as_tt(impls, next);
@@ -416,7 +355,16 @@ fn add_impl(
         }
         Expr::Marked(expr, Mark::Star) => {
             *state_count += 1;
-            let thing = add_impl(expr, ctx, terminals, state_count, id, impls, reachable, initial_states);
+            let thing = add_impl(
+                expr,
+                ctx,
+                terminals,
+                state_count,
+                id,
+                impls,
+                reachable,
+                initial_states,
+            );
             let tt = as_tt(impls, thing);
             let next = as_tt(impls, next);
             quote! {
@@ -428,7 +376,18 @@ fn add_impl(
             *state_count += 1;
             let things: Vec<_> = exprs
                 .iter()
-                .map(|e| add_impl(e, ctx, terminals, state_count, next, impls, reachable, initial_states))
+                .map(|e| {
+                    add_impl(
+                        e,
+                        ctx,
+                        terminals,
+                        state_count,
+                        next,
+                        impls,
+                        reachable,
+                        initial_states,
+                    )
+                })
                 .collect();
 
             let things = things.into_iter().map(|x| as_tt(impls, x));
@@ -440,7 +399,16 @@ fn add_impl(
         Expr::Seq(exprs) => {
             let mut target = next;
             for e in exprs.iter().rev() {
-                target = add_impl(e, ctx, terminals, state_count, target, impls, reachable, initial_states);
+                target = add_impl(
+                    e,
+                    ctx,
+                    terminals,
+                    state_count,
+                    target,
+                    impls,
+                    reachable,
+                    initial_states,
+                );
             }
 
             return target;
@@ -451,7 +419,12 @@ fn add_impl(
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
             reachable.insert(next);
-            let error_value = ctx.context.error_values.get(&name).copied().unwrap_or(10isize);
+            let error_value = ctx
+                .context
+                .error_values
+                .get(&name)
+                .copied()
+                .unwrap_or(10isize);
             inline_terminal_rule(next, &n, error_value)
         }
         Expr::Reference(re) => {
@@ -463,10 +436,17 @@ fn add_impl(
             let n = ctx.context.ident_for(re);
             reachable.insert(next);
             if is_terminal {
-                let error_value = ctx.context.error_values.get(re.as_str()).copied().unwrap_or(2isize);
+                let error_value = ctx
+                    .context
+                    .error_values
+                    .get(re.as_str())
+                    .copied()
+                    .unwrap_or(2isize);
                 inline_terminal_rule(next, &n, error_value)
             } else {
-                let entry = *initial_states.get(re).unwrap_or_else(|| panic!("unknown rule: {re}"));
+                let entry = *initial_states
+                    .get(re)
+                    .unwrap_or_else(|| panic!("unknown rule: {re}"));
                 push_rule(next, &n, entry)
             }
         }
@@ -513,7 +493,9 @@ fn producing_rule_arms(
         .filter(|(k, _)| reachable.contains(k))
         .collect();
     step_arms_vec.sort_by_key(|(k, _)| *k);
-    let step_arms = step_arms_vec.into_iter().map(|(k, v)| quote! { (SyntaxKind::#n, #k) => { #v } });
+    let step_arms = step_arms_vec
+        .into_iter()
+        .map(|(k, v)| quote! { (SyntaxKind::#n, #k) => { #v } });
 
     let new_arm = quote! { SyntaxKind::#n => Rule { kind, state: #imp }, };
 
@@ -762,7 +744,9 @@ pub fn generate(path: &str, contents: &str) -> String {
         .producing
         .iter()
         .zip(compacted.iter())
-        .map(|(value, expr)| producing_rule_arms(value, expr, &config, &mut terminals, &initial_states))
+        .map(|(value, expr)| {
+            producing_rule_arms(value, expr, &config, &mut terminals, &initial_states)
+        })
         .unzip();
 
     let sub_pattersn = get_sub_patterns(&config.rules.terminals);
@@ -855,6 +839,29 @@ pub fn generate(path: &str, contents: &str) -> String {
             quote! {
                 SyntaxKind::#rule_ident => Some(crate::TermType::#variant_ident),
             }
+        })
+        .collect();
+
+    // Build max_error_value arms: for each terminal, emit the error_value used
+    // by grammar rules that match it.  Only emit arms that differ from the
+    // wildcard default (2), so the match stays compact.
+    let max_error_value_arms: Vec<_> = sorted_terminals
+        .iter()
+        .filter_map(|x| {
+            let ident_str = x.ident(&config);
+            let is_kw = matches!(x, Terminal::Literal(_));
+            let default_ev = if is_kw { 10 } else { 2 };
+            let ev = config
+                .context
+                .error_values
+                .get(ident_str.as_str())
+                .copied()
+                .unwrap_or(default_ev);
+            if ev == 2 {
+                return None; // matches wildcard default, no arm needed
+            }
+            let n = config.context.ident_for(&ident_str);
+            Some(quote! { SyntaxKind::#n => #ev, })
         })
         .collect();
 
@@ -992,6 +999,13 @@ pub fn generate(path: &str, contents: &str) -> String {
             match self {
                 #( #term_type_arms )*
                 _ => None,
+            }
+        }
+
+        fn max_error_value(&self) -> isize {
+            match self {
+                #( #max_error_value_arms )*
+                _ => 2,
             }
         }
     }

@@ -81,7 +81,9 @@
 [78]  	Verb	  ::=  	VarOrIri | 'a'
 [79]  	ObjectList	  ::=  	Object ( ',' Object )*
 [80]  	Object	  ::=  	GraphNode
-[81]  	TriplesSameSubjectPath	  ::=  	VarOrTerm PropertyListPathNotEmpty | TriplesNodePath PropertyListPath
+[81]  	TriplesSameSubjectPath	  ::=  	Subject1 PropertyListPathNotEmpty | Subject2 PropertyListPath
+[81s]   Subject1 ::= VarOrTerm
+[81t]   Subject2 ::= TriplesNodePath
 [82]  	PropertyListPath	  ::=  	PropertyListPathNotEmpty?
 [83]  	PropertyListPathNotEmpty	  ::=  	( VerbPath | VerbSimple ) ObjectListPath ( ';' ( ( VerbPath | VerbSimple ) ObjectList )? )*
 [84]  	VerbPath	  ::=  	Path
@@ -273,9 +275,17 @@ PREFIX -> sparql_prefix_token
 === error_value ===
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-cl_open -> 8
-cl_close -> 8
-br_open -> 8
-br_close -> 8
-sq_open -> 8
-sq_close -> 8
+cl_open -> 9
+cl_close -> 9
+br_open -> 9
+br_close -> 9
+sq_open -> 9
+sq_close -> 9
+colon -> 10
+comma -> 10
+=== term_type ===
+Subject1 -> Subject
+Subject2 -> Subject
+VerbPath -> Predicate
+VerbSimple -> Predicate
+Object -> Object

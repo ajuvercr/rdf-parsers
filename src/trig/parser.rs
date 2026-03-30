@@ -1992,7 +1992,37 @@ impl TokenTrait for SyntaxKind {
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn is_significant(&self) -> bool {
-        matches!(self, SyntaxKind::LabelOrSubject | SyntaxKind::Object | SyntaxKind::Predicate | SyntaxKind::Subject | SyntaxKind::Verb)
+    fn term_type(&self) -> Option<crate::TermType> {
+        match self {
+            SyntaxKind::LabelOrSubject => Some(crate::TermType::Subject),
+            SyntaxKind::Object => Some(crate::TermType::Object),
+            SyntaxKind::Predicate => Some(crate::TermType::Predicate),
+            SyntaxKind::Subject => Some(crate::TermType::Subject),
+            SyntaxKind::Verb => Some(crate::TermType::Predicate),
+            _ => None,
+        }
+    }
+    fn max_error_value(&self) -> isize {
+        match self {
+            SyntaxKind::ClOpen => 8isize,
+            SyntaxKind::ClClose => 8isize,
+            SyntaxKind::Comma => 10isize,
+            SyntaxKind::Stop => 10isize,
+            SyntaxKind::Colon => 10isize,
+            SyntaxKind::BaseToken => 100isize,
+            SyntaxKind::PrefixToken => 100isize,
+            SyntaxKind::SparqlBaseToken => 100isize,
+            SyntaxKind::GraphToken => 8isize,
+            SyntaxKind::SparqlPrefixToken => 100isize,
+            SyntaxKind::SqOpen => 8isize,
+            SyntaxKind::SqClose => 8isize,
+            SyntaxKind::Datatype => 10isize,
+            SyntaxKind::Alit => 10isize,
+            SyntaxKind::FalseLit => 10isize,
+            SyntaxKind::TrueLit => 10isize,
+            SyntaxKind::CurlyOpen => 100isize,
+            SyntaxKind::CurlyClose => 100isize,
+            _ => 2,
+        }
     }
 }

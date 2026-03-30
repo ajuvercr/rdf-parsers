@@ -22,22 +22,39 @@ pub trait ParserTrait: Debug + Sized + 'static {
 }
 
 pub struct AStar<'a, R: ParserTrait> {
-    /// Maps each state key to the best score seen so far (queued or processed).
-    /// Used for lazy-deletion dedup: elements with worse scores are rejected
-    /// early in `add_element`; stale heap entries are skipped in `consume`.
+    /// Maps each state key to the best (lowest) cost seen so far (queued or
+    /// processed).  Used for lazy-deletion dedup: elements with worse (higher)
+    /// costs are rejected early in `add_element`; stale heap entries are
+    /// skipped in `consume`.
     done: HashMap<(Fingerprint, usize, usize), isize>,
     tokens: &'a [FatToken<R::Kind>],
     todo: BinaryHeap<Element<R>>,
     pub bias: IncrementalBias,
+    /// Admissible heuristic: `heuristic[pos]` is a non-positive lower bound on
+    /// the additional cost reduction achievable from token position `pos` to
+    /// the end of input.  Computed as a suffix sum:
+    ///   heuristic[T] = 0
+    ///   heuristic[i] = heuristic[i+1] - (2 + tokens[i].kind.max_error_value())
+    ///                  (skipped tokens contribute 0)
+    heuristic: Vec<isize>,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
     fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias) -> Self {
+        let mut heuristic = vec![0isize; tokens.len() + 1];
+        for i in (0..tokens.len()).rev() {
+            heuristic[i] = if tokens[i].kind.skips() {
+                heuristic[i + 1]
+            } else {
+                heuristic[i + 1] - (2 + tokens[i].kind.max_error_value())
+            };
+        }
         Self {
             tokens,
             done: HashMap::new(),
             todo: BinaryHeap::new(),
             bias,
+            heuristic,
         }
     }
 
@@ -51,7 +68,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // Skip stale entries: a better-scoring element for this state
                 // was enqueued after this one.
                 match self.done.get(&state) {
-                    Some(&best) if best > e.score => continue,
+                    Some(&best) if best < e.cost => continue,
                     _ => {}
                 }
 
@@ -70,13 +87,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
         match self.done.entry(state) {
             std::collections::hash_map::Entry::Occupied(mut e) => {
-                if element.score <= *e.get() {
-                    return false; // reject: equal-or-worse duplicate
+                if element.cost >= *e.get() {
+                    return false; // reject: equal-or-worse (higher cost) duplicate
                 }
-                *e.get_mut() = element.score; // better path found
+                *e.get_mut() = element.cost; // better (lower cost) path found
             }
             std::collections::hash_map::Entry::Vacant(v) => {
-                v.insert(element.score);
+                v.insert(element.cost);
             }
         }
 
@@ -105,7 +122,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 }
 
                 // Compute incremental bias using the cached role.
-                let bias = match (found.old_kind(), element.cached_role.as_ref()) {
+                let bias = match (found.old_kind(), element.cached_role) {
                     (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
                     (Some(_), Some(_)) => self.bias.conflict_penalty,
                     _ => 0,
@@ -115,7 +132,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     let fallback = Element {
                         list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
-                        score: element.score + self.bias.match_bonus,
+                        cost: element.cost - self.bias.match_bonus,
+                        h: self.heuristic[element.state.1],
                         state: (element.state.0, element.state.1),
                         cached_role: element.cached_role.clone(),
                     };
@@ -127,7 +145,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 return Element {
                     list,
                     parent: element.parent.clone(),
-                    score: element.score + 2 + error_value + bias,
+                    cost: element.cost - (2 + error_value + bias),
+                    h: self.heuristic[idx],
                     state: (element.state.0, idx),
                     cached_role: element.cached_role.clone(),
                 };
@@ -139,7 +158,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         Element {
             list,
             parent: element.parent.clone(),
-            score: element.score - error_value,
+            cost: element.cost + error_value,
+            h: self.heuristic[idx],
             state: (element.state.0, idx),
             cached_role: element.cached_role.clone(),
         }
@@ -176,7 +196,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 }
 
                 // Compute incremental bias using the cached role.
-                let bias = match (found.old_kind(), element.cached_role.as_ref()) {
+                let bias = match (found.old_kind(), element.cached_role) {
                     (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
                     (Some(_), Some(_)) => self.bias.conflict_penalty,
                     _ => 0,
@@ -194,7 +214,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Some(Element {
                         list: fb_list,
                         parent: element.parent.clone(),
-                        score: element.score + self.bias.match_bonus,
+                        cost: element.cost - self.bias.match_bonus,
+                        h: self.heuristic[element.state.1],
                         state: element.state,
                         cached_role: element.cached_role.clone(),
                     })
@@ -213,7 +234,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Element {
                         list,
                         parent: element.parent.clone(),
-                        score: element.score + 2 + error_value + bias,
+                        cost: element.cost - (2 + error_value + bias),
+                        h: self.heuristic[idx],
                         state: (element.state.0, idx),
                         cached_role: element.cached_role.clone(),
                     },
@@ -232,7 +254,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             Element {
                 list,
                 parent: element.parent.clone(),
-                score: element.score - error_value,
+                cost: element.cost + error_value,
+                h: self.heuristic[idx],
                 state: (element.state.0, idx),
                 cached_role: element.cached_role.clone(),
             },
@@ -244,29 +267,36 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 #[derive(Debug)]
 pub struct Element<R: ParserTrait> {
     list: List<Step<R::Kind>>,
-    parent: List<(R, Fingerprint, Option<R::Kind>)>,
-    score: isize,
+    parent: List<(R, Fingerprint, Option<crate::TermType>)>,
+    /// Accumulated cost so far (lower = better).  Starts at 0; decreases on
+    /// successful token matches, increases on error insertions.
+    cost: isize,
+    /// Admissible heuristic: lower bound on the additional cost reduction
+    /// achievable from the current token position to end of input.
+    /// Always non-positive.  `f = cost + h` is the A* priority.
+    h: isize,
     state: (Fingerprint, usize),
     /// Cached role: the innermost significant ancestor rule kind, maintained
     /// through push/pop/pop_push to avoid an O(depth) parent-chain walk per token.
-    cached_role: Option<R::Kind>,
+    cached_role: Option<crate::TermType>,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
-        self.score == other.score && self.parent.len() == other.parent.len()
+        (self.cost + self.h) == (other.cost + other.h) && self.parent.len() == other.parent.len()
     }
 }
 impl<R: ParserTrait> Eq for Element<R> {}
 impl<R: ParserTrait> Element<R> {
-    fn new(current: R) -> Self {
+    fn new(current: R, h: isize) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
         let kind = current.element_kind();
-        let cached_role = if kind.is_significant() { Some(kind) } else { None };
+        let cached_role = kind.term_type();
         Self {
             list: List::default(),
             parent: parent.prepend((current, head, None)),
-            score: 0,
+            cost: 0,
+            h,
             state: (Fingerprint(1), 0),
             cached_role,
         }
@@ -275,12 +305,13 @@ impl<R: ParserTrait> Element<R> {
     pub fn pop_push(&self, rule: R) -> Self {
         let ((_, f, old_tt), tail) = self.parent.slice().unwrap();
         let kind = rule.element_kind();
-        let cached_role = if kind.is_significant() { Some(kind) } else { old_tt.clone() };
-        let parent = tail.prepend((rule, *f, old_tt.clone()));
+        let cached_role = kind.term_type().or_else(|| *old_tt);
+        let parent = tail.prepend((rule, *f, *old_tt));
         Self {
             parent,
             list: self.list.clone(),
-            score: self.score,
+            cost: self.cost,
+            h: self.h,
             state: self.state.clone(),
             cached_role,
         }
@@ -289,14 +320,15 @@ impl<R: ParserTrait> Element<R> {
     pub fn push(&self, rule: R) -> Self {
         let kind = rule.element_kind();
         let (s, a) = self.state;
-        let cached_role = if kind.is_significant() { Some(kind.clone()) } else { self.cached_role.clone() };
-        let parent = self.parent.prepend((rule, s, self.cached_role.clone()));
+        let cached_role = kind.term_type().or(self.cached_role);
+        let parent = self.parent.prepend((rule, s, self.cached_role));
         let list = self.list.prepend(Step::start(kind.clone()));
         let s = descend(s, kind.branch());
         Self {
             parent,
             list,
-            score: self.score,
+            cost: self.cost,
+            h: self.h,
             state: (s, a),
             cached_role,
         }
@@ -309,18 +341,23 @@ impl<R: ParserTrait> Element<R> {
         Some(Self {
             parent: parent.clone(),
             list,
-            score: self.score,
+            cost: self.cost,
+            h: self.h,
             state: (*f, a),
-            cached_role: old_tt.clone(),
+            cached_role: *old_tt,
         })
     }
 }
 
 impl<R: ParserTrait> Ord for Element<R> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.score
-            .cmp(&other.score)
-            .then(self.parent.len().cmp(&other.parent.len()))
+        // Min-heap on f = cost + h (lower f = higher priority).
+        // Tiebreak: prefer shallower parent stacks (fewer pending rules).
+        let f_self = self.cost + self.h;
+        let f_other = other.cost + other.h;
+        f_other
+            .cmp(&f_self)
+            .then(other.parent.len().cmp(&self.parent.len()))
     }
 }
 impl<R: ParserTrait> PartialOrd for Element<R> {
@@ -335,6 +372,7 @@ pub fn a_star<R: ParserTrait>(
     bias: IncrementalBias,
 ) -> List<Step<R::Kind>> {
     let mut state = AStar::new(tokens, bias);
-    state.todo.push(Element::new(root));
+    let h0 = state.heuristic[0];
+    state.todo.push(Element::new(root, h0));
     state.consume().unwrap_or_default()
 }

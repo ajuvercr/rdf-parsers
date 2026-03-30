@@ -2,31 +2,25 @@ use std::ops::Range;
 
 use ariadne::{ColorGenerator, Label, Report, ReportBuilder, ReportKind, Source};
 use benchmark::Fixture;
+use rowan::NodeOrToken;
+use swls_core::util::Spanned as ChumskySpanned;
+use swls_core::util::token::Token as ChumskyToken;
 use swls_lang_turtle::lang::{
     context::{Context, TokenIdx},
     parser::parse_turtle as chumsky_parse_turtle,
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
 };
-use swls_core::util::Spanned as ChumskySpanned;
-use swls_core::util::token::Token as ChumskyToken;
-use rowan::NodeOrToken;
 use tower_lsp::lsp_types::Url;
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles, parse_t_2,
-    parse_t_2_incremental, tokenize,
-    turtle::parser::{Lang, Rule, SyntaxKind},
-    sparql::parser::{
-        Lang as SparqlLang, Rule as SparqlRule,
-        SyntaxKind as SparqlSyntaxKind,
-    },
-    trig::parser::{
-        Lang as TrigLang, Rule as TrigRule,
-        SyntaxKind as TrigSyntaxKind,
-    },
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles,
     ntriples::parser::{
-        Lang as NTriplesLang, Rule as NTriplesRule,
-        SyntaxKind as NTriplesSyntaxKind,
+        Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
     },
+    parse_t_2, parse_t_2_incremental,
+    sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
+    tokenize,
+    trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
+    turtle::parser::{Lang, Rule, SyntaxKind},
 };
 
 // ── ariadne output ────────────────────────────────────────────────────────────
@@ -64,6 +58,9 @@ fn astar_build_prev_turtle(text: &str) -> PrevParseInfo<SyntaxKind> {
     let root = parse.syntax::<Lang>();
     let tokens = tokenize::<SyntaxKind>(text);
     let prev_roles = extract_prev_roles::<Lang>(&root);
+    for (token, role) in tokens.iter().zip(prev_roles.iter()) {
+        println!("{:?} {:?}", token.text(), role);
+    }
     PrevParseInfo { tokens, prev_roles }
 }
 
@@ -72,6 +69,9 @@ fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo<NTriplesSyntaxKind> {
     let root = parse.syntax::<NTriplesLang>();
     let tokens = tokenize::<NTriplesSyntaxKind>(text);
     let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
+    for (token, role) in tokens.iter().zip(prev_roles.iter()) {
+        println!("{:?} {:?}", token.text(), role);
+    }
     PrevParseInfo { tokens, prev_roles }
 }
 
@@ -80,6 +80,9 @@ fn astar_build_prev_trig(text: &str) -> PrevParseInfo<TrigSyntaxKind> {
     let root = parse.syntax::<TrigLang>();
     let tokens = tokenize::<TrigSyntaxKind>(text);
     let prev_roles = extract_prev_roles::<TrigLang>(&root);
+    for (token, role) in tokens.iter().zip(prev_roles.iter()) {
+        println!("{:?} {:?}", token.text(), role);
+    }
     PrevParseInfo { tokens, prev_roles }
 }
 
@@ -88,6 +91,9 @@ fn astar_build_prev_sparql(text: &str) -> PrevParseInfo<SparqlSyntaxKind> {
     let root = parse.syntax::<SparqlLang>();
     let tokens = tokenize::<SparqlSyntaxKind>(text);
     let prev_roles = extract_prev_roles::<SparqlLang>(&root);
+    for (token, role) in tokens.iter().zip(prev_roles.iter()) {
+        println!("{:?} {:?}", token.text(), role);
+    }
     PrevParseInfo { tokens, prev_roles }
 }
 
@@ -116,9 +122,7 @@ where
     let mut token_ends: Vec<usize> = root
         .descendants_with_tokens()
         .filter_map(|nt| match nt {
-            NodeOrToken::Token(t) if !t.kind().skips() => {
-                Some(usize::from(t.text_range().end()))
-            }
+            NodeOrToken::Token(t) if !t.kind().skips() => Some(usize::from(t.text_range().end())),
             _ => None,
         })
         .collect();
@@ -247,7 +251,10 @@ fn run_astar_sparql(fixture: &Fixture, loc: &str) {
     if fixture.is_static {
         println!("=== (static) ===");
         let pairs = astar_pairs_from_parse::<SparqlLang>(
-            parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), &fixture.before),
+            parse_t_2(
+                SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+                &fixture.before,
+            ),
             &fixture.before,
         );
         print_ariadne(&pairs, &fixture.before, loc);
@@ -259,7 +266,10 @@ fn run_astar_sparql(fixture: &Fixture, loc: &str) {
     println!("=== before ===");
     let prev = astar_build_prev_sparql(&fixture.before);
     let before_pairs = astar_pairs_from_parse::<SparqlLang>(
-        parse_t_2(SparqlRule::new(SparqlSyntaxKind::QueryUnit), &fixture.before),
+        parse_t_2(
+            SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+            &fixture.before,
+        ),
         &fixture.before,
     );
     print_ariadne(&before_pairs, &fixture.before, loc);
@@ -284,7 +294,10 @@ fn run_astar_ntriples(fixture: &Fixture, loc: &str) {
     if fixture.is_static {
         println!("=== (static) ===");
         let pairs = astar_pairs_from_parse::<NTriplesLang>(
-            parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), &fixture.before),
+            parse_t_2(
+                NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+                &fixture.before,
+            ),
             &fixture.before,
         );
         print_ariadne(&pairs, &fixture.before, loc);
@@ -296,7 +309,10 @@ fn run_astar_ntriples(fixture: &Fixture, loc: &str) {
     println!("=== before ===");
     let prev = astar_build_prev_ntriples(&fixture.before);
     let before_pairs = astar_pairs_from_parse::<NTriplesLang>(
-        parse_t_2(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), &fixture.before),
+        parse_t_2(
+            NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+            &fixture.before,
+        ),
         &fixture.before,
     );
     print_ariadne(&before_pairs, &fixture.before, loc);
@@ -403,7 +419,9 @@ fn main() {
         "ntriples" => run_astar_ntriples(&fixture, &path),
         "chumsky" => run_chumsky(&fixture, &path),
         _ => {
-            eprintln!("Unknown subcommand: '{subcmd}'. Use 'astar', 'sparql', 'trig', 'ntriples', or 'chumsky'.");
+            eprintln!(
+                "Unknown subcommand: '{subcmd}'. Use 'astar', 'sparql', 'trig', 'ntriples', or 'chumsky'."
+            );
             std::process::exit(1);
         }
     }

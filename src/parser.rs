@@ -4,7 +4,7 @@ pub struct FatToken<T: TokenTrait> {
     pub kind: T,
     text: String,
     pub range: Range<usize>,
-    old_kind: Option<T>,
+    old_kind: Option<crate::TermType>,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -20,11 +20,11 @@ impl<T: TokenTrait> FatToken<T> {
         &self.text
     }
 
-    pub fn old_kind(&self) -> Option<&T> {
-        self.old_kind.as_ref()
+    pub fn old_kind(&self) -> Option<crate::TermType> {
+        self.old_kind
     }
 
-    pub fn set_old_kind(&mut self, kind: Option<T>) {
+    pub fn set_old_kind(&mut self, kind: Option<crate::TermType>) {
         self.old_kind = kind;
     }
 }
@@ -189,11 +189,11 @@ use crate::{Context, ParserTrait, TokenTrait, list::List};
 /// by finding the innermost ancestor whose kind is "significant" (i.e.
 /// `is_significant()` returns true).
 ///
-/// Returns `Vec<Option<L::Kind>>` indexed by token position, aligned with
+/// Returns `Vec<Option<TermType>>` indexed by token position, aligned with
 /// the token-vec produced by `tokenize`.
 pub fn extract_prev_roles<L: rowan::Language>(
     root: &rowan::SyntaxNode<L>,
-) -> Vec<Option<L::Kind>>
+) -> Vec<Option<crate::TermType>>
 where
     L::Kind: crate::TokenTrait,
 {
@@ -205,10 +205,7 @@ where
         // Walk up ancestors to find the innermost significant one.
         let role = tok
             .parent_ancestors()
-            .find_map(|ancestor| {
-                let k = ancestor.kind();
-                if k.is_significant() { Some(k) } else { None }
-            });
+            .find_map(|ancestor| ancestor.kind().term_type());
         result.push(role);
     }
     result
