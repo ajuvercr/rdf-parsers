@@ -75,6 +75,7 @@ cl_open -> 9
 cl_close -> 9
 sq_open -> 9
 sq_close -> 9
+stop -> 10
 colon -> 10
 comma -> 10
 === term_type ===

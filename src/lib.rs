@@ -113,7 +113,10 @@ pub trait TokenTrait:
 
     /// Maximum `error_value` for this token kind across all grammar rules that
     /// may match it.  Used to compute the A* suffix-sum heuristic.
-    /// Defaults to 2 (the minimum terminal default).
+    ///
+    /// Must always return > 0: the A* cost model requires `error_value > 0`
+    /// so that matching is strictly cheaper than skipping.
+    /// Defaults to 2, matching the minimum terminal weight used in codegen.
     fn max_error_value(&self) -> isize {
         2
     }
@@ -163,14 +166,7 @@ where
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
     let tokens = tokenize::<T::Kind>(text);
-    let list = a_star::a_star(
-        root,
-        &tokens,
-        IncrementalBias {
-            match_bonus: 0,
-            conflict_penalty: 0,
-        },
-    );
+    let list = a_star::a_star(root, &tokens, IncrementalBias { strength: 0 });
     Parse::from_steps(&tokens, list)
 }
 
@@ -180,32 +176,26 @@ pub struct PrevParseInfo<K: TokenTrait> {
     pub prev_roles: Vec<Option<TermType>>,
 }
 
-/// Cost adjustments applied in A* `expect_as` when a token's previous
-/// `TermType` (from `FatToken::old_kind`) agrees or conflicts with the
-/// current parse context.  The A* minimises cost, so subtracting reduces cost
-/// (good) and adding increases cost (bad).
+/// Role-preservation bias applied in the A* search during incremental
+/// re-parsing.  When a token's previous `TermType` (Subject/Predicate/Object)
+/// agrees with the current parse context, cost is reduced by `strength`;
+/// when it conflicts, cost is increased by `strength`.
 ///
-/// The defaults are conservative: a small bonus for agreement and a modest
-/// penalty for conflict.  Callers that need stronger bias (e.g. to recover a
-/// whole subject–predicate–object triple from a two-token edit) should
-/// increase the magnitudes — a `conflict_penalty` around `-(N * match_bonus)`
-/// where N is the number of preserved tokens is a reasonable starting point.
+/// `strength` must be > 0 for the bias to have any effect, and should exceed
+/// the default token weight (2) so that a single role agreement outweighs a
+/// single missing token.  The default of 5 means one agreeing node saves more
+/// than twice the cost of any missing token at the default weight.
 #[derive(Debug, Clone, Copy)]
 pub struct IncrementalBias {
-    /// Subtracted from the A* cost when `old_kind == current TermType`
-    /// (agreement lowers cost = good).
-    pub match_bonus: isize,
-    /// Subtracted from the A* cost when `old_kind != current TermType`.
-    /// Should be negative so that subtracting it *increases* cost (bad).
-    pub conflict_penalty: isize,
+    /// Magnitude of the role-agreement bonus and role-conflict penalty.
+    /// Agreement: cost -= strength.  Conflict: cost += strength.
+    /// Must be > 0; use 0 to disable incremental bias entirely.
+    pub strength: isize,
 }
 
 impl Default for IncrementalBias {
     fn default() -> Self {
-        Self {
-            match_bonus: 4,
-            conflict_penalty: -5,
-        }
+        Self { strength: 5 }
     }
 }
 

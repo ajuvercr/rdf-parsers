@@ -1090,7 +1090,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PredicateObjectList, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -1162,7 +1162,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ObjectList, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -1220,7 +1220,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -1551,7 +1551,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Datatype, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::Datatype, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -1596,7 +1596,7 @@ mod definitions {
                 }
                 (SyntaxKind::BooleanLiteral, 1usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::TrueLit, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::TrueLit, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -1608,7 +1608,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::FalseLit, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::FalseLit, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -1784,7 +1784,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Comma, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Comma, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Comma, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -1796,7 +1796,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Colon, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Colon, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Colon, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -1844,25 +1844,25 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Datatype, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Datatype, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Datatype, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Alit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Alit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Alit, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::FalseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FalseLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::FalseLit, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::TrueLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TrueLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::TrueLit, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -2006,9 +2006,7 @@ impl TokenTrait for SyntaxKind {
         match self {
             SyntaxKind::ClOpen => 8isize,
             SyntaxKind::ClClose => 8isize,
-            SyntaxKind::Comma => 10isize,
             SyntaxKind::Stop => 10isize,
-            SyntaxKind::Colon => 10isize,
             SyntaxKind::BaseToken => 100isize,
             SyntaxKind::PrefixToken => 100isize,
             SyntaxKind::SparqlBaseToken => 100isize,
@@ -2016,10 +2014,6 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::SparqlPrefixToken => 100isize,
             SyntaxKind::SqOpen => 8isize,
             SyntaxKind::SqClose => 8isize,
-            SyntaxKind::Datatype => 10isize,
-            SyntaxKind::Alit => 10isize,
-            SyntaxKind::FalseLit => 10isize,
-            SyntaxKind::TrueLit => 10isize,
             SyntaxKind::CurlyOpen => 100isize,
             SyntaxKind::CurlyClose => 100isize,
             _ => 2,

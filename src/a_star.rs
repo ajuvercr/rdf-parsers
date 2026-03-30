@@ -101,6 +101,10 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         true
     }
 
+    /// # Panics / correctness
+    /// `error_value` must be > 0.  A successful match reduces cost by
+    /// `error_value` while a miss increases it by the same amount, so
+    /// matching is only strictly cheaper than skipping when `error_value > 0`.
     pub fn expect_as(
         &mut self,
         element: &Element<R>,
@@ -123,16 +127,16 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 // Compute incremental bias using the cached role.
                 let bias = match (found.old_kind(), element.cached_role) {
-                    (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
-                    (Some(_), Some(_)) => self.bias.conflict_penalty,
+                    (Some(old), Some(cur)) if old == cur => self.bias.strength,
+                    (Some(_), Some(_)) => -self.bias.strength,
                     _ => 0,
                 };
 
-                if bias == self.bias.conflict_penalty && self.bias.conflict_penalty < 0 {
+                if bias < 0 {
                     let fallback = Element {
                         list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
-                        cost: element.cost - self.bias.match_bonus,
+                        cost: element.cost - self.bias.strength,
                         h: self.heuristic[element.state.1],
                         state: (element.state.0, element.state.1),
                         cached_role: element.cached_role.clone(),
@@ -145,7 +149,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 return Element {
                     list,
                     parent: element.parent.clone(),
-                    cost: element.cost - (2 + error_value + bias),
+                    cost: element.cost - (error_value + bias),
                     h: self.heuristic[idx],
                     state: (element.state.0, idx),
                     cached_role: element.cached_role.clone(),
@@ -168,11 +172,14 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     /// Match a terminal token and wrap it in CST Start/End nodes inline,
     /// without pushing a separate rule onto the parent stack.
     ///
+    /// # Panics / correctness
+    /// `error_value` must be > 0 — see [`Self::expect_as`].
+    ///
     /// This replaces the push_rule + terminal step + pop cycle for terminals,
     /// eliminating ~3 Rc allocations, 2 BinaryHeap operations, and 1
     /// fingerprint computation per terminal token.
     ///
-    /// Returns `(main, fallback)`. When a conflict_penalty bias applies,
+    /// Returns `(main, fallback)`. When a role conflict applies,
     /// `fallback` is `Some(element)` representing the error/no-consume path.
     /// The caller must apply `pop_push(next_rule)` to both before enqueuing:
     /// this gives the fallback a different `done` key (head.at() = NEXT ≠ K).
@@ -197,16 +204,16 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 // Compute incremental bias using the cached role.
                 let bias = match (found.old_kind(), element.cached_role) {
-                    (Some(old), Some(cur)) if old == cur => self.bias.match_bonus,
-                    (Some(_), Some(_)) => self.bias.conflict_penalty,
+                    (Some(old), Some(cur)) if old == cur => self.bias.strength,
+                    (Some(_), Some(_)) => -self.bias.strength,
                     _ => 0,
                 };
 
-                // When conflict_penalty applies, produce a fallback that records
-                // an error without consuming the token. The caller applies
+                // When a conflict applies, produce a fallback that records an
+                // error without consuming the token. The caller applies
                 // pop_push(NEXT) to both, so the fallback key becomes
                 // (fp, same_pos, NEXT) which differs from current key (fp, pos, K).
-                let fallback = if bias == self.bias.conflict_penalty && self.bias.conflict_penalty < 0 {
+                let fallback = if bias < 0 {
                     let fb_list = element.list
                         .prepend(Step::start(token.clone()))
                         .prepend(Step::error(Error::Expected(token.clone())))
@@ -214,7 +221,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Some(Element {
                         list: fb_list,
                         parent: element.parent.clone(),
-                        cost: element.cost - self.bias.match_bonus,
+                        cost: element.cost - self.bias.strength,
                         h: self.heuristic[element.state.1],
                         state: element.state,
                         cached_role: element.cached_role.clone(),
@@ -234,7 +241,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     Element {
                         list,
                         parent: element.parent.clone(),
-                        cost: element.cost - (2 + error_value + bias),
+                        cost: element.cost - (error_value + bias),
                         h: self.heuristic[idx],
                         state: (element.state.0, idx),
                         cached_role: element.cached_role.clone(),

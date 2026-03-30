@@ -14,6 +14,14 @@ use crate::regex::{order_rules_by_references, to_regex};
 mod parser;
 mod regex;
 
+/// Default `error_value` for all tokens (terminal references and keyword literals).
+///
+/// Must be > 0: the A* cost model requires `error_value > 0` so that matching
+/// a token is strictly cheaper than skipping it.  Tokens that need different
+/// recovery behaviour should be assigned explicit weights in the grammar's
+/// `=== error_value ===` section.
+const DEFAULT_TOKEN_WEIGHT: isize = 2;
+
 #[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 enum Terminal {
     Literal(String),
@@ -424,7 +432,7 @@ fn add_impl(
                 .error_values
                 .get(&name)
                 .copied()
-                .unwrap_or(10isize);
+                .unwrap_or(DEFAULT_TOKEN_WEIGHT);
             inline_terminal_rule(next, &n, error_value)
         }
         Expr::Reference(re) => {
@@ -441,7 +449,7 @@ fn add_impl(
                     .error_values
                     .get(re.as_str())
                     .copied()
-                    .unwrap_or(2isize);
+                    .unwrap_or(DEFAULT_TOKEN_WEIGHT);
                 inline_terminal_rule(next, &n, error_value)
             } else {
                 let entry = *initial_states
@@ -504,11 +512,11 @@ fn producing_rule_arms(
 
 fn terminal_rule_arms(
     terminal: &str,
-    is_kw: bool,
+    _is_kw: bool,
     ctx: &Config,
 ) -> (token_stream::TokenStream, token_stream::TokenStream) {
     let n = ctx.context.ident_for(terminal);
-    let defa = if is_kw { 10 } else { 2 };
+    let defa = DEFAULT_TOKEN_WEIGHT;
     let error = ctx
         .context
         .error_values
@@ -849,8 +857,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         .iter()
         .filter_map(|x| {
             let ident_str = x.ident(&config);
-            let is_kw = matches!(x, Terminal::Literal(_));
-            let default_ev = if is_kw { 10 } else { 2 };
+            let default_ev = DEFAULT_TOKEN_WEIGHT;
             let ev = config
                 .context
                 .error_values

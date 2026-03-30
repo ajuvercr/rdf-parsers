@@ -305,7 +305,7 @@ mod definitions {
                         state.add_element(parent);
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Datatype, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::Datatype, 2isize);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -363,7 +363,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Datatype, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Datatype, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Datatype, 2isize);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -435,7 +435,6 @@ impl TokenTrait for SyntaxKind {
     fn max_error_value(&self) -> isize {
         match self {
             SyntaxKind::Stop => 8isize,
-            SyntaxKind::Datatype => 10isize,
             _ => 2,
         }
     }

@@ -795,7 +795,12 @@ mod tests {
     /// (error: missing comma).
     #[test]
     fn test_incremental_baseline_roles() {
-        let r = roles("<a> <b> <c> <d> .", None, IncrementalBias::default());
+        let text = "<a> <b> <c> <d> .";
+        let parse = crate::parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
+        let root = parse.syntax::<lang::Lang>();
+        eprintln!("PARSE TREE:\n{:#?}", root);
+        let r = roles(text, None, IncrementalBias::default());
+        eprintln!("ROLES: {:?}", r);
         let role_of = |tok: &str| r.iter().find(|(t, _)| t == tok).unwrap().1;
 
         assert_eq!(role_of("<a>"), Some(crate::TermType::Subject));
@@ -851,9 +856,9 @@ mod tests {
     ///   2. `<b> <c> <d>` — the original triple, roles preserved
     ///
     /// This works because `expect_as` enqueues a fallback element (with
-    /// +match_bonus score) whenever a token matches but conflicts with its
-    /// old role, letting the A* explore paths where the conflicting token
-    /// begins a new parse context (e.g. as Subject of the next statement).
+    /// lower cost) whenever a token matches but conflicts with its old role,
+    /// letting the A* explore paths where the conflicting token begins a new
+    /// parse context (e.g. as Subject of the next statement).
     #[test]
     fn test_incremental_two_triples_from_inserted_token() {
         let prev = prev_info("<b> <c> <d> .");
