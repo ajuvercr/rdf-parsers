@@ -34,8 +34,11 @@ pub struct AStar<'a, R: ParserTrait> {
     /// the additional cost reduction achievable from token position `pos` to
     /// the end of input.  Computed as a suffix sum:
     ///   heuristic[T] = 0
-    ///   heuristic[i] = heuristic[i+1] - (2 + tokens[i].kind.max_error_value())
+    ///   heuristic[i] = heuristic[i+1] - tokens[i].kind.max_error_value()
     ///                  (skipped tokens contribute 0)
+    /// Admissibility: each matched token reduces cost by exactly `error_value`,
+    /// so the maximum achievable savings from position i is the sum of
+    /// max_error_value for all remaining non-whitespace tokens.
     heuristic: Vec<isize>,
 }
 
@@ -46,7 +49,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             heuristic[i] = if tokens[i].kind.skips() {
                 heuristic[i + 1]
             } else {
-                heuristic[i + 1] - (2 + tokens[i].kind.max_error_value())
+                heuristic[i + 1] - tokens[i].kind.max_error_value()
             };
         }
         Self {
@@ -134,7 +137,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 if bias < 0 {
                     let fallback = Element {
-                        list: element.list.prepend(Step::error(Error::Expected(token.clone()))),
+                        list: element
+                            .list
+                            .prepend(Step::error(Error::Expected(token.clone()))),
                         parent: element.parent.clone(),
                         cost: element.cost - self.bias.strength,
                         h: self.heuristic[element.state.1],
@@ -204,7 +209,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 // Compute incremental bias using the cached role.
                 let bias = match (found.old_kind(), element.cached_role) {
-                    (Some(old), Some(cur)) if old == cur => self.bias.strength,
+                    (Some(old), Some(cur)) if old == cur => 0,
                     (Some(_), Some(_)) => -self.bias.strength,
                     _ => 0,
                 };
@@ -214,7 +219,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // pop_push(NEXT) to both, so the fallback key becomes
                 // (fp, same_pos, NEXT) which differs from current key (fp, pos, K).
                 let fallback = if bias < 0 {
-                    let fb_list = element.list
+                    let fb_list = element
+                        .list
                         .prepend(Step::start(token.clone()))
                         .prepend(Step::error(Error::Expected(token.clone())))
                         .prepend(Step::end());
@@ -232,7 +238,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 // Build list: prepend Start, Bump, End (End at head).
                 // After reversal in from_steps: Start, Bump, End — correct CST.
-                let list = element.list
+                let list = element
+                    .list
                     .prepend(Step::start(token))
                     .prepend(Step::bump())
                     .prepend(Step::end());
@@ -252,7 +259,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         }
 
         // Error: token not present or wrong kind.
-        let list = element.list
+        let list = element
+            .list
             .prepend(Step::start(token.clone()))
             .prepend(Step::error(Error::Expected(token)))
             .prepend(Step::end());

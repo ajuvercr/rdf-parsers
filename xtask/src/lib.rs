@@ -20,7 +20,7 @@ mod regex;
 /// a token is strictly cheaper than skipping it.  Tokens that need different
 /// recovery behaviour should be assigned explicit weights in the grammar's
 /// `=== error_value ===` section.
-const DEFAULT_TOKEN_WEIGHT: isize = 2;
+const DEFAULT_TOKEN_WEIGHT: isize = 10;
 
 #[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 enum Terminal {

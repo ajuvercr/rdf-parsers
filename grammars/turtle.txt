@@ -60,6 +60,8 @@ double -> myDouble
 . -> stop
 @prefix -> prefix_token
 @base -> base_token
+BASE -> sparql_base_token
+PREFIX -> sparql_prefix_token
 ; -> colon
 [ -> sq_open
 ] -> sq_close
@@ -71,13 +73,9 @@ prefix_token -> 100
 base_token -> 100
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-cl_open -> 9
-cl_close -> 9
-sq_open -> 9
-sq_close -> 9
-stop -> 10
-colon -> 10
-comma -> 10
+stop -> 5
+colon -> 4
+comma -> 3
 === term_type ===
 subject -> Subject
 predicate -> Predicate

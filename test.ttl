@@ -1,7 +1,5 @@
 <<<<<<< before
-@prefix foaf: <foaf>.
 <a> <b> <c>.
 =======
-@prefix foaf: 
-<a> <b> <c>.
+<a> <x> <y> <b> <c>.
 >>>>>>> after

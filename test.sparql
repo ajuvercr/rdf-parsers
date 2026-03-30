@@ -1,9 +1,9 @@
 SELECT ?x WHERE {
 <<<<<<< before
-?x <p> <o>;
+?x <p> <o> ;
 =======
 ?x <p> <o>
 >>>>>>> after
    <a> <b>.
-    }
+}
 

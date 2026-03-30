@@ -795,12 +795,7 @@ mod tests {
     /// (error: missing comma).
     #[test]
     fn test_incremental_baseline_roles() {
-        let text = "<a> <b> <c> <d> .";
-        let parse = crate::parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
-        let root = parse.syntax::<lang::Lang>();
-        eprintln!("PARSE TREE:\n{:#?}", root);
-        let r = roles(text, None, IncrementalBias::default());
-        eprintln!("ROLES: {:?}", r);
+        let r = roles("<a> <b> <c> <d> .", None, IncrementalBias::default());
         let role_of = |tok: &str| r.iter().find(|(t, _)| t == tok).unwrap().1;
 
         assert_eq!(role_of("<a>"), Some(crate::TermType::Subject));

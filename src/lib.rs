@@ -166,7 +166,7 @@ where
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
     let tokens = tokenize::<T::Kind>(text);
-    let list = a_star::a_star(root, &tokens, IncrementalBias { strength: 0 });
+    let list = a_star::a_star(root, &tokens, IncrementalBias::default());
     Parse::from_steps(&tokens, list)
 }
 
@@ -195,7 +195,7 @@ pub struct IncrementalBias {
 
 impl Default for IncrementalBias {
     fn default() -> Self {
-        Self { strength: 5 }
+        Self { strength: 1 }
     }
 }
 
