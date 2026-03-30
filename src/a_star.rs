@@ -21,6 +21,17 @@ pub trait ParserTrait: Debug + Sized + 'static {
     fn element_kind(&self) -> Self::Kind;
 }
 
+enum IsExpectedElement {
+    True,
+    False,
+    Unkown,
+}
+
+/// Default maximum number of heap pops before the search gives up and returns
+/// the best partial result found so far.  Prevents pathological inputs from
+/// blocking indefinitely.
+pub const DEFAULT_MAX_ITERATIONS: usize = 1_000_000;
+
 pub struct AStar<'a, R: ParserTrait> {
     /// Maps each state key to the best (lowest) cost seen so far (queued or
     /// processed).  Used for lazy-deletion dedup: elements with worse (higher)
@@ -31,26 +42,33 @@ pub struct AStar<'a, R: ParserTrait> {
     todo: BinaryHeap<Element<R>>,
     pub bias: IncrementalBias,
     /// Admissible heuristic: `heuristic[pos]` is a non-positive lower bound on
-    /// the additional cost reduction achievable from token position `pos` to
-    /// the end of input.  Computed as a suffix sum:
-    ///   heuristic[T] = 0
-    ///   heuristic[i] = heuristic[i+1] - tokens[i].kind.max_error_value()
-    ///                  (skipped tokens contribute 0)
-    /// Admissibility: each matched token reduces cost by exactly `error_value`,
-    /// so the maximum achievable savings from position i is the sum of
-    /// max_error_value for all remaining non-whitespace tokens.
+    /// the minimum additional cost from token position `pos` to end of input.
+    /// Computed as suffix sum of potential agreement bonuses: each remaining
+    /// token with `old_kind` could yield a `-strength` discount.  This is
+    /// optimistic (assumes every token lands in its previous role) and
+    /// therefore admissible.
     heuristic: Vec<isize>,
+    /// Number of elements popped from the heap so far.
+    iterations: usize,
+    /// Maximum number of heap pops before giving up.  See `DEFAULT_MAX_ITERATIONS`.
+    max_iterations: usize,
+    /// Best element that reached end-of-input during search, tracked as
+    /// `(cost, step_list, parent_depth)`.  Used as a fallback when the search
+    /// times out before finding a fully-unwound parse (depth == 1).
+    best_at_eof: Option<(isize, List<Step<R::Kind>>, usize)>,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
-    fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias) -> Self {
+    fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias, max_iterations: usize) -> Self {
         let mut heuristic = vec![0isize; tokens.len() + 1];
         for i in (0..tokens.len()).rev() {
-            heuristic[i] = if tokens[i].kind.skips() {
-                heuristic[i + 1]
+            let offset = if tokens[i].kind.skips() {
+                0
             } else {
-                heuristic[i + 1] - tokens[i].kind.max_error_value()
+                tokens[i].kind.max_error_value()
             };
+            // Maybe off by one
+            heuristic[i] = heuristic[i + 1] + offset;
         }
         Self {
             tokens,
@@ -58,12 +76,24 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             todo: BinaryHeap::new(),
             bias,
             heuristic,
+            iterations: 0,
+            max_iterations,
+            best_at_eof: None,
         }
     }
 
-    pub fn consume(&mut self) -> Option<List<Step<R::Kind>>> {
+    pub fn consume(&mut self, root: R) -> Option<List<Step<R::Kind>>> {
+        let start_idx = self.get_actual_index(0);
+        let h = if let Some(heurisitic) = self.heuristic.get(start_idx) {
+            *heurisitic
+        } else {
+            return Some(List::default());
+        };
+        self.todo.push(Element::new_at(root, h, start_idx));
+
         loop {
             let e = self.todo.pop()?;
+            self.iterations += 1;
 
             if let Some((head, _, _)) = e.parent.head() {
                 let state = (e.state.0, e.state.1, head.at());
@@ -75,13 +105,40 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     _ => {}
                 }
 
-                if e.state.1 == self.tokens.len() && e.parent.len() == 1 {
-                    return Some(e.list);
+                if e.state.1 == self.tokens.len() {
+                    let depth = e.parent.len();
+                    if self
+                        .best_at_eof
+                        .as_ref()
+                        .map_or(true, |&(c, _, _)| e.cost < c)
+                    {
+                        self.best_at_eof = Some((e.cost, e.list.clone(), depth));
+                    }
+                    if depth == 1 {
+                        return Some(e.list);
+                    }
+                }
+
+                // Enforce the iteration budget before expanding this element.
+                if self.iterations >= self.max_iterations {
+                    println!("Max iterations reached");
+                    break;
                 }
 
                 head.step(&e, self);
             }
         }
+
+        // Timeout (or empty heap with no complete parse).  Return the best
+        // element that reached end-of-input, closing any still-open grammar
+        // rules with synthetic End steps.
+        self.best_at_eof.take().map(|(_, list, depth)| {
+            let mut list = list;
+            for _ in 0..depth.saturating_sub(1) {
+                list = list.prepend(Step::end());
+            }
+            list
+        })
     }
 
     pub fn add_element(&mut self, element: Element<R>) -> bool {
@@ -104,178 +161,125 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         true
     }
 
-    /// # Panics / correctness
-    /// `error_value` must be > 0.  A successful match reduces cost by
-    /// `error_value` while a miss increases it by the same amount, so
-    /// matching is only strictly cheaper than skipping when `error_value > 0`.
-    pub fn expect_as(
-        &mut self,
+    fn is_expected_element(
+        &self,
         element: &Element<R>,
-        token: R::Kind,
-        error_value: isize,
-    ) -> Element<R> {
-        let mut idx = element.state.1;
-        if let Some(found) = self.tokens.get(idx) {
-            if found.kind == token {
-                let list = element.list.prepend(Step::bump());
-                idx += 1;
-                while self
-                    .tokens
-                    .get(idx)
-                    .map(|x| x.kind.skips())
-                    .unwrap_or(false)
-                {
-                    idx += 1;
-                }
-
-                // Compute incremental bias using the cached role.
-                let bias = match (found.old_kind(), element.cached_role) {
-                    (Some(old), Some(cur)) if old == cur => self.bias.strength,
-                    (Some(_), Some(_)) => -self.bias.strength,
-                    _ => 0,
-                };
-
-                if bias < 0 {
-                    let fallback = Element {
-                        list: element
-                            .list
-                            .prepend(Step::error(Error::Expected(token.clone()))),
-                        parent: element.parent.clone(),
-                        cost: element.cost - self.bias.strength,
-                        h: self.heuristic[element.state.1],
-                        state: (element.state.0, element.state.1),
-                        cached_role: element.cached_role.clone(),
-                    };
-                    if let Some(popped) = fallback.pop() {
-                        self.add_element(popped);
-                    }
-                }
-
-                return Element {
-                    list,
-                    parent: element.parent.clone(),
-                    cost: element.cost - (error_value + bias),
-                    h: self.heuristic[idx],
-                    state: (element.state.0, idx),
-                    cached_role: element.cached_role.clone(),
-                };
-            }
-        }
-
-        let list = element.list.prepend(Step::error(Error::Expected(token)));
-
-        Element {
-            list,
-            parent: element.parent.clone(),
-            cost: element.cost + error_value,
-            h: self.heuristic[idx],
-            state: (element.state.0, idx),
-            cached_role: element.cached_role.clone(),
+        found: &FatToken<R::Kind>,
+    ) -> IsExpectedElement {
+        match (found.old_kind(), element.cached_role) {
+            (Some(old), Some(cur)) if old == cur => IsExpectedElement::True,
+            (Some(old), Some(cur)) if old != cur => IsExpectedElement::False,
+            _ => IsExpectedElement::Unkown,
         }
     }
 
-    /// Match a terminal token and wrap it in CST Start/End nodes inline,
-    /// without pushing a separate rule onto the parent stack.
+    pub fn expect_as(&mut self, element: &Element<R>, token: R::Kind) -> Element<R> {
+        let (out, fallback) = self.expect_with_fallback(element, token, false);
+        if let Some(fb) = fallback {
+            if let Some(popped) = fb.pop() {
+                self.add_element(popped);
+            }
+        }
+        out
+    }
+
+    fn get_actual_index(&mut self, mut idx: usize) -> usize {
+        while self
+            .tokens
+            .get(idx)
+            .map(|x| x.kind.skips())
+            .unwrap_or(false)
+        {
+            idx += 1;
+        }
+
+        idx
+    }
+
+    fn expect_with_fallback(
+        &mut self,
+        element: &Element<R>,
+        token: R::Kind,
+        wrapped: bool,
+    ) -> (Element<R>, Option<Element<R>>) {
+        let create_list = |step: Step<R::Kind>| {
+            if wrapped {
+                element
+                    .list
+                    .prepend(Step::start(token.clone()))
+                    .prepend(step)
+                    .prepend(Step::end())
+            } else {
+                element.list.prepend(step)
+            }
+        };
+
+        let idx = element.state.1;
+
+        // This thing actually matches
+        if let Some(found) = self.tokens.get(idx) {
+            if found.kind == token {
+                let next = self.get_actual_index(idx + 1);
+                let is_expected_element = self.is_expected_element(element, found);
+                let fallback = match is_expected_element {
+                    IsExpectedElement::False => Some(Element {
+                        list: create_list(Step::error(Error::Expected(token.clone()))),
+                        parent: element.parent.clone(),
+                        // So we just assume this is an error, so we add the error value
+                        cost: element.cost + token.max_error_value(),
+                        h: element.h,
+                        state: element.state,
+                        cached_role: element.cached_role.clone(),
+                    }),
+                    _ => None,
+                };
+
+                let bias = match is_expected_element {
+                    IsExpectedElement::True => 0,
+                    // When we have to insert morethen 4 token, we
+                    // should just assume it changed
+                    IsExpectedElement::False => 40,
+                    IsExpectedElement::Unkown => 0,
+                };
+
+                let matched = Element {
+                    list: create_list(Step::bump()),
+                    parent: element.parent.clone(),
+                    cost: element.cost + token.max_error_value() + bias,
+                    h: self.heuristic[next],
+                    state: (element.state.0, next),
+                    cached_role: element.cached_role.clone(),
+                };
+
+                return (matched, fallback);
+            }
+        }
+
+        // The thing didn't match, so we just add that we expected the thing
+        let error = Element {
+            list: create_list(Step::error(Error::Expected(token.clone()))),
+            parent: element.parent.clone(),
+            cost: element.cost + token.max_error_value(),
+            h: self.heuristic[idx],
+            state: (element.state.0, idx),
+            cached_role: element.cached_role.clone(),
+        };
+
+        (error, None)
+    }
+
+    /// Like `expect_as` but wraps the token in inline CST Start/End nodes,
+    /// avoiding a push_rule + pop cycle (~3 Rc allocs, 2 heap ops, 1 fingerprint).
     ///
-    /// # Panics / correctness
-    /// `error_value` must be > 0 — see [`Self::expect_as`].
-    ///
-    /// This replaces the push_rule + terminal step + pop cycle for terminals,
-    /// eliminating ~3 Rc allocations, 2 BinaryHeap operations, and 1
-    /// fingerprint computation per terminal token.
-    ///
-    /// Returns `(main, fallback)`. When a role conflict applies,
-    /// `fallback` is `Some(element)` representing the error/no-consume path.
-    /// The caller must apply `pop_push(next_rule)` to both before enqueuing:
-    /// this gives the fallback a different `done` key (head.at() = NEXT ≠ K).
+    /// Returns `(main, fallback)`.  On a role conflict the caller must apply
+    /// `pop_push(next_rule)` to both before enqueuing so they get distinct
+    /// `done` keys.
     pub fn expect_as_inline(
         &mut self,
         element: &Element<R>,
         token: R::Kind,
-        error_value: isize,
     ) -> (Element<R>, Option<Element<R>>) {
-        let mut idx = element.state.1;
-        if let Some(found) = self.tokens.get(idx) {
-            if found.kind == token {
-                idx += 1;
-                while self
-                    .tokens
-                    .get(idx)
-                    .map(|x| x.kind.skips())
-                    .unwrap_or(false)
-                {
-                    idx += 1;
-                }
-
-                // Compute incremental bias using the cached role.
-                let bias = match (found.old_kind(), element.cached_role) {
-                    (Some(old), Some(cur)) if old == cur => 0,
-                    (Some(_), Some(_)) => -self.bias.strength,
-                    _ => 0,
-                };
-
-                // When a conflict applies, produce a fallback that records an
-                // error without consuming the token. The caller applies
-                // pop_push(NEXT) to both, so the fallback key becomes
-                // (fp, same_pos, NEXT) which differs from current key (fp, pos, K).
-                let fallback = if bias < 0 {
-                    let fb_list = element
-                        .list
-                        .prepend(Step::start(token.clone()))
-                        .prepend(Step::error(Error::Expected(token.clone())))
-                        .prepend(Step::end());
-                    Some(Element {
-                        list: fb_list,
-                        parent: element.parent.clone(),
-                        cost: element.cost - self.bias.strength,
-                        h: self.heuristic[element.state.1],
-                        state: element.state,
-                        cached_role: element.cached_role.clone(),
-                    })
-                } else {
-                    None
-                };
-
-                // Build list: prepend Start, Bump, End (End at head).
-                // After reversal in from_steps: Start, Bump, End — correct CST.
-                let list = element
-                    .list
-                    .prepend(Step::start(token))
-                    .prepend(Step::bump())
-                    .prepend(Step::end());
-
-                return (
-                    Element {
-                        list,
-                        parent: element.parent.clone(),
-                        cost: element.cost - (error_value + bias),
-                        h: self.heuristic[idx],
-                        state: (element.state.0, idx),
-                        cached_role: element.cached_role.clone(),
-                    },
-                    fallback,
-                );
-            }
-        }
-
-        // Error: token not present or wrong kind.
-        let list = element
-            .list
-            .prepend(Step::start(token.clone()))
-            .prepend(Step::error(Error::Expected(token)))
-            .prepend(Step::end());
-
-        (
-            Element {
-                list,
-                parent: element.parent.clone(),
-                cost: element.cost + error_value,
-                h: self.heuristic[idx],
-                state: (element.state.0, idx),
-                cached_role: element.cached_role.clone(),
-            },
-            None,
-        )
+        self.expect_with_fallback(element, token, true)
     }
 }
 
@@ -283,12 +287,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 pub struct Element<R: ParserTrait> {
     list: List<Step<R::Kind>>,
     parent: List<(R, Fingerprint, Option<crate::TermType>)>,
-    /// Accumulated cost so far (lower = better).  Starts at 0; decreases on
-    /// successful token matches, increases on error insertions.
+    /// Accumulated error cost (lower = better).  Starts at 0; increases on
+    /// error insertions, unchanged on successful matches.  Bias adjustments
+    /// may slightly decrease cost (agreement) or increase it (conflict).
     cost: isize,
-    /// Admissible heuristic: lower bound on the additional cost reduction
-    /// achievable from the current token position to end of input.
-    /// Always non-positive.  `f = cost + h` is the A* priority.
+    /// Admissible heuristic: non-negative lower bound on the minimum
+    /// additional cost from the current token position to end of input.
+    /// Currently always 0.  `f = cost + h` is the A* priority.
     h: isize,
     state: (Fingerprint, usize),
     /// Cached role: the innermost significant ancestor rule kind, maintained
@@ -302,7 +307,7 @@ impl<R: ParserTrait> PartialEq for Element<R> {
 }
 impl<R: ParserTrait> Eq for Element<R> {}
 impl<R: ParserTrait> Element<R> {
-    fn new(current: R, h: isize) -> Self {
+    fn new_at(current: R, h: isize, at: usize) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
         let kind = current.element_kind();
@@ -312,7 +317,7 @@ impl<R: ParserTrait> Element<R> {
             parent: parent.prepend((current, head, None)),
             cost: 0,
             h,
-            state: (Fingerprint(1), 0),
+            state: (Fingerprint(1), at),
             cached_role,
         }
     }
@@ -366,7 +371,7 @@ impl<R: ParserTrait> Element<R> {
 
 impl<R: ParserTrait> Ord for Element<R> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Min-heap on f = cost + h (lower f = higher priority).
+        // Min-heap on f = cost + h (lower f = fewer errors = higher priority).
         // Tiebreak: prefer shallower parent stacks (fewer pending rules).
         let f_self = self.cost + self.h;
         let f_other = other.cost + other.h;
@@ -385,9 +390,11 @@ pub fn a_star<R: ParserTrait>(
     root: R,
     tokens: &[FatToken<R::Kind>],
     bias: IncrementalBias,
+    max_iterations: usize,
 ) -> List<Step<R::Kind>> {
-    let mut state = AStar::new(tokens, bias);
-    let h0 = state.heuristic[0];
-    state.todo.push(Element::new(root, h0));
-    state.consume().unwrap_or_default()
+    let mut state = AStar::new(tokens, bias, max_iterations);
+    // let h0 = state.heuristic[0];
+    // state.todo.push(Element::new(root, h0));
+    // Lets update the element to point to something that isn't whitespace
+    state.consume(root).unwrap_or_default()
 }

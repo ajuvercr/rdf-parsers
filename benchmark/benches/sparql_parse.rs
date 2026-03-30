@@ -2,8 +2,9 @@ use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use turtle::{
     IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2,
-    parse_t_2_incremental, tokenize,
+    parse_t_2_incremental,
     sparql::parser::{Lang, Rule, SyntaxKind},
+    tokenize,
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -29,11 +30,9 @@ fn bench_fresh(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("fresh/sparql");
     for fix in &fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("parse", &fix.name),
-            fix,
-            |b, fix| b.iter(|| sparql_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("parse", &fix.name), fix, |b, fix| {
+            b.iter(|| sparql_parse(&fix.after))
+        });
     }
     group.finish();
 }
@@ -53,11 +52,9 @@ fn bench_incremental(c: &mut Criterion) {
     // "cold": fresh parse of the "after" text — baseline for the incremental case.
     let mut group = c.benchmark_group("incremental/cold_sparql");
     for fix in &edit_fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("fresh_after", &fix.name),
-            fix,
-            |b, fix| b.iter(|| sparql_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("fresh_after", &fix.name), fix, |b, fix| {
+            b.iter(|| sparql_parse(&fix.after))
+        });
     }
     group.finish();
 

@@ -2926,8 +2926,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BaseDecl, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Iriref, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Iriref);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -2941,7 +2940,7 @@ mod definitions {
                 }
                 (SyntaxKind::BaseDecl, 2usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SparqlBaseToken, 100isize);
+                        state.expect_as_inline(element, SyntaxKind::SparqlBaseToken);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -2959,8 +2958,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::PrefixDecl, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Iriref, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Iriref);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -2973,8 +2971,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::PrefixDecl, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::PnameNs, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::PnameNs);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -2988,7 +2985,7 @@ mod definitions {
                 }
                 (SyntaxKind::PrefixDecl, 3usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SparqlPrefixToken, 100isize);
+                        state.expect_as_inline(element, SyntaxKind::SparqlPrefixToken);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -3129,8 +3126,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -3141,7 +3137,7 @@ mod definitions {
                             state: 9usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -3165,8 +3161,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -3182,8 +3177,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::SelectClause, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -3209,7 +3203,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::SelectClause, 8usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -3246,8 +3240,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -3258,7 +3251,7 @@ mod definitions {
                             state: 9usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -3269,8 +3262,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DistinctLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DistinctLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3281,8 +3273,7 @@ mod definitions {
                             state: 1usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ReducedLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ReducedLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3295,8 +3286,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::SelectClause, 16usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SelectLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SelectLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 12usize,
@@ -3349,8 +3339,7 @@ mod definitions {
                                 state: 4usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 10usize,
@@ -3387,8 +3376,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ConstructQuery, 7usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3401,8 +3389,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ConstructQuery, 8usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3426,8 +3413,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ConstructQuery, 10usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -3451,8 +3437,7 @@ mod definitions {
                                 state: 4usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 10usize,
@@ -3465,8 +3450,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ConstructQuery, 14usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ConstructLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ConstructLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -3543,7 +3527,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -3602,8 +3586,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::DescribeQuery, 11usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DescribeLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DescribeLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 6usize,
@@ -3658,8 +3641,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::AskQuery, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AskLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AskLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -3701,8 +3683,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::DatasetClause, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::FromLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::FromLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3751,8 +3732,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::NamedGraphClause, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NamedLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NamedLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3812,8 +3792,7 @@ mod definitions {
                                 state: 5usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -3990,7 +3969,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GroupClause, 4usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ByLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ByLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4003,8 +3982,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GroupClause, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GroupLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GroupLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -4044,8 +4022,7 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -4069,8 +4046,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::GroupCondition, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -4083,8 +4059,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GroupCondition, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -4095,7 +4070,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 6usize,
@@ -4163,8 +4138,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::HavingClause, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::HavingLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::HavingLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4224,7 +4198,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::OrderClause, 4usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ByLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ByLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4237,8 +4211,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::OrderClause, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::OrderLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::OrderLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -4256,8 +4229,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::OrderCondition, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AscLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AscLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4268,8 +4240,7 @@ mod definitions {
                             state: 2usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DescLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DescLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4383,8 +4354,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::LimitClause, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Integer, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Integer);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -4397,8 +4367,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::LimitClause, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::LimitLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::LimitLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4416,8 +4385,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::OffsetClause, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Integer, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Integer);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -4430,8 +4398,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::OffsetClause, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::OffsetLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::OffsetLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4452,8 +4419,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ValuesLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ValuesLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4503,7 +4469,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 4isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -4678,8 +4644,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IntoLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IntoLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4729,8 +4694,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -4743,8 +4707,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Load, 7usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::LoadLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::LoadLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -4786,8 +4749,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4800,8 +4762,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Clear, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClearLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClearLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4843,8 +4804,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4857,8 +4817,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Drop, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DropLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DropLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4900,8 +4859,7 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4914,8 +4872,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Create, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CreateLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::CreateLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -4946,7 +4903,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Add, 2usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -4983,8 +4940,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -4997,8 +4953,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Add, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AddLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AddLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -5029,7 +4984,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Move, 2usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5066,8 +5021,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -5080,8 +5034,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Move, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MoveLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MoveLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -5112,7 +5065,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Copy, 2usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ToLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5149,8 +5102,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -5163,8 +5115,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Copy, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CopyLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::CopyLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -5195,8 +5146,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::InsertData, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::InsertDataLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InsertDataLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5227,8 +5177,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::DeleteData, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DeleteDataLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DeleteDataLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5259,8 +5208,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::DeleteWhere, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DeleteWhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DeleteWhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5302,8 +5250,7 @@ mod definitions {
                                 state: 5usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5351,8 +5298,7 @@ mod definitions {
                                 state: 5usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WhereLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WhereLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5398,8 +5344,7 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::WithLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::WithLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 11usize,
@@ -5443,8 +5388,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::DeleteClause, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DeleteLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DeleteLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5475,8 +5419,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::InsertClause, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::InsertLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InsertLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5505,8 +5448,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NamedLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NamedLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -5532,8 +5474,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::UsingClause, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UsingLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UsingLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5551,8 +5492,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GraphOrDefault, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DefaultLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DefaultLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5574,8 +5514,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GraphLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GraphLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -5619,8 +5558,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::GraphRef, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GraphLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GraphLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -5649,8 +5587,7 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DefaultLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DefaultLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5661,8 +5598,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NamedLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NamedLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5673,8 +5609,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AllLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AllLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5692,8 +5627,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::QuadPattern, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5719,8 +5653,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::QuadPattern, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -5738,8 +5671,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::QuadData, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5765,8 +5697,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::QuadData, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -5827,7 +5758,7 @@ mod definitions {
                                 state: 5usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop, 5isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -5872,8 +5803,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::QuadsNotTriples, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5886,8 +5816,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::QuadsNotTriples, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -5911,8 +5840,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::QuadsNotTriples, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -5938,8 +5866,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::QuadsNotTriples, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GraphLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GraphLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -5960,7 +5887,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop, 5isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6007,8 +5934,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GroupGraphPattern, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -6045,8 +5971,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::GroupGraphPattern, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6107,7 +6032,7 @@ mod definitions {
                                 state: 5usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop, 5isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6155,7 +6080,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop, 5isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6310,8 +6235,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::OptionalGraphPattern, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::OptionalLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::OptionalLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -6355,8 +6279,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::GraphGraphPattern, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GraphLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GraphLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6411,8 +6334,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SilentLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SilentLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6425,8 +6347,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ServiceGraphPattern, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ServiceLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ServiceLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -6444,8 +6365,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Bind, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -6471,7 +6391,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Bind, 3usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6497,8 +6417,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Bind, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -6511,8 +6430,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Bind, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BindLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BindLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -6543,8 +6461,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::InlineData, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ValuesLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ValuesLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -6602,8 +6519,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -6616,8 +6532,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::InlineDataOneVar, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6648,8 +6563,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::InlineDataFull, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -6660,7 +6574,7 @@ mod definitions {
                             state: 5usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6671,8 +6585,7 @@ mod definitions {
                             state: 2usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -6696,8 +6609,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6710,8 +6622,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::InlineDataFull, 9usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6724,7 +6635,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::InlineDataFull, 10usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -6735,8 +6646,7 @@ mod definitions {
                             state: 9usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -6760,8 +6670,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -6823,8 +6732,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UndefLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UndefLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -6855,8 +6763,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::MinusGraphPattern, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MinusLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MinusLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -6869,8 +6776,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::GroupOrUnionGraphPattern, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UnionLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UnionLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -6930,8 +6836,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Filter, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::FilterLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::FilterLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -7020,7 +6925,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ArgList, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7031,8 +6936,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -7045,7 +6949,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ArgList, 4usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -7056,8 +6960,7 @@ mod definitions {
                             state: 5usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7107,8 +7010,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DistinctLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DistinctLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -7126,7 +7028,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ExpressionList, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7137,8 +7039,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -7151,7 +7052,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ExpressionList, 4usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -7162,8 +7063,7 @@ mod definitions {
                             state: 5usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7207,8 +7107,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ConstructTemplate, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7221,8 +7120,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ConstructTemplate, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7246,8 +7144,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ConstructTemplate, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ClOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ClOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7268,7 +7165,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop, 5isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7386,7 +7283,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PropertyListNotEmpty, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 4isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7474,7 +7371,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -7487,7 +7384,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::ObjectList, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7659,7 +7556,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PropertyListPathNotEmpty, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 4isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7789,7 +7686,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ObjectListPath, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7867,7 +7764,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PathAlternative, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -7909,7 +7806,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PathSequence, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8001,7 +7898,7 @@ mod definitions {
                                 state: 3usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Hat, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Hat);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8032,8 +7929,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::PathMod, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Questionmark, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Questionmark);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8044,7 +7940,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8055,7 +7951,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8084,7 +7980,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8095,7 +7991,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bang, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bang);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -8106,8 +8002,7 @@ mod definitions {
                             state: 4usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -8133,8 +8028,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PathPrimary, 6usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8176,8 +8070,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -8190,8 +8083,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::PathNegatedPropertySet, 4usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8215,7 +8107,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::PathNegatedPropertySet, 5usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 6usize,
@@ -8226,8 +8118,7 @@ mod definitions {
                             state: 6usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8269,7 +8160,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8280,7 +8171,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Hat, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Hat);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -8304,7 +8195,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Alit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8351,8 +8242,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BlankNodePropertyList, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SqClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8378,8 +8268,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BlankNodePropertyList, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SqOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8426,8 +8315,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BlankNodePropertyListPath, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SqClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8453,8 +8341,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BlankNodePropertyListPath, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SqOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8496,8 +8383,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8510,8 +8396,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Collection, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8553,8 +8438,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8567,8 +8451,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::CollectionPath, 5usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8702,7 +8585,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Var, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Var1, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Var1);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8713,7 +8596,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Var2, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Var2);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8786,7 +8669,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -8817,7 +8700,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ConditionalOrExpression, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe2, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Pipe2);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8859,7 +8742,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ConditionalAndExpression, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Amp2, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Amp2);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -8927,7 +8810,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Eq, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Eq);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8938,7 +8821,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Neq, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Neq);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8949,7 +8832,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Lt, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Lt);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8960,7 +8843,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Gt, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Gt);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8971,7 +8854,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Lte, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Lte);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8982,7 +8865,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Gte, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Gte);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -8993,7 +8876,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 11usize,
@@ -9004,8 +8887,7 @@ mod definitions {
                             state: 11usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NotLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NotLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 14usize,
@@ -9044,7 +8926,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::RelationalExpression, 14usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::InLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 11usize,
@@ -9088,7 +8970,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::AdditiveExpression, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -9099,7 +8981,7 @@ mod definitions {
                             state: 3usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bar, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bar);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -9150,7 +9032,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::AdditiveExpression, 7usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -9161,7 +9043,7 @@ mod definitions {
                             state: 8usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -9204,7 +9086,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::MultiplicativeExpression, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -9215,7 +9097,7 @@ mod definitions {
                             state: 2usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Div);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -9262,7 +9144,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::UnaryExpression, 1usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bang, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bang);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -9273,7 +9155,7 @@ mod definitions {
                             state: 2usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Plus);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -9284,7 +9166,7 @@ mod definitions {
                             state: 4usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bar, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Bar);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 6usize,
@@ -9436,8 +9318,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BrackettedExpression, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -9463,8 +9344,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BrackettedExpression, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -9493,8 +9373,128 @@ mod definitions {
                                 state: 2usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::LangLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DatatypeLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IriLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UriLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AbsLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::CeilLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::FloorLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::RoundLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrlenLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UcaseLit);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 7usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::LcaseLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9506,7 +9506,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::LangLit, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::EncodeForUriLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9517,8 +9517,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DatatypeLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::YearLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9529,8 +9528,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IriLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MonthLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9541,8 +9539,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UriLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DayLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9553,8 +9550,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AbsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::HoursLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9565,8 +9561,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CeilLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MinutesLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9577,8 +9572,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::FloorLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SecondsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9589,8 +9583,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::RoundLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::TimezoneLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9601,8 +9594,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrlenLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::TzLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9613,8 +9605,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UcaseLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Md5Lit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9625,8 +9616,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::LcaseLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Sha1Lit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9637,8 +9627,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::EncodeForUriLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Sha256Lit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9649,8 +9638,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::YearLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Sha384Lit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9661,8 +9649,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MonthLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Sha512Lit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9673,8 +9660,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DayLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IsIriLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9685,8 +9671,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::HoursLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IsUriLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9697,8 +9682,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MinutesLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IsBlankLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9709,8 +9693,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SecondsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IsLiteralLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9721,8 +9704,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::TimezoneLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IsNumericLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -9733,139 +9715,7 @@ mod definitions {
                             state: 7usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::TzLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Md5Lit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Sha1Lit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Sha256Lit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Sha384Lit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Sha512Lit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IsIriLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IsUriLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IsBlankLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IsLiteralLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IsNumericLit, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::LangmatchesLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::LangmatchesLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9876,8 +9726,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ContainsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ContainsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9888,8 +9737,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrstartsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrstartsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9900,8 +9748,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrendsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrendsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9912,8 +9759,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrbeforeLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrbeforeLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9924,8 +9770,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrafterLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrafterLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9936,8 +9781,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrlangLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrlangLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9948,8 +9792,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StrdtLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StrdtLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9960,8 +9803,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SameTermLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SameTermLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 43usize,
@@ -9972,7 +9814,7 @@ mod definitions {
                             state: 43usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IfLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::IfLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 56usize,
@@ -9983,8 +9825,7 @@ mod definitions {
                             state: 56usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BoundLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BoundLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 59usize,
@@ -9995,8 +9836,7 @@ mod definitions {
                             state: 59usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BnodeLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BnodeLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 61usize,
@@ -10007,8 +9847,7 @@ mod definitions {
                             state: 61usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::RandLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::RandLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 67usize,
@@ -10019,8 +9858,7 @@ mod definitions {
                             state: 67usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NowLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NowLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 67usize,
@@ -10031,8 +9869,7 @@ mod definitions {
                             state: 67usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::UuidLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::UuidLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 67usize,
@@ -10043,8 +9880,7 @@ mod definitions {
                             state: 67usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StruuidLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StruuidLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 67usize,
@@ -10055,8 +9891,7 @@ mod definitions {
                             state: 67usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ConcatLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ConcatLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 73usize,
@@ -10067,8 +9902,7 @@ mod definitions {
                             state: 73usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CoalesceLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::CoalesceLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 73usize,
@@ -10136,8 +9970,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10163,8 +9996,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 7usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -10177,7 +10009,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BuiltInCall, 40usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -10203,8 +10035,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 43usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 41usize,
@@ -10217,7 +10048,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BuiltInCall, 54usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 41usize,
@@ -10243,8 +10074,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 56usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 55usize,
@@ -10270,8 +10100,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 59usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 58usize,
@@ -10284,8 +10113,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BuiltInCall, 61usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 63usize,
@@ -10296,7 +10124,7 @@ mod definitions {
                             state: 63usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10309,8 +10137,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BuiltInCall, 62usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10336,7 +10163,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BuiltInCall, 67usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Nil);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10367,8 +10194,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::RegexExpression, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10381,8 +10207,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::RegexExpression, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10393,7 +10218,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -10432,7 +10257,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::RegexExpression, 6usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -10458,8 +10283,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::RegexExpression, 8usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -10472,8 +10296,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::RegexExpression, 9usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::RegexLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::RegexLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -10491,8 +10314,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::SubstringExpression, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10505,8 +10327,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::SubstringExpression, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10517,7 +10338,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -10556,7 +10377,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::SubstringExpression, 6usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -10582,8 +10403,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::SubstringExpression, 8usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -10596,8 +10416,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::SubstringExpression, 9usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SubstrLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SubstrLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -10615,8 +10434,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::StrReplaceExpression, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10629,8 +10447,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::StrReplaceExpression, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10641,7 +10458,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -10680,7 +10497,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::StrReplaceExpression, 6usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 5usize,
@@ -10706,7 +10523,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::StrReplaceExpression, 8usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma, 3isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Comma);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 7usize,
@@ -10732,8 +10549,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::StrReplaceExpression, 10usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 9usize,
@@ -10746,8 +10562,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::StrReplaceExpression, 11usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ReplaceLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ReplaceLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 10usize,
@@ -10778,8 +10593,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::ExistsFunc, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ExistsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ExistsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -10810,8 +10624,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::NotExistsFunc, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::ExistsLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::ExistsLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -10824,8 +10637,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::NotExistsFunc, 3usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::NotLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::NotLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 2usize,
@@ -10843,8 +10655,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -10857,8 +10668,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 2usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::CountLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::CountLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 8usize,
@@ -10869,8 +10679,7 @@ mod definitions {
                             state: 8usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SumLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SumLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -10881,8 +10690,7 @@ mod definitions {
                             state: 13usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MinLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MinLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -10893,8 +10701,7 @@ mod definitions {
                             state: 13usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::MaxLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::MaxLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -10905,8 +10712,7 @@ mod definitions {
                             state: 13usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::AvgLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AvgLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -10917,8 +10723,7 @@ mod definitions {
                             state: 13usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SampleLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SampleLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 13usize,
@@ -10929,8 +10734,7 @@ mod definitions {
                             state: 13usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::GroupConcatLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GroupConcatLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 28usize,
@@ -10943,7 +10747,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 3usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -10967,7 +10771,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Aggregate, 6usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Star);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 1usize,
@@ -10989,8 +10793,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DistinctLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DistinctLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 3usize,
@@ -11003,8 +10806,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 8usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 6usize,
@@ -11041,8 +10843,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DistinctLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DistinctLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 10usize,
@@ -11055,8 +10856,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 13usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 11usize,
@@ -11069,8 +10869,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 20usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrClose, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrClose);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11081,7 +10880,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon, 4isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Colon);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 23usize,
@@ -11107,7 +10906,7 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::Aggregate, 22usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Eq, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Eq);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 21usize,
@@ -11120,8 +10919,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 23usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::SeparatorLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SeparatorLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 22usize,
@@ -11158,8 +10956,7 @@ mod definitions {
                                 state: 1usize,
                             }),
                     );
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DistinctLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DistinctLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 25usize,
@@ -11172,8 +10969,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Aggregate, 28usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BrOpen, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BrOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 26usize,
@@ -11228,8 +11024,7 @@ mod definitions {
                     if let Some(parent) = element.pop() {
                         state.add_element(parent);
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Langtag, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Langtag);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11240,8 +11035,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Datatype, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Datatype);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 4usize,
@@ -11325,8 +11119,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::NumericLiteralUnsigned, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Integer, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Integer);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11337,8 +11130,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Decimal, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Decimal);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11349,8 +11141,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Double, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Double);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11369,7 +11160,7 @@ mod definitions {
                 }
                 (SyntaxKind::NumericLiteralPositive, 1usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IntegerPositive, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::IntegerPositive);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11381,7 +11172,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DecimalPositive, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::DecimalPositive);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11392,8 +11183,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DoublePositive, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DoublePositive);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11412,7 +11202,7 @@ mod definitions {
                 }
                 (SyntaxKind::NumericLiteralNegative, 1usize) => {
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::IntegerNegative, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::IntegerNegative);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11424,7 +11214,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DecimalNegative, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::DecimalNegative);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11435,8 +11225,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::DoubleNegative, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::DoubleNegative);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11454,8 +11243,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BooleanLiteral, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::TrueLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::TrueLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11466,8 +11254,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::FalseLit, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::FalseLit);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11485,8 +11272,18 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::MyString, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StringLiteral1, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StringLiteral1);
+                    state.add_element(matched.pop_push(Rule {
+                        kind: self.kind,
+                        state: 0usize,
+                    }));
+                    if let Some(fb) = fb {
+                        state.add_element(fb.pop_push(Rule {
+                            kind: self.kind,
+                            state: 0usize,
+                        }));
+                    }
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StringLiteral2);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11498,7 +11295,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StringLiteral2, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::StringLiteralLong1);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11510,19 +11307,7 @@ mod definitions {
                         }));
                     }
                     let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StringLiteralLong1, 10isize);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::StringLiteralLong2, 10isize);
+                        state.expect_as_inline(element, SyntaxKind::StringLiteralLong2);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11540,8 +11325,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Iri, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::Iriref, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Iriref);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11570,8 +11354,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::PrefixedName, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::PnameLn, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::PnameLn);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11582,8 +11365,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::PnameNs, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::PnameNs);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11601,8 +11383,7 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BlankNode, 1usize) => {
-                    let (matched, fb) =
-                        state.expect_as_inline(element, SyntaxKind::BlankNodeLabel, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::BlankNodeLabel);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11613,7 +11394,7 @@ mod definitions {
                             state: 0usize,
                         }));
                     }
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Anon, 10isize);
+                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Anon);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
                         state: 0usize,
@@ -11626,973 +11407,973 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::Bang, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Bang, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Bang);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Neq, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Neq, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Neq);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Amp2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Amp2, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Amp2);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BrOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BrOpen, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BrOpen);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BrClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BrClose, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BrClose);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Star, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Star, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Star);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Plus, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Plus, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Plus);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Comma, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Comma, 3isize);
+                    let added = state.expect_as(element, SyntaxKind::Comma);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Bar, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Bar, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Bar);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Stop, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Stop, 5isize);
+                    let added = state.expect_as(element, SyntaxKind::Stop);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Div, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Div, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Div);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Colon, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Colon, 4isize);
+                    let added = state.expect_as(element, SyntaxKind::Colon);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Lt, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Lt, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Lt);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Lte, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Lte, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Lte);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Eq, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Eq, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Eq);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Gt, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Gt, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Gt);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Gte, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Gte, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Gte);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Questionmark, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Questionmark, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Questionmark);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AbsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AbsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AbsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AddLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AddLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AddLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AllLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AllLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AllLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AscLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AscLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AscLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AskLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AskLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AskLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::AvgLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AvgLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::AvgLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SparqlBaseToken, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SparqlBaseToken, 100isize);
+                    let added = state.expect_as(element, SyntaxKind::SparqlBaseToken);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BindLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BindLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BindLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BnodeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BnodeLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BnodeLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BoundLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BoundLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BoundLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ByLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ByLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ByLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CeilLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CeilLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::CeilLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ClearLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClearLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ClearLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CoalesceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CoalesceLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::CoalesceLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ConcatLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ConcatLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ConcatLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ConstructLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ConstructLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ConstructLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ContainsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ContainsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ContainsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CopyLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CopyLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::CopyLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CountLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CountLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::CountLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::CreateLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::CreateLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::CreateLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DatatypeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DatatypeLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DatatypeLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DayLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DayLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DayLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DefaultLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DefaultLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DefaultLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DeleteLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DeleteLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DeleteLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DeleteDataLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DeleteDataLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DeleteDataLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DeleteWhereLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DeleteWhereLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DeleteWhereLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DescLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DescLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DescLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DescribeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DescribeLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DescribeLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DistinctLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DistinctLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DistinctLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DropLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DropLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DropLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::EncodeForUriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::EncodeForUriLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::EncodeForUriLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ExistsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ExistsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ExistsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::FilterLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FilterLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::FilterLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::FloorLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FloorLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::FloorLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::FromLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FromLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::FromLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::GraphLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GraphLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::GraphLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::GroupLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GroupLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::GroupLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::GroupConcatLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::GroupConcatLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::GroupConcatLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::HavingLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::HavingLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::HavingLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::HoursLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::HoursLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::HoursLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IfLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IfLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IfLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::InLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::InLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::InsertLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InsertLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::InsertLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::InsertDataLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::InsertDataLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::InsertDataLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IntoLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntoLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IntoLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IriLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IriLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::LangLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LangLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::LangLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::LangmatchesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LangmatchesLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::LangmatchesLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::LcaseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LcaseLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::LcaseLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::LimitLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LimitLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::LimitLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::LoadLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::LoadLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::LoadLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MaxLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MaxLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MaxLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Md5Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Md5Lit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Md5Lit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MinLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MinLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MinusLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinusLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MinusLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MinutesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MinutesLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MinutesLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MonthLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MonthLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MonthLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::MoveLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::MoveLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::MoveLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::NamedLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NamedLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::NamedLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::NotLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NotLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::NotLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::NowLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::NowLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::NowLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::OffsetLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OffsetLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::OffsetLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::OptionalLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OptionalLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::OptionalLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::OrderLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::OrderLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::OrderLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SparqlPrefixToken, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SparqlPrefixToken, 100isize);
+                    let added = state.expect_as(element, SyntaxKind::SparqlPrefixToken);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::RandLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RandLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::RandLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ReducedLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ReducedLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ReducedLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::RegexLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RegexLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::RegexLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ReplaceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ReplaceLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ReplaceLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::RoundLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::RoundLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::RoundLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SampleLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SampleLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SampleLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SecondsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SecondsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SecondsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SelectLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SelectLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SelectLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SeparatorLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SeparatorLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SeparatorLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ServiceLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ServiceLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ServiceLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Sha1Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha1Lit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Sha1Lit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Sha256Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha256Lit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Sha256Lit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Sha384Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha384Lit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Sha384Lit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Sha512Lit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Sha512Lit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Sha512Lit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SilentLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SilentLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SilentLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrafterLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrafterLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrafterLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrbeforeLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrbeforeLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrbeforeLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrdtLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrdtLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrdtLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrendsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrendsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrendsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrlangLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrlangLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrlangLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrlenLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrlenLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrlenLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StrstartsLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StrstartsLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StrstartsLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StruuidLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StruuidLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StruuidLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SubstrLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SubstrLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SubstrLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SumLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SumLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SumLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::TimezoneLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TimezoneLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::TimezoneLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ToLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ToLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ToLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::TzLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TzLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::TzLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UcaseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UcaseLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UcaseLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UndefLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UndefLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UndefLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UnionLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UnionLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UnionLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UriLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UriLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UsingLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UsingLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UsingLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::UuidLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::UuidLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::UuidLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ValuesLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ValuesLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ValuesLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::WhereLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::WhereLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::WhereLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::WithLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::WithLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::WithLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::YearLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::YearLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::YearLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SqOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SqOpen, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SqOpen);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SqClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SqClose, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SqClose);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Hat, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Hat, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Hat);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Datatype, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Datatype, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Datatype);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Alit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Alit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Alit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::FalseLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::FalseLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::FalseLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IsBlankLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsBlankLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IsBlankLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IsIriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsIriLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IsIriLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IsLiteralLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsLiteralLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IsLiteralLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IsNumericLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsNumericLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IsNumericLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IsUriLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IsUriLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IsUriLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::SameTermLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::SameTermLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::SameTermLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::TrueLit, _) => {
-                    let added = state.expect_as(element, SyntaxKind::TrueLit, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::TrueLit);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ClOpen, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClOpen, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ClOpen);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Pipe, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Pipe, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Pipe);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Pipe2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Pipe2, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Pipe2);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::ClClose, _) => {
-                    let added = state.expect_as(element, SyntaxKind::ClClose, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::ClClose);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Anon, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Anon, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Anon);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::BlankNodeLabel, _) => {
-                    let added = state.expect_as(element, SyntaxKind::BlankNodeLabel, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::BlankNodeLabel);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Decimal, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Decimal, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Decimal);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DecimalNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DecimalNegative, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DecimalNegative);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DecimalPositive, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DecimalPositive, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DecimalPositive);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Double, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Double, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Double);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DoubleNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DoubleNegative, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DoubleNegative);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::DoublePositive, _) => {
-                    let added = state.expect_as(element, SyntaxKind::DoublePositive, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::DoublePositive);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Integer, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Integer, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Integer);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IntegerNegative, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntegerNegative, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IntegerNegative);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::IntegerPositive, _) => {
-                    let added = state.expect_as(element, SyntaxKind::IntegerPositive, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::IntegerPositive);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Iriref, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Iriref, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Iriref);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Langtag, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Langtag, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Langtag);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Nil, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Nil, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Nil);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::PnameLn, _) => {
-                    let added = state.expect_as(element, SyntaxKind::PnameLn, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::PnameLn);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::PnameNs, _) => {
-                    let added = state.expect_as(element, SyntaxKind::PnameNs, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::PnameNs);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StringLiteral1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteral1, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StringLiteral1);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StringLiteral2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteral2, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StringLiteral2);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StringLiteralLong1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong1, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong1);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::StringLiteralLong2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong2, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::StringLiteralLong2);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Var1, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Var1, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Var1);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Var2, _) => {
-                    let added = state.expect_as(element, SyntaxKind::Var2, 10isize);
+                    let added = state.expect_as(element, SyntaxKind::Var2);
                     if let Some(parent) = added.pop() {
                         state.add_element(parent);
                     }
@@ -12642,169 +12423,12 @@ impl TokenTrait for SyntaxKind {
     }
     fn max_error_value(&self) -> isize {
         match self {
-            SyntaxKind::Bang => 10isize,
-            SyntaxKind::Neq => 10isize,
-            SyntaxKind::Amp2 => 10isize,
-            SyntaxKind::BrOpen => 10isize,
-            SyntaxKind::BrClose => 10isize,
-            SyntaxKind::Star => 10isize,
-            SyntaxKind::Plus => 10isize,
             SyntaxKind::Comma => 3isize,
-            SyntaxKind::Bar => 10isize,
             SyntaxKind::Stop => 5isize,
-            SyntaxKind::Div => 10isize,
             SyntaxKind::Colon => 4isize,
-            SyntaxKind::Lt => 10isize,
-            SyntaxKind::Lte => 10isize,
-            SyntaxKind::Eq => 10isize,
-            SyntaxKind::Gt => 10isize,
-            SyntaxKind::Gte => 10isize,
-            SyntaxKind::Questionmark => 10isize,
-            SyntaxKind::AbsLit => 10isize,
-            SyntaxKind::AddLit => 10isize,
-            SyntaxKind::AllLit => 10isize,
-            SyntaxKind::AsLit => 10isize,
-            SyntaxKind::AscLit => 10isize,
-            SyntaxKind::AskLit => 10isize,
-            SyntaxKind::AvgLit => 10isize,
             SyntaxKind::SparqlBaseToken => 100isize,
-            SyntaxKind::BindLit => 10isize,
-            SyntaxKind::BnodeLit => 10isize,
-            SyntaxKind::BoundLit => 10isize,
-            SyntaxKind::ByLit => 10isize,
-            SyntaxKind::CeilLit => 10isize,
-            SyntaxKind::ClearLit => 10isize,
-            SyntaxKind::CoalesceLit => 10isize,
-            SyntaxKind::ConcatLit => 10isize,
-            SyntaxKind::ConstructLit => 10isize,
-            SyntaxKind::ContainsLit => 10isize,
-            SyntaxKind::CopyLit => 10isize,
-            SyntaxKind::CountLit => 10isize,
-            SyntaxKind::CreateLit => 10isize,
-            SyntaxKind::DatatypeLit => 10isize,
-            SyntaxKind::DayLit => 10isize,
-            SyntaxKind::DefaultLit => 10isize,
-            SyntaxKind::DeleteLit => 10isize,
-            SyntaxKind::DeleteDataLit => 10isize,
-            SyntaxKind::DeleteWhereLit => 10isize,
-            SyntaxKind::DescLit => 10isize,
-            SyntaxKind::DescribeLit => 10isize,
-            SyntaxKind::DistinctLit => 10isize,
-            SyntaxKind::DropLit => 10isize,
-            SyntaxKind::EncodeForUriLit => 10isize,
-            SyntaxKind::ExistsLit => 10isize,
-            SyntaxKind::FilterLit => 10isize,
-            SyntaxKind::FloorLit => 10isize,
-            SyntaxKind::FromLit => 10isize,
-            SyntaxKind::GraphLit => 10isize,
-            SyntaxKind::GroupLit => 10isize,
-            SyntaxKind::GroupConcatLit => 10isize,
-            SyntaxKind::HavingLit => 10isize,
-            SyntaxKind::HoursLit => 10isize,
-            SyntaxKind::IfLit => 10isize,
-            SyntaxKind::InLit => 10isize,
-            SyntaxKind::InsertLit => 10isize,
-            SyntaxKind::InsertDataLit => 10isize,
-            SyntaxKind::IntoLit => 10isize,
-            SyntaxKind::IriLit => 10isize,
-            SyntaxKind::LangLit => 10isize,
-            SyntaxKind::LangmatchesLit => 10isize,
-            SyntaxKind::LcaseLit => 10isize,
-            SyntaxKind::LimitLit => 10isize,
-            SyntaxKind::LoadLit => 10isize,
-            SyntaxKind::MaxLit => 10isize,
-            SyntaxKind::Md5Lit => 10isize,
-            SyntaxKind::MinLit => 10isize,
-            SyntaxKind::MinusLit => 10isize,
-            SyntaxKind::MinutesLit => 10isize,
-            SyntaxKind::MonthLit => 10isize,
-            SyntaxKind::MoveLit => 10isize,
-            SyntaxKind::NamedLit => 10isize,
-            SyntaxKind::NotLit => 10isize,
-            SyntaxKind::NowLit => 10isize,
-            SyntaxKind::OffsetLit => 10isize,
-            SyntaxKind::OptionalLit => 10isize,
-            SyntaxKind::OrderLit => 10isize,
             SyntaxKind::SparqlPrefixToken => 100isize,
-            SyntaxKind::RandLit => 10isize,
-            SyntaxKind::ReducedLit => 10isize,
-            SyntaxKind::RegexLit => 10isize,
-            SyntaxKind::ReplaceLit => 10isize,
-            SyntaxKind::RoundLit => 10isize,
-            SyntaxKind::SampleLit => 10isize,
-            SyntaxKind::SecondsLit => 10isize,
-            SyntaxKind::SelectLit => 10isize,
-            SyntaxKind::SeparatorLit => 10isize,
-            SyntaxKind::ServiceLit => 10isize,
-            SyntaxKind::Sha1Lit => 10isize,
-            SyntaxKind::Sha256Lit => 10isize,
-            SyntaxKind::Sha384Lit => 10isize,
-            SyntaxKind::Sha512Lit => 10isize,
-            SyntaxKind::SilentLit => 10isize,
-            SyntaxKind::StrLit => 10isize,
-            SyntaxKind::StrafterLit => 10isize,
-            SyntaxKind::StrbeforeLit => 10isize,
-            SyntaxKind::StrdtLit => 10isize,
-            SyntaxKind::StrendsLit => 10isize,
-            SyntaxKind::StrlangLit => 10isize,
-            SyntaxKind::StrlenLit => 10isize,
-            SyntaxKind::StrstartsLit => 10isize,
-            SyntaxKind::StruuidLit => 10isize,
-            SyntaxKind::SubstrLit => 10isize,
-            SyntaxKind::SumLit => 10isize,
-            SyntaxKind::TimezoneLit => 10isize,
-            SyntaxKind::ToLit => 10isize,
-            SyntaxKind::TzLit => 10isize,
-            SyntaxKind::UcaseLit => 10isize,
-            SyntaxKind::UndefLit => 10isize,
-            SyntaxKind::UnionLit => 10isize,
-            SyntaxKind::UriLit => 10isize,
-            SyntaxKind::UsingLit => 10isize,
-            SyntaxKind::UuidLit => 10isize,
-            SyntaxKind::ValuesLit => 10isize,
-            SyntaxKind::WhereLit => 10isize,
-            SyntaxKind::WithLit => 10isize,
-            SyntaxKind::YearLit => 10isize,
-            SyntaxKind::SqOpen => 10isize,
-            SyntaxKind::SqClose => 10isize,
-            SyntaxKind::Hat => 10isize,
-            SyntaxKind::Datatype => 10isize,
-            SyntaxKind::Alit => 10isize,
-            SyntaxKind::FalseLit => 10isize,
-            SyntaxKind::IsBlankLit => 10isize,
-            SyntaxKind::IsIriLit => 10isize,
-            SyntaxKind::IsLiteralLit => 10isize,
-            SyntaxKind::IsNumericLit => 10isize,
-            SyntaxKind::IsUriLit => 10isize,
-            SyntaxKind::SameTermLit => 10isize,
-            SyntaxKind::TrueLit => 10isize,
-            SyntaxKind::ClOpen => 10isize,
-            SyntaxKind::Pipe => 10isize,
-            SyntaxKind::Pipe2 => 10isize,
-            SyntaxKind::ClClose => 10isize,
-            SyntaxKind::Anon => 10isize,
-            SyntaxKind::BlankNodeLabel => 10isize,
-            SyntaxKind::Decimal => 10isize,
-            SyntaxKind::DecimalNegative => 10isize,
-            SyntaxKind::DecimalPositive => 10isize,
-            SyntaxKind::Double => 10isize,
-            SyntaxKind::DoubleNegative => 10isize,
-            SyntaxKind::DoublePositive => 10isize,
-            SyntaxKind::Integer => 10isize,
-            SyntaxKind::IntegerNegative => 10isize,
-            SyntaxKind::IntegerPositive => 10isize,
-            SyntaxKind::Iriref => 10isize,
-            SyntaxKind::Langtag => 10isize,
-            SyntaxKind::Nil => 10isize,
-            SyntaxKind::PnameLn => 10isize,
-            SyntaxKind::PnameNs => 10isize,
-            SyntaxKind::StringLiteral1 => 10isize,
-            SyntaxKind::StringLiteral2 => 10isize,
-            SyntaxKind::StringLiteralLong1 => 10isize,
-            SyntaxKind::StringLiteralLong2 => 10isize,
-            SyntaxKind::Var1 => 10isize,
-            SyntaxKind::Var2 => 10isize,
-            _ => 2,
+            _ => 10isize,
         }
     }
 }

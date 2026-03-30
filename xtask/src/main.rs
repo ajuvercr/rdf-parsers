@@ -12,8 +12,12 @@ fn main() {
 }
 
 fn codegen() {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-        .unwrap_or_else(|_| std::env::current_dir().unwrap().to_string_lossy().into_owned());
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| {
+        std::env::current_dir()
+            .unwrap()
+            .to_string_lossy()
+            .into_owned()
+    });
 
     // xtask lives at <root>/xtask, grammars and src are at <root>
     let root = std::path::Path::new(&manifest_dir)
@@ -50,7 +54,9 @@ fn codegen() {
             std::process::Command::new("rustfmt")
                 .arg(&out_path)
                 .status()
-                .unwrap_or_else(|e| panic!("failed to run rustfmt on {}: {}", out_path.display(), e));
+                .unwrap_or_else(|e| {
+                    panic!("failed to run rustfmt on {}: {}", out_path.display(), e)
+                });
             println!("wrote {}", out_path.display());
         } else {
             println!("up to date {}", out_path.display());

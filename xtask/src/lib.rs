@@ -228,13 +228,9 @@ fn push_rule(
 
 /// Generate an inlined terminal match: matches the token and wraps it in CST
 /// Start/End nodes in one call, without pushing a separate rule onto the stack.
-fn inline_terminal_rule(
-    next: usize,
-    n: &proc_macro2::Ident,
-    error_value: isize,
-) -> token_stream::TokenStream {
+fn inline_terminal_rule(next: usize, n: &proc_macro2::Ident) -> token_stream::TokenStream {
     quote! {
-        let (matched, fb) = state.expect_as_inline(element, SyntaxKind::#n, #error_value);
+        let (matched, fb) = state.expect_as_inline(element, SyntaxKind::#n);
         state.add_element(matched.pop_push(Rule { kind: self.kind, state: #next }));
         if let Some(fb) = fb {
             state.add_element(fb.pop_push(Rule { kind: self.kind, state: #next }));
@@ -427,13 +423,7 @@ fn add_impl(
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
             reachable.insert(next);
-            let error_value = ctx
-                .context
-                .error_values
-                .get(&name)
-                .copied()
-                .unwrap_or(DEFAULT_TOKEN_WEIGHT);
-            inline_terminal_rule(next, &n, error_value)
+            inline_terminal_rule(next, &n)
         }
         Expr::Reference(re) => {
             *state_count += 1;
@@ -444,13 +434,7 @@ fn add_impl(
             let n = ctx.context.ident_for(re);
             reachable.insert(next);
             if is_terminal {
-                let error_value = ctx
-                    .context
-                    .error_values
-                    .get(re.as_str())
-                    .copied()
-                    .unwrap_or(DEFAULT_TOKEN_WEIGHT);
-                inline_terminal_rule(next, &n, error_value)
+                inline_terminal_rule(next, &n)
             } else {
                 let entry = *initial_states
                     .get(re)
@@ -516,17 +500,9 @@ fn terminal_rule_arms(
     ctx: &Config,
 ) -> (token_stream::TokenStream, token_stream::TokenStream) {
     let n = ctx.context.ident_for(terminal);
-    let defa = DEFAULT_TOKEN_WEIGHT;
-    let error = ctx
-        .context
-        .error_values
-        .get(terminal)
-        .copied()
-        .unwrap_or(defa);
-
     let step_arm = quote! {
         (SyntaxKind::#n, _) => {
-            let added = state.expect_as(element, SyntaxKind::#n, #error);
+            let added = state.expect_as(element, SyntaxKind::#n);
             if let Some(parent) = added.pop() {
                 state.add_element(parent);
             }
@@ -857,16 +833,12 @@ pub fn generate(path: &str, contents: &str) -> String {
         .iter()
         .filter_map(|x| {
             let ident_str = x.ident(&config);
-            let default_ev = DEFAULT_TOKEN_WEIGHT;
             let ev = config
                 .context
                 .error_values
                 .get(ident_str.as_str())
-                .copied()
-                .unwrap_or(default_ev);
-            if ev == 2 {
-                return None; // matches wildcard default, no arm needed
-            }
+                .copied()?;
+
             let n = config.context.ident_for(&ident_str);
             Some(quote! { SyntaxKind::#n => #ev, })
         })
@@ -1012,7 +984,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         fn max_error_value(&self) -> isize {
             match self {
                 #( #max_error_value_arms )*
-                _ => 2,
+                _ => #DEFAULT_TOKEN_WEIGHT,
             }
         }
     }

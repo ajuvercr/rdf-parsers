@@ -495,37 +495,3 @@ impl<T: TokenTrait> Parser<T> {
         }
     }
 }
-
-pub(crate) struct Checker<T: TokenTrait> {
-    checkpoint: Parser<T>,
-    error_value: isize,
-    out: Option<Parser<T>>,
-}
-
-impl<T: TokenTrait> Checker<T> {
-    pub fn new(parser: &Parser<T>) -> Self {
-        Self {
-            checkpoint: parser.clone(),
-            error_value: parser.res.error_value,
-            out: None,
-        }
-    }
-
-    pub fn update(&mut self, parser: &mut Parser<T>) {
-        if self.out.is_none() {
-            self.out = Some(parser.clone());
-            self.error_value = parser.res.error_value;
-        } else {
-            let o_error_value = parser.res.error_value;
-            if parser.res.error_value < self.error_value {
-                self.out = Some(parser.clone());
-                self.error_value = o_error_value;
-            }
-        }
-        parser.reset(&self.checkpoint);
-    }
-
-    pub fn get(self) -> Parser<T> {
-        self.out.unwrap_or(self.checkpoint)
-    }
-}

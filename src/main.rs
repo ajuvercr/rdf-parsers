@@ -5,7 +5,9 @@ use turtle::turtle as lang;
 use turtle::turtle::convert::convert;
 
 fn main() {
-    let path = std::env::args().nth(1).unwrap_or_else(|| "./test.ttl".to_string());
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "./test.ttl".to_string());
     let input = read_to_string(&path).unwrap();
 
     println!("=== Input ===");

@@ -112,10 +112,11 @@ pub trait TokenTrait:
     fn term_type(&self) -> Option<TermType>;
 
     /// Maximum `error_value` for this token kind across all grammar rules that
-    /// may match it.  Used to compute the A* suffix-sum heuristic.
+    /// may match it.
     ///
-    /// Must always return > 0: the A* cost model requires `error_value > 0`
-    /// so that matching is strictly cheaper than skipping.
+    /// Must always return > 0: the A* cost model adds `error_value` on a miss
+    /// and nothing on a match, so matching is strictly cheaper when
+    /// `error_value > 0`.
     /// Defaults to 2, matching the minimum terminal weight used in codegen.
     fn max_error_value(&self) -> isize {
         2
@@ -166,7 +167,12 @@ where
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
     let tokens = tokenize::<T::Kind>(text);
-    let list = a_star::a_star(root, &tokens, IncrementalBias::default());
+    let list = a_star::a_star(
+        root,
+        &tokens,
+        IncrementalBias::default(),
+        a_star::DEFAULT_MAX_ITERATIONS,
+    );
     Parse::from_steps(&tokens, list)
 }
 
@@ -178,13 +184,9 @@ pub struct PrevParseInfo<K: TokenTrait> {
 
 /// Role-preservation bias applied in the A* search during incremental
 /// re-parsing.  When a token's previous `TermType` (Subject/Predicate/Object)
-/// agrees with the current parse context, cost is reduced by `strength`;
-/// when it conflicts, cost is increased by `strength`.
-///
-/// `strength` must be > 0 for the bias to have any effect, and should exceed
-/// the default token weight (2) so that a single role agreement outweighs a
-/// single missing token.  The default of 5 means one agreeing node saves more
-/// than twice the cost of any missing token at the default weight.
+/// agrees with the current parse context, cost is reduced by `strength`
+/// (a discount on the otherwise free match); when it conflicts, cost is
+/// increased by `strength` (a penalty).
 #[derive(Debug, Clone, Copy)]
 pub struct IncrementalBias {
     /// Magnitude of the role-agreement bonus and role-conflict penalty.
@@ -246,6 +248,6 @@ where
         }
     }
 
-    let list = a_star::a_star(root, &tokens, bias);
+    let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
     Parse::from_steps(&tokens, list)
 }

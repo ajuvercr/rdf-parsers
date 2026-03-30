@@ -893,4 +893,52 @@ mod tests {
             other => panic!("expected <d> as object, got {:?}", other),
         }
     }
+
+    #[test]
+    fn test_incremental_remove_object() {
+        let prev = prev_info("<a> <b> <c> .");
+        let bias = IncrementalBias::default();
+        let parse = parse_t_2_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            "<a> <b> .",
+            Some(&prev),
+            bias,
+        );
+        let root = parse.syntax::<lang::Lang>();
+        let doc = convert(&root);
+
+        assert_eq!(doc.triples.len(), 1, "should produce two triples");
+
+        // Triple 1: <a> as subject (error recovery — predicate/object are
+        // error nodes with empty IRIs, representing the undefined slots)
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as first subject, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_incremental_remove_prefix() {
+        let prev =
+            prev_info("@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n <a> foaf:knows ex:Bob .");
+        let bias = IncrementalBias::default();
+        let parse = parse_t_2_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            "<a> foaf:knows ex:Bob .",
+            Some(&prev),
+            bias,
+        );
+        let root = parse.syntax::<lang::Lang>();
+        let doc = convert(&root);
+        println!("{:#?}\n{:?}", root, doc);
+
+        assert_eq!(doc.triples.len(), 1, "should produce one triples");
+
+        // Triple 1: <a> as subject (error recovery — predicate/object are
+        // error nodes with empty IRIs, representing the undefined slots)
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as first subject, got {:?}", other),
+        }
+    }
 }

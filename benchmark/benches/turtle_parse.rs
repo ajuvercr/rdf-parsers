@@ -1,13 +1,13 @@
 use benchmark::{Fixture, load_fixtures};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
+use lsp_types::Url;
+use oxttl::TurtleParser;
 use swls_lang_turtle::lang::{
     context::{Context, TokenIdx},
     parse_source as lang_turtle_parse_source,
     parser::parse_turtle as chumsky_parse_turtle,
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
 };
-use lsp_types::Url;
-use oxttl::TurtleParser;
 use turtle::{
     IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2,
     parse_t_2_incremental, tokenize,
@@ -50,31 +50,25 @@ fn bench_fresh(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("fresh/turtle");
     for fix in &fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("parse", &fix.name),
-            fix,
-            |b, fix| b.iter(|| turtle_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("parse", &fix.name), fix, |b, fix| {
+            b.iter(|| turtle_parse(&fix.after))
+        });
     }
     group.finish();
 
     let mut group = c.benchmark_group("fresh/chumsky_turtle");
     for fix in &fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("parse", &fix.name),
-            fix,
-            |b, fix| b.iter(|| chumsky_turtle_parse(&url, &fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("parse", &fix.name), fix, |b, fix| {
+            b.iter(|| chumsky_turtle_parse(&url, &fix.after))
+        });
     }
     group.finish();
 
     let mut group = c.benchmark_group("fresh/oxttl");
     for fix in &fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("parse", &fix.name),
-            fix,
-            |b, fix| b.iter(|| oxttl_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("parse", &fix.name), fix, |b, fix| {
+            b.iter(|| oxttl_parse(&fix.after))
+        });
     }
     group.finish();
 }
@@ -94,11 +88,9 @@ fn bench_incremental(c: &mut Criterion) {
     // "cold": fresh parse of the "after" text — baseline for the incremental case.
     let mut group = c.benchmark_group("incremental/cold_turtle");
     for fix in &edit_fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("fresh_after", &fix.name),
-            fix,
-            |b, fix| b.iter(|| turtle_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("fresh_after", &fix.name), fix, |b, fix| {
+            b.iter(|| turtle_parse(&fix.after))
+        });
     }
     group.finish();
 
@@ -131,11 +123,9 @@ fn bench_incremental(c: &mut Criterion) {
     let url = Url::parse("file:///benchmark/fixture.ttl").unwrap();
     let mut group = c.benchmark_group("incremental/cold_chumsky_turtle");
     for fix in &edit_fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("fresh_after", &fix.name),
-            fix,
-            |b, fix| b.iter(|| chumsky_turtle_parse(&url, &fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("fresh_after", &fix.name), fix, |b, fix| {
+            b.iter(|| chumsky_turtle_parse(&url, &fix.after))
+        });
     }
     group.finish();
 
@@ -168,9 +158,13 @@ fn bench_incremental(c: &mut Criterion) {
                             raw_tokens.into_iter().filter(|x| !x.is_invalid()).collect();
                         let len = after_tokens.len();
                         context.setup_current_to_prev(
-                            TokenIdx { tokens: &after_tokens },
+                            TokenIdx {
+                                tokens: &after_tokens,
+                            },
                             len,
-                            TokenIdx { tokens: &before_tokens },
+                            TokenIdx {
+                                tokens: &before_tokens,
+                            },
                             before_tokens.len(),
                         );
                         chumsky_parse_turtle(&url, after_tokens, fix.after.len(), context.ctx())
@@ -185,11 +179,9 @@ fn bench_incremental(c: &mut Criterion) {
     // oxttl as the non-incremental reference for edit fixtures.
     let mut group = c.benchmark_group("incremental/cold_oxttl");
     for fix in &edit_fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("fresh_after", &fix.name),
-            fix,
-            |b, fix| b.iter(|| oxttl_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("fresh_after", &fix.name), fix, |b, fix| {
+            b.iter(|| oxttl_parse(&fix.after))
+        });
     }
     group.finish();
 }

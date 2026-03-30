@@ -9,10 +9,13 @@ use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles, parse_t_2_incremental,
-    tokenize,
-    ntriples::parser::{Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind},
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles,
+    ntriples::parser::{
+        Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
+    },
+    parse_t_2_incremental,
     sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
+    tokenize,
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
 };
@@ -50,9 +53,7 @@ where
     let mut token_ends: Vec<usize> = root
         .descendants_with_tokens()
         .filter_map(|nt| match nt {
-            NodeOrToken::Token(t) if !t.kind().skips() => {
-                Some(usize::from(t.text_range().end()))
-            }
+            NodeOrToken::Token(t) if !t.kind().skips() => Some(usize::from(t.text_range().end())),
             _ => None,
         })
         .collect();
@@ -191,18 +192,15 @@ where
     L::Kind: TokenTrait + std::fmt::Debug,
 {
     // pairs[i] corresponds to the i-th Error node in pre-order traversal.
-    let error_msgs: HashMap<usize, String> =
-        pairs.iter().enumerate().map(|(i, (_, msg))| (i, msg.clone())).collect();
+    let error_msgs: HashMap<usize, String> = pairs
+        .iter()
+        .enumerate()
+        .map(|(i, (_, msg))| (i, msg.clone()))
+        .collect();
 
     let root = parse.syntax::<L>();
     let mut out = String::new();
-    format_element(
-        NodeOrToken::Node(root),
-        &error_msgs,
-        &mut 0,
-        0,
-        &mut out,
-    );
+    format_element(NodeOrToken::Node(root), &error_msgs, &mut 0, 0, &mut out);
     out
 }
 
@@ -228,7 +226,12 @@ pub fn parse(language: &str, text: &str) -> String {
         "sparql" => {
             let parse = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let root = parse.syntax::<SparqlLang>();
             let prev_roles = extract_prev_roles::<SparqlLang>(&root);
@@ -242,7 +245,12 @@ pub fn parse(language: &str, text: &str) -> String {
         "trig" => {
             let parse = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(TrigRule::new(TrigSyntaxKind::TrigDoc), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    TrigRule::new(TrigSyntaxKind::TrigDoc),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let root = parse.syntax::<TrigLang>();
             let prev_roles = extract_prev_roles::<TrigLang>(&root);
@@ -256,7 +264,12 @@ pub fn parse(language: &str, text: &str) -> String {
         "ntriples" => {
             let parse = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let root = parse.syntax::<NTriplesLang>();
             let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
@@ -286,7 +299,12 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "sparql" => {
             let parse = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
             render_ast::<SparqlLang>(&parse, &pairs)
@@ -294,7 +312,12 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "trig" => {
             let parse = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(TrigRule::new(TrigSyntaxKind::TrigDoc), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    TrigRule::new(TrigSyntaxKind::TrigDoc),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
             render_ast::<TrigLang>(&parse, &pairs)
@@ -302,7 +325,12 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "ntriples" => {
             let parse = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text, p.as_ref(), bias)
+                parse_t_2_incremental(
+                    NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+                    text,
+                    p.as_ref(),
+                    bias,
+                )
             });
             let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
             render_ast::<NTriplesLang>(&parse, &pairs)

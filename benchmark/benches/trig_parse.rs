@@ -29,11 +29,9 @@ fn bench_fresh(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("fresh/trig");
     for fix in &fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("parse", &fix.name),
-            fix,
-            |b, fix| b.iter(|| trig_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("parse", &fix.name), fix, |b, fix| {
+            b.iter(|| trig_parse(&fix.after))
+        });
     }
     group.finish();
 }
@@ -53,11 +51,9 @@ fn bench_incremental(c: &mut Criterion) {
     // "cold": fresh parse of the "after" text — baseline for the incremental case.
     let mut group = c.benchmark_group("incremental/cold_trig");
     for fix in &edit_fixtures {
-        group.bench_with_input(
-            BenchmarkId::new("fresh_after", &fix.name),
-            fix,
-            |b, fix| b.iter(|| trig_parse(&fix.after)),
-        );
+        group.bench_with_input(BenchmarkId::new("fresh_after", &fix.name), fix, |b, fix| {
+            b.iter(|| trig_parse(&fix.after))
+        });
     }
     group.finish();
 
