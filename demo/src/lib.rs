@@ -10,6 +10,7 @@ use wasm_bindgen::prelude::*;
 
 use turtle::{
     IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait,
+    model::Turtle,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
@@ -206,10 +207,35 @@ where
     out
 }
 
+fn render_triples(turtle: &Turtle) -> String {
+    let mut out = String::new();
+
+    if let Some(base) = &turtle.base {
+        let _ = writeln!(out, "{}", base.value());
+    }
+    for prefix in &turtle.prefixes {
+        let _ = writeln!(out, "{}", prefix.value());
+    }
+    if turtle.base.is_some() || !turtle.prefixes.is_empty() {
+        out.push('\n');
+    }
+
+    if turtle.triples.is_empty() {
+        out.push_str("(no triples)");
+    } else {
+        for triple in &turtle.triples {
+            let _ = writeln!(out, "{}", triple.value());
+        }
+    }
+
+    out
+}
+
 #[wasm_bindgen]
 pub struct ParseResult {
     ariadne: String,
     ast: String,
+    triples: String,
 }
 
 #[wasm_bindgen]
@@ -223,6 +249,11 @@ impl ParseResult {
     pub fn ariadne(&self) -> String {
         self.ariadne.clone()
     }
+
+    #[wasm_bindgen(getter)]
+    pub fn triples(&self) -> String {
+        self.triples.clone()
+    }
 }
 
 /// Parse `text` incrementally against `prev`, render both the ariadne error
@@ -233,6 +264,7 @@ fn parse_language<T, L>(
     text: &str,
     prev: &RefCell<Option<PrevParseInfo>>,
     update_prev: bool,
+    convert_fn: impl FnOnce(&Parse) -> Turtle,
 ) -> ParseResult
 where
     T: ParserTrait + 'static,
@@ -246,12 +278,14 @@ where
         parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
     };
     let pairs = get_error_range_pairs::<L>(&parse, text);
+    let turtle = convert_fn(&parse);
     if update_prev {
         *prev.borrow_mut() = Some(new_prev);
     }
     ParseResult {
         ariadne: render_ariadne(&pairs, text, "input"),
         ast: render_ast::<L>(&parse, &pairs),
+        triples: render_triples(&turtle),
     }
 }
 
@@ -259,7 +293,13 @@ where
 pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
-            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, true)
+            parse_language::<_, Lang>(
+                Rule::new(SyntaxKind::TurtleDoc),
+                text,
+                prev,
+                true,
+                |p| turtle::turtle::convert::convert(&p.syntax::<Lang>()),
+            )
         }),
         "sparql" => PREV_SPARQL.with(|prev| {
             parse_language::<_, SparqlLang>(
@@ -267,10 +307,17 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 text,
                 prev,
                 true,
+                |p| turtle::sparql::convert::convert(&p.syntax::<SparqlLang>()),
             )
         }),
         "trig" => PREV_TRIG.with(|prev| {
-            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, true)
+            parse_language::<_, TrigLang>(
+                TrigRule::new(TrigSyntaxKind::TrigDoc),
+                text,
+                prev,
+                true,
+                |p| turtle::trig::convert::convert(&p.syntax::<TrigLang>()),
+            )
         }),
         "ntriples" => PREV_NTRIPLES.with(|prev| {
             parse_language::<_, NTriplesLang>(
@@ -278,10 +325,17 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 text,
                 prev,
                 true,
+                |p| turtle::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
             )
         }),
         "n3" => PREV_N3.with(|prev| {
-            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, true)
+            parse_language::<_, N3Lang>(
+                N3Rule::new(N3SyntaxKind::N3Doc),
+                text,
+                prev,
+                true,
+                |p| turtle::n3::convert::convert(&p.syntax::<N3Lang>()),
+            )
         }),
         _ => return Err("Unknown language".into()),
     })

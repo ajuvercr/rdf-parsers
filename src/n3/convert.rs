@@ -42,10 +42,15 @@ pub fn convert(root: &Node) -> Turtle {
                         prefixes.push(Spanned(convert_prefix(&p), text_range(&p)));
                     }
                 } else if let Some(t) = child(&child_node, SyntaxKind::Triples) {
+                    // Collect triples nested inside formulas first
+                    collect_nested_triples(&t, &mut triples);
+                    // Convert the top-level triple itself, but skip if subject
+                    // is invalid (e.g. N3 formula — inner triples already collected)
                     let range = text_range(&child_node);
-                    triples.push(Spanned(convert_triples(&t), range));
-                    // Also collect triples nested inside formulas within this triple
-                    collect_nested_triples(&child_node, &mut triples);
+                    let triple = convert_triples(&t);
+                    if !matches!(triple.subject.value(), Term::Invalid) {
+                        triples.push(Spanned(triple, range));
+                    }
                 }
             }
             SyntaxKind::SparqlDirective => {
@@ -200,11 +205,20 @@ fn convert_verb(node: &Node) -> Term {
             Term::Invalid
         }
     } else if child(node, SyntaxKind::Eq).is_some() {
-        Term::Invalid
+        Term::NamedNode(NamedNode::Full(
+            "http://www.w3.org/2002/07/owl#sameAs".to_string(),
+            node.text_range().start().into(),
+        ))
     } else if child(node, SyntaxKind::ImplyLeft).is_some() {
-        Term::Invalid
+        Term::NamedNode(NamedNode::Full(
+            "http://www.w3.org/2000/10/swap/log#impliedBy".to_string(),
+            node.text_range().start().into(),
+        ))
     } else if child(node, SyntaxKind::ImplyRight).is_some() {
-        Term::Invalid
+        Term::NamedNode(NamedNode::Full(
+            "http://www.w3.org/2000/10/swap/log#implies".to_string(),
+            node.text_range().start().into(),
+        ))
     } else {
         Term::Invalid
     }
@@ -753,19 +767,15 @@ mod tests {
         let doc = parse(
             "@prefix ex: <http://example.org/> .\n{ ex:a ex:b ex:c } ex:implies ex:d .",
         );
-        // The formula itself contributes a top-level triple (subject=Invalid for formula,
-        // with the POL), plus the nested triple inside the formula.
-        assert!(
-            doc.triples.len() >= 2,
-            "expected at least 2 triples (top-level + nested), got {}",
-            doc.triples.len()
-        );
+        // The top-level triple has a formula as subject (Term::Invalid), so it's
+        // skipped. Only the nested triple inside the formula is collected.
+        assert_eq!(doc.triples.len(), 1);
 
-        // Find the nested triple from inside the formula
-        let nested = doc.triples.iter().find(|t| {
-            matches!(t.value().subject.value(), Term::NamedNode(nn) if nn_eq(nn, &prefixed("ex", "a")))
-        });
-        assert!(nested.is_some(), "should find the nested triple ex:a ex:b ex:c");
+        // The nested triple from inside the formula
+        let nested = &doc.triples[0];
+        assert!(
+            matches!(nested.value().subject.value(), Term::NamedNode(nn) if nn_eq(nn, &prefixed("ex", "a")))
+        );
     }
 
     // ── `has` verb ───────────────────────────────────────────────────────────
@@ -805,6 +815,25 @@ mod tests {
         assert!(nn_eq(
             term_nn(t.po[0].predicate.value()),
             &prefixed("ex", "friend")
+        ));
+    }
+
+    #[test]
+    fn test_n3_rule_formulas() {
+        let input = "@prefix : <http://example.org/> .\n\n\
+            { ?x a :Human . } => { ?x a :Mortal . } .\n\n\
+            :Socrates a :Human .\n";
+        let doc = parse(input);
+        // The formula rule `{ } => { }` is skipped (subject is a formula),
+        // but the inner triples are extracted, plus the regular triple.
+        assert_eq!(doc.triples.len(), 3);
+        // Inner formula triples
+        assert_eq!(format!("{}", doc.triples[0].value().subject.value()), "?x");
+        assert_eq!(format!("{}", doc.triples[1].value().subject.value()), "?x");
+        // Regular triple
+        assert!(nn_eq(
+            term_nn(doc.triples[2].value().subject.value()),
+            &prefixed("", "Socrates")
         ));
     }
 }

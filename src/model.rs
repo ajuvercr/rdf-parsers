@@ -209,7 +209,7 @@ impl Display for Term {
                 Ok(())
             }
             Term::Invalid => write!(f, "invalid"),
-            Term::Variable(x) => write!(f, "{}", x.0),
+            Term::Variable(x) => write!(f, "?{}", x.0),
         }
     }
 }
@@ -223,13 +223,30 @@ pub struct Triple {
 
 impl Display for Triple {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.subject.value(), self.po[0].value())?;
-
-        for po in &self.po[1..] {
-            write!(f, "; {}", po.value())?;
+        if let Some(graph) = &self.graph {
+            write!(f, "GRAPH {} {{\n  ", graph.value())?;
         }
 
-        write!(f, ".")
+        write!(f, "{}", self.subject.value())?;
+
+        if !self.po.is_empty() {
+            write!(f, " {}", self.po[0].value())?;
+            for po in &self.po[1..] {
+                if self.graph.is_some() {
+                    write!(f, ";\n    {}", po.value())?;
+                } else {
+                    write!(f, ";\n  {}", po.value())?;
+                }
+            }
+        }
+
+        write!(f, " .\n")?;
+
+        if self.graph.is_some() {
+            write!(f, "}}\n")?;
+        }
+
+        Ok(())
     }
 }
 

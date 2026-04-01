@@ -276,6 +276,32 @@
             color: #bd93f9;
         }
 
+        #triples-wrap .CodeMirror {
+            height: 100%;
+        }
+
+        .ast-tab {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #556677;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: color 0.15s, border-bottom-color 0.15s;
+        }
+
+        .ast-tab:hover {
+            color: #8899aa;
+        }
+
+        .ast-tab.active {
+            color: #a8d8ea;
+            border-bottom-color: #4a90d9;
+        }
+
         #diag-half {
             flex: unset;
         }
@@ -447,8 +473,14 @@
             </div>
             <div class="split-handle" id="split-handle"></div>
             <div class="output-half" id="ast-half">
-                <div class="pane-label">AST — error nodes annotated with their message</div>
-                <pre id="ast-output" class="output-panel loading">Initializing…</pre>
+                <div class="pane-label" style="display:flex;align-items:center;gap:0;">
+                    <button class="ast-tab active" data-tab="triples">Derived Triples</button>
+                    <button class="ast-tab" data-tab="ast">AST</button>
+                </div>
+                <div class="editor-wrap" id="triples-wrap">
+                    <textarea id="triples-output"></textarea>
+                </div>
+                <pre id="ast-output" class="output-panel loading" style="display:none;">Initializing…</pre>
             </div>
         </div>
     </div>
@@ -532,8 +564,10 @@ GRAPH ex:metadata {
 
         const output = document.getElementById('output');
         const astOutput = document.getElementById('ast-output');
+        const triplesWrap = document.getElementById('triples-wrap');
         const status = document.getElementById('status');
         const tabs = document.querySelectorAll('.lang-tab');
+        const astTabs = document.querySelectorAll('.ast-tab');
         const ansiUp = new AnsiUp();
 
         // Draggable vertical split
@@ -587,6 +621,14 @@ GRAPH ex:metadata {
             spellcheck: false,
         });
 
+        const triplesCm = CodeMirror.fromTextArea(document.getElementById('triples-output'), {
+            mode: 'text/turtle',
+            theme: 'dracula',
+            lineNumbers: true,
+            readOnly: true,
+            tabSize: 2,
+        });
+
         // Per-language saved content — starts from samples, preserves edits.
         const savedContent = {...SAMPLES};
 
@@ -594,17 +636,29 @@ GRAPH ex:metadata {
         let wasmReady = false;
         let debounceTimer = null;
 
+        // AST/Triples tab switching
+        let currentAstTab = 'triples';
+        function switchAstTab(tab) {
+            currentAstTab = tab;
+            astTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+            astOutput.style.display = tab === 'ast' ? '' : 'none';
+            triplesWrap.style.display = tab === 'triples' ? '' : 'none';
+            if (tab === 'triples') triplesCm.refresh();
+        }
+        astTabs.forEach(tab => tab.addEventListener('click', () => switchAstTab(tab.dataset.tab)));
+
         function runParse() {
             if (!wasmReady) return;
             const text = cm.getValue();
             const t0 = performance.now();
-            const {ariadne, ast} = parse(currentLang, text);
+            const {ariadne, ast, triples} = parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = ariadne.startsWith('No errors');
             output.innerHTML = ansiUp.ansi_to_html(ariadne);
             output.className = 'output-panel' + (noErrors ? ' no-errors' : '');
             astOutput.textContent = ast;
+            triplesCm.setValue(triples);
             status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;
             status.className = 'status ' + (noErrors ? 'ok' : 'err');
         }
