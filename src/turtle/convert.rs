@@ -349,6 +349,8 @@ fn strip_string_delimiters(text: &str) -> (&str, StringStyle) {
 
 #[cfg(test)]
 mod tests {
+    use rowan::TextSize;
+
     use super::*;
     use crate::{parse_t_2, turtle::parser as lang};
 
@@ -930,7 +932,6 @@ mod tests {
         );
         let root = parse.syntax::<lang::Lang>();
         let doc = convert(&root);
-        println!("{:#?}\n{:?}", root, doc);
 
         assert_eq!(doc.triples.len(), 1, "should produce one triples");
 
@@ -940,5 +941,45 @@ mod tests {
             Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
             other => panic!("expected <a> as first subject, got {:?}", other),
         }
+    }
+
+    #[test]
+    fn test_suggest_correct_sq_close_location() {
+        let before = r#"ex:Bob foaf: [
+  foaf:knows [
+    foaf:name "Alice"
+  ];
+  foaf:name "Bob";
+ ]."#;
+
+        let after = r#"ex:Bob foaf: [
+  foaf:knows [
+    foaf:name "Alice"
+  ;
+  foaf:name "Bob";
+ ]."#;
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+        let parse = parse_t_2_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after,
+            Some(&prev),
+            bias,
+        );
+        let root = parse.syntax::<lang::Lang>();
+
+        let first_location = before.find(']').unwrap_or_default();
+        let error_span = root
+            .descendants_with_tokens()
+            .filter(|t| t.kind() == lang::SyntaxKind::Error)
+            .map(|t| t.text_range())
+            .next()
+            .expect("has an error");
+
+        println!("error span {:?} location {}", error_span, first_location);
+        assert!(
+            error_span.contains(TextSize::new(first_location as u32)),
+            "The error span includes the location of the removed bracket"
+        );
     }
 }
