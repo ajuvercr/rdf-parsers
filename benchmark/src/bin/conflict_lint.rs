@@ -52,29 +52,39 @@ fn print_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) {
 
 // ── A* helpers ────────────────────────────────────────────────────────────────
 
-fn astar_build_prev_turtle(text: &str) -> PrevParseInfo<SyntaxKind> {
+fn astar_build_prev_turtle(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
-fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo<NTriplesSyntaxKind> {
+fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
-fn astar_build_prev_trig(text: &str) -> PrevParseInfo<TrigSyntaxKind> {
+fn astar_build_prev_trig(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
-fn astar_build_prev_n3(text: &str) -> PrevParseInfo<turtle::n3::SyntaxKind> {
+fn astar_build_prev_n3(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(turtle::n3::Rule::new(turtle::n3::SyntaxKind::N3Doc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
-fn astar_build_prev_sparql(text: &str) -> PrevParseInfo<SparqlSyntaxKind> {
+fn astar_build_prev_sparql(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for

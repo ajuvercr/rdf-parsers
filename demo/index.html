@@ -459,7 +459,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sparql/sparql.min.js"></script>
 
     <script type="module">
-        import init, {parse, parse_ast} from './pkg/demo.js';
+        import init, {parse} from './pkg/demo.js';
         import {AnsiUp} from 'https://cdn.jsdelivr.net/npm/ansi_up@6.0.2/ansi_up.js';
 
         const SAMPLES = {
@@ -598,12 +598,11 @@ GRAPH ex:metadata {
             if (!wasmReady) return;
             const text = cm.getValue();
             const t0 = performance.now();
-            const result = parse(currentLang, text);
-            const ast = parse_ast(currentLang, text);
+            const {ariadne, ast} = parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
-            const noErrors = result.startsWith('No errors');
-            output.innerHTML = ansiUp.ansi_to_html(result);
+            const noErrors = ariadne.startsWith('No errors');
+            output.innerHTML = ansiUp.ansi_to_html(ariadne);
             output.className = 'output-panel' + (noErrors ? ' no-errors' : '');
             astOutput.textContent = ast;
             status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;

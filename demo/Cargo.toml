@@ -8,6 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 turtle = { path = ".." }
+logos = "0.16.1"
 wasm-bindgen = "0.2"
 rowan = "0.16.1"
 ariadne = "0.6.0"

@@ -12,9 +12,11 @@ fn ntriples_parse(text: &str) {
     let _ = parse(Rule::new(SyntaxKind::NtriplesDoc), text);
 }
 
-fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
+fn build_prev_info(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(Rule::new(SyntaxKind::NtriplesDoc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────

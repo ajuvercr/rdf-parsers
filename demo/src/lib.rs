@@ -9,7 +9,7 @@ use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait,
+    IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
@@ -21,11 +21,11 @@ use turtle::{
 };
 
 thread_local! {
-    static PREV_TURTLE:   RefCell<Option<PrevParseInfo<SyntaxKind>>>         = RefCell::new(None);
-    static PREV_SPARQL:   RefCell<Option<PrevParseInfo<SparqlSyntaxKind>>>   = RefCell::new(None);
-    static PREV_TRIG:     RefCell<Option<PrevParseInfo<TrigSyntaxKind>>>     = RefCell::new(None);
-    static PREV_NTRIPLES: RefCell<Option<PrevParseInfo<NTriplesSyntaxKind>>> = RefCell::new(None);
-    static PREV_N3: RefCell<Option<PrevParseInfo<N3SyntaxKind>>> = RefCell::new(None);
+    static PREV_TURTLE:   RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static PREV_SPARQL:   RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static PREV_TRIG:     RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static PREV_NTRIPLES: RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static PREV_N3:       RefCell<Option<PrevParseInfo>> = RefCell::new(None);
 }
 
 #[wasm_bindgen(start)]
@@ -35,7 +35,7 @@ pub fn start() {
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
 /// every Error node in source order.
-fn astar_pairs_from_parse<L>(parse: &Parse, text: &str) -> Vec<(Range<usize>, String)>
+fn get_error_range_pairs<L>(parse: &Parse, text: &str) -> Vec<(Range<usize>, String)>
 where
     L: rowan::Language,
     L::Kind: TokenTrait,
@@ -58,6 +58,7 @@ where
             _ => None,
         })
         .collect();
+
     token_ends.sort_unstable();
 
     let ranges: Vec<Range<usize>> = root
@@ -206,143 +207,82 @@ where
 }
 
 #[wasm_bindgen]
-pub fn parse(language: &str, text: &str) -> String {
-    let loc = "input";
-    let bias = IncrementalBias::default();
-    match language {
-        "turtle" => {
-            let (parse, tokens) = PREV_TURTLE.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
-            });
-            let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
-            PREV_TURTLE.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
-            });
-            render_ariadne(&pairs, text, loc)
-        }
-        "sparql" => {
-            let (parse, tokens) = PREV_SPARQL.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    SparqlRule::new(SparqlSyntaxKind::QueryUnit),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
-            PREV_SPARQL.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
-            });
-            render_ariadne(&pairs, text, loc)
-        }
-        "trig" => {
-            let (parse, tokens) = PREV_TRIG.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    TrigRule::new(TrigSyntaxKind::TrigDoc),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
-            PREV_TRIG.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
-            });
-            render_ariadne(&pairs, text, loc)
-        }
-        "ntriples" => {
-            let (parse, tokens) = PREV_NTRIPLES.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
-            PREV_NTRIPLES.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
-            });
-            render_ariadne(&pairs, text, loc)
-        }
-        "n3" => {
-            let (parse, tokens) = PREV_N3.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(N3Rule::new(N3SyntaxKind::N3Doc), text, p.as_ref(), bias)
-            });
-            let pairs = astar_pairs_from_parse::<N3Lang>(&parse, text);
-            PREV_N3.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
-            });
-            render_ariadne(&pairs, text, loc)
-        }
-        _ => String::from("Unknown language"),
+pub struct ParseResult {
+    ariadne: String,
+    ast: String,
+}
+
+#[wasm_bindgen]
+impl ParseResult {
+    #[wasm_bindgen(getter)]
+    pub fn ast(&self) -> String {
+        self.ast.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn ariadne(&self) -> String {
+        self.ariadne.clone()
+    }
+}
+
+/// Parse `text` incrementally against `prev`, render both the ariadne error
+/// report and the AST string, and optionally write the new token stream back
+/// into `prev` for the next incremental parse.
+fn parse_language<T, L>(
+    root: T,
+    text: &str,
+    prev: &RefCell<Option<PrevParseInfo>>,
+    update_prev: bool,
+) -> ParseResult
+where
+    T: ParserTrait + 'static,
+    for<'a> T::Kind: logos::Logos<'a, Source = str>,
+    for<'a> <<T as ParserTrait>::Kind as logos::Logos<'a>>::Extras: Default,
+    L: rowan::Language,
+    L::Kind: TokenTrait + std::fmt::Debug,
+{
+    let (parse, new_prev) = {
+        let p = prev.borrow();
+        parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
+    };
+    let pairs = get_error_range_pairs::<L>(&parse, text);
+    if update_prev {
+        *prev.borrow_mut() = Some(new_prev);
+    }
+    ParseResult {
+        ariadne: render_ariadne(&pairs, text, "input"),
+        ast: render_ast::<L>(&parse, &pairs),
     }
 }
 
 #[wasm_bindgen]
-pub fn parse_ast(language: &str, text: &str) -> String {
-    let bias = IncrementalBias::default();
-    match language {
-        "turtle" => {
-            let (parse, _) = PREV_TURTLE.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
-            });
-            let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
-            render_ast::<Lang>(&parse, &pairs)
-        }
-        "sparql" => {
-            let (parse, _) = PREV_SPARQL.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    SparqlRule::new(SparqlSyntaxKind::QueryUnit),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
-            render_ast::<SparqlLang>(&parse, &pairs)
-        }
-        "trig" => {
-            let (parse, _) = PREV_TRIG.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    TrigRule::new(TrigSyntaxKind::TrigDoc),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
-            render_ast::<TrigLang>(&parse, &pairs)
-        }
-        "ntriples" => {
-            let (parse, _) = PREV_NTRIPLES.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(
-                    NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
-                    text,
-                    p.as_ref(),
-                    bias,
-                )
-            });
-            let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
-            render_ast::<NTriplesLang>(&parse, &pairs)
-        }
-        "n3" => {
-            let (parse, _) = PREV_N3.with(|prev| {
-                let p = prev.borrow();
-                parse_incremental(N3Rule::new(N3SyntaxKind::N3Doc), text, p.as_ref(), bias)
-            });
-            let pairs = astar_pairs_from_parse::<N3Lang>(&parse, text);
-            render_ast::<N3Lang>(&parse, &pairs)
-        }
-        _ => String::from("Unknown language"),
-    }
+pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
+    Ok(match language {
+        "turtle" => PREV_TURTLE.with(|prev| {
+            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, true)
+        }),
+        "sparql" => PREV_SPARQL.with(|prev| {
+            parse_language::<_, SparqlLang>(
+                SparqlRule::new(SparqlSyntaxKind::QueryUnit),
+                text,
+                prev,
+                true,
+            )
+        }),
+        "trig" => PREV_TRIG.with(|prev| {
+            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, true)
+        }),
+        "ntriples" => PREV_NTRIPLES.with(|prev| {
+            parse_language::<_, NTriplesLang>(
+                NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
+                text,
+                prev,
+                true,
+            )
+        }),
+        "n3" => PREV_N3.with(|prev| {
+            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, true)
+        }),
+        _ => return Err("Unknown language".into()),
+    })
 }

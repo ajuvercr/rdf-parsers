@@ -8,7 +8,9 @@ pub use parser::*;
 
 mod a_star;
 pub use a_star::Fingerprint;
+pub use a_star::ParserTrait;
 mod list;
+pub mod model;
 pub mod n3;
 pub mod ntriples;
 mod parser;
@@ -139,11 +141,16 @@ where
     (parse, tokens)
 }
 
+/// A single token from a previous parse, carrying the text and fingerprint
+/// needed for incremental re-parsing.
+pub struct PrevToken {
+    pub text: String,
+    pub fingerprint: Option<Fingerprint>,
+}
+
 /// Information from a previous parse needed for incremental re-parsing.
-/// The tokens carry their parse-time fingerprints in `old_kind`, set by
-/// `Parse::from_steps` during the previous parse.
-pub struct PrevParseInfo<K: TokenTrait> {
-    pub tokens: Vec<FatToken<K>>,
+pub struct PrevParseInfo {
+    pub tokens: Vec<PrevToken>,
 }
 
 /// Role-preservation bias applied in the A* search during incremental
@@ -173,9 +180,9 @@ impl Default for IncrementalBias {
 pub fn parse_incremental<'a, T: a_star::ParserTrait + 'static>(
     root: T,
     text: &'a str,
-    prev: Option<&PrevParseInfo<T::Kind>>,
+    prev: Option<&PrevParseInfo>,
     bias: IncrementalBias,
-) -> (Parse, Vec<FatToken<T::Kind>>)
+) -> (Parse, PrevParseInfo)
 where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
@@ -184,7 +191,7 @@ where
 
     if let Some(prev) = prev {
         // Build text slices for the differ.
-        let old_texts: Vec<&str> = prev.tokens.iter().map(|t| t.text()).collect();
+        let old_texts: Vec<&str> = prev.tokens.iter().map(|t| t.text.as_str()).collect();
         let new_texts: Vec<&str> = tokens.iter().map(|t| t.text()).collect();
 
         // Map new token index → old token index for Equal (unchanged) regions.
@@ -207,12 +214,15 @@ where
         // Copy the old fingerprint onto each unchanged new token.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
-                tok.set_old_kind(prev.tokens.get(old_idx).and_then(|t| t.old_kind()));
+                tok.set_old_kind(prev.tokens.get(old_idx).and_then(|t| t.fingerprint));
             }
         }
     }
 
     let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
     let parse = Parse::from_steps(&mut tokens, list);
-    (parse, tokens)
+    let prev = PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    };
+    (parse, prev)
 }

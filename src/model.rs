@@ -218,6 +218,7 @@ impl Display for Term {
 pub struct Triple {
     pub subject: Spanned<Term>,
     pub po: Vec<Spanned<PO>>,
+    pub graph: Option<Spanned<Term>>,
 }
 
 impl Display for Triple {

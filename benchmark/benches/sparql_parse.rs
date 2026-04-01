@@ -11,9 +11,11 @@ fn sparql_parse(text: &str) {
     let _ = parse(Rule::new(SyntaxKind::QueryUnit), text);
 }
 
-fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
+fn build_prev_info(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(Rule::new(SyntaxKind::QueryUnit), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────

@@ -872,6 +872,7 @@ dependencies = [
  "ariadne",
  "concolor",
  "console_error_panic_hook",
+ "logos 0.16.1",
  "rowan",
  "turtle",
  "wasm-bindgen",

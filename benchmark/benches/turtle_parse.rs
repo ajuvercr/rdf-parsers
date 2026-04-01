@@ -31,9 +31,11 @@ fn oxttl_parse(text: &str) {
         });
 }
 
-fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
+fn build_prev_info(text: &str) -> PrevParseInfo {
     let (_, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
-    PrevParseInfo { tokens }
+    PrevParseInfo {
+        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+    }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────

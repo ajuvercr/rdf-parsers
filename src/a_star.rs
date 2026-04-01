@@ -237,7 +237,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     IsExpectedElement::True => 0,
                     // When we have to insert morethen 4 token, we
                     // should just assume it changed
-                    IsExpectedElement::False => 40,
+                    IsExpectedElement::False => 15,
                     IsExpectedElement::Unkown => 0,
                 };
 

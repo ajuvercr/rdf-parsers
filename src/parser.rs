@@ -27,6 +27,13 @@ impl<T: TokenTrait> FatToken<T> {
     pub fn set_old_kind(&mut self, kind: Option<crate::Fingerprint>) {
         self.old_kind = kind;
     }
+
+    pub fn to_prev_token(&self) -> crate::PrevToken {
+        crate::PrevToken {
+            text: self.text.clone(),
+            fingerprint: self.old_kind,
+        }
+    }
 }
 
 /// Collapse rule nodes that consumed no tokens into a single `Expected(RuleName)` error.

@@ -2,8 +2,8 @@ use rowan::SyntaxNode;
 
 use crate::Spanned;
 
-use super::model::*;
 use super::parser::{Lang, SyntaxKind};
+use crate::model::*;
 
 type Node = SyntaxNode<Lang>;
 
@@ -124,7 +124,11 @@ fn convert_triples(node: &Node) -> Triple {
         .map(|n| convert_predicate_object_list(&n))
         .unwrap_or_default();
 
-    Triple { subject, po }
+    Triple {
+        subject,
+        po,
+        graph: None,
+    }
 }
 
 fn convert_predicate_object_list(node: &Node) -> Vec<Spanned<PO>> {
@@ -759,9 +763,11 @@ mod tests {
 
     use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
 
-    fn prev_info(text: &str) -> PrevParseInfo<lang::SyntaxKind> {
+    fn prev_info(text: &str) -> PrevParseInfo {
         let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
-        PrevParseInfo { tokens }
+        PrevParseInfo {
+            tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+        }
     }
 
     /// Going from `<b> <c> <d> .` to `<a> <b> <c> <d> .` (inserting `<a>`
