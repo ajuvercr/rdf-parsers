@@ -359,12 +359,12 @@
             }
 
             /* Panes: stack */
-            .workspace > .pane {
+            .workspace>.pane {
                 flex: none;
                 height: 38vh;
             }
 
-            .pane + .pane {
+            .pane+.pane {
                 border-left: none;
                 border-top: 1px solid #0f3460;
                 flex: 1;
@@ -401,7 +401,7 @@
         <div class="card">
             <div class="card-heading">Why?</div>
             <ul>
-                <li>RDF has many serialisation formats — Turtle, SPARQL, TriG, N-Triples, and more</li>
+                <li>RDF has many serialisation formats — Turtle, SPARQL, TriG, N-Triples, N3, and more</li>
                 <li>All are being revised with RDF 1.2</li>
                 <li>Writing parsers by hand for each one is error-prone and hard to keep consistent</li>
             </ul>
@@ -429,6 +429,7 @@
             <button class="lang-tab active" data-lang="turtle">Turtle</button>
             <button class="lang-tab" data-lang="sparql">SPARQL</button>
             <button class="lang-tab" data-lang="trig">TriG</button>
+            <button class="lang-tab" data-lang="n3">N3</button>
             <button class="lang-tab" data-lang="ntriples">N-Triples</button>
         </nav>
 
@@ -505,6 +506,20 @@ GRAPH ex:metadata {
 <http://example.org/Bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
 <http://example.org/Bob> <http://xmlns.com/foaf/0.1/name> "Bob" .
 `,
+            n3: `@prefix : <http://example.org/> .
+
+# Rule: all humans are mortal
+{
+  ?x a :Human .
+}
+=>
+{
+  ?x a :Mortal .
+} .
+
+# Fact: Socrates is a human
+:Socrates a :Human .
+`,
         };
 
         const MODES = {
@@ -512,6 +527,7 @@ GRAPH ex:metadata {
             sparql: 'application/sparql-query',
             trig: 'text/turtle',
             ntriples: 'text/turtle',
+            n3: 'text/turtle',
         };
 
         const output = document.getElementById('output');
@@ -554,12 +570,12 @@ GRAPH ex:metadata {
         handle.addEventListener('touchstart', e => {
             startDrag(e.touches[0].clientY);
             e.preventDefault();
-        }, { passive: false });
+        }, {passive: false});
         document.addEventListener('touchmove', e => {
             if (!dragging) return;
             moveDrag(e.touches[0].clientY);
             e.preventDefault();
-        }, { passive: false });
+        }, {passive: false});
         document.addEventListener('touchend', endDrag);
 
         const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {

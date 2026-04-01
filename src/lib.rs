@@ -1,7 +1,7 @@
 use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
-use std::fmt::Debug;
 
 use logos::{Lexer, Logos};
 pub use parser::*;
@@ -9,6 +9,7 @@ pub use parser::*;
 mod a_star;
 pub use a_star::Fingerprint;
 mod list;
+pub mod n3;
 pub mod ntriples;
 mod parser;
 pub mod sparql;
@@ -119,7 +120,10 @@ where
     tokens
 }
 
-pub fn parse<'a, T: a_star::ParserTrait + 'static>(root: T, text: &'a str) -> (Parse, Vec<FatToken<T::Kind>>)
+pub fn parse<'a, T: a_star::ParserTrait + 'static>(
+    root: T,
+    text: &'a str,
+) -> (Parse, Vec<FatToken<T::Kind>>)
 where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,

@@ -10,6 +10,7 @@ use wasm_bindgen::prelude::*;
 
 use turtle::{
     IncrementalBias, Parse, PrevParseInfo, TokenTrait,
+    n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
     },
@@ -24,6 +25,7 @@ thread_local! {
     static PREV_SPARQL:   RefCell<Option<PrevParseInfo<SparqlSyntaxKind>>>   = RefCell::new(None);
     static PREV_TRIG:     RefCell<Option<PrevParseInfo<TrigSyntaxKind>>>     = RefCell::new(None);
     static PREV_NTRIPLES: RefCell<Option<PrevParseInfo<NTriplesSyntaxKind>>> = RefCell::new(None);
+    static PREV_N3: RefCell<Option<PrevParseInfo<N3SyntaxKind>>> = RefCell::new(None);
 }
 
 #[wasm_bindgen(start)]
@@ -267,6 +269,17 @@ pub fn parse(language: &str, text: &str) -> String {
             });
             render_ariadne(&pairs, text, loc)
         }
+        "n3" => {
+            let (parse, tokens) = PREV_N3.with(|prev| {
+                let p = prev.borrow();
+                parse_incremental(N3Rule::new(N3SyntaxKind::N3Doc), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<N3Lang>(&parse, text);
+            PREV_N3.with(|prev| {
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
+            });
+            render_ariadne(&pairs, text, loc)
+        }
         _ => String::from("Unknown language"),
     }
 }
@@ -321,6 +334,14 @@ pub fn parse_ast(language: &str, text: &str) -> String {
             });
             let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
             render_ast::<NTriplesLang>(&parse, &pairs)
+        }
+        "n3" => {
+            let (parse, _) = PREV_N3.with(|prev| {
+                let p = prev.borrow();
+                parse_incremental(N3Rule::new(N3SyntaxKind::N3Doc), text, p.as_ref(), bias)
+            });
+            let pairs = astar_pairs_from_parse::<N3Lang>(&parse, text);
+            render_ast::<N3Lang>(&parse, &pairs)
         }
         _ => String::from("Unknown language"),
     }
