@@ -23,7 +23,3 @@
 ^^ -> datatype
 === error_value ===
 stop -> 8
-=== term_type ===
-subject -> Subject
-predicate -> Predicate
-object -> Object

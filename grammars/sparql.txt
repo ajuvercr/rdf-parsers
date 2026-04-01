@@ -278,10 +278,3 @@ sparql_prefix_token -> 100
 stop -> 5
 colon -> 4
 comma -> 3
-=== term_type ===
-Subject1 -> Subject
-Subject2 -> Subject
-VerbPath -> Predicate
-VerbSimple -> Predicate
-Object -> Object
-ObjectListPath -> Object

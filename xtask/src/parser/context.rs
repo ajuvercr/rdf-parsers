@@ -36,7 +36,6 @@ pub struct Context {
     pub rename: HashMap<String, String>,
     with: HashMap<String, String>,
     pub error_values: HashMap<String, isize>,
-    pub term_types: HashMap<String, String>,
 }
 
 impl Context {
@@ -72,7 +71,6 @@ enum CtxBlock {
     Rename(Vec<(String, String)>),
     With(Vec<(String, String)>),
     ErrorValues(Vec<(String, isize)>),
-    TermTypes(Vec<(String, String)>),
 }
 
 pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<'src, char>>> {
@@ -107,11 +105,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         })
         .map(CtxBlock::ErrorValues);
 
-    let term_types = section_header("term_type", "===")
-        .ignore_then(mapping)
-        .map(CtxBlock::TermTypes);
-
-    let block = rename.or(with).or(error_values).or(term_types);
+    let block = rename.or(with).or(error_values);
 
     section_header("context", "==")
         .labelled("context header")
@@ -123,7 +117,6 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                     CtxBlock::Rename(entries) => ctx.rename.extend(entries),
                     CtxBlock::With(entries) => ctx.with.extend(entries),
                     CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
-                    CtxBlock::TermTypes(entries) => ctx.term_types.extend(entries),
                 }
             }
             ctx

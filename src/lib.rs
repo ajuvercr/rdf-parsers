@@ -86,13 +86,6 @@ pub trait ParserTrait {
     fn parse(parser: &mut crate::Parser<Self::Kind>, context: &mut Context);
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TermType {
-    Subject,
-    Predicate,
-    Object,
-}
-
 pub trait TokenTrait:
     Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Eq + Hash + 'static
 {
@@ -105,12 +98,6 @@ pub trait TokenTrait:
 
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
-
-    fn is_significant(&self) -> bool {
-        self.term_type().is_some()
-    }
-
-    fn term_type(&self) -> Option<TermType>;
 
     /// Maximum `error_value` for this token kind across all grammar rules that
     /// may match it.

@@ -812,20 +812,6 @@ pub fn generate(path: &str, contents: &str) -> String {
         .map(|x| config.context.ident_for(x))
         .collect();
 
-    let mut sorted_term_types: Vec<_> = config.context.term_types.iter().collect();
-    sorted_term_types.sort_by_key(|(k, _)| k.as_str());
-
-    let term_type_arms: Vec<_> = sorted_term_types
-        .iter()
-        .map(|(rule, variant)| {
-            let rule_ident = config.context.ident_for(rule);
-            let variant_ident = syn::Ident::new(variant, Span::call_site());
-            quote! {
-                SyntaxKind::#rule_ident => Some(crate::TermType::#variant_ident),
-            }
-        })
-        .collect();
-
     // Build max_error_value arms: for each terminal, emit the error_value used
     // by grammar rules that match it.  Only emit arms that differ from the
     // wildcard default (2), so the match stays compact.
@@ -972,13 +958,6 @@ pub fn generate(path: &str, contents: &str) -> String {
 
         fn ending_tokens(&self) -> &'static [SyntaxKind] {
             &[]
-        }
-
-        fn term_type(&self) -> Option<crate::TermType> {
-            match self {
-                #( #term_type_arms )*
-                _ => None,
-            }
         }
 
         fn max_error_value(&self) -> isize {

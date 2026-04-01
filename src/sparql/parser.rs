@@ -12410,17 +12410,6 @@ impl TokenTrait for SyntaxKind {
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn term_type(&self) -> Option<crate::TermType> {
-        match self {
-            SyntaxKind::Object => Some(crate::TermType::Object),
-            SyntaxKind::ObjectListPath => Some(crate::TermType::Object),
-            SyntaxKind::Subject1 => Some(crate::TermType::Subject),
-            SyntaxKind::Subject2 => Some(crate::TermType::Subject),
-            SyntaxKind::VerbPath => Some(crate::TermType::Predicate),
-            SyntaxKind::VerbSimple => Some(crate::TermType::Predicate),
-            _ => None,
-        }
-    }
     fn max_error_value(&self) -> isize {
         match self {
             SyntaxKind::Comma => 3isize,

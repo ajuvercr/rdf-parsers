@@ -420,14 +420,6 @@ impl TokenTrait for SyntaxKind {
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn term_type(&self) -> Option<crate::TermType> {
-        match self {
-            SyntaxKind::Object => Some(crate::TermType::Object),
-            SyntaxKind::Predicate => Some(crate::TermType::Predicate),
-            SyntaxKind::Subject => Some(crate::TermType::Subject),
-            _ => None,
-        }
-    }
     fn max_error_value(&self) -> isize {
         match self {
             SyntaxKind::Stop => 8isize,
