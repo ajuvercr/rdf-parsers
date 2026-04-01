@@ -6,7 +6,7 @@ use std::{
 use crate::{Error, FatToken, IncrementalBias, Step, TokenTrait, list::List};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-struct Fingerprint(u128);
+pub struct Fingerprint(pub u128);
 
 fn descend(fp: Fingerprint, branch_id: u32) -> Fingerprint {
     const M: u128 = 0x9E3779B97F4A7C15_6A09E667F3BCC909;
@@ -95,7 +95,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             let e = self.todo.pop()?;
             self.iterations += 1;
 
-            if let Some((head, _, _)) = e.parent.head() {
+            if let Some((head, _)) = e.parent.head() {
                 let state = (e.state.0, e.state.1, head.at());
 
                 // Skip stale entries: a better-scoring element for this state
@@ -166,10 +166,10 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         element: &Element<R>,
         found: &FatToken<R::Kind>,
     ) -> IsExpectedElement {
-        match (found.old_kind(), element.cached_role) {
-            (Some(old), Some(cur)) if old == cur => IsExpectedElement::True,
-            (Some(old), Some(cur)) if old != cur => IsExpectedElement::False,
-            _ => IsExpectedElement::Unkown,
+        match found.old_kind() {
+            Some(old_fp) if old_fp == element.state.0 => IsExpectedElement::True,
+            Some(_) => IsExpectedElement::False,
+            None => IsExpectedElement::Unkown,
         }
     }
 
@@ -229,7 +229,6 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         cost: element.cost + token.max_error_value(),
                         h: element.h,
                         state: element.state,
-                        cached_role: element.cached_role.clone(),
                     }),
                     _ => None,
                 };
@@ -243,12 +242,11 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 };
 
                 let matched = Element {
-                    list: create_list(Step::bump()),
+                    list: create_list(Step::Bump(element.state.0)),
                     parent: element.parent.clone(),
                     cost: element.cost + token.max_error_value() + bias,
                     h: self.heuristic[next],
                     state: (element.state.0, next),
-                    cached_role: element.cached_role.clone(),
                 };
 
                 return (matched, fallback);
@@ -262,7 +260,6 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             cost: element.cost + token.max_error_value(),
             h: self.heuristic[idx],
             state: (element.state.0, idx),
-            cached_role: element.cached_role.clone(),
         };
 
         (error, None)
@@ -286,7 +283,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 #[derive(Debug)]
 pub struct Element<R: ParserTrait> {
     list: List<Step<R::Kind>>,
-    parent: List<(R, Fingerprint, Option<crate::TermType>)>,
+    parent: List<(R, Fingerprint)>,
     /// Accumulated error cost (lower = better).  Starts at 0; increases on
     /// error insertions, unchanged on successful matches.  Bias adjustments
     /// may slightly decrease cost (agreement) or increase it (conflict).
@@ -296,9 +293,6 @@ pub struct Element<R: ParserTrait> {
     /// Currently always 0.  `f = cost + h` is the A* priority.
     h: isize,
     state: (Fingerprint, usize),
-    /// Cached role: the innermost significant ancestor rule kind, maintained
-    /// through push/pop/pop_push to avoid an O(depth) parent-chain walk per token.
-    cached_role: Option<crate::TermType>,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -310,38 +304,31 @@ impl<R: ParserTrait> Element<R> {
     fn new_at(current: R, h: isize, at: usize) -> Self {
         let parent = List::default();
         let head = Fingerprint(0);
-        let kind = current.element_kind();
-        let cached_role = kind.term_type();
         Self {
             list: List::default(),
-            parent: parent.prepend((current, head, None)),
+            parent: parent.prepend((current, head)),
             cost: 0,
             h,
             state: (Fingerprint(1), at),
-            cached_role,
         }
     }
 
     pub fn pop_push(&self, rule: R) -> Self {
-        let ((_, f, old_tt), tail) = self.parent.slice().unwrap();
-        let kind = rule.element_kind();
-        let cached_role = kind.term_type().or_else(|| *old_tt);
-        let parent = tail.prepend((rule, *f, *old_tt));
+        let ((_, f), tail) = self.parent.slice().unwrap();
+        let parent = tail.prepend((rule, *f));
         Self {
             parent,
             list: self.list.clone(),
             cost: self.cost,
             h: self.h,
             state: self.state.clone(),
-            cached_role,
         }
     }
 
     pub fn push(&self, rule: R) -> Self {
         let kind = rule.element_kind();
         let (s, a) = self.state;
-        let cached_role = kind.term_type().or(self.cached_role);
-        let parent = self.parent.prepend((rule, s, self.cached_role));
+        let parent = self.parent.prepend((rule, s));
         let list = self.list.prepend(Step::start(kind.clone()));
         let s = descend(s, kind.branch());
         Self {
@@ -350,12 +337,11 @@ impl<R: ParserTrait> Element<R> {
             cost: self.cost,
             h: self.h,
             state: (s, a),
-            cached_role,
         }
     }
 
     pub fn pop(&self) -> Option<Self> {
-        let ((_, f, old_tt), parent) = self.parent.slice()?;
+        let ((_, f), parent) = self.parent.slice()?;
         let list = self.list.prepend(Step::end());
         let (_, a) = self.state;
         Some(Self {
@@ -364,7 +350,6 @@ impl<R: ParserTrait> Element<R> {
             cost: self.cost,
             h: self.h,
             state: (*f, a),
-            cached_role: *old_tt,
         })
     }
 }

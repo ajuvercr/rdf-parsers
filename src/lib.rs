@@ -8,6 +8,7 @@ use logos::{Lexer, Logos};
 pub use parser::*;
 
 mod a_star;
+pub use a_star::Fingerprint;
 mod list;
 pub mod ntriples;
 mod parser;
@@ -161,25 +162,27 @@ where
     Parser::new(tokens).parse_item::<T>()
 }
 
-pub fn parse_t_2<'a, T: a_star::ParserTrait + 'static>(root: T, text: &'a str) -> Parse
+pub fn parse_t_2<'a, T: a_star::ParserTrait + 'static>(root: T, text: &'a str) -> (Parse, Vec<FatToken<T::Kind>>)
 where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
-    let tokens = tokenize::<T::Kind>(text);
+    let mut tokens = tokenize::<T::Kind>(text);
     let list = a_star::a_star(
         root,
         &tokens,
         IncrementalBias::default(),
         a_star::DEFAULT_MAX_ITERATIONS,
     );
-    Parse::from_steps(&tokens, list)
+    let parse = Parse::from_steps(&mut tokens, list);
+    (parse, tokens)
 }
 
 /// Information from a previous parse needed for incremental re-parsing.
+/// The tokens carry their parse-time fingerprints in `old_kind`, set by
+/// `Parse::from_steps` during the previous parse.
 pub struct PrevParseInfo<K: TokenTrait> {
     pub tokens: Vec<FatToken<K>>,
-    pub prev_roles: Vec<Option<TermType>>,
 }
 
 /// Role-preservation bias applied in the A* search during incremental
@@ -202,16 +205,16 @@ impl Default for IncrementalBias {
 }
 
 /// Like `parse_t_2` but, when `prev` is provided, diffs the token stream
-/// against the previous one and copies each old token's `TermType` onto the
-/// matching new token via `FatToken::set_old_kind`.  The A* scorer then uses
-/// `bias` to adjust scores for parses that agree or disagree with the
-/// previous token roles.
+/// against the previous one and copies each old token's parse-time fingerprint
+/// onto the matching new token via `FatToken::set_old_kind`.  The A* scorer
+/// then uses `bias` to adjust scores for parses that agree or disagree with
+/// the previous token positions in the grammar rule stack.
 pub fn parse_t_2_incremental<'a, T: a_star::ParserTrait + 'static>(
     root: T,
     text: &'a str,
     prev: Option<&PrevParseInfo<T::Kind>>,
     bias: IncrementalBias,
-) -> Parse
+) -> (Parse, Vec<FatToken<T::Kind>>)
 where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
@@ -240,14 +243,15 @@ where
             }
         }
 
-        // Copy the old TermType onto each unchanged new token.
+        // Copy the old fingerprint onto each unchanged new token.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
-                tok.set_old_kind(prev.prev_roles.get(old_idx).cloned().flatten());
+                tok.set_old_kind(prev.tokens.get(old_idx).and_then(|t| t.old_kind()));
             }
         }
     }
 
     let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
-    Parse::from_steps(&tokens, list)
+    let parse = Parse::from_steps(&mut tokens, list);
+    (parse, tokens)
 }

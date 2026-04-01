@@ -9,13 +9,12 @@ use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
 use turtle::{
-    IncrementalBias, Parse, PrevParseInfo, TokenTrait, extract_prev_roles,
+    IncrementalBias, Parse, PrevParseInfo, TokenTrait,
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
     },
     parse_t_2_incremental,
     sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
-    tokenize,
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
 };
@@ -210,21 +209,18 @@ pub fn parse(language: &str, text: &str) -> String {
     let bias = IncrementalBias::default();
     match language {
         "turtle" => {
-            let parse = PREV_TURTLE.with(|prev| {
+            let (parse, tokens) = PREV_TURTLE.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
             });
-            let root = parse.syntax::<Lang>();
-            let prev_roles = extract_prev_roles::<Lang>(&root);
-            let tokens = tokenize::<SyntaxKind>(text);
             let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
             PREV_TURTLE.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
             });
             render_ariadne(&pairs, text, loc)
         }
         "sparql" => {
-            let parse = PREV_SPARQL.with(|prev| {
+            let (parse, tokens) = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     SparqlRule::new(SparqlSyntaxKind::QueryUnit),
@@ -233,17 +229,14 @@ pub fn parse(language: &str, text: &str) -> String {
                     bias,
                 )
             });
-            let root = parse.syntax::<SparqlLang>();
-            let prev_roles = extract_prev_roles::<SparqlLang>(&root);
-            let tokens = tokenize::<SparqlSyntaxKind>(text);
             let pairs = astar_pairs_from_parse::<SparqlLang>(&parse, text);
             PREV_SPARQL.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
             });
             render_ariadne(&pairs, text, loc)
         }
         "trig" => {
-            let parse = PREV_TRIG.with(|prev| {
+            let (parse, tokens) = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     TrigRule::new(TrigSyntaxKind::TrigDoc),
@@ -252,17 +245,14 @@ pub fn parse(language: &str, text: &str) -> String {
                     bias,
                 )
             });
-            let root = parse.syntax::<TrigLang>();
-            let prev_roles = extract_prev_roles::<TrigLang>(&root);
-            let tokens = tokenize::<TrigSyntaxKind>(text);
             let pairs = astar_pairs_from_parse::<TrigLang>(&parse, text);
             PREV_TRIG.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
             });
             render_ariadne(&pairs, text, loc)
         }
         "ntriples" => {
-            let parse = PREV_NTRIPLES.with(|prev| {
+            let (parse, tokens) = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
@@ -271,12 +261,9 @@ pub fn parse(language: &str, text: &str) -> String {
                     bias,
                 )
             });
-            let root = parse.syntax::<NTriplesLang>();
-            let prev_roles = extract_prev_roles::<NTriplesLang>(&root);
-            let tokens = tokenize::<NTriplesSyntaxKind>(text);
             let pairs = astar_pairs_from_parse::<NTriplesLang>(&parse, text);
             PREV_NTRIPLES.with(|prev| {
-                *prev.borrow_mut() = Some(PrevParseInfo { tokens, prev_roles });
+                *prev.borrow_mut() = Some(PrevParseInfo { tokens });
             });
             render_ariadne(&pairs, text, loc)
         }
@@ -289,7 +276,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
     let bias = IncrementalBias::default();
     match language {
         "turtle" => {
-            let parse = PREV_TURTLE.with(|prev| {
+            let (parse, _) = PREV_TURTLE.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
             });
@@ -297,7 +284,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
             render_ast::<Lang>(&parse, &pairs)
         }
         "sparql" => {
-            let parse = PREV_SPARQL.with(|prev| {
+            let (parse, _) = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     SparqlRule::new(SparqlSyntaxKind::QueryUnit),
@@ -310,7 +297,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
             render_ast::<SparqlLang>(&parse, &pairs)
         }
         "trig" => {
-            let parse = PREV_TRIG.with(|prev| {
+            let (parse, _) = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     TrigRule::new(TrigSyntaxKind::TrigDoc),
@@ -323,7 +310,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
             render_ast::<TrigLang>(&parse, &pairs)
         }
         "ntriples" => {
-            let parse = PREV_NTRIPLES.with(|prev| {
+            let (parse, _) = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
                 parse_t_2_incremental(
                     NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),

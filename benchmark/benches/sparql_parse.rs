@@ -1,24 +1,19 @@
 use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use turtle::{
-    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2,
-    parse_t_2_incremental,
-    sparql::parser::{Lang, Rule, SyntaxKind},
-    tokenize,
+    IncrementalBias, PrevParseInfo, parse_t_2, parse_t_2_incremental,
+    sparql::parser::{Rule, SyntaxKind},
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 fn sparql_parse(text: &str) {
-    parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
+    let _ = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
-    let parse = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
-    let root = parse.syntax::<Lang>();
-    let tokens = tokenize::<SyntaxKind>(text);
-    let prev_roles = extract_prev_roles::<Lang>(&root);
-    PrevParseInfo { tokens, prev_roles }
+    let (_, tokens) = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
+    PrevParseInfo { tokens }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────
@@ -69,12 +64,12 @@ fn bench_incremental(c: &mut Criterion) {
                 b.iter_batched(
                     || build_prev_info(&fix.before),
                     |prev| {
-                        parse_t_2_incremental(
+                        let _ = parse_t_2_incremental(
                             Rule::new(SyntaxKind::QueryUnit),
                             &fix.after,
                             Some(&prev),
                             bias,
-                        )
+                        );
                     },
                     BatchSize::SmallInput,
                 )

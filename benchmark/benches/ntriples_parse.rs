@@ -1,23 +1,20 @@
 use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use turtle::{
-    IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles,
-    ntriples::parser::{Lang, Rule, SyntaxKind},
-    parse_t_2, parse_t_2_incremental, tokenize,
+    IncrementalBias, PrevParseInfo,
+    ntriples::parser::{Rule, SyntaxKind},
+    parse_t_2, parse_t_2_incremental,
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 fn ntriples_parse(text: &str) {
-    parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
+    let _ = parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
-    let parse = parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
-    let root = parse.syntax::<Lang>();
-    let tokens = tokenize::<SyntaxKind>(text);
-    let prev_roles = extract_prev_roles::<Lang>(&root);
-    PrevParseInfo { tokens, prev_roles }
+    let (_, tokens) = parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
+    PrevParseInfo { tokens }
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────
@@ -68,12 +65,12 @@ fn bench_incremental(c: &mut Criterion) {
                 b.iter_batched(
                     || build_prev_info(&fix.before),
                     |prev| {
-                        parse_t_2_incremental(
+                        let _ = parse_t_2_incremental(
                             Rule::new(SyntaxKind::NtriplesDoc),
                             &fix.after,
                             Some(&prev),
                             bias,
-                        )
+                        );
                     },
                     BatchSize::SmallInput,
                 )

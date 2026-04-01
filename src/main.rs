@@ -13,7 +13,7 @@ fn main() {
     println!("=== Input ===");
     println!("{}", input);
 
-    let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), &input);
+    let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), &input);
     let root = parse.syntax::<lang::Lang>();
     let doc = convert(&root);
 

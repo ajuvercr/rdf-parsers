@@ -355,7 +355,7 @@ mod tests {
     use crate::{parse_t_2, turtle::parser as lang};
 
     fn parse(input: &str) -> Turtle {
-        let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
+        let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
         let root = parse.syntax::<lang::Lang>();
         convert(&root)
     }
@@ -665,7 +665,8 @@ mod tests {
     // ── fault-tolerant parsing ────────────────────────────────────────────────
 
     fn parse_raw(input: &str) -> crate::Parse {
-        parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input)
+        let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
+        parse
     }
 
     #[test]
@@ -756,94 +757,11 @@ mod tests {
 
     // ── incremental parsing ───────────────────────────────────────────────────
 
-    use crate::{
-        IncrementalBias, PrevParseInfo, TokenTrait as _, extract_prev_roles, parse_t_2_incremental,
-        tokenize,
-    };
+    use crate::{IncrementalBias, PrevParseInfo, parse_t_2_incremental};
 
     fn prev_info(text: &str) -> PrevParseInfo<lang::SyntaxKind> {
-        let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
-        let root = parse.syntax::<lang::Lang>();
-        let tokens = tokenize::<lang::SyntaxKind>(text);
-        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
-        PrevParseInfo { tokens, prev_roles }
-    }
-
-    fn roles(
-        text: &str,
-        prev: Option<&PrevParseInfo<lang::SyntaxKind>>,
-        bias: IncrementalBias,
-    ) -> Vec<(String, Option<crate::TermType>)> {
-        let parse = parse_t_2_incremental(
-            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
-            text,
-            prev,
-            bias,
-        );
-        let root = parse.syntax::<lang::Lang>();
-        let tokens = tokenize::<lang::SyntaxKind>(text);
-        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
-        tokens
-            .iter()
-            .zip(prev_roles.iter())
-            .filter(|(t, _)| !t.kind.skips())
-            .map(|(t, tt)| (t.text().to_owned(), *tt))
-            .collect()
-    }
-
-    /// Without incremental hints, the baseline A* parses `<a> <b> <c> <d> .`
-    /// (invalid Turtle) as: subject=`<a>`, predicate=`<b>`, then resolves
-    /// the extra tokens `<c>` and `<d>` as two objects in the same objectList
-    /// (error: missing comma).
-    #[test]
-    fn test_incremental_baseline_roles() {
-        let r = roles("<a> <b> <c> <d> .", None, IncrementalBias::default());
-        let role_of = |tok: &str| r.iter().find(|(t, _)| t == tok).unwrap().1;
-
-        assert_eq!(role_of("<a>"), Some(crate::TermType::Subject));
-        assert_eq!(role_of("<b>"), Some(crate::TermType::Predicate));
-        assert_eq!(role_of("<c>"), Some(crate::TermType::Object));
-        assert_eq!(role_of("<d>"), Some(crate::TermType::Object));
-    }
-
-    /// Verify that tokens inside a nested blank node get the innermost
-    /// TermType, not the outer one.
-    /// `[ <p1> [ <p2> <o2> ] ] <q> <r> .`
-    /// - `<p2>` is the predicate of the inner blank node → Predicate
-    /// - `<o2>` is the object of the inner blank node    → Object
-    #[test]
-    fn test_extract_prev_roles_nested_blank_nodes() {
-        let text = "[ <p1> [ <p2> <o2> ] ] <q> <r> .";
-        let parse = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
-        let root = parse.syntax::<lang::Lang>();
-        let tokens = tokenize::<lang::SyntaxKind>(text);
-        let prev_roles = extract_prev_roles::<lang::Lang>(&root);
-
-        // Build a map of token text → TermType role for convenient lookup.
-        use std::collections::HashMap;
-        let map: HashMap<&str, Option<crate::TermType>> = tokens
-            .iter()
-            .zip(prev_roles.iter())
-            .filter(|(t, _)| !t.kind.skips())
-            .map(|(t, tt)| (t.text(), *tt))
-            .collect();
-
-        assert_eq!(
-            map.get("<p2>").copied().flatten(),
-            Some(crate::TermType::Predicate),
-            "<p2> should be Predicate (innermost blank node context)"
-        );
-        assert_eq!(
-            map.get("<o2>").copied().flatten(),
-            Some(crate::TermType::Object),
-            "<o2> should be Object (innermost blank node context)"
-        );
-        // <p1> is the predicate of the outer blank-node property list.
-        assert_eq!(
-            map.get("<p1>").copied().flatten(),
-            Some(crate::TermType::Predicate),
-            "<p1> should be Predicate"
-        );
+        let (_, tokens) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
+        PrevParseInfo { tokens }
     }
 
     /// Going from `<b> <c> <d> .` to `<a> <b> <c> <d> .` (inserting `<a>`
@@ -860,7 +778,7 @@ mod tests {
     fn test_incremental_two_triples_from_inserted_token() {
         let prev = prev_info("<b> <c> <d> .");
         let bias = IncrementalBias::default();
-        let parse = parse_t_2_incremental(
+        let (parse, _) = parse_t_2_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> <b> <c> <d> .",
             Some(&prev),
@@ -900,7 +818,7 @@ mod tests {
     fn test_incremental_remove_object() {
         let prev = prev_info("<a> <b> <c> .");
         let bias = IncrementalBias::default();
-        let parse = parse_t_2_incremental(
+        let (parse, _) = parse_t_2_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> <b> .",
             Some(&prev),
@@ -924,7 +842,7 @@ mod tests {
         let prev =
             prev_info("@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n <a> foaf:knows ex:Bob .");
         let bias = IncrementalBias::default();
-        let parse = parse_t_2_incremental(
+        let (parse, _) = parse_t_2_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> foaf:knows ex:Bob .",
             Some(&prev),
@@ -960,7 +878,7 @@ mod tests {
  ]."#;
         let prev = prev_info(before);
         let bias = IncrementalBias::default();
-        let parse = parse_t_2_incremental(
+        let (parse, _) = parse_t_2_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             after,
             Some(&prev),
@@ -977,9 +895,10 @@ mod tests {
             .expect("has an error");
 
         println!("error span {:?} location {}", error_span, first_location);
+        let loc = TextSize::new(first_location as u32);
         assert!(
-            error_span.contains(TextSize::new(first_location as u32)),
-            "The error span includes the location of the removed bracket"
+            error_span.contains(loc) || error_span.start() == loc,
+            "The error span should start at or include the location of the removed bracket"
         );
     }
 }

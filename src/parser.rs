@@ -4,7 +4,7 @@ pub struct FatToken<T: TokenTrait> {
     pub kind: T,
     text: String,
     pub range: Range<usize>,
-    old_kind: Option<crate::TermType>,
+    old_kind: Option<crate::Fingerprint>,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -20,11 +20,11 @@ impl<T: TokenTrait> FatToken<T> {
         &self.text
     }
 
-    pub fn old_kind(&self) -> Option<crate::TermType> {
+    pub fn old_kind(&self) -> Option<crate::Fingerprint> {
         self.old_kind
     }
 
-    pub fn set_old_kind(&mut self, kind: Option<crate::TermType>) {
+    pub fn set_old_kind(&mut self, kind: Option<crate::Fingerprint>) {
         self.old_kind = kind;
     }
 }
@@ -46,7 +46,7 @@ fn coalesce_empty_rules<T: crate::TokenTrait>(steps: Vec<Step<T>>) -> Vec<Step<T
                 stack.push((kind.clone(), out.len(), false, false));
                 out.push(step);
             }
-            Step::Bump => {
+            Step::Bump(_) => {
                 for entry in &mut stack {
                     entry.2 = true;
                 }
@@ -119,8 +119,12 @@ impl Parse {
         result.into_iter().collect()
     }
 
-    pub fn from_steps<T: crate::TokenTrait>(tokens: &[FatToken<T>], steps: List<Step<T>>) -> Self {
+    pub fn from_steps<T: crate::TokenTrait>(
+        tokens: &mut [FatToken<T>],
+        steps: List<Step<T>>,
+    ) -> Self {
         let mut at = 0;
+        let mut fingerprint_assignments: Vec<(usize, crate::Fingerprint)> = Vec::new();
         let skip_white_with_builder = |builder: &mut GreenNodeBuilder<'_>, at: &mut usize| {
             while let Some(t) = tokens.get(*at)
                 && t.kind.skips()
@@ -152,9 +156,10 @@ impl Parse {
                     errors = errors.prepend(format!("{:?}", e));
                     builder.finish_node();
                 }
-                Step::Bump => {
+                Step::Bump(fp) => {
                     skip_white_with_builder(&mut builder, &mut at);
                     if let Some(i) = tokens.get(at) {
+                        fingerprint_assignments.push((at, fp));
                         builder.token(i.kind.clone().into(), &i.text);
                         at += 1;
                     }
@@ -162,6 +167,12 @@ impl Parse {
             }
         }
         skip_white_with_builder(&mut builder, &mut at);
+
+        for (idx, fp) in fingerprint_assignments {
+            if let Some(tok) = tokens.get_mut(idx) {
+                tok.set_old_kind(Some(fp));
+            }
+        }
 
         builder.finish_node();
 
@@ -184,32 +195,6 @@ use std::{collections::HashSet, ops::Range};
 use rowan::{GreenNode, GreenNodeBuilder, Language};
 
 use crate::{Context, ParserTrait, TokenTrait, list::List};
-
-/// Walk a rowan `SyntaxNode` tree and extract the grammar role for each token
-/// by finding the innermost ancestor whose kind is "significant" (i.e.
-/// `is_significant()` returns true).
-///
-/// Returns `Vec<Option<TermType>>` indexed by token position, aligned with
-/// the token-vec produced by `tokenize`.
-pub fn extract_prev_roles<L: rowan::Language>(
-    root: &rowan::SyntaxNode<L>,
-) -> Vec<Option<crate::TermType>>
-where
-    L::Kind: crate::TokenTrait,
-{
-    let mut result = Vec::new();
-    for token in root.descendants_with_tokens() {
-        let rowan::NodeOrToken::Token(tok) = token else {
-            continue;
-        };
-        // Walk up ancestors to find the innermost significant one.
-        let role = tok
-            .parent_ancestors()
-            .find_map(|ancestor| ancestor.kind().term_type());
-        result.push(role);
-    }
-    result
-}
 
 #[derive(Clone, Debug)]
 pub struct Parser<T: TokenTrait> {
@@ -245,7 +230,7 @@ pub enum Step<T> {
     Start(T),
     Error(Error<T>),
     End,
-    Bump,
+    Bump(crate::Fingerprint),
 }
 impl<T: TokenTrait> Step<T> {
     pub fn start(kind: T) -> Self {
@@ -260,7 +245,7 @@ impl<T: TokenTrait> Step<T> {
     }
 
     pub fn bump() -> Self {
-        Step::Bump
+        Step::Bump(crate::Fingerprint(0))
     }
 
     pub fn apply(&self, parser: &mut Parser<T>, builder: &mut GreenNodeBuilder<'_>) {
@@ -275,7 +260,7 @@ impl<T: TokenTrait> Step<T> {
                 parser.errors = parser.errors.prepend(format!("{:?}", e));
                 builder.finish_node();
             }
-            Step::Bump => {
+            Step::Bump(_) => {
                 parser.skip_white_with_builder(builder);
                 if let Some((i, r)) = parser.tokens.slice() {
                     builder.token(i.kind.clone().into(), &i.text);
