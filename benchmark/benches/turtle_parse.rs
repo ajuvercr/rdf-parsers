@@ -9,7 +9,7 @@ use swls_lang_turtle::lang::{
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
 };
 use turtle::{
-    IncrementalBias, PrevParseInfo, parse_t_2, parse_t_2_incremental,
+    IncrementalBias, PrevParseInfo, parse, parse_incremental,
     turtle::parser::{Rule, SyntaxKind},
 };
 
@@ -20,7 +20,7 @@ fn chumsky_turtle_parse(url: &Url, text: &str) {
 }
 
 fn turtle_parse(text: &str) {
-    let _ = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
+    let _ = parse(Rule::new(SyntaxKind::TurtleDoc), text);
 }
 
 fn oxttl_parse(text: &str) {
@@ -32,7 +32,7 @@ fn oxttl_parse(text: &str) {
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
-    let (_, tokens) = parse_t_2(Rule::new(SyntaxKind::TurtleDoc), text);
+    let (_, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
     PrevParseInfo { tokens }
 }
 
@@ -101,7 +101,7 @@ fn bench_incremental(c: &mut Criterion) {
                 b.iter_batched(
                     || build_prev_info(&fix.before),
                     |prev| {
-                        let _ = parse_t_2_incremental(
+                        let _ = parse_incremental(
                             Rule::new(SyntaxKind::TurtleDoc),
                             &fix.after,
                             Some(&prev),

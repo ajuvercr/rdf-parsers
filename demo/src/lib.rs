@@ -13,7 +13,7 @@ use turtle::{
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
     },
-    parse_t_2_incremental,
+    parse_incremental,
     sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
@@ -211,7 +211,7 @@ pub fn parse(language: &str, text: &str) -> String {
         "turtle" => {
             let (parse, tokens) = PREV_TURTLE.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
+                parse_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
             });
             let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
             PREV_TURTLE.with(|prev| {
@@ -222,7 +222,7 @@ pub fn parse(language: &str, text: &str) -> String {
         "sparql" => {
             let (parse, tokens) = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                     text,
                     p.as_ref(),
@@ -238,7 +238,7 @@ pub fn parse(language: &str, text: &str) -> String {
         "trig" => {
             let (parse, tokens) = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     TrigRule::new(TrigSyntaxKind::TrigDoc),
                     text,
                     p.as_ref(),
@@ -254,7 +254,7 @@ pub fn parse(language: &str, text: &str) -> String {
         "ntriples" => {
             let (parse, tokens) = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                     text,
                     p.as_ref(),
@@ -278,7 +278,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "turtle" => {
             let (parse, _) = PREV_TURTLE.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
+                parse_incremental(Rule::new(SyntaxKind::TurtleDoc), text, p.as_ref(), bias)
             });
             let pairs = astar_pairs_from_parse::<Lang>(&parse, text);
             render_ast::<Lang>(&parse, &pairs)
@@ -286,7 +286,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "sparql" => {
             let (parse, _) = PREV_SPARQL.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                     text,
                     p.as_ref(),
@@ -299,7 +299,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "trig" => {
             let (parse, _) = PREV_TRIG.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     TrigRule::new(TrigSyntaxKind::TrigDoc),
                     text,
                     p.as_ref(),
@@ -312,7 +312,7 @@ pub fn parse_ast(language: &str, text: &str) -> String {
         "ntriples" => {
             let (parse, _) = PREV_NTRIPLES.with(|prev| {
                 let p = prev.borrow();
-                parse_t_2_incremental(
+                parse_incremental(
                     NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                     text,
                     p.as_ref(),

@@ -352,11 +352,11 @@ mod tests {
     use rowan::TextSize;
 
     use super::*;
-    use crate::{parse_t_2, turtle::parser as lang};
+    use crate::{parse as crate_parse, turtle::parser as lang};
 
     fn parse(input: &str) -> Turtle {
-        let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
-        let root = parse.syntax::<lang::Lang>();
+        let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
+        let root = result.syntax::<lang::Lang>();
         convert(&root)
     }
 
@@ -665,8 +665,8 @@ mod tests {
     // ── fault-tolerant parsing ────────────────────────────────────────────────
 
     fn parse_raw(input: &str) -> crate::Parse {
-        let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
-        parse
+        let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input);
+        result
     }
 
     #[test]
@@ -757,10 +757,10 @@ mod tests {
 
     // ── incremental parsing ───────────────────────────────────────────────────
 
-    use crate::{IncrementalBias, PrevParseInfo, parse_t_2_incremental};
+    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
 
     fn prev_info(text: &str) -> PrevParseInfo<lang::SyntaxKind> {
-        let (_, tokens) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
+        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
         PrevParseInfo { tokens }
     }
 
@@ -778,7 +778,7 @@ mod tests {
     fn test_incremental_two_triples_from_inserted_token() {
         let prev = prev_info("<b> <c> <d> .");
         let bias = IncrementalBias::default();
-        let (parse, _) = parse_t_2_incremental(
+        let (parse, _) = parse_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> <b> <c> <d> .",
             Some(&prev),
@@ -818,7 +818,7 @@ mod tests {
     fn test_incremental_remove_object() {
         let prev = prev_info("<a> <b> <c> .");
         let bias = IncrementalBias::default();
-        let (parse, _) = parse_t_2_incremental(
+        let (parse, _) = parse_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> <b> .",
             Some(&prev),
@@ -842,7 +842,7 @@ mod tests {
         let prev =
             prev_info("@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n <a> foaf:knows ex:Bob .");
         let bias = IncrementalBias::default();
-        let (parse, _) = parse_t_2_incremental(
+        let (parse, _) = parse_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             "<a> foaf:knows ex:Bob .",
             Some(&prev),
@@ -878,7 +878,7 @@ mod tests {
  ]."#;
         let prev = prev_info(before);
         let bias = IncrementalBias::default();
-        let (parse, _) = parse_t_2_incremental(
+        let (parse, _) = parse_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
             after,
             Some(&prev),

@@ -3,17 +3,17 @@ use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_ma
 use turtle::{
     IncrementalBias, PrevParseInfo,
     ntriples::parser::{Rule, SyntaxKind},
-    parse_t_2, parse_t_2_incremental,
+    parse, parse_incremental,
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 fn ntriples_parse(text: &str) {
-    let _ = parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
+    let _ = parse(Rule::new(SyntaxKind::NtriplesDoc), text);
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
-    let (_, tokens) = parse_t_2(Rule::new(SyntaxKind::NtriplesDoc), text);
+    let (_, tokens) = parse(Rule::new(SyntaxKind::NtriplesDoc), text);
     PrevParseInfo { tokens }
 }
 
@@ -65,7 +65,7 @@ fn bench_incremental(c: &mut Criterion) {
                 b.iter_batched(
                     || build_prev_info(&fix.before),
                     |prev| {
-                        let _ = parse_t_2_incremental(
+                        let _ = parse_incremental(
                             Rule::new(SyntaxKind::NtriplesDoc),
                             &fix.after,
                             Some(&prev),

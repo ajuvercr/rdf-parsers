@@ -1,9 +1,8 @@
 use std::borrow::Borrow;
 use std::hash::Hash;
-use std::ops::{Deref, DerefMut, Range};
-use std::{collections::HashSet, fmt::Debug};
+use std::ops::{Deref, DerefMut};
+use std::fmt::Debug;
 
-use crate::list::Inner;
 use logos::{Lexer, Logos};
 pub use parser::*;
 
@@ -77,15 +76,6 @@ impl<T> Spanned<T> {
     }
 }
 
-pub trait ParserTrait {
-    type Kind: 'static + TokenTrait;
-    const KIND: Self::Kind;
-    const CAN_BE_EMPTY: bool;
-    const FIRST_ITEMS: &'static [Self::Kind];
-    const LAST_ITEMS: &'static [Self::Kind];
-    fn parse(parser: &mut crate::Parser<Self::Kind>, context: &mut Context);
-}
-
 pub trait TokenTrait:
     Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Eq + Hash + 'static
 {
@@ -111,14 +101,6 @@ pub trait TokenTrait:
     }
 }
 
-pub struct Context {
-    suggestions: HashSet<(String, Range<usize>)>,
-}
-
-/// Second, implementing the `Language` trait teaches rowan to convert between
-/// these two SyntaxKind types, allowing for a nicer SyntaxNode API where
-/// "kinds" are values from our `enum SyntaxKind`, instead of plain u16 values.
-
 pub fn tokenize<'a, K>(text: &'a str) -> Vec<FatToken<K>>
 where
     K: TokenTrait + Logos<'a, Source = str>,
@@ -137,19 +119,7 @@ where
     tokens
 }
 
-pub fn parse_t<'a, T: ParserTrait>(text: &'a str) -> Parse
-where
-    T::Kind: Logos<'a, Source = str>,
-    <<T as ParserTrait>::Kind as Logos<'a>>::Extras: Default,
-{
-    let tokens = tokenize::<T::Kind>(text);
-    let tokens = tokens
-        .into_iter()
-        .rfold(Inner::new(), |acc, b| acc.prepend(b));
-    Parser::new(tokens).parse_item::<T>()
-}
-
-pub fn parse_t_2<'a, T: a_star::ParserTrait + 'static>(root: T, text: &'a str) -> (Parse, Vec<FatToken<T::Kind>>)
+pub fn parse<'a, T: a_star::ParserTrait + 'static>(root: T, text: &'a str) -> (Parse, Vec<FatToken<T::Kind>>)
 where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
@@ -196,7 +166,7 @@ impl Default for IncrementalBias {
 /// onto the matching new token via `FatToken::set_old_kind`.  The A* scorer
 /// then uses `bias` to adjust scores for parses that agree or disagree with
 /// the previous token positions in the grammar rule stack.
-pub fn parse_t_2_incremental<'a, T: a_star::ParserTrait + 'static>(
+pub fn parse_incremental<'a, T: a_star::ParserTrait + 'static>(
     root: T,
     text: &'a str,
     prev: Option<&PrevParseInfo<T::Kind>>,

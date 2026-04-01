@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-use turtle::parse_t_2;
+use turtle::parse;
 use turtle::turtle as lang;
 use turtle::turtle::convert::convert;
 
@@ -13,8 +13,8 @@ fn main() {
     println!("=== Input ===");
     println!("{}", input);
 
-    let (parse, _) = parse_t_2(lang::Rule::new(lang::SyntaxKind::TurtleDoc), &input);
-    let root = parse.syntax::<lang::Lang>();
+    let (result, _) = parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), &input);
+    let root = result.syntax::<lang::Lang>();
     let doc = convert(&root);
 
     println!("=== Triples ===");

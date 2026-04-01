@@ -1,18 +1,18 @@
 use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use turtle::{
-    IncrementalBias, PrevParseInfo, parse_t_2, parse_t_2_incremental,
+    IncrementalBias, PrevParseInfo, parse, parse_incremental,
     sparql::parser::{Rule, SyntaxKind},
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 fn sparql_parse(text: &str) {
-    let _ = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
+    let _ = parse(Rule::new(SyntaxKind::QueryUnit), text);
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo<SyntaxKind> {
-    let (_, tokens) = parse_t_2(Rule::new(SyntaxKind::QueryUnit), text);
+    let (_, tokens) = parse(Rule::new(SyntaxKind::QueryUnit), text);
     PrevParseInfo { tokens }
 }
 
@@ -64,7 +64,7 @@ fn bench_incremental(c: &mut Criterion) {
                 b.iter_batched(
                     || build_prev_info(&fix.before),
                     |prev| {
-                        let _ = parse_t_2_incremental(
+                        let _ = parse_incremental(
                             Rule::new(SyntaxKind::QueryUnit),
                             &fix.after,
                             Some(&prev),
