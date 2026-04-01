@@ -145,12 +145,14 @@ impl Parse {
         let mut builder = GreenNodeBuilder::new();
         builder.start_node(T::ROOT.into());
         let step_count = steps.len();
-        let steps: Vec<_> = {
+        let steps_vec: Vec<_> = {
             let mut v = Vec::with_capacity(step_count);
             v.extend(steps.iter().cloned());
+            // Drop the list iteratively to avoid stack overflow on long lists.
+            crate::list::drop_list(steps);
             v
         };
-        let steps = coalesce_empty_rules(steps.into_iter().rev().collect());
+        let steps = coalesce_empty_rules(steps_vec.into_iter().rev().collect());
         for step in steps.into_iter() {
             match step {
                 Step::Start(kind) => {

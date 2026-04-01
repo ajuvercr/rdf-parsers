@@ -305,6 +305,9 @@ pub struct Turtle {
     pub base: Option<Spanned<Base>>,
     pub prefixes: Vec<Spanned<TurtlePrefix>>,
     pub triples: Vec<Spanned<Triple>>,
+    /// Document base URL for prefix/IRI resolution. Set by the language server
+    /// after parsing; not populated by the A* parser or CST converter.
+    pub set_base: Option<String>,
 }
 
 impl Turtle {
@@ -321,6 +324,7 @@ impl Turtle {
             base,
             prefixes,
             triples,
+            set_base: None,
         }
     }
 }

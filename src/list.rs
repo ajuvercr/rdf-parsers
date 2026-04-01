@@ -6,6 +6,36 @@ pub enum Inner<T> {
     Nil,
     Cons(T, List<T>, usize),
 }
+
+/// Iteratively drop a `List<T>` to avoid stack overflow on long lists.
+///
+/// The default recursive drop of `Rc<Inner<T>>` can overflow the stack when
+/// the list has thousands of nodes (e.g., A* parse results for large files).
+/// This function walks the list iteratively, unlinking each node before it is
+/// freed so that no stack frame chains are created.
+pub fn drop_list<T>(list: List<T>) {
+    let mut current = list;
+    loop {
+        // If we're the sole owner, move the inner value out so we can
+        // mutate it before it is freed.
+        match Rc::try_unwrap(current) {
+            Err(_) => break, // Other Rc clones exist; let them handle drop.
+            Ok(inner) => {
+                match inner {
+                    Inner::Nil => break,
+                    Inner::Cons(_item, tail, _) => {
+                        // Continue with the tail.  When this loop iteration
+                        // ends, `_item` is dropped (non-recursive because it's
+                        // a plain `T`, not a `List`), and the old `inner`
+                        // (which now owns only `_item`) is freed — with its
+                        // `tail` field already moved out, so no chain.
+                        current = tail;
+                    }
+                }
+            }
+        }
+    }
+}
 impl<T: PartialEq> PartialEq for Inner<T> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {

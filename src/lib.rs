@@ -9,7 +9,7 @@ pub use parser::*;
 mod a_star;
 pub use a_star::Fingerprint;
 pub use a_star::ParserTrait;
-mod list;
+pub mod list;
 pub mod model;
 pub mod n3;
 pub mod ntriples;
@@ -77,6 +77,32 @@ impl<T> Spanned<T> {
     pub fn span(&self) -> &std::ops::Range<usize> {
         &self.1
     }
+
+    pub fn map<O>(self, f: impl Fn(T) -> O) -> Spanned<O> {
+        Spanned(f(self.0), self.1)
+    }
+    pub fn map_ref<'a, O: 'a>(&'a self, f: impl Fn(&'a T) -> O) -> Spanned<O> {
+        Spanned(f(&self.0), self.1.clone())
+    }
+    pub fn as_ref(&self) -> Spanned<&T> {
+        Spanned(&self.0, self.1.clone())
+    }
+    pub fn try_map_ref<'a, O>(&'a self, f: impl FnOnce(&'a T) -> Option<O>) -> Option<Spanned<O>> {
+        f(&self.0).map(|v| Spanned(v, self.1.clone()))
+    }
+    pub fn try_map<O>(self, f: impl FnOnce(T) -> Option<O>) -> Option<Spanned<O>> {
+        f(self.0).map(|v| Spanned(v, self.1))
+    }
+}
+
+impl<T> Spanned<Option<T>> {
+    pub fn transpose(self) -> Option<Spanned<T>> {
+        self.0.map(|inner| Spanned(inner, self.1))
+    }
+}
+
+pub fn spanned<T>(t: T, span: std::ops::Range<usize>) -> Spanned<T> {
+    Spanned(t, span)
 }
 
 pub trait TokenTrait:
