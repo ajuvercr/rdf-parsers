@@ -426,4 +426,9 @@ impl TokenTrait for SyntaxKind {
             _ => 1isize,
         }
     }
+    fn bracket_delta(&self) -> i8 {
+        match self {
+            _ => 0,
+        }
+    }
 }

@@ -848,6 +848,19 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .collect();
 
+    // Build bracket_delta arms for openers (+1) and closers (-1).
+    let bracket_delta_arms: Vec<_> = {
+        let openers = config.context.bracket_openers.iter().map(|name| {
+            let n = config.context.ident_for(name);
+            quote! { SyntaxKind::#n => 1, }
+        });
+        let closers = config.context.bracket_closers.iter().map(|name| {
+            let n = config.context.ident_for(name);
+            quote! { SyntaxKind::#n => -1, }
+        });
+        openers.chain(closers).collect()
+    };
+
     let enum_definition = quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
         #(#sub_pattersn)*
@@ -982,6 +995,13 @@ pub fn generate(path: &str, contents: &str) -> String {
             match self {
                 #( #max_error_value_arms )*
                 _ => #DEFAULT_TOKEN_WEIGHT,
+            }
+        }
+
+        fn bracket_delta(&self) -> i8 {
+            match self {
+                #( #bracket_delta_arms )*
+                _ => 0,
             }
         }
     }

@@ -5,6 +5,9 @@ pub struct FatToken<T: TokenTrait> {
     text: String,
     pub range: Range<usize>,
     old_kind: Option<crate::Fingerprint>,
+    /// Bracket nesting depth from the previous parse at which this token was
+    /// parsed.  `None` for new (inserted) tokens.
+    old_depth: Option<u8>,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -13,6 +16,7 @@ impl<T: TokenTrait> FatToken<T> {
             range,
             text,
             old_kind: None,
+            old_depth: None,
         }
     }
 
@@ -28,10 +32,19 @@ impl<T: TokenTrait> FatToken<T> {
         self.old_kind = kind;
     }
 
-    pub fn to_prev_token(&self) -> crate::PrevToken {
+    pub fn old_depth(&self) -> Option<u8> {
+        self.old_depth
+    }
+
+    pub fn set_old_depth(&mut self, depth: Option<u8>) {
+        self.old_depth = depth;
+    }
+
+    pub fn to_prev_token(&self, current_depth: u8) -> crate::PrevToken {
         crate::PrevToken {
             text: self.text.clone(),
             fingerprint: self.old_kind,
+            depth: current_depth,
         }
     }
 }
@@ -131,7 +144,8 @@ impl Parse {
         steps: List<Step<T>>,
     ) -> Self {
         let mut at = 0;
-        let mut fingerprint_assignments: Vec<(usize, crate::Fingerprint)> = Vec::new();
+        // (token_index, fingerprint, bracket_depth_at_bump)
+        let mut fingerprint_assignments: Vec<(usize, crate::Fingerprint, u8)> = Vec::new();
         let skip_white_with_builder = |builder: &mut GreenNodeBuilder<'_>, at: &mut usize| {
             while let Some(t) = tokens.get(*at)
                 && t.kind.skips()
@@ -153,6 +167,8 @@ impl Parse {
             v
         };
         let steps = coalesce_empty_rules(steps_vec.into_iter().rev().collect());
+        // Running bracket nesting depth: incremented on openers, decremented on closers.
+        let mut current_depth: i32 = 0;
         for step in steps.into_iter() {
             match step {
                 Step::Start(kind) => {
@@ -168,7 +184,12 @@ impl Parse {
                 Step::Bump(fp) => {
                     skip_white_with_builder(&mut builder, &mut at);
                     if let Some(i) = tokens.get(at) {
-                        fingerprint_assignments.push((at, fp));
+                        // Record depth at the token's position (before adjusting for
+                        // this token's own bracket_delta, so openers record the outer
+                        // depth and closers record the inner depth).
+                        let depth_at_token = current_depth.clamp(0, 255) as u8;
+                        fingerprint_assignments.push((at, fp, depth_at_token));
+                        current_depth += i.kind.bracket_delta() as i32;
                         builder.token(i.kind.clone().into(), &i.text);
                         at += 1;
                     }
@@ -177,9 +198,10 @@ impl Parse {
         }
         skip_white_with_builder(&mut builder, &mut at);
 
-        for (idx, fp) in fingerprint_assignments {
+        for (idx, fp, depth) in fingerprint_assignments {
             if let Some(tok) = tokens.get_mut(idx) {
                 tok.set_old_kind(Some(fp));
+                tok.set_old_depth(Some(depth));
             }
         }
 

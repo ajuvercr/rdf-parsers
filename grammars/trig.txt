@@ -90,3 +90,11 @@ sq_open -> 8
 sq_close -> 8
 curly_open -> 100
 curly_close -> 100
+=== bracket_open ===
+sq_open
+cl_open
+curly_open
+=== bracket_close ===
+sq_close
+cl_close
+curly_close

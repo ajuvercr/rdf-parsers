@@ -274,30 +274,68 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         if let Some(found) = self.tokens.get(idx) {
             if found.kind == token {
                 let next = self.get_actual_index(idx + 1);
+                // Update bracket depth after consuming this token.
+                let new_depth = element.current_depth + token.bracket_delta();
 
                 let (fallback, bias, h) = if self.mode == ParseMode::Fast {
                     // Fast mode: no role-conflict check, no fallback branch, h = 0.
                     (None, 0, 0)
                 } else {
                     let is_expected_element = self.is_expected_element(element, found);
-                    let fallback = match is_expected_element {
-                        IsExpectedElement::False => Some(Element {
-                            list: create_list(Step::error(Error::Expected(token.clone()))),
-                            parent: element.parent.clone(),
-                            // So we just assume this is an error, so we add the error value
-                            cost: element.cost + token.max_error_value(),
-                            h: element.h,
-                            state: element.state,
-                            has_error: true,
-                        }),
-                        _ => None,
-                    };
-                    let bias = match is_expected_element {
-                        IsExpectedElement::True => 0,
-                        // When we have to insert more than 4 tokens, we
-                        // should just assume it changed
-                        IsExpectedElement::False => 50,
-                        IsExpectedElement::Unkown => 0,
+                    let (fallback, bias) = match is_expected_element {
+                        IsExpectedElement::True | IsExpectedElement::Unkown => (None, 0),
+                        IsExpectedElement::False => {
+                            // Compute the depth delta this token carries from the
+                            // previous parse and how it relates to the current depth.
+                            let depth_delta = found.old_depth().map(|old| {
+                                element.current_depth as i16 - old as i16
+                            });
+                            let committed_delta = element.assumed_depth_delta as i16;
+                            if depth_delta == Some(committed_delta) && committed_delta != 0 {
+                                // This conflict is fully explained by the depth shift
+                                // already committed to — treat it as a free agree.
+                                (None, 0)
+                            } else if depth_delta == Some(committed_delta) {
+                                // Same depth, fingerprint wrong: genuine role conflict.
+                                // Restore the original +50 bias so the A* prefers a
+                                // correct parse over reusing a token in the wrong role.
+                                let insert_error = Some(Element {
+                                    list: create_list(Step::error(Error::Expected(token.clone()))),
+                                    parent: element.parent.clone(),
+                                    cost: element.cost + token.max_error_value(),
+                                    h: element.h,
+                                    state: element.state,
+                                    has_error: true,
+                                    assumed_depth_delta: element.assumed_depth_delta,
+                                    current_depth: element.current_depth,
+                                });
+                                (insert_error, 50)
+                            } else {
+                                // New or different depth conflict. Create two branches:
+                                // (a) adopt this depth delta (one-time cost), and
+                                // (b) insert an error token instead (don't consume).
+                                let insert_error = Some(Element {
+                                    list: create_list(Step::error(Error::Expected(token.clone()))),
+                                    parent: element.parent.clone(),
+                                    cost: element.cost + token.max_error_value(),
+                                    h: element.h,
+                                    state: element.state,
+                                    has_error: true,
+                                    assumed_depth_delta: element.assumed_depth_delta,
+                                    current_depth: element.current_depth,
+                                });
+                                // One-time delta-adoption cost: proportional to how much
+                                // the assumed delta changes.
+                                let new_delta = depth_delta
+                                    .map(|d| d.clamp(i8::MIN as i16, i8::MAX as i16) as i8)
+                                    .unwrap_or(element.assumed_depth_delta);
+                                let delta_change =
+                                    (new_delta as i16 - element.assumed_depth_delta as i16).abs();
+                                let adoption_cost =
+                                    delta_change as isize * token.max_error_value();
+                                (insert_error, adoption_cost)
+                            }
+                        }
                     };
                     (fallback, bias, self.heuristic[next])
                 };
@@ -309,6 +347,18 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     h,
                     state: (element.state.0, next),
                     has_error: element.has_error,
+                    assumed_depth_delta: if bias > 0 {
+                        // We adopted a new delta; compute it from the token's depth.
+                        found.old_depth()
+                            .map(|old| {
+                                (element.current_depth as i16 - old as i16)
+                                    .clamp(i8::MIN as i16, i8::MAX as i16) as i8
+                            })
+                            .unwrap_or(element.assumed_depth_delta)
+                    } else {
+                        element.assumed_depth_delta
+                    },
+                    current_depth: new_depth,
                 };
 
                 return (matched, fallback);
@@ -329,6 +379,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             h,
             state: (element.state.0, idx),
             has_error: true,
+            assumed_depth_delta: element.assumed_depth_delta,
+            current_depth: element.current_depth,
         };
 
         (error, None)
@@ -366,6 +418,14 @@ pub struct Element<R: ParserTrait> {
     /// element's list.  In `Fast` mode, elements with `has_error = true` are
     /// never returned as a successful parse result.
     has_error: bool,
+    /// The bracket nesting depth shift this path has committed to.  When a
+    /// block of tokens moves to a different nesting level, the first conflict
+    /// adopts the delta (paying a one-time cost); subsequent tokens in the
+    /// same block that conflict by the same delta are free.
+    assumed_depth_delta: i8,
+    /// The current bracket nesting depth of the parser at this element's token
+    /// position.  Incremented when an opener is bumped, decremented for closers.
+    current_depth: i8,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -384,6 +444,8 @@ impl<R: ParserTrait> Element<R> {
             h,
             state: (Fingerprint(1), at),
             has_error: false,
+            assumed_depth_delta: 0,
+            current_depth: 0,
         }
     }
 
@@ -397,6 +459,8 @@ impl<R: ParserTrait> Element<R> {
             h: self.h,
             state: self.state.clone(),
             has_error: self.has_error,
+            assumed_depth_delta: self.assumed_depth_delta,
+            current_depth: self.current_depth,
         }
     }
 
@@ -413,6 +477,8 @@ impl<R: ParserTrait> Element<R> {
             h: self.h,
             state: (s, a),
             has_error: self.has_error,
+            assumed_depth_delta: self.assumed_depth_delta,
+            current_depth: self.current_depth,
         }
     }
 
@@ -427,6 +493,8 @@ impl<R: ParserTrait> Element<R> {
             h: self.h,
             state: (*f, a),
             has_error: self.has_error,
+            assumed_depth_delta: self.assumed_depth_delta,
+            current_depth: self.current_depth,
         })
     }
 }

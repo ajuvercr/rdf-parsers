@@ -1656,4 +1656,13 @@ impl TokenTrait for SyntaxKind {
             _ => 1isize,
         }
     }
+    fn bracket_delta(&self) -> i8 {
+        match self {
+            SyntaxKind::SqOpen => 1,
+            SyntaxKind::ClOpen => 1,
+            SyntaxKind::SqClose => -1,
+            SyntaxKind::ClClose => -1,
+            _ => 0,
+        }
+    }
 }

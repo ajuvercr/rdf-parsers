@@ -36,6 +36,10 @@ pub struct Context {
     pub rename: HashMap<String, String>,
     with: HashMap<String, String>,
     pub error_values: HashMap<String, isize>,
+    /// Tokens whose `bracket_delta()` is +1 (openers: `{`, `[`, `(`).
+    pub bracket_openers: Vec<String>,
+    /// Tokens whose `bracket_delta()` is -1 (closers: `}`, `]`, `)`).
+    pub bracket_closers: Vec<String>,
 }
 
 impl Context {
@@ -71,6 +75,8 @@ enum CtxBlock {
     Rename(Vec<(String, String)>),
     With(Vec<(String, String)>),
     ErrorValues(Vec<(String, isize)>),
+    BracketOpeners(Vec<String>),
+    BracketClosers(Vec<String>),
 }
 
 pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<'src, char>>> {
@@ -87,6 +93,15 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .then(line_text)
         .repeated()
         .collect();
+
+    // plain list of names (one per non-empty line); stops at a new section header
+    let name_list = none_of(" \n=")
+        .repeated()
+        .at_least(1)
+        .collect::<String>()
+        .padded()
+        .repeated()
+        .collect::<Vec<_>>();
 
     let rename = section_header("rename", "===")
         .ignore_then(mapping)
@@ -105,7 +120,15 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         })
         .map(CtxBlock::ErrorValues);
 
-    let block = rename.or(with).or(error_values);
+    let bracket_openers = section_header("bracket_open", "===")
+        .ignore_then(name_list.clone())
+        .map(CtxBlock::BracketOpeners);
+
+    let bracket_closers = section_header("bracket_close", "===")
+        .ignore_then(name_list)
+        .map(CtxBlock::BracketClosers);
+
+    let block = rename.or(with).or(error_values).or(bracket_openers).or(bracket_closers);
 
     section_header("context", "==")
         .labelled("context header")
@@ -117,6 +140,8 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                     CtxBlock::Rename(entries) => ctx.rename.extend(entries),
                     CtxBlock::With(entries) => ctx.with.extend(entries),
                     CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
+                    CtxBlock::BracketOpeners(names) => ctx.bracket_openers.extend(names),
+                    CtxBlock::BracketClosers(names) => ctx.bracket_closers.extend(names),
                 }
             }
             ctx

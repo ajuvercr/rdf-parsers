@@ -80,3 +80,9 @@ sq_open -> 2
 sq_close -> 2
 cl_open -> 2
 cl_close -> 2
+=== bracket_open ===
+sq_open
+cl_open
+=== bracket_close ===
+sq_close
+cl_close

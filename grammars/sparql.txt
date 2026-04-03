@@ -278,3 +278,11 @@ sparql_prefix_token -> 100
 stop -> 5
 colon -> 4
 comma -> 3
+=== bracket_open ===
+sq_open
+br_open
+cl_open
+=== bracket_close ===
+sq_close
+br_close
+cl_close

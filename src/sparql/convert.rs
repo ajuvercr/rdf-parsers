@@ -735,9 +735,8 @@ mod tests {
 
     #[test]
     fn test_triple_with_iris() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> SELECT * WHERE { ex:alice ex:knows ex:bob }",
-        );
+        let doc =
+            parse("PREFIX ex: <http://example.org/> SELECT * WHERE { ex:alice ex:knows ex:bob }");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -755,9 +754,8 @@ mod tests {
 
     #[test]
     fn test_a_shorthand() {
-        let doc = parse(
-            "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { ?x a foaf:Person }",
-        );
+        let doc =
+            parse("PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { ?x a foaf:Person }");
         let t = doc.triples[0].value();
         assert!(matches!(
             t.po[0].predicate.value(),
@@ -809,18 +807,14 @@ mod tests {
 
     #[test]
     fn test_string_literal() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:name \"Alice\" }",
-        );
+        let doc = parse("PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:name \"Alice\" }");
         let t = doc.triples[0].value();
         assert_eq!(term_lit(t.po[0].object[0].value()).plain_string(), "Alice");
     }
 
     #[test]
     fn test_numeric_literal() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:age 30 }",
-        );
+        let doc = parse("PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:age 30 }");
         let t = doc.triples[0].value();
         match term_lit(t.po[0].object[0].value()) {
             Literal::Numeric(n) => assert_eq!(n, "30"),
@@ -830,14 +824,9 @@ mod tests {
 
     #[test]
     fn test_boolean_literal() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:active true }",
-        );
+        let doc = parse("PREFIX ex: <http://example.org/> SELECT * WHERE { ?x ex:active true }");
         let t = doc.triples[0].value();
-        assert_eq!(
-            *term_lit(t.po[0].object[0].value()),
-            Literal::Boolean(true)
-        );
+        assert_eq!(*term_lit(t.po[0].object[0].value()), Literal::Boolean(true));
     }
 
     // ── blank nodes ──────────────────────────────────────────────────────────
@@ -894,9 +883,7 @@ mod tests {
 
     #[test]
     fn test_ask_query() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> ASK { ex:alice ex:knows ex:bob }",
-        );
+        let doc = parse("PREFIX ex: <http://example.org/> ASK { ex:alice ex:knows ex:bob }");
         assert_eq!(doc.triples.len(), 1);
     }
 
@@ -904,9 +891,8 @@ mod tests {
 
     #[test]
     fn test_mixed_variables_and_iris() {
-        let doc = parse(
-            "PREFIX ex: <http://example.org/> SELECT ?name WHERE { ex:alice ex:name ?name }",
-        );
+        let doc =
+            parse("PREFIX ex: <http://example.org/> SELECT ?name WHERE { ex:alice ex:name ?name }");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -927,12 +913,20 @@ mod tests {
 
     // ── incremental parsing ───────────────────────────────────────────────────
 
-    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
+    use crate::{IncrementalBias, PrevParseInfo, TokenTrait, parse_incremental};
 
     fn prev_info(text: &str) -> PrevParseInfo {
         let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::QueryUnit), text);
+        let mut depth: i32 = 0;
         PrevParseInfo {
-            tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
         }
     }
 
@@ -961,8 +955,9 @@ mod tests {
     /// appears after FILTER.
     #[test]
     fn test_suggest_filter_moved_into_optional() {
-        let before = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age . }\n  FILTER(?name != \"\")\n}";
-        let after  = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age .\n    FILTER(?name != \"\")\n  }\n}";
+        let before =
+            "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age . }\n  FILTER(?name != \"\")\n}";
+        let after = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age .\n    FILTER(?name != \"\")\n  }\n}";
 
         let prev = prev_info(before);
         let bias = IncrementalBias::default();
@@ -974,10 +969,58 @@ mod tests {
         );
 
         let errors: Vec<_> = parse.errors.iter().collect();
-        assert_eq!(errors.len(), 0, "valid SPARQL should parse without errors; got: {:?}", errors);
+        assert_eq!(
+            errors.len(),
+            0,
+            "valid SPARQL should parse without errors; got: {:?}",
+            errors
+        );
 
         let root = parse.syntax::<lang::Lang>();
         let doc = convert(&root);
-        assert_eq!(doc.triples.len(), 1, "should produce one triple (?person foaf:age ?age)");
+        assert_eq!(
+            doc.triples.len(),
+            1,
+            "should produce one triple (?person foaf:age ?age)"
+        );
+    }
+}
+
+#[cfg(test)]
+mod demo_sim_tests {
+    use super::*;
+    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
+    use crate::sparql::parser as lang;
+
+    // Simulate demo flow: use parse_incremental's returned prev (not crate_parse)
+    #[test]
+    fn test_suggest_filter_moved_demo_flow() {
+        let before =
+            "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age . }\n  FILTER(?name != \"\")\n}";
+        let after = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age .\n    FILTER(?name != \"\")\n  }\n}";
+
+        // First parse: no prev (as in demo on initial load)
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            before,
+            None,
+            IncrementalBias::default(),
+        );
+
+        // Second parse: use the prev from the first parse (as in demo on edit)
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            after,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert_eq!(
+            errors.len(),
+            0,
+            "demo flow: valid SPARQL should parse without errors; got: {:?}",
+            errors
+        );
     }
 }

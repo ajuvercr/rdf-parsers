@@ -129,6 +129,17 @@ pub trait TokenTrait:
     fn max_error_value(&self) -> isize {
         2
     }
+
+    /// Bracket nesting delta for this token kind.
+    ///
+    /// Returns +1 for opening brackets (`{`, `[`, `(`), -1 for closing
+    /// brackets (`}`, `]`, `)`), and 0 for all other tokens.  Used by the
+    /// incremental A* to track the bracket nesting depth at which each token
+    /// was parsed, enabling a one-time "context-shift" cost when a block of
+    /// tokens moves to a different nesting level between edits.
+    fn bracket_delta(&self) -> i8 {
+        0
+    }
 }
 
 pub fn tokenize<'a, K>(text: &'a str) -> Vec<FatToken<K>>
@@ -189,11 +200,15 @@ where
     Some((parse, tokens))
 }
 
-/// A single token from a previous parse, carrying the text and fingerprint
-/// needed for incremental re-parsing.
+/// A single token from a previous parse, carrying the text, fingerprint, and
+/// bracket nesting depth needed for incremental re-parsing.
 pub struct PrevToken {
     pub text: String,
     pub fingerprint: Option<Fingerprint>,
+    /// Bracket nesting depth at which this token was parsed (0 = top level).
+    /// Used by the incremental A* to detect context-shifts (a block of tokens
+    /// moving to a different nesting level) and charge for them only once.
+    pub depth: u8,
 }
 
 /// Information from a previous parse needed for incremental re-parsing.
@@ -259,18 +274,27 @@ where
             }
         }
 
-        // Copy the old fingerprint onto each unchanged new token.
+        // Copy the old fingerprint and depth onto each unchanged new token.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
-                tok.set_old_kind(prev.tokens.get(old_idx).and_then(|t| t.fingerprint));
+                if let Some(prev_tok) = prev.tokens.get(old_idx) {
+                    tok.set_old_kind(prev_tok.fingerprint);
+                    tok.set_old_depth(Some(prev_tok.depth));
+                }
             }
         }
     }
 
     let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
     let parse = Parse::from_steps(&mut tokens, list);
+    // Compute bracket depths for the new token sequence to populate PrevParseInfo.
+    let mut depth: i32 = 0;
     let prev = PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+        tokens: tokens.iter().map(|t| {
+            let d = depth.clamp(0, 255) as u8;
+            depth += t.kind.bracket_delta() as i32;
+            t.to_prev_token(d)
+        }).collect(),
     };
     (parse, prev)
 }
