@@ -924,4 +924,60 @@ mod tests {
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
     }
+
+    // ── incremental parsing ───────────────────────────────────────────────────
+
+    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
+
+    fn prev_info(text: &str) -> PrevParseInfo {
+        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::QueryUnit), text);
+        PrevParseInfo {
+            tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+        }
+    }
+
+    /// Moving FILTER out of the top-level WHERE and into an OPTIONAL block.
+    ///
+    /// Before:
+    /// ```sparql
+    /// SELECT * WHERE {
+    ///   OPTIONAL { ?person foaf:age ?age . }
+    ///   FILTER(?name != "")
+    /// }
+    /// ```
+    ///
+    /// After:
+    /// ```sparql
+    /// SELECT * WHERE {
+    ///   OPTIONAL { ?person foaf:age ?age .
+    ///     FILTER(?name != "")
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// The after form is valid SPARQL. The test verifies the incremental parser
+    /// does not get stuck preferring the old parse (where FILTER was a sibling
+    /// of OPTIONAL at the top level) when the closing `}` of OPTIONAL now
+    /// appears after FILTER.
+    #[test]
+    fn test_suggest_filter_moved_into_optional() {
+        let before = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age . }\n  FILTER(?name != \"\")\n}";
+        let after  = "SELECT * WHERE {\n  OPTIONAL { ?person foaf:age ?age .\n    FILTER(?name != \"\")\n  }\n}";
+
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            after,
+            Some(&prev),
+            bias,
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert_eq!(errors.len(), 0, "valid SPARQL should parse without errors; got: {:?}", errors);
+
+        let root = parse.syntax::<lang::Lang>();
+        let doc = convert(&root);
+        assert_eq!(doc.triples.len(), 1, "should produce one triple (?person foaf:age ?age)");
+    }
 }
