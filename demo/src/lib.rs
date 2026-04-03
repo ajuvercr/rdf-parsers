@@ -263,7 +263,6 @@ fn parse_language<T, L>(
     root: T,
     text: &str,
     prev: &RefCell<Option<PrevParseInfo>>,
-    update_prev: bool,
     convert_fn: impl FnOnce(&Parse) -> Turtle,
 ) -> ParseResult
 where
@@ -279,9 +278,7 @@ where
     };
     let pairs = get_error_range_pairs::<L>(&parse, text);
     let turtle = convert_fn(&parse);
-    if update_prev {
-        *prev.borrow_mut() = Some(new_prev);
-    }
+    *prev.borrow_mut() = Some(new_prev);
     ParseResult {
         ariadne: render_ariadne(&pairs, text, "input"),
         ast: render_ast::<L>(&parse, &pairs),
@@ -293,49 +290,35 @@ where
 pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
-            parse_language::<_, Lang>(
-                Rule::new(SyntaxKind::TurtleDoc),
-                text,
-                prev,
-                true,
-                |p| turtle::turtle::convert::convert(&p.syntax::<Lang>()),
-            )
+            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, |p| {
+                turtle::turtle::convert::convert(&p.syntax::<Lang>())
+            })
         }),
         "sparql" => PREV_SPARQL.with(|prev| {
             parse_language::<_, SparqlLang>(
                 SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                 text,
                 prev,
-                true,
                 |p| turtle::sparql::convert::convert(&p.syntax::<SparqlLang>()),
             )
         }),
         "trig" => PREV_TRIG.with(|prev| {
-            parse_language::<_, TrigLang>(
-                TrigRule::new(TrigSyntaxKind::TrigDoc),
-                text,
-                prev,
-                true,
-                |p| turtle::trig::convert::convert(&p.syntax::<TrigLang>()),
-            )
+            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, |p| {
+                turtle::trig::convert::convert(&p.syntax::<TrigLang>())
+            })
         }),
         "ntriples" => PREV_NTRIPLES.with(|prev| {
             parse_language::<_, NTriplesLang>(
                 NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                 text,
                 prev,
-                true,
                 |p| turtle::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
             )
         }),
         "n3" => PREV_N3.with(|prev| {
-            parse_language::<_, N3Lang>(
-                N3Rule::new(N3SyntaxKind::N3Doc),
-                text,
-                prev,
-                true,
-                |p| turtle::n3::convert::convert(&p.syntax::<N3Lang>()),
-            )
+            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, |p| {
+                turtle::n3::convert::convert(&p.syntax::<N3Lang>())
+            })
         }),
         _ => return Err("Unknown language".into()),
     })

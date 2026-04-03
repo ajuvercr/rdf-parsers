@@ -989,8 +989,8 @@ mod tests {
 #[cfg(test)]
 mod demo_sim_tests {
     use super::*;
-    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
     use crate::sparql::parser as lang;
+    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
 
     // Simulate demo flow: use parse_incremental's returned prev (not crate_parse)
     #[test]
@@ -1020,6 +1020,65 @@ mod demo_sim_tests {
             errors.len(),
             0,
             "demo flow: valid SPARQL should parse without errors; got: {:?}",
+            errors
+        );
+    }
+}
+
+#[cfg(test)]
+mod real_demo_tests {
+    use super::*;
+    use crate::sparql::parser as lang;
+    use crate::{IncrementalBias, parse_incremental};
+
+    #[test]
+    fn test_suggest_filter_moved_real_demo() {
+        let before = "
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . }
+  FILTER(?name != \"\")
+}
+ORDER BY ?name";
+
+        let after = "
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . 
+  FILTER(?name != \"\")}
+}
+ORDER BY ?name";
+
+        // Simulate demo: first parse with no prev, then incremental
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            before,
+            None,
+            IncrementalBias::default(),
+        );
+
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            after,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert_eq!(
+            errors.len(),
+            0,
+            "real demo: valid SPARQL should parse without errors; got: {:?}",
             errors
         );
     }
