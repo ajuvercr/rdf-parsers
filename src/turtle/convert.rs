@@ -779,6 +779,7 @@ mod tests {
                 depth += t.kind.bracket_delta() as i32;
                 t.to_prev_token(d)
             }).collect(),
+            had_errors: false,
         }
     }
 

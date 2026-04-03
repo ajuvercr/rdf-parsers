@@ -927,6 +927,7 @@ mod tests {
                     t.to_prev_token(d)
                 })
                 .collect(),
+            had_errors: false,
         }
     }
 
@@ -1033,7 +1034,86 @@ mod real_demo_tests {
 
     #[test]
     fn test_suggest_filter_moved_real_demo() {
-        let before = "
+        let before = r#"
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . }
+  FILTER(?name != "")
+}
+ORDER BY ?name"#;
+
+        let after_1 = r#"
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . 
+  FILTER(?name != "")
+}
+ORDER BY ?name"#;
+
+        let after_2 = r#"
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . 
+  FILTER(?name != "")}
+}
+ORDER BY ?name"#;
+
+        // Simulate demo: first parse with no prev, then incremental
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            before,
+            None,
+            IncrementalBias::default(),
+        );
+
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            after_1,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::QueryUnit),
+            after_2,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert_eq!(
+            errors.len(),
+            0,
+            "real demo: valid SPARQL should parse without errors; got: {:?}",
+            errors
+        );
+    }
+}
+
+#[cfg(test)]
+mod multi_step_tests {
+    use super::*;
+    use crate::{IncrementalBias, parse_incremental};
+    use crate::sparql::parser as lang;
+
+    #[test]
+    fn test_filter_move_via_intermediate_delete() {
+        // Step 1: the valid "before" state
+        let step1 = "\
 PREFIX ex: <http://example.org/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
@@ -1046,7 +1126,22 @@ WHERE {
 }
 ORDER BY ?name";
 
-        let after = "
+        // Step 2: user removes the OPTIONAL closing `}` (invalid intermediate)
+        let step2 = "\
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?person ?name ?age
+WHERE {
+  ?person a foaf:Person ;
+          foaf:name ?name .
+  OPTIONAL { ?person foaf:age ?age . 
+  FILTER(?name != \"\")
+}
+ORDER BY ?name";
+
+        // Step 3: user places `}` after FILTER (valid final state)
+        let step3 = "\
 PREFIX ex: <http://example.org/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
@@ -1059,27 +1154,26 @@ WHERE {
 }
 ORDER BY ?name";
 
-        // Simulate demo: first parse with no prev, then incremental
-        let (_, prev) = parse_incremental(
-            lang::Rule::new(lang::SyntaxKind::QueryUnit),
-            before,
-            None,
-            IncrementalBias::default(),
-        );
+        let bias = IncrementalBias::default();
+        let rule = || lang::Rule::new(lang::SyntaxKind::QueryUnit);
 
-        let (parse, _) = parse_incremental(
-            lang::Rule::new(lang::SyntaxKind::QueryUnit),
-            after,
-            Some(&prev),
-            IncrementalBias::default(),
-        );
+        let (parse1, prev1) = parse_incremental(rule(), step1, None, bias);
+        eprintln!("Step 1 errors: {:?}", parse1.errors);
 
-        let errors: Vec<_> = parse.errors.iter().collect();
-        assert_eq!(
-            errors.len(),
-            0,
-            "real demo: valid SPARQL should parse without errors; got: {:?}",
-            errors
-        );
+        let (parse2, prev2) = parse_incremental(rule(), step2, Some(&prev1), bias);
+        eprintln!("Step 2 errors: {:?}", parse2.errors);
+
+        // Show what depths the intermediate parse assigned to FILTER tokens
+        for tok in &prev2.tokens {
+            if tok.text.contains("FILTER") || tok.text == "(" {
+                eprintln!("  token {:?} fp={:?} depth={}", tok.text, tok.fingerprint.is_some(), tok.depth);
+            }
+        }
+
+        let (parse3, _) = parse_incremental(rule(), step3, Some(&prev2), bias);
+        let errors: Vec<_> = parse3.errors.iter().collect();
+        eprintln!("Step 3 errors: {:?}", errors);
+        assert_eq!(errors.len(), 0,
+            "three-step edit: valid SPARQL should parse without errors; got: {:?}", errors);
     }
 }

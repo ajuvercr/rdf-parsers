@@ -214,6 +214,12 @@ pub struct PrevToken {
 /// Information from a previous parse needed for incremental re-parsing.
 pub struct PrevParseInfo {
     pub tokens: Vec<PrevToken>,
+    /// Whether the previous parse produced any errors.  When true, stored
+    /// bracket depths are not used for conflict classification (they may be
+    /// misleading due to error-recovery changing the grammar context), so
+    /// fingerprint conflicts are treated as free-pass rather than +50 role
+    /// conflicts.
+    pub had_errors: bool,
 }
 
 /// Role-preservation bias applied in the A* search during incremental
@@ -275,11 +281,16 @@ where
         }
 
         // Copy the old fingerprint and depth onto each unchanged new token.
+        // When the previous parse had errors, skip copying depth: error-
+        // recovery may have placed tokens at grammatically misleading depths,
+        // and we don't want the +50 same-depth bias to fire on them.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
                 if let Some(prev_tok) = prev.tokens.get(old_idx) {
                     tok.set_old_kind(prev_tok.fingerprint);
-                    tok.set_old_depth(Some(prev_tok.depth));
+                    if !prev.had_errors {
+                        tok.set_old_depth(Some(prev_tok.depth));
+                    }
                 }
             }
         }
@@ -287,6 +298,7 @@ where
 
     let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
     let parse = Parse::from_steps(&mut tokens, list);
+    let had_errors = parse.errors.len() > 0;
     // Compute bracket depths for the new token sequence to populate PrevParseInfo.
     let mut depth: i32 = 0;
     let prev = PrevParseInfo {
@@ -295,6 +307,7 @@ where
             depth += t.kind.bracket_delta() as i32;
             t.to_prev_token(d)
         }).collect(),
+        had_errors,
     };
     (parse, prev)
 }
