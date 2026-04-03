@@ -2046,7 +2046,7 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::Colon => 4isize,
             SyntaxKind::BaseToken => 100isize,
             SyntaxKind::PrefixToken => 100isize,
-            _ => 10isize,
+            _ => 1isize,
         }
     }
 }

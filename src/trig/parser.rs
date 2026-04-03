@@ -1978,7 +1978,7 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::SqClose => 8isize,
             SyntaxKind::CurlyOpen => 100isize,
             SyntaxKind::CurlyClose => 100isize,
-            _ => 10isize,
+            _ => 1isize,
         }
     }
 }

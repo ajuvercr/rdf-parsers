@@ -423,7 +423,7 @@ impl TokenTrait for SyntaxKind {
     fn max_error_value(&self) -> isize {
         match self {
             SyntaxKind::Stop => 8isize,
-            _ => 10isize,
+            _ => 1isize,
         }
     }
 }

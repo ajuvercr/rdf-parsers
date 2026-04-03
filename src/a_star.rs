@@ -221,29 +221,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         found: &FatToken<R::Kind>,
     ) -> IsExpectedElement {
         match found.old_kind() {
-            Some(old_fp) if old_fp == element.state.0 => {
-                if std::env::var("TURTLE_DEBUG_FP").is_ok() {
-                    eprintln!(
-                        "[agree]    token={:?} fp={} pos={}",
-                        found.text(),
-                        element.state.0.0,
-                        element.state.1,
-                    );
-                }
-                IsExpectedElement::True
-            }
-            Some(old_fp) => {
-                if std::env::var("TURTLE_DEBUG_FP").is_ok() {
-                    eprintln!(
-                        "[conflict] token={:?} old_fp={} elem_fp={} pos={}",
-                        found.text(),
-                        old_fp.0,
-                        element.state.0.0,
-                        element.state.1,
-                    );
-                }
-                IsExpectedElement::False
-            }
+            Some(old_fp) if old_fp == element.state.0 => IsExpectedElement::True,
+            Some(_) => IsExpectedElement::False,
             None => IsExpectedElement::Unkown,
         }
     }
@@ -382,7 +361,7 @@ pub struct Element<R: ParserTrait> {
     /// additional cost from the current token position to end of input.
     /// Currently always 0.  `f = cost + h` is the A* priority.
     h: isize,
-    pub state: (Fingerprint, usize),
+    state: (Fingerprint, usize),
     /// Set to `true` the moment any `Step::Error` is prepended to this
     /// element's list.  In `Fast` mode, elements with `has_error = true` are
     /// never returned as a successful parse result.

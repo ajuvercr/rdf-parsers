@@ -184,285 +184,285 @@ pub enum SyntaxKind {
     Iri,
     IriOrFunction,
     #[doc = r" terminals"]
-    #[token("!")]
+    #[token("!", ignore(case))]
     Bang,
-    #[token("!=")]
+    #[token("!=", ignore(case))]
     Neq,
-    #[token("&&")]
+    #[token("&&", ignore(case))]
     Amp2,
-    #[token("(")]
+    #[token("(", ignore(case))]
     BrOpen,
-    #[token(")")]
+    #[token(")", ignore(case))]
     BrClose,
-    #[token("*")]
+    #[token("*", ignore(case))]
     Star,
-    #[token("+")]
+    #[token("+", ignore(case))]
     Plus,
-    #[token(",")]
+    #[token(",", ignore(case))]
     Comma,
-    #[token("-")]
+    #[token("-", ignore(case))]
     Bar,
-    #[token(".")]
+    #[token(".", ignore(case))]
     Stop,
-    #[token("/")]
+    #[token("/", ignore(case))]
     Div,
-    #[token(";")]
+    #[token(";", ignore(case))]
     Colon,
-    #[token("<")]
+    #[token("<", ignore(case))]
     Lt,
-    #[token("<=")]
+    #[token("<=", ignore(case))]
     Lte,
-    #[token("=")]
+    #[token("=", ignore(case))]
     Eq,
-    #[token(">")]
+    #[token(">", ignore(case))]
     Gt,
-    #[token(">=")]
+    #[token(">=", ignore(case))]
     Gte,
-    #[token("?")]
+    #[token("?", ignore(case))]
     Questionmark,
-    #[token("ABS")]
+    #[token("ABS", ignore(case))]
     AbsLit,
-    #[token("ADD")]
+    #[token("ADD", ignore(case))]
     AddLit,
-    #[token("ALL")]
+    #[token("ALL", ignore(case))]
     AllLit,
-    #[token("AS")]
+    #[token("AS", ignore(case))]
     AsLit,
-    #[token("ASC")]
+    #[token("ASC", ignore(case))]
     AscLit,
-    #[token("ASK")]
+    #[token("ASK", ignore(case))]
     AskLit,
-    #[token("AVG")]
+    #[token("AVG", ignore(case))]
     AvgLit,
-    #[token("BASE")]
+    #[token("BASE", ignore(case))]
     SparqlBaseToken,
-    #[token("BIND")]
+    #[token("BIND", ignore(case))]
     BindLit,
-    #[token("BNODE")]
+    #[token("BNODE", ignore(case))]
     BnodeLit,
-    #[token("BOUND")]
+    #[token("BOUND", ignore(case))]
     BoundLit,
-    #[token("BY")]
+    #[token("BY", ignore(case))]
     ByLit,
-    #[token("CEIL")]
+    #[token("CEIL", ignore(case))]
     CeilLit,
-    #[token("CLEAR")]
+    #[token("CLEAR", ignore(case))]
     ClearLit,
-    #[token("COALESCE")]
+    #[token("COALESCE", ignore(case))]
     CoalesceLit,
-    #[token("CONCAT")]
+    #[token("CONCAT", ignore(case))]
     ConcatLit,
-    #[token("CONSTRUCT")]
+    #[token("CONSTRUCT", ignore(case))]
     ConstructLit,
-    #[token("CONTAINS")]
+    #[token("CONTAINS", ignore(case))]
     ContainsLit,
-    #[token("COPY")]
+    #[token("COPY", ignore(case))]
     CopyLit,
-    #[token("COUNT")]
+    #[token("COUNT", ignore(case))]
     CountLit,
-    #[token("CREATE")]
+    #[token("CREATE", ignore(case))]
     CreateLit,
-    #[token("DATATYPE")]
+    #[token("DATATYPE", ignore(case))]
     DatatypeLit,
-    #[token("DAY")]
+    #[token("DAY", ignore(case))]
     DayLit,
-    #[token("DEFAULT")]
+    #[token("DEFAULT", ignore(case))]
     DefaultLit,
-    #[token("DELETE")]
+    #[token("DELETE", ignore(case))]
     DeleteLit,
-    #[token("DELETE DATA")]
+    #[token("DELETE DATA", ignore(case))]
     DeleteDataLit,
-    #[token("DELETE WHERE")]
+    #[token("DELETE WHERE", ignore(case))]
     DeleteWhereLit,
-    #[token("DESC")]
+    #[token("DESC", ignore(case))]
     DescLit,
-    #[token("DESCRIBE")]
+    #[token("DESCRIBE", ignore(case))]
     DescribeLit,
-    #[token("DISTINCT")]
+    #[token("DISTINCT", ignore(case))]
     DistinctLit,
-    #[token("DROP")]
+    #[token("DROP", ignore(case))]
     DropLit,
-    #[token("ENCODE_FOR_URI")]
+    #[token("ENCODE_FOR_URI", ignore(case))]
     EncodeForUriLit,
-    #[token("EXISTS")]
+    #[token("EXISTS", ignore(case))]
     ExistsLit,
-    #[token("FILTER")]
+    #[token("FILTER", ignore(case))]
     FilterLit,
-    #[token("FLOOR")]
+    #[token("FLOOR", ignore(case))]
     FloorLit,
-    #[token("FROM")]
+    #[token("FROM", ignore(case))]
     FromLit,
-    #[token("GRAPH")]
+    #[token("GRAPH", ignore(case))]
     GraphLit,
-    #[token("GROUP")]
+    #[token("GROUP", ignore(case))]
     GroupLit,
-    #[token("GROUP_CONCAT")]
+    #[token("GROUP_CONCAT", ignore(case))]
     GroupConcatLit,
-    #[token("HAVING")]
+    #[token("HAVING", ignore(case))]
     HavingLit,
-    #[token("HOURS")]
+    #[token("HOURS", ignore(case))]
     HoursLit,
-    #[token("IF")]
+    #[token("IF", ignore(case))]
     IfLit,
-    #[token("IN")]
+    #[token("IN", ignore(case))]
     InLit,
-    #[token("INSERT")]
+    #[token("INSERT", ignore(case))]
     InsertLit,
-    #[token("INSERT DATA")]
+    #[token("INSERT DATA", ignore(case))]
     InsertDataLit,
-    #[token("INTO")]
+    #[token("INTO", ignore(case))]
     IntoLit,
-    #[token("IRI")]
+    #[token("IRI", ignore(case))]
     IriLit,
-    #[token("LANG")]
+    #[token("LANG", ignore(case))]
     LangLit,
-    #[token("LANGMATCHES")]
+    #[token("LANGMATCHES", ignore(case))]
     LangmatchesLit,
-    #[token("LCASE")]
+    #[token("LCASE", ignore(case))]
     LcaseLit,
-    #[token("LIMIT")]
+    #[token("LIMIT", ignore(case))]
     LimitLit,
-    #[token("LOAD")]
+    #[token("LOAD", ignore(case))]
     LoadLit,
-    #[token("MAX")]
+    #[token("MAX", ignore(case))]
     MaxLit,
-    #[token("MD5")]
+    #[token("MD5", ignore(case))]
     Md5Lit,
-    #[token("MIN")]
+    #[token("MIN", ignore(case))]
     MinLit,
-    #[token("MINUS")]
+    #[token("MINUS", ignore(case))]
     MinusLit,
-    #[token("MINUTES")]
+    #[token("MINUTES", ignore(case))]
     MinutesLit,
-    #[token("MONTH")]
+    #[token("MONTH", ignore(case))]
     MonthLit,
-    #[token("MOVE")]
+    #[token("MOVE", ignore(case))]
     MoveLit,
-    #[token("NAMED")]
+    #[token("NAMED", ignore(case))]
     NamedLit,
-    #[token("NOT")]
+    #[token("NOT", ignore(case))]
     NotLit,
-    #[token("NOW")]
+    #[token("NOW", ignore(case))]
     NowLit,
-    #[token("OFFSET")]
+    #[token("OFFSET", ignore(case))]
     OffsetLit,
-    #[token("OPTIONAL")]
+    #[token("OPTIONAL", ignore(case))]
     OptionalLit,
-    #[token("ORDER")]
+    #[token("ORDER", ignore(case))]
     OrderLit,
-    #[token("PREFIX")]
+    #[token("PREFIX", ignore(case))]
     SparqlPrefixToken,
-    #[token("RAND")]
+    #[token("RAND", ignore(case))]
     RandLit,
-    #[token("REDUCED")]
+    #[token("REDUCED", ignore(case))]
     ReducedLit,
-    #[token("REGEX")]
+    #[token("REGEX", ignore(case))]
     RegexLit,
-    #[token("REPLACE")]
+    #[token("REPLACE", ignore(case))]
     ReplaceLit,
-    #[token("ROUND")]
+    #[token("ROUND", ignore(case))]
     RoundLit,
-    #[token("SAMPLE")]
+    #[token("SAMPLE", ignore(case))]
     SampleLit,
-    #[token("SECONDS")]
+    #[token("SECONDS", ignore(case))]
     SecondsLit,
-    #[token("SELECT")]
+    #[token("SELECT", ignore(case))]
     SelectLit,
-    #[token("SEPARATOR")]
+    #[token("SEPARATOR", ignore(case))]
     SeparatorLit,
-    #[token("SERVICE")]
+    #[token("SERVICE", ignore(case))]
     ServiceLit,
-    #[token("SHA1")]
+    #[token("SHA1", ignore(case))]
     Sha1Lit,
-    #[token("SHA256")]
+    #[token("SHA256", ignore(case))]
     Sha256Lit,
-    #[token("SHA384")]
+    #[token("SHA384", ignore(case))]
     Sha384Lit,
-    #[token("SHA512")]
+    #[token("SHA512", ignore(case))]
     Sha512Lit,
-    #[token("SILENT")]
+    #[token("SILENT", ignore(case))]
     SilentLit,
-    #[token("STR")]
+    #[token("STR", ignore(case))]
     StrLit,
-    #[token("STRAFTER")]
+    #[token("STRAFTER", ignore(case))]
     StrafterLit,
-    #[token("STRBEFORE")]
+    #[token("STRBEFORE", ignore(case))]
     StrbeforeLit,
-    #[token("STRDT")]
+    #[token("STRDT", ignore(case))]
     StrdtLit,
-    #[token("STRENDS")]
+    #[token("STRENDS", ignore(case))]
     StrendsLit,
-    #[token("STRLANG")]
+    #[token("STRLANG", ignore(case))]
     StrlangLit,
-    #[token("STRLEN")]
+    #[token("STRLEN", ignore(case))]
     StrlenLit,
-    #[token("STRSTARTS")]
+    #[token("STRSTARTS", ignore(case))]
     StrstartsLit,
-    #[token("STRUUID")]
+    #[token("STRUUID", ignore(case))]
     StruuidLit,
-    #[token("SUBSTR")]
+    #[token("SUBSTR", ignore(case))]
     SubstrLit,
-    #[token("SUM")]
+    #[token("SUM", ignore(case))]
     SumLit,
-    #[token("TIMEZONE")]
+    #[token("TIMEZONE", ignore(case))]
     TimezoneLit,
-    #[token("TO")]
+    #[token("TO", ignore(case))]
     ToLit,
-    #[token("TZ")]
+    #[token("TZ", ignore(case))]
     TzLit,
-    #[token("UCASE")]
+    #[token("UCASE", ignore(case))]
     UcaseLit,
-    #[token("UNDEF")]
+    #[token("UNDEF", ignore(case))]
     UndefLit,
-    #[token("UNION")]
+    #[token("UNION", ignore(case))]
     UnionLit,
-    #[token("URI")]
+    #[token("URI", ignore(case))]
     UriLit,
-    #[token("USING")]
+    #[token("USING", ignore(case))]
     UsingLit,
-    #[token("UUID")]
+    #[token("UUID", ignore(case))]
     UuidLit,
-    #[token("VALUES")]
+    #[token("VALUES", ignore(case))]
     ValuesLit,
-    #[token("WHERE")]
+    #[token("WHERE", ignore(case))]
     WhereLit,
-    #[token("WITH")]
+    #[token("WITH", ignore(case))]
     WithLit,
-    #[token("YEAR")]
+    #[token("YEAR", ignore(case))]
     YearLit,
-    #[token("[")]
+    #[token("[", ignore(case))]
     SqOpen,
-    #[token("]")]
+    #[token("]", ignore(case))]
     SqClose,
-    #[token("^")]
+    #[token("^", ignore(case))]
     Hat,
-    #[token("^^")]
+    #[token("^^", ignore(case))]
     Datatype,
     #[token("a")]
     Alit,
-    #[token("false")]
+    #[token("false", ignore(case))]
     FalseLit,
-    #[token("isBLANK")]
+    #[token("isBLANK", ignore(case))]
     IsBlankLit,
-    #[token("isIRI")]
+    #[token("isIRI", ignore(case))]
     IsIriLit,
-    #[token("isLITERAL")]
+    #[token("isLITERAL", ignore(case))]
     IsLiteralLit,
-    #[token("isNUMERIC")]
+    #[token("isNUMERIC", ignore(case))]
     IsNumericLit,
-    #[token("isURI")]
+    #[token("isURI", ignore(case))]
     IsUriLit,
-    #[token("sameTerm")]
+    #[token("sameTerm", ignore(case))]
     SameTermLit,
-    #[token("true")]
+    #[token("true", ignore(case))]
     TrueLit,
-    #[token("{")]
+    #[token("{", ignore(case))]
     ClOpen,
-    #[token("|")]
+    #[token("|", ignore(case))]
     Pipe,
-    #[token("||")]
+    #[token("||", ignore(case))]
     Pipe2,
-    #[token("}")]
+    #[token("}", ignore(case))]
     ClClose,
     #[regex("(?&ANON)")]
     Anon,
@@ -12417,7 +12417,7 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::Colon => 4isize,
             SyntaxKind::SparqlBaseToken => 100isize,
             SyntaxKind::SparqlPrefixToken => 100isize,
-            _ => 10isize,
+            _ => 1isize,
         }
     }
 }

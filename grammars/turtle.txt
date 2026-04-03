@@ -13,9 +13,10 @@
 [9]	verb	::=	predicate | 'a'
 [10]	subject	::=	iri | BlankNode | collection
 [11]	predicate	::=	iri
-[12]	object	::=	iri | BlankNode | collection | blankNodePropertyList | literal
+[12]	object	::=	iri | BLANK_NODE_LABEL | blankNodePropertyList2 | collection | literal
 [13]	literal	::=	RDFLiteral | NumericLiteral | BooleanLiteral
-[14]	blankNodePropertyList	::=	'[' predicateObjectList  ']'
+[14]	blankNodePropertyList2	::=	'[' predicateObjectList?  ']'
+[14b]	blankNodePropertyList	::=	'[' predicateObjectList  ']'
 [15]	collection	::=	'(' object* ')'
 [16]	NumericLiteral	::=	INTEGER | DECIMAL | DOUBLE
 [128s]	RDFLiteral	::=	String (LANGTAG | '^^' iri)?
@@ -23,7 +24,7 @@
 [17]	String	::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
 [135s]	iri	::=	IRIREF | PrefixedName
 [136s]	PrefixedName	::=	PNAME_LN | PNAME_NS
-[137s]	BlankNode	::=	BLANK_NODE_LABEL | ANON  | '[' ']'
+[137s]	BlankNode	::=	BLANK_NODE_LABEL |  '[' ']'
 === terminals ===
 [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>'
 [139s]	PNAME_NS	::=	PN_PREFIX? ':'
@@ -41,7 +42,6 @@
 [26]	UCHAR	::=	'\u' HEX HEX HEX HEX | '\U' HEX HEX HEX HEX HEX HEX HEX HEX
 [159s]	ECHAR	::=	'\' [tbnrf"'\]
 [161s]	WS	::=	#x20 | #x9 | #xD | #xA
-[162s]	ANON	::=	'[' WS* ']'
 [163s]	PN_CHARS_BASE	::=	[A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
 [164s]	PN_CHARS_U	::=	PN_CHARS_BASE | '_'
 [166s]	PN_CHARS	::=	PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] | [#x203F-#x2040]
@@ -73,10 +73,10 @@ prefix_token -> 100
 base_token -> 100
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-stop -> 30
-colon -> 20
-comma -> 20
-sq_open -> 20
-sq_close -> 20
-cl_open -> 20
-cl_close -> 20
+stop -> 3
+colon -> 2
+comma -> 2
+sq_open -> 2
+sq_close -> 2
+cl_open -> 2
+cl_close -> 2
