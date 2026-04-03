@@ -80,11 +80,11 @@ pub enum SyntaxKind {
     BaseToken,
     #[token("@prefix")]
     PrefixToken,
-    #[token("BASE")]
+    #[token("BASE", ignore(case))]
     SparqlBaseToken,
-    #[token("GRAPH")]
+    #[token("GRAPH", ignore(case))]
     GraphToken,
-    #[token("PREFIX")]
+    #[token("PREFIX", ignore(case))]
     SparqlPrefixToken,
     #[token("[")]
     SqOpen,

@@ -258,10 +258,16 @@ pub struct PO {
 
 impl Display for PO {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.predicate.value(), self.object[0].value())?;
+        if let Some(o) = self.object.first() {
+            write!(f, "{} {}", self.predicate.value(), o.value())?;
+        } else {
+            write!(f, "{} undefined", self.predicate.value())?;
+        }
 
-        for po in &self.object[1..] {
-            write!(f, ", {}", po.value())?;
+        if self.object.len() > 1 {
+            for po in &self.object[1..] {
+                write!(f, ", {}", po.value())?;
+            }
         }
 
         Ok(())

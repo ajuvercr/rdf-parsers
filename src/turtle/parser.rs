@@ -1054,6 +1054,9 @@ mod definitions {
                     );
                 }
                 (SyntaxKind::BlankNodePropertyList, 3usize) => {
+                    if std::env::var("TURTLE_DEBUG_FP").is_ok() && element.state.1 == 10 {
+                        eprintln!("[BNPL3] fp={} pos={}", element.state.0.0, element.state.1);
+                    }
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
@@ -1603,13 +1606,17 @@ impl TokenTrait for SyntaxKind {
     }
     fn max_error_value(&self) -> isize {
         match self {
-            SyntaxKind::Comma => 3isize,
-            SyntaxKind::Stop => 5isize,
-            SyntaxKind::Colon => 4isize,
+            SyntaxKind::ClOpen => 20isize,
+            SyntaxKind::ClClose => 20isize,
+            SyntaxKind::Comma => 20isize,
+            SyntaxKind::Stop => 30isize,
+            SyntaxKind::Colon => 20isize,
             SyntaxKind::BaseToken => 100isize,
             SyntaxKind::PrefixToken => 100isize,
             SyntaxKind::SparqlBaseToken => 100isize,
             SyntaxKind::SparqlPrefixToken => 100isize,
+            SyntaxKind::SqOpen => 20isize,
+            SyntaxKind::SqClose => 20isize,
             _ => 10isize,
         }
     }

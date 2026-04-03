@@ -9,6 +9,7 @@ pub use parser::*;
 mod a_star;
 pub use a_star::Fingerprint;
 pub use a_star::ParserTrait;
+pub use a_star::ParseMode;
 pub mod list;
 pub mod model;
 pub mod n3;
@@ -165,6 +166,27 @@ where
     );
     let parse = Parse::from_steps(&mut tokens, list);
     (parse, tokens)
+}
+
+/// Parses `text` in non-fault-tolerant fast mode.
+///
+/// Returns `Some((parse, tokens))` when the document is error-free, or `None`
+/// if any token could not be matched.  Use this when you know the document is
+/// correct and want maximum throughput — no error-recovery branches are
+/// explored, no prevInfo fingerprints are tracked, and no heuristic is
+/// precomputed.
+pub fn parse_fast<'a, T: a_star::ParserTrait + 'static>(
+    root: T,
+    text: &'a str,
+) -> Option<(Parse, Vec<FatToken<T::Kind>>)>
+where
+    T::Kind: Logos<'a, Source = str>,
+    <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
+{
+    let mut tokens = tokenize::<T::Kind>(text);
+    let list = a_star::a_star_fast(root, &tokens)?;
+    let parse = Parse::from_steps(&mut tokens, list);
+    Some((parse, tokens))
 }
 
 /// A single token from a previous parse, carrying the text and fingerprint

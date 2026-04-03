@@ -70,53 +70,53 @@ pub enum SyntaxKind {
     Triples,
     Verb,
     #[doc = r" terminals"]
-    #[token("!")]
+    #[token("!", ignore(case))]
     Bang,
-    #[token("(")]
+    #[token("(", ignore(case))]
     BrOpen,
-    #[token(")")]
+    #[token(")", ignore(case))]
     BrClose,
-    #[token(",")]
+    #[token(",", ignore(case))]
     Comma,
-    #[token(".")]
+    #[token(".", ignore(case))]
     Stop,
-    #[token(";")]
+    #[token(";", ignore(case))]
     Colon,
-    #[token("<-")]
+    #[token("<-", ignore(case))]
     ArrowLeft,
-    #[token("<=")]
+    #[token("<=", ignore(case))]
     ImplyLeft,
-    #[token("=")]
+    #[token("=", ignore(case))]
     Eq,
-    #[token("=>")]
+    #[token("=>", ignore(case))]
     ImplyRight,
-    #[token("@base")]
+    #[token("@base", ignore(case))]
     BaseToken,
-    #[token("@prefix")]
+    #[token("@prefix", ignore(case))]
     PrefixToken,
     #[token("BASE")]
     BaseLit,
     #[token("PREFIX")]
     PrefixLit,
-    #[token("[")]
+    #[token("[", ignore(case))]
     SqOpen,
-    #[token("]")]
+    #[token("]", ignore(case))]
     SqClose,
-    #[token("^")]
+    #[token("^", ignore(case))]
     Hat,
-    #[token("^^")]
+    #[token("^^", ignore(case))]
     Datatype,
-    #[token("a")]
+    #[token("a", ignore(case))]
     Alit,
-    #[token("has")]
+    #[token("has", ignore(case))]
     HasLit,
-    #[token("is")]
+    #[token("is", ignore(case))]
     IsLit,
-    #[token("of")]
+    #[token("of", ignore(case))]
     OfLit,
-    #[token("{")]
+    #[token("{", ignore(case))]
     ClOpen,
-    #[token("}")]
+    #[token("}", ignore(case))]
     ClClose,
     #[regex("(?&ANON)")]
     Anon,

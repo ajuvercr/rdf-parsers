@@ -728,6 +728,8 @@ mod tests {
                      ex:alice ex:age 30\n\
                      ex:bob ex:age 25 .";
         let p = parse_raw(input);
+        let root = p.syntax::<lang::Lang>();
+        println!("Parse tree:\n{:#?}", root);
         assert!(p.errors.len() > 0, "should report at least one error");
 
         let doc = parse(input);
@@ -906,5 +908,252 @@ mod tests {
             error_span.contains(loc) || error_span.start() == loc,
             "The error span should start at or include the location of the removed bracket"
         );
+    }
+
+    #[test]
+    fn test_suggest_completing_triple() {
+        let before = r#"ex:Alice a foaf:Person ;
+    foaf:knows ex:Bob . "#;
+
+        let after = r#"ex:Alice a foaf:Person ; <a>
+    foaf:knows ex:Bob . "#;
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after,
+            Some(&prev),
+            bias,
+        );
+
+        println!("Errors {:?}", parse.errors);
+        let root = parse.syntax::<lang::Lang>();
+        println!("Parse tree:\n{:#?}", root);
+
+        let doc = convert(&root);
+        println!("Triples count: {}", doc.triples.len());
+        for (i, t) in doc.triples.iter().enumerate() {
+            println!(
+                "  Triple {i}: subject={:?}, po_count={}",
+                t.0.subject,
+                t.0.po.len()
+            );
+        }
+        assert_eq!(doc.triples.len(), 1, "should produce one triples");
+        assert_eq!(
+            doc.triples[0].0.po.len(),
+            3,
+            "should produce three predicate objects"
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+
+        assert_eq!(errors.len(), 2, "expect a term and a semi colon");
+    }
+
+    #[test]
+    fn test_suggest_completing_triple_2() {
+        let before = r#"ex:Alice a foaf:Person ;
+    foaf:knows ex:Bob . "#;
+
+        let after_1 = r#"ex:Alice a foaf:Person ; <a>
+    foaf:knows ex:Bob . "#;
+
+        let after_2 = r#"ex:Alice a foaf:Person ; <a> <b>
+    foaf:knows ex:Bob . "#;
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_1,
+            Some(&prev),
+            bias,
+        );
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_2,
+            Some(&prev),
+            bias,
+        );
+
+        let root = parse.syntax::<lang::Lang>();
+        let doc = convert(&root);
+        assert_eq!(doc.triples.len(), 1, "should produce one triples");
+        assert_eq!(
+            doc.triples[0].0.po.len(),
+            3,
+            "should produce three predicate objects"
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+
+        assert_eq!(errors.len(), 1, "expect a semi colon");
+    }
+
+    #[test]
+    fn test_suggest_inside_blank_node() {
+        let before = r#"<a> a <b> ;
+    <knows> [  ] ."#;
+
+        let after_1 = r#"<a> a <b> ;
+    <knows> [ <nam ] ."#;
+
+        let after_2 = r#"<a> a <b> ;
+    <knows> [ <name> ] ."#;
+
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+
+        for t in &prev.tokens {
+            println!("first {:?} {:?}", t.text, t.fingerprint);
+        }
+        let (_, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_1,
+            Some(&prev),
+            bias,
+        );
+        for t in &prev.tokens {
+            println!("secon {:?} {:?}", t.text, t.fingerprint);
+        }
+        let (parse, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_2,
+            Some(&prev),
+            bias,
+        );
+
+        for t in &prev.tokens {
+            println!("third {:?} {:?}", t.text, t.fingerprint);
+        }
+
+        println!("Errors {:?}", parse.errors);
+        let root = parse.syntax::<lang::Lang>();
+        println!("Parse tree:\n{:#?}", root);
+
+        let doc = convert(&root);
+        assert_eq!(doc.triples.len(), 1, "should produce one triples");
+        assert_eq!(
+            doc.triples[0].0.po.len(),
+            2,
+            "should produce two predicate objects"
+        );
+    }
+
+    // ── fast (non-fault-tolerant) parsing ─────────────────────────────────────
+
+    use crate::parse_fast;
+
+    fn parse_fast_doc(input: &str) -> Option<Turtle> {
+        let (result, _) = parse_fast(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input)?;
+        let root = result.syntax::<lang::Lang>();
+        Some(convert(&root))
+    }
+
+    fn parse_fast_raw(input: &str) -> Option<crate::Parse> {
+        let (result, _) = parse_fast(lang::Rule::new(lang::SyntaxKind::TurtleDoc), input)?;
+        Some(result)
+    }
+
+    /// A well-formed document should succeed and produce no errors.
+    #[test]
+    fn test_fast_valid_simple_triple() {
+        let doc = parse_fast_doc("<http://a> <http://b> <http://c> .")
+            .expect("valid input should return Some");
+        assert_eq!(doc.triples.len(), 1);
+    }
+
+    /// parse_fast must return None (not panic) when the document has errors.
+    #[test]
+    fn test_fast_returns_none_on_error() {
+        // Missing trailing dot
+        assert!(
+            parse_fast_doc("<http://a> <http://b> <http://c>").is_none(),
+            "document with missing dot should return None"
+        );
+    }
+
+    /// Syntax errors mid-document (extra subject with no predicate) must yield None.
+    #[test]
+    fn test_fast_returns_none_on_mid_document_error() {
+        // A valid triple followed by a subject with no predicate or object —
+        // a genuine grammar-level error that can't be skipped at the lexer level.
+        assert!(
+            parse_fast_doc("<http://a> <http://b> <http://c> . <http://dangling>").is_none(),
+            "incomplete trailing statement should return None"
+        );
+    }
+
+    /// For a correct document, fast mode should produce no CST errors.
+    #[test]
+    fn test_fast_produces_no_errors() {
+        let p = parse_fast_raw("@prefix ex: <http://example.org/> . ex:alice ex:age 30 .")
+            .expect("valid input should return Some");
+        assert_eq!(
+            p.errors.len(),
+            0,
+            "fast parse of valid input should have no errors"
+        );
+    }
+
+    /// Fast mode should correctly parse prefix declarations.
+    #[test]
+    fn test_fast_prefix_directive() {
+        let doc = parse_fast_doc("@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob .")
+            .expect("valid input should return Some");
+        assert_eq!(doc.prefixes.len(), 1);
+        assert_eq!(doc.triples.len(), 1);
+        assert!(nn_eq(
+            term_nn(doc.triples[0].subject.value()),
+            &prefixed("ex", "alice")
+        ));
+    }
+
+    /// Fast mode should correctly parse multiple triples.
+    #[test]
+    fn test_fast_multiple_triples() {
+        let doc = parse_fast_doc(
+            "@prefix ex: <http://example.org/> . ex:alice ex:age 30 . ex:bob ex:age 25 .",
+        )
+        .expect("valid input should return Some");
+        assert_eq!(doc.triples.len(), 2);
+        assert!(nn_eq(
+            term_nn(doc.triples[0].subject.value()),
+            &prefixed("ex", "alice")
+        ));
+        assert!(nn_eq(
+            term_nn(doc.triples[1].subject.value()),
+            &prefixed("ex", "bob")
+        ));
+    }
+
+    /// Fast mode result should match regular parse for a correct document.
+    #[test]
+    fn test_fast_matches_regular_parse() {
+        let input = "@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\" ; ex:age 30 .";
+        let fast_doc = parse_fast_doc(input).expect("valid input should return Some");
+        let regular_doc = parse(input);
+        assert_eq!(fast_doc.triples.len(), regular_doc.triples.len());
+        assert_eq!(fast_doc.prefixes.len(), regular_doc.prefixes.len());
+    }
+
+    /// Fast mode should handle blank node property lists.
+    #[test]
+    fn test_fast_blank_node_property_list() {
+        let doc = parse_fast_doc(
+            "@prefix ex: <http://example.org/> . ex:alice ex:knows [ ex:name \"Bob\" ] .",
+        )
+        .expect("valid input should return Some");
+        assert_eq!(doc.triples.len(), 1);
+    }
+
+    /// Fast mode should handle collections.
+    #[test]
+    fn test_fast_collection() {
+        let doc = parse_fast_doc(
+            "@prefix ex: <http://example.org/> . ex:alice ex:list ( ex:a ex:b ex:c ) .",
+        )
+        .expect("valid input should return Some");
+        assert_eq!(doc.triples.len(), 1);
     }
 }

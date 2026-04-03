@@ -8,7 +8,7 @@ use std::io::Cursor;
 use std::ops::Range;
 use syn::LitStr;
 
-use crate::parser::{Config, Expr, Mark, Rule};
+use crate::parser::{Config, Expr, LiteralType, Mark, Rule};
 use crate::regex::{order_rules_by_references, to_regex};
 
 mod parser;
@@ -23,15 +23,21 @@ mod regex;
 const DEFAULT_TOKEN_WEIGHT: isize = 10;
 
 #[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
+enum IgnoreCase {
+    True,
+    False,
+}
+
+#[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 enum Terminal {
-    Literal(String),
+    Literal(String, IgnoreCase),
     Ref(String),
 }
 impl Terminal {
     fn ident<'a, 'b: 'a>(&'a self, config: &'b Config) -> String {
         match self {
             Terminal::Ref(x) => x.to_string(),
-            Terminal::Literal(x) => config.context.with(x),
+            Terminal::Literal(x, _) => config.context.with(x),
         }
     }
 }
@@ -417,9 +423,14 @@ fn add_impl(
 
             return target;
         }
-        Expr::Literal(_literal_type, f) => {
+        Expr::Literal(lt, f) => {
+            let ignore_case = if lt == &LiteralType::Double {
+                IgnoreCase::True
+            } else {
+                IgnoreCase::False
+            };
             *state_count += 1;
-            terminals.insert(Terminal::Literal(f.clone()));
+            terminals.insert(Terminal::Literal(f.clone(), ignore_case));
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
             reachable.insert(next);
@@ -743,7 +754,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         .map(|x| {
             let ident = x.ident(&config);
             let is_kw = match x {
-                Terminal::Literal(_) => true,
+                Terminal::Literal(_, _) => true,
                 Terminal::Ref(_) => false,
             };
             terminal_rule_arms(&ident, is_kw, &config)
@@ -787,13 +798,20 @@ pub fn generate(path: &str, contents: &str) -> String {
     let terminals: Vec<_> = sorted_terminals
         .iter()
         .flat_map(|x| match x {
-            Terminal::Literal(x) => {
+            Terminal::Literal(x, case) => {
                 let name = config.context.with(x);
                 let ident = config.context.ident_for(&name);
 
-                quote! {
-                    #[token(#x)]
-                    #ident,
+                if case == &IgnoreCase::False {
+                    quote! {
+                        #[token(#x)]
+                        #ident,
+                    }
+                } else {
+                    quote! {
+                        #[token(#x, ignore(case))]
+                        #ident,
+                    }
                 }
             }
             Terminal::Ref(n) => {

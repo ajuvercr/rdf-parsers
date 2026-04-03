@@ -5,6 +5,21 @@ use std::{
 
 use crate::{Error, FatToken, IncrementalBias, Step, TokenTrait, list::List};
 
+/// Controls whether the A* search performs fault-tolerant error recovery.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ParseMode {
+    /// Full fault-tolerant mode: explores error-recovery branches, tracks
+    /// role-agreement fingerprints, maintains a best-at-EOF fallback, and
+    /// applies an incremental heuristic.  Use when the document may contain
+    /// errors and a best-effort CST is required.
+    FaultTolerant,
+    /// Fast mode: no error-recovery branches, no prevInfo fingerprints, no
+    /// heuristic precomputation, no best-at-EOF fallback.  Returns `None`
+    /// from `consume` if the document contains any error.  Use when the
+    /// document is known to be correct and maximum throughput is desired.
+    Fast,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Fingerprint(pub u128);
 
@@ -47,6 +62,7 @@ pub struct AStar<'a, R: ParserTrait> {
     /// token with `old_kind` could yield a `-strength` discount.  This is
     /// optimistic (assumes every token lands in its previous role) and
     /// therefore admissible.
+    /// In `Fast` mode this is always empty; 0 is used directly.
     heuristic: Vec<isize>,
     /// Number of elements popped from the heap so far.
     iterations: usize,
@@ -55,7 +71,10 @@ pub struct AStar<'a, R: ParserTrait> {
     /// Best element that reached end-of-input during search, tracked as
     /// `(cost, step_list, parent_depth)`.  Used as a fallback when the search
     /// times out before finding a fully-unwound parse (depth == 1).
+    /// Never populated in `Fast` mode.
     best_at_eof: Option<(isize, List<Step<R::Kind>>, usize)>,
+    /// Whether to perform fault-tolerant error recovery.
+    mode: ParseMode,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -79,12 +98,33 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             iterations: 0,
             max_iterations,
             best_at_eof: None,
+            mode: ParseMode::FaultTolerant,
+        }
+    }
+
+    /// Creates an `AStar` configured for fast, non-fault-tolerant parsing.
+    /// Skips heuristic precomputation, incremental bias, and best-at-EOF
+    /// tracking.  Returns `None` from `consume` if the document contains any
+    /// error.
+    fn new_fast(tokens: &'a [FatToken<R::Kind>]) -> Self {
+        Self {
+            tokens,
+            done: HashMap::new(),
+            todo: BinaryHeap::new(),
+            bias: IncrementalBias { strength: 0 },
+            heuristic: Vec::new(),
+            iterations: 0,
+            max_iterations: usize::MAX,
+            best_at_eof: None,
+            mode: ParseMode::Fast,
         }
     }
 
     pub fn consume(&mut self, root: R) -> Option<List<Step<R::Kind>>> {
         let start_idx = self.get_actual_index(0);
-        let h = if let Some(heurisitic) = self.heuristic.get(start_idx) {
+        let h = if self.mode == ParseMode::Fast {
+            0
+        } else if let Some(heurisitic) = self.heuristic.get(start_idx) {
             *heurisitic
         } else {
             return Some(List::default());
@@ -107,19 +147,25 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 if e.state.1 == self.tokens.len() {
                     let depth = e.parent.len();
-                    if self
-                        .best_at_eof
-                        .as_ref()
-                        .map_or(true, |&(c, _, _)| e.cost < c)
+                    if self.mode == ParseMode::FaultTolerant
+                        && self
+                            .best_at_eof
+                            .as_ref()
+                            .map_or(true, |&(c, _, _)| e.cost < c)
                     {
                         self.best_at_eof = Some((e.cost, e.list.clone(), depth));
                     }
                     if depth == 1 {
+                        // In Fast mode, reject any parse that contains an error step.
+                        if self.mode == ParseMode::Fast && e.has_error {
+                            continue;
+                        }
                         return Some(e.list);
                     }
                 }
 
                 // Enforce the iteration budget before expanding this element.
+                // In Fast mode max_iterations is usize::MAX, so this never fires.
                 if self.iterations >= self.max_iterations {
                     println!("Max iterations reached");
                     break;
@@ -142,6 +188,14 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     }
 
     pub fn add_element(&mut self, element: Element<R>) -> bool {
+        // In Fast mode, elements that already contain an error can never
+        // contribute to a valid parse.  Dropping them here prevents the heap
+        // from filling with dead branches and stops infinite-loop searches on
+        // invalid documents.
+        if self.mode == ParseMode::Fast && element.has_error {
+            return false;
+        }
+
         let at = element.parent.head().map(|x| x.0.at()).unwrap_or(0);
         let state = (element.state.0, element.state.1, at);
 
@@ -167,8 +221,29 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         found: &FatToken<R::Kind>,
     ) -> IsExpectedElement {
         match found.old_kind() {
-            Some(old_fp) if old_fp == element.state.0 => IsExpectedElement::True,
-            Some(_) => IsExpectedElement::False,
+            Some(old_fp) if old_fp == element.state.0 => {
+                if std::env::var("TURTLE_DEBUG_FP").is_ok() {
+                    eprintln!(
+                        "[agree]    token={:?} fp={} pos={}",
+                        found.text(),
+                        element.state.0.0,
+                        element.state.1,
+                    );
+                }
+                IsExpectedElement::True
+            }
+            Some(old_fp) => {
+                if std::env::var("TURTLE_DEBUG_FP").is_ok() {
+                    eprintln!(
+                        "[conflict] token={:?} old_fp={} elem_fp={} pos={}",
+                        found.text(),
+                        old_fp.0,
+                        element.state.0.0,
+                        element.state.1,
+                    );
+                }
+                IsExpectedElement::False
+            }
             None => IsExpectedElement::Unkown,
         }
     }
@@ -220,46 +295,61 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         if let Some(found) = self.tokens.get(idx) {
             if found.kind == token {
                 let next = self.get_actual_index(idx + 1);
-                let is_expected_element = self.is_expected_element(element, found);
-                let fallback = match is_expected_element {
-                    IsExpectedElement::False => Some(Element {
-                        list: create_list(Step::error(Error::Expected(token.clone()))),
-                        parent: element.parent.clone(),
-                        // So we just assume this is an error, so we add the error value
-                        cost: element.cost + token.max_error_value(),
-                        h: element.h,
-                        state: element.state,
-                    }),
-                    _ => None,
-                };
 
-                let bias = match is_expected_element {
-                    IsExpectedElement::True => 0,
-                    // When we have to insert morethen 4 token, we
-                    // should just assume it changed
-                    IsExpectedElement::False => 15,
-                    IsExpectedElement::Unkown => 0,
+                let (fallback, bias, h) = if self.mode == ParseMode::Fast {
+                    // Fast mode: no role-conflict check, no fallback branch, h = 0.
+                    (None, 0, 0)
+                } else {
+                    let is_expected_element = self.is_expected_element(element, found);
+                    let fallback = match is_expected_element {
+                        IsExpectedElement::False => Some(Element {
+                            list: create_list(Step::error(Error::Expected(token.clone()))),
+                            parent: element.parent.clone(),
+                            // So we just assume this is an error, so we add the error value
+                            cost: element.cost + token.max_error_value(),
+                            h: element.h,
+                            state: element.state,
+                            has_error: true,
+                        }),
+                        _ => None,
+                    };
+                    let bias = match is_expected_element {
+                        IsExpectedElement::True => 0,
+                        // When we have to insert more than 4 tokens, we
+                        // should just assume it changed
+                        IsExpectedElement::False => 50,
+                        IsExpectedElement::Unkown => 0,
+                    };
+                    (fallback, bias, self.heuristic[next])
                 };
 
                 let matched = Element {
                     list: create_list(Step::Bump(element.state.0)),
                     parent: element.parent.clone(),
                     cost: element.cost + token.max_error_value() + bias,
-                    h: self.heuristic[next],
+                    h,
                     state: (element.state.0, next),
+                    has_error: element.has_error,
                 };
 
                 return (matched, fallback);
             }
         }
 
+        let h = if self.mode == ParseMode::Fast {
+            0
+        } else {
+            self.heuristic[idx]
+        };
+
         // The thing didn't match, so we just add that we expected the thing
         let error = Element {
             list: create_list(Step::error(Error::Expected(token.clone()))),
             parent: element.parent.clone(),
             cost: element.cost + token.max_error_value(),
-            h: self.heuristic[idx],
+            h,
             state: (element.state.0, idx),
+            has_error: true,
         };
 
         (error, None)
@@ -292,7 +382,11 @@ pub struct Element<R: ParserTrait> {
     /// additional cost from the current token position to end of input.
     /// Currently always 0.  `f = cost + h` is the A* priority.
     h: isize,
-    state: (Fingerprint, usize),
+    pub state: (Fingerprint, usize),
+    /// Set to `true` the moment any `Step::Error` is prepended to this
+    /// element's list.  In `Fast` mode, elements with `has_error = true` are
+    /// never returned as a successful parse result.
+    has_error: bool,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -310,6 +404,7 @@ impl<R: ParserTrait> Element<R> {
             cost: 0,
             h,
             state: (Fingerprint(1), at),
+            has_error: false,
         }
     }
 
@@ -322,6 +417,7 @@ impl<R: ParserTrait> Element<R> {
             cost: self.cost,
             h: self.h,
             state: self.state.clone(),
+            has_error: self.has_error,
         }
     }
 
@@ -337,6 +433,7 @@ impl<R: ParserTrait> Element<R> {
             cost: self.cost,
             h: self.h,
             state: (s, a),
+            has_error: self.has_error,
         }
     }
 
@@ -350,6 +447,7 @@ impl<R: ParserTrait> Element<R> {
             cost: self.cost,
             h: self.h,
             state: (*f, a),
+            has_error: self.has_error,
         })
     }
 }
@@ -382,4 +480,14 @@ pub fn a_star<R: ParserTrait>(
     // state.todo.push(Element::new(root, h0));
     // Lets update the element to point to something that isn't whitespace
     state.consume(root).unwrap_or_default()
+}
+
+/// Like `a_star` but runs in non-fault-tolerant fast mode.  Returns `None` if
+/// the document contains any error; `Some(steps)` on a clean parse.
+pub fn a_star_fast<R: ParserTrait>(
+    root: R,
+    tokens: &[FatToken<R::Kind>],
+) -> Option<List<Step<R::Kind>>> {
+    let mut state = AStar::new_fast(tokens);
+    state.consume(root)
 }
