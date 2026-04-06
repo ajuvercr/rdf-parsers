@@ -300,7 +300,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 // Restore the original +50 bias so the A* prefers a
                                 // correct parse over reusing a token in the wrong role.
                                 let insert_error = Some(Element {
-                                    list: create_list(Step::error(Error::Expected(token.clone()))),
+                                    list: create_list(Step::error(Error::Expected(token.clone().into()))),
                                     parent: element.parent.clone(),
                                     cost: element.cost + token.max_error_value(),
                                     h: element.h,
@@ -315,7 +315,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 // (a) adopt this depth delta (one-time cost), and
                                 // (b) insert an error token instead (don't consume).
                                 let insert_error = Some(Element {
-                                    list: create_list(Step::error(Error::Expected(token.clone()))),
+                                    list: create_list(Step::error(Error::Expected(token.clone().into()))),
                                     parent: element.parent.clone(),
                                     cost: element.cost + token.max_error_value(),
                                     h: element.h,
@@ -373,7 +373,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
         // The thing didn't match, so we just add that we expected the thing
         let error = Element {
-            list: create_list(Step::error(Error::Expected(token.clone()))),
+            list: create_list(Step::error(Error::Expected(token.clone().into()))),
             parent: element.parent.clone(),
             cost: element.cost + token.max_error_value(),
             h,

@@ -107,7 +107,7 @@ pub fn spanned<T>(t: T, span: std::ops::Range<usize>) -> Spanned<T> {
 }
 
 pub trait TokenTrait:
-    Debug + Clone + Into<rowan::SyntaxKind> + PartialEq + Eq + Hash + 'static
+    Debug + Clone + Into<rowan::SyntaxKind> + From<rowan::SyntaxKind> + PartialEq + Eq + Hash + 'static
 {
     const ERROR: Self;
     const ROOT: Self;

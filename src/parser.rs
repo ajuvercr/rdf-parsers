@@ -51,10 +51,14 @@ impl<T: TokenTrait> FatToken<T> {
 
 /// Collapse rule nodes that consumed no tokens into a single `Expected(RuleName)` error.
 ///
-/// Only the outermost failing rule under a successfully-parsed ancestor is collapsed:
-/// if a parent rule also has no bumps, it defers to the grandparent, and so on.
-/// This prevents showing dozens of low-level "Expected(Iriref)" errors when an
-/// entire `PredicateObjectList` is simply absent.
+/// When a grammar rule fires but consumes no tokens and has errors, and at least one
+/// ancestor rule has already consumed something, the whole rule is replaced by a
+/// single `Expected(rule_kind)` error.  Collapsing is allowed to cascade outward:
+/// each successive `out.truncate` erases the inner collapse so only the outermost
+/// still-empty rule survives.  This naturally surfaces the most specific grammar
+/// rule that the user should care about — e.g. `Expected(Verb)` instead of
+/// `Expected(Alit)` when the verb is absent, or `Expected(PredicateObjectList)`
+/// when both verb and object are absent.
 fn coalesce_empty_rules<T: crate::TokenTrait>(steps: Vec<Step<T>>) -> Vec<Step<T>> {
     let mut out: Vec<Step<T>> = Vec::with_capacity(steps.len());
     // Stack entry: (kind, start_idx_in_out, has_bump, has_error)
@@ -80,16 +84,15 @@ fn coalesce_empty_rules<T: crate::TokenTrait>(steps: Vec<Step<T>>) -> Vec<Step<T
             }
             Step::End => {
                 let (kind, start_pos, has_bump, has_error) = stack.pop().expect("unmatched End");
-                // Coalesce only when:
-                // - this rule produced no real tokens (has_bump = false)
-                // - it contains at least one error (has_error = true)
-                // - its parent has real tokens (parent.has_bump = true), meaning
-                //   the parent will NOT itself be coalesced at a higher level.
-                let parent_has_bump = stack.last().map(|e| e.2).unwrap_or(false);
-                if !has_bump && has_error && parent_has_bump {
+                let any_ancestor_has_bump = stack.iter().any(|e| e.2);
+
+                if !has_bump && has_error && any_ancestor_has_bump {
+                    // Rule consumed no tokens: collapse into a single Expected(rule_kind)
+                    // error.  The truncate erases any inner collapses, so this rule's name
+                    // takes precedence over more specific (but noisier) inner names.
                     out.truncate(start_pos);
                     out.push(Step::Start(kind.clone()));
-                    out.push(Step::Error(Error::Expected(kind)));
+                    out.push(Step::Error(Error::Expected(kind.into())));
                     out.push(Step::End);
                 } else {
                     out.push(Step::End);
@@ -182,7 +185,12 @@ impl Parse {
                     // not at the end of the previously-consumed token.
                     skip_white_with_builder(&mut builder, &mut at);
                     builder.start_node(T::ERROR.into());
-                    error_msgs.push(format!("{:?}", e));
+                    // Convert the rowan::SyntaxKind back to the language-specific T
+                    // for a human-readable debug name (e.g. "Expected(Verb)" rather
+                    // than "Expected(SyntaxKind(42))").
+                    let Error::Expected(raw_kind) = e;
+                    let lang_kind: T = raw_kind.into();
+                    error_msgs.push(format!("Expected({:?})", lang_kind));
                     builder.finish_node();
                 }
                 Step::Bump(fp) => {
@@ -236,19 +244,25 @@ impl Parse {
 ///
 /// Error nodes in the CST are zero-width: they sit at the byte position of the
 /// missing token but span no characters themselves.  The *effective* span
-/// widens that point to include the run of skippable tokens (whitespace /
-/// trivia) that immediately precede it — the "dead zone" between the last real
-/// token and where the missing one was expected.  This gives callers a
-/// non-empty range suitable for highlighting in an editor.
+/// widens that point in both directions to include skippable tokens (whitespace /
+/// trivia) that immediately surround it — the "dead zone" between the adjacent
+/// real tokens.  This gives callers a non-empty range suitable for highlighting.
+///
+/// Specifically the span is `leading_gap_start..trailing_gap_end`, where:
+/// - `leading_gap_start` is the end of the last non-skippable token *before* the
+///   error (or `0` if the error is at the start of the file).
+/// - `trailing_gap_end` is the start of the first non-skippable token at or
+///   after the error position (extended through any immediately following
+///   skippable tokens).
 ///
 /// # Example
 ///
-/// For input `"  <b> <c> }"` with a missing `{`, the error node sits at byte
-/// 2 (after the two leading spaces are consumed by the parser).  The effective
-/// span is `0..2`, covering those two whitespace bytes.
+/// For input `"  <b> <c> }"` with a missing `{`, the error node sits at byte 2
+/// (after the two leading spaces are consumed as trivia by the `Start` step
+/// preceding the error).  The effective span is `0..2`, covering those two bytes.
 ///
-/// If there is no preceding whitespace the function returns a zero-width range
-/// at the error position, identical to the node's own `text_range()`.
+/// For input `"<a> <b> <c>"` missing a trailing `.`, where the error appears at
+/// the end (byte 11) with no trailing whitespace, the span is `11..11` (zero-width).
 pub fn effective_error_span<L>(error_node: &rowan::SyntaxNode<L>) -> Range<usize>
 where
     L: Language,
@@ -264,20 +278,35 @@ where
         .unwrap_or_else(|| error_node.clone());
 
     let mut span_start = 0usize;
-    let span_end: usize = error_node.text_range().end().into();
-    let mut iter = root.descendants_with_tokens();
-    for elem in &mut iter {
+    let mut span_end = error_start;
+    let mut past_error = false;
+
+    for elem in root.descendants_with_tokens() {
         let NodeOrToken::Token(tok) = elem else {
             continue;
         };
         let tok_start: usize = tok.text_range().start().into();
-        if tok_start >= error_start {
+
+        if !past_error {
+            if tok_start >= error_start {
+                // Transition to trailing side — handle this token below without
+                // skipping it so span_end is computed from the right position.
+                past_error = true;
+            } else {
+                if !tok.kind().skips() {
+                    span_start = tok.text_range().end().into();
+                }
+                continue;
+            }
+        }
+
+        // Trailing side: stop at the first non-skippable token and record its
+        // start as span_end; extend through consecutive skippable tokens.
+        if !tok.kind().skips() {
+            span_end = tok_start;
             break;
         }
-        if !tok.kind().skips() || tok.text_range().is_empty() {
-            let s: usize = tok.text_range().end().into();
-            span_start = s + 1;
-        }
+        span_end = tok.text_range().end().into();
     }
 
     span_start..span_end
@@ -290,14 +319,14 @@ use rowan::{GreenNode, GreenNodeBuilder, Language};
 use crate::{TokenTrait, list::List};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Error<T> {
-    Expected(T),
+pub enum Error {
+    Expected(rowan::SyntaxKind),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Step<T> {
     Start(T),
-    Error(Error<T>),
+    Error(Error),
     End,
     Bump(crate::Fingerprint),
 }
@@ -305,7 +334,7 @@ impl<T: TokenTrait> Step<T> {
     pub fn start(kind: T) -> Self {
         Step::Start(kind)
     }
-    pub fn error(error: Error<T>) -> Self {
+    pub fn error(error: Error) -> Self {
         Self::Error(error)
     }
 

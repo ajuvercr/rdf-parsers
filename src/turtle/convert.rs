@@ -691,7 +691,7 @@ mod tests {
             p.errors.len() > 0,
             "missing trailing dot should produce an error"
         );
-        // The error should mention the Stop (`.`) terminal
+        // The error should name the missing Stop (`.`) terminal
         assert!(
             p.errors.iter().any(|e| e.contains("Stop")),
             "expected an error mentioning Stop, got: {:?}",
@@ -1026,6 +1026,37 @@ mod tests {
             doc.triples[0].0.po.len(),
             2,
             "should produce two predicate objects"
+        );
+    }
+
+    /// When `a` (the rdf:type shorthand verb) is removed from `<s> a <o> .`,
+    /// the parser must report a missing verb.  The error should name the `Verb`
+    /// grammar rule, not the low-level `Alit` terminal.
+    #[test]
+    fn test_remove_rdf_type_verb_error_names_verb_rule() {
+        let prev = prev_info("<s> a <o> .");
+        let bias = IncrementalBias::default();
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            "<s> <o> .",
+            Some(&prev),
+            bias,
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert!(
+            !errors.is_empty(),
+            "removing the verb should produce an error, got none"
+        );
+        assert!(
+            errors.iter().any(|e| e.to_lowercase().contains("verb")),
+            "error should name the Verb grammar rule, got: {:?}",
+            errors
+        );
+        assert!(
+            !errors.iter().any(|e| e.to_lowercase().contains("alit")),
+            "error should not expose the low-level Alit terminal, got: {:?}",
+            errors
         );
     }
 
