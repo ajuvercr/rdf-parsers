@@ -155,7 +155,7 @@ impl Parse {
             }
         };
 
-        let mut errors = List::default();
+        let mut error_msgs: Vec<String> = Vec::new();
         let mut builder = GreenNodeBuilder::new();
         builder.start_node(T::ROOT.into());
         let step_count = steps.len();
@@ -177,8 +177,12 @@ impl Parse {
                 }
                 Step::End => builder.finish_node(),
                 Step::Error(e) => {
+                    // Skip whitespace so the zero-width error node is positioned at
+                    // the first non-whitespace byte where the missing token was expected,
+                    // not at the end of the previously-consumed token.
+                    skip_white_with_builder(&mut builder, &mut at);
                     builder.start_node(T::ERROR.into());
-                    errors = errors.prepend(format!("{:?}", e));
+                    error_msgs.push(format!("{:?}", e));
                     builder.finish_node();
                 }
                 Step::Bump(fp) => {
@@ -207,9 +211,16 @@ impl Parse {
 
         builder.finish_node();
 
+        // Build errors in forward document order: error_msgs was collected left-to-right
+        // (first error in document first), so fold in reverse to build a prepend-only List
+        // whose head is the first error.
+        let errors = error_msgs
+            .into_iter()
+            .rfold(List::default(), |acc, msg| acc.prepend(msg));
+
         Parse {
             green_node: builder.finish(),
-            errors: errors,
+            errors,
             suggestions: HashSet::new(),
         }
     }
@@ -219,6 +230,57 @@ impl Parse {
     pub fn syntax<L: Language>(&self) -> rowan::SyntaxNode<L> {
         rowan::SyntaxNode::new_root(self.green_node.clone())
     }
+}
+
+/// Returns the effective byte span of an error node.
+///
+/// Error nodes in the CST are zero-width: they sit at the byte position of the
+/// missing token but span no characters themselves.  The *effective* span
+/// widens that point to include the run of skippable tokens (whitespace /
+/// trivia) that immediately precede it — the "dead zone" between the last real
+/// token and where the missing one was expected.  This gives callers a
+/// non-empty range suitable for highlighting in an editor.
+///
+/// # Example
+///
+/// For input `"  <b> <c> }"` with a missing `{`, the error node sits at byte
+/// 2 (after the two leading spaces are consumed by the parser).  The effective
+/// span is `0..2`, covering those two whitespace bytes.
+///
+/// If there is no preceding whitespace the function returns a zero-width range
+/// at the error position, identical to the node's own `text_range()`.
+pub fn effective_error_span<L>(error_node: &rowan::SyntaxNode<L>) -> Range<usize>
+where
+    L: Language,
+    L::Kind: TokenTrait,
+{
+    use rowan::NodeOrToken;
+
+    let error_start: usize = error_node.text_range().start().into();
+
+    let root = error_node
+        .ancestors()
+        .last()
+        .unwrap_or_else(|| error_node.clone());
+
+    let mut span_start = 0usize;
+    let span_end: usize = error_node.text_range().end().into();
+    let mut iter = root.descendants_with_tokens();
+    for elem in &mut iter {
+        let NodeOrToken::Token(tok) = elem else {
+            continue;
+        };
+        let tok_start: usize = tok.text_range().start().into();
+        if tok_start >= error_start {
+            break;
+        }
+        if !tok.kind().skips() || tok.text_range().is_empty() {
+            let s: usize = tok.text_range().end().into();
+            span_start = s + 1;
+        }
+    }
+
+    span_start..span_end
 }
 
 use std::{collections::HashSet, ops::Range};

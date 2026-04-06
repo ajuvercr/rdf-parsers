@@ -909,6 +909,55 @@ mod tests {
         );
     }
 
+    /// `"  <a> <b> <c> }"` — two leading spaces, then a triple, missing the
+    /// opening `{`.  The parser inserts a synthetic `{` via error recovery.
+    ///
+    /// This test verifies three things:
+    ///   1. Exactly one parse error is reported.
+    ///   2. The error node sits strictly before the `}` in the CST.
+    ///   3. `effective_error_span` widens the zero-width error point to include
+    ///      the two leading whitespace bytes, returning a span of width 2.
+    #[test]
+    fn test_missing_open_curly_error_span_precedes_close_curly() {
+        let input = "  <a <a> <b> <c> }";
+
+        let p = parse_raw(input);
+        assert_eq!(
+            p.errors.len(),
+            1,
+            "expected exactly one error (missing {{), got: {:?}",
+            p.errors.iter().collect::<Vec<_>>()
+        );
+
+        let root = p.syntax::<lang::Lang>();
+
+        let error_node = root
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_node())
+            .find(|n| n.kind() == lang::SyntaxKind::Error)
+            .expect("expected an Error node in the CST");
+
+        let close_curly_offset: usize = root
+            .descendants_with_tokens()
+            .filter(|t| t.kind() == lang::SyntaxKind::CurlyClose)
+            .map(|t| usize::from(t.text_range().start()))
+            .next()
+            .expect("expected a CurlyClose token in the CST");
+
+        assert!(
+            usize::from(error_node.text_range().start()) < close_curly_offset,
+            "error should precede `}}` in the CST"
+        );
+
+        let span = crate::effective_error_span::<lang::Lang>(&error_node);
+        assert_eq!(
+            span.len(),
+            5,
+            "effective span should cover the 2 leading whitespace bytes, got {:?}",
+            span
+        );
+    }
+
     // ── mixed content ────────────────────────────────────────────────────────
 
     #[test]
@@ -1070,10 +1119,7 @@ mod tests {
     /// both triples in the named graph.
     #[test]
     fn test_incremental_add_triple_inside_named_graph() {
-        let doc = parse_incr(
-            "<g> { <b> <c> <d> }",
-            "<g> { <b> <c> <d> . <e> <f> <h> }",
-        );
+        let doc = parse_incr("<g> { <b> <c> <d> }", "<g> { <b> <c> <d> . <e> <f> <h> }");
 
         assert_eq!(doc.triples.len(), 2, "should produce two triples");
 
@@ -1098,10 +1144,7 @@ mod tests {
     /// After removal the parser should produce one triple still in graph <g>.
     #[test]
     fn test_incremental_remove_triple_inside_named_graph() {
-        let doc = parse_incr(
-            "<g> { <b> <c> <d> . <e> <f> <h> }",
-            "<g> { <b> <c> <d> }",
-        );
+        let doc = parse_incr("<g> { <b> <c> <d> . <e> <f> <h> }", "<g> { <b> <c> <d> }");
 
         assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
 
