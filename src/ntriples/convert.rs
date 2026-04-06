@@ -317,6 +317,37 @@ mod tests {
         ));
     }
 
+    // ── fault-tolerant parsing ────────────────────────────────────────────────
+
+    fn parse_raw(input: &str) -> crate::Parse {
+        let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::NtriplesDoc), input);
+        result
+    }
+
+    #[test]
+    fn test_valid_input_has_no_errors() {
+        let p = parse_raw(
+            "<http://example.org/s> <http://example.org/p> <http://example.org/o> .",
+        );
+        assert_eq!(p.errors.len(), 0, "valid input should produce no errors");
+    }
+
+    #[test]
+    fn test_missing_trailing_dot_reports_error() {
+        let p = parse_raw(
+            "<http://example.org/s> <http://example.org/p> <http://example.org/o>",
+        );
+        assert!(
+            p.errors.len() > 0,
+            "missing trailing dot should produce an error"
+        );
+        assert!(
+            p.errors.iter().any(|e| e.contains("Stop")),
+            "expected an error mentioning Stop, got: {:?}",
+            p.errors.iter().collect::<Vec<_>>()
+        );
+    }
+
     #[test]
     fn no_prefixes_and_no_base() {
         let doc = parse(
@@ -324,5 +355,97 @@ mod tests {
         );
         assert!(doc.base.is_none());
         assert!(doc.prefixes.is_empty());
+    }
+
+    // ── incremental re-parse tests ────────────────────────────────────────────
+    //
+    // These tests verify that the A* search finds the correct parse within its
+    // iteration budget after a small edit.  They catch grammar weight errors:
+    // if a token's error_value is set too high the heuristic becomes too
+    // optimistic and the search exhausts its budget before finding the solution.
+
+    use crate::{IncrementalBias, PrevParseInfo, TokenTrait, parse_incremental};
+
+    fn prev_info_incr(text: &str) -> PrevParseInfo {
+        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::NtriplesDoc), text);
+        let mut depth: i32 = 0;
+        PrevParseInfo {
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
+            had_errors: false,
+        }
+    }
+
+    fn parse_incr(before: &str, after: &str) -> Turtle {
+        let prev = prev_info_incr(before);
+        let (result, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::NtriplesDoc),
+            after,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+        let root = result.syntax::<lang::Lang>();
+        convert(&root)
+    }
+
+    /// Remove the object: `<a> <b> <c> .` → `<a> <b> .`
+    /// The parser should recover and produce one triple with the original subject.
+    #[test]
+    fn test_incremental_remove_object() {
+        let doc = parse_incr(
+            "<http://a> <http://b> <http://c> .",
+            "<http://a> <http://b> .",
+        );
+        assert_eq!(doc.triples.len(), 1, "should produce one triple");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => {
+                assert_eq!(iri, "http://a")
+            }
+            other => panic!("expected http://a as subject, got {:?}", other),
+        }
+    }
+
+    /// Add a second triple: `<a> <b> <c> .` → `<a> <b> <c> .\n<d> <e> <f> .`
+    /// The incremental parser should produce two triples with the correct subjects.
+    #[test]
+    fn test_incremental_add_triple() {
+        let doc = parse_incr(
+            "<http://a> <http://b> <http://c> .",
+            "<http://a> <http://b> <http://c> .\n<http://d> <http://e> <http://f> .",
+        );
+        assert_eq!(doc.triples.len(), 2, "should produce two triples");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "http://a"),
+            other => panic!("expected http://a as first subject, got {:?}", other),
+        }
+        match doc.triples[1].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "http://d"),
+            other => panic!("expected http://d as second subject, got {:?}", other),
+        }
+    }
+
+    /// Change the subject: `<a> <b> <c> .` → `<x> <b> <c> .`
+    /// Only one token changes; the incremental bias should preserve the other roles.
+    #[test]
+    fn test_incremental_change_subject() {
+        let doc = parse_incr(
+            "<http://a> <http://b> <http://c> .",
+            "<http://x> <http://b> <http://c> .",
+        );
+        assert_eq!(doc.triples.len(), 1, "should produce one triple");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "http://x"),
+            other => panic!("expected http://x as subject, got {:?}", other),
+        }
+        match doc.triples[0].value().po[0].predicate.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "http://b"),
+            other => panic!("expected http://b as predicate, got {:?}", other),
+        }
     }
 }

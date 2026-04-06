@@ -52,39 +52,45 @@ fn print_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) {
 
 // ── A* helpers ────────────────────────────────────────────────────────────────
 
-fn astar_build_prev_turtle(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
+fn make_prev_info<K>(parse_result: turtle::Parse, tokens: Vec<turtle::FatToken<K>>) -> PrevParseInfo
+where
+    K: TokenTrait,
+{
+    let had_errors = parse_result.errors.len() > 0;
+    let mut depth: i32 = 0;
     PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+        tokens: tokens.iter().map(|t| {
+            let d = depth.clamp(0, 255) as u8;
+            depth += t.kind.bracket_delta() as i32;
+            t.to_prev_token(d)
+        }).collect(),
+        had_errors,
     }
+}
+
+fn astar_build_prev_turtle(text: &str) -> PrevParseInfo {
+    let (p, t) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
+    make_prev_info(p, t)
 }
 
 fn astar_build_prev_ntriples(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
-    PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
-    }
+    let (p, t) = parse(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), text);
+    make_prev_info(p, t)
 }
 
 fn astar_build_prev_trig(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
-    PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
-    }
+    let (p, t) = parse(TrigRule::new(TrigSyntaxKind::TrigDoc), text);
+    make_prev_info(p, t)
 }
 
 fn astar_build_prev_n3(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(turtle::n3::Rule::new(turtle::n3::SyntaxKind::N3Doc), text);
-    PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
-    }
+    let (p, t) = parse(turtle::n3::Rule::new(turtle::n3::SyntaxKind::N3Doc), text);
+    make_prev_info(p, t)
 }
 
 fn astar_build_prev_sparql(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
-    PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
-    }
+    let (p, t) = parse(SparqlRule::new(SparqlSyntaxKind::QueryUnit), text);
+    make_prev_info(p, t)
 }
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for

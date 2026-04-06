@@ -47,6 +47,7 @@ pub enum SyntaxKind {
     Block,
     Collection,
     Directive,
+    GraphBlock,
     Iri,
     LabelOrSubject,
     Literal,
@@ -172,9 +173,13 @@ mod definitions {
                     kind,
                     state: 1usize,
                 },
+                SyntaxKind::GraphBlock => Rule {
+                    kind,
+                    state: 2usize,
+                },
                 SyntaxKind::TriplesOrGraph => Rule {
                     kind,
-                    state: 5usize,
+                    state: 3usize,
                 },
                 SyntaxKind::Triples2 => Rule {
                     kind,
@@ -343,6 +348,7 @@ mod definitions {
                 SyntaxKind::SparqlBaseToken,
                 SyntaxKind::SparqlPrefixToken,
             ],
+            SyntaxKind::GraphBlock => &[SyntaxKind::CurlyOpen],
             SyntaxKind::Iri => &[],
             SyntaxKind::LabelOrSubject => &[],
             SyntaxKind::Literal => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
@@ -462,19 +468,8 @@ mod definitions {
                                 state: 0usize,
                             })
                             .push(Rule {
-                                kind: SyntaxKind::TriplesOrGraph,
-                                state: 5usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WrappedGraph,
-                                state: 4usize,
+                                kind: SyntaxKind::GraphBlock,
+                                state: 2usize,
                             }),
                     );
                     state.add_element(
@@ -491,16 +486,27 @@ mod definitions {
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::GraphToken);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
-                        state: 6usize,
+                        state: 5usize,
                     }));
                     if let Some(fb) = fb {
                         state.add_element(fb.pop_push(Rule {
                             kind: self.kind,
-                            state: 6usize,
+                            state: 5usize,
                         }));
                     }
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::TriplesOrGraph,
+                                state: 3usize,
+                            }),
+                    );
                 }
-                (SyntaxKind::Block, 5usize) => {
+                (SyntaxKind::Block, 4usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
@@ -513,12 +519,54 @@ mod definitions {
                             }),
                     );
                 }
-                (SyntaxKind::Block, 6usize) => {
+                (SyntaxKind::Block, 5usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
-                                state: 5usize,
+                                state: 4usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::LabelOrSubject,
+                                state: 1usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GraphBlock, 0usize) => {
+                    if let Some(parent) = element.pop() {
+                        state.add_element(parent);
+                    }
+                }
+                (SyntaxKind::GraphBlock, 1usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WrappedGraph,
+                                state: 4usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::GraphBlock, 2usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 0usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::WrappedGraph,
+                                state: 4usize,
+                            }),
+                    );
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 1usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::LabelOrSubject,
@@ -532,30 +580,6 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::TriplesOrGraph, 1usize) => {
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 0usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::WrappedGraph,
-                                state: 4usize,
-                            }),
-                    );
-                    state.add_element(
-                        element
-                            .pop_push(Rule {
-                                kind: self.kind,
-                                state: 3usize,
-                            })
-                            .push(Rule {
-                                kind: SyntaxKind::PredicateObjectList,
-                                state: 7usize,
-                            }),
-                    );
-                }
-                (SyntaxKind::TriplesOrGraph, 3usize) => {
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::Stop);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
@@ -568,12 +592,25 @@ mod definitions {
                         }));
                     }
                 }
-                (SyntaxKind::TriplesOrGraph, 5usize) => {
+                (SyntaxKind::TriplesOrGraph, 2usize) => {
                     state.add_element(
                         element
                             .pop_push(Rule {
                                 kind: self.kind,
                                 state: 1usize,
+                            })
+                            .push(Rule {
+                                kind: SyntaxKind::PredicateObjectList,
+                                state: 7usize,
+                            }),
+                    );
+                }
+                (SyntaxKind::TriplesOrGraph, 3usize) => {
+                    state.add_element(
+                        element
+                            .pop_push(Rule {
+                                kind: self.kind,
+                                state: 2usize,
                             })
                             .push(Rule {
                                 kind: SyntaxKind::LabelOrSubject,
@@ -1966,18 +2003,18 @@ impl TokenTrait for SyntaxKind {
     }
     fn max_error_value(&self) -> isize {
         match self {
-            SyntaxKind::ClOpen => 8isize,
-            SyntaxKind::ClClose => 8isize,
-            SyntaxKind::Stop => 10isize,
+            SyntaxKind::ClOpen => 2isize,
+            SyntaxKind::ClClose => 2isize,
+            SyntaxKind::Stop => 3isize,
             SyntaxKind::BaseToken => 100isize,
             SyntaxKind::PrefixToken => 100isize,
             SyntaxKind::SparqlBaseToken => 100isize,
-            SyntaxKind::GraphToken => 8isize,
+            SyntaxKind::GraphToken => 3isize,
             SyntaxKind::SparqlPrefixToken => 100isize,
-            SyntaxKind::SqOpen => 8isize,
-            SyntaxKind::SqClose => 8isize,
-            SyntaxKind::CurlyOpen => 100isize,
-            SyntaxKind::CurlyClose => 100isize,
+            SyntaxKind::SqOpen => 2isize,
+            SyntaxKind::SqClose => 2isize,
+            SyntaxKind::CurlyOpen => 2isize,
+            SyntaxKind::CurlyClose => 2isize,
             _ => 1isize,
         }
     }

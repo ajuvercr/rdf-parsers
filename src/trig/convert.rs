@@ -35,12 +35,12 @@ pub fn convert(root: &Node) -> Turtle {
     for child_node in root.children() {
         let kind = child_node.kind();
         if kind == SyntaxKind::Directive {
-            if let Some(b) =
-                child(&child_node, SyntaxKind::Base).or_else(|| child(&child_node, SyntaxKind::SparqlBase))
+            if let Some(b) = child(&child_node, SyntaxKind::Base)
+                .or_else(|| child(&child_node, SyntaxKind::SparqlBase))
             {
                 base = Some(Spanned(convert_base(&b), text_range(&b)));
-            } else if let Some(p) =
-                child(&child_node, SyntaxKind::PrefixId).or_else(|| child(&child_node, SyntaxKind::SparqlPrefix))
+            } else if let Some(p) = child(&child_node, SyntaxKind::PrefixId)
+                .or_else(|| child(&child_node, SyntaxKind::SparqlPrefix))
             {
                 prefixes.push(Spanned(convert_prefix(&p), text_range(&p)));
             }
@@ -55,7 +55,7 @@ pub fn convert(root: &Node) -> Turtle {
 // ── trig-specific conversion ─────────────────────────────────────────────────
 
 fn convert_block(block: &Node, triples: &mut Vec<Spanned<Triple>>) {
-    // block ::= triplesOrGraph | wrappedGraph | triples2 | "GRAPH" labelOrSubject wrappedGraph
+    // block ::= graphBlock | triples2 | "GRAPH" labelOrSubject wrappedGraph | triplesOrGraph
     // Check GraphToken first: the "GRAPH" variant also has a WrappedGraph child.
     if child(block, SyntaxKind::GraphToken).is_some() {
         // "GRAPH" labelOrSubject wrappedGraph
@@ -66,51 +66,50 @@ fn convert_block(block: &Node, triples: &mut Vec<Spanned<Triple>>) {
         if let Some(wg) = child(block, SyntaxKind::WrappedGraph) {
             convert_wrapped_graph(&wg, graph_term, triples);
         }
+    } else if let Some(gb) = child(block, SyntaxKind::GraphBlock) {
+        convert_graph_block(&gb, triples);
     } else if let Some(tog) = child(block, SyntaxKind::TriplesOrGraph) {
         convert_triples_or_graph(&tog, triples);
-    } else if let Some(wg) = child(block, SyntaxKind::WrappedGraph) {
-        // Default graph (no graph name)
-        convert_wrapped_graph(&wg, None, triples);
     } else if let Some(t2) = child(block, SyntaxKind::Triples2) {
         let range = text_range(block);
         triples.push(Spanned(convert_triples2(&t2), range));
     }
 }
 
-fn convert_triples_or_graph(node: &Node, triples: &mut Vec<Spanned<Triple>>) {
-    // triplesOrGraph ::= labelOrSubject (wrappedGraph | predicateObjectList '.')
-    let los = child(node, SyntaxKind::LabelOrSubject);
-
+fn convert_graph_block(node: &Node, triples: &mut Vec<Spanned<Triple>>) {
+    // graphBlock ::= labelOrSubject? wrappedGraph
+    // The optional labelOrSubject is the named-graph IRI; absent means default graph.
+    let graph_term = child(node, SyntaxKind::LabelOrSubject).map(|los| {
+        let range = text_range(&los);
+        Spanned(convert_label_or_subject(&los), range)
+    });
     if let Some(wg) = child(node, SyntaxKind::WrappedGraph) {
-        // labelOrSubject wrappedGraph → named graph
-        let graph_term = los.map(|l| {
+        convert_wrapped_graph(&wg, graph_term, triples);
+    }
+}
+
+fn convert_triples_or_graph(node: &Node, triples: &mut Vec<Spanned<Triple>>) {
+    // triplesOrGraph ::= labelOrSubject predicateObjectList '.'
+    let subject = child(node, SyntaxKind::LabelOrSubject)
+        .map(|l| {
             let range = text_range(&l);
             Spanned(convert_label_or_subject(&l), range)
-        });
-        convert_wrapped_graph(&wg, graph_term, triples);
-    } else {
-        // labelOrSubject predicateObjectList '.' → regular triple
-        let subject = los
-            .map(|l| {
-                let range = text_range(&l);
-                Spanned(convert_label_or_subject(&l), range)
-            })
-            .unwrap_or_else(|| Spanned(Term::Invalid, text_range(node)));
+        })
+        .unwrap_or_else(|| Spanned(Term::Invalid, text_range(node)));
 
-        let po = child(node, SyntaxKind::PredicateObjectList)
-            .map(|n| convert_predicate_object_list(&n))
-            .unwrap_or_default();
+    let po = child(node, SyntaxKind::PredicateObjectList)
+        .map(|n| convert_predicate_object_list(&n))
+        .unwrap_or_default();
 
-        let range = text_range(node);
-        triples.push(Spanned(
-            Triple {
-                subject,
-                po,
-                graph: None,
-            },
-            range,
-        ));
-    }
+    let range = text_range(node);
+    triples.push(Spanned(
+        Triple {
+            subject,
+            po,
+            graph: None,
+        },
+        range,
+    ));
 }
 
 fn convert_wrapped_graph(
@@ -481,10 +480,42 @@ fn strip_string_delimiters(text: &str) -> (&str, StringStyle) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{parse as crate_parse, trig::parser as lang};
+    use crate::{
+        IncrementalBias, PrevParseInfo, TokenTrait, parse as crate_parse, parse_incremental,
+        trig::parser as lang,
+    };
 
     fn parse(input: &str) -> Turtle {
         let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::TrigDoc), input);
+        let root = result.syntax::<lang::Lang>();
+        convert(&root)
+    }
+
+    fn prev_info(text: &str) -> PrevParseInfo {
+        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TrigDoc), text);
+        let mut depth: i32 = 0;
+        PrevParseInfo {
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
+            had_errors: false,
+        }
+    }
+
+    fn parse_incr(before: &str, after: &str) -> Turtle {
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+        let (result, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TrigDoc),
+            after,
+            Some(&prev),
+            bias,
+        );
         let root = result.syntax::<lang::Lang>();
         convert(&root)
     }
@@ -569,9 +600,7 @@ mod tests {
 
     #[test]
     fn test_simple_triple() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob .",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> . ex:alice ex:knows ex:bob .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -708,9 +737,7 @@ mod tests {
 
     #[test]
     fn test_default_graph_wrapped() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . { ex:alice ex:knows ex:bob . }",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> . { ex:alice ex:knows ex:bob . }");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -731,9 +758,8 @@ mod tests {
 
     #[test]
     fn test_named_graph_with_keyword() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . GRAPH ex:g1 { ex:alice ex:knows ex:bob . }",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . GRAPH ex:g1 { ex:alice ex:knows ex:bob . }");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -771,9 +797,7 @@ mod tests {
 
     #[test]
     fn test_named_graph_without_keyword() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . ex:g1 { ex:alice ex:knows ex:bob . }",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> . ex:g1 { ex:alice ex:knows ex:bob . }");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
@@ -785,9 +809,7 @@ mod tests {
 
     #[test]
     fn test_triples2_blank_node_property_list() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . [ ex:name \"Alice\" ] ex:age 30 .",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> . [ ex:name \"Alice\" ] ex:age 30 .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(matches!(
@@ -795,6 +817,96 @@ mod tests {
             Term::BlankNode(BlankNode::Unnamed(_, _, _))
         ));
         assert_eq!(t.po.len(), 1);
+    }
+
+    // ── sparql-style directives ──────────────────────────────────────────────
+
+    #[test]
+    fn test_sparql_prefix_directive() {
+        let doc = parse("PREFIX ex: <http://example.org/> ex:alice ex:knows ex:bob .");
+        assert_eq!(doc.prefixes.len(), 1);
+        assert_eq!(doc.prefixes[0].value().prefix.value(), "ex");
+    }
+
+    #[test]
+    fn test_sparql_base_directive() {
+        let doc = parse("BASE <http://example.org/> <alice> <knows> <bob> .");
+        let base = doc.base.as_ref().expect("base should be present");
+        assert!(nn_eq(
+            base.value().1.value(),
+            &NamedNode::Full("http://example.org/".to_string(), 0)
+        ));
+    }
+
+    // ── string literal with datatype ─────────────────────────────────────────
+
+    #[test]
+    fn test_string_literal_with_datatype() {
+        let doc = parse(
+            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . @prefix ex: <http://example.org/> . ex:alice ex:age \"30\"^^xsd:integer .",
+        );
+        let t = doc.triples[0].value();
+        match term_lit(t.po[0].object[0].value()) {
+            Literal::RDF(r) => {
+                assert_eq!(r.value, "30");
+                assert!(r.ty.is_some());
+                assert!(nn_eq(r.ty.as_ref().unwrap(), &prefixed("xsd", "integer")));
+            }
+            other => panic!("expected RDF literal, got {:?}", other),
+        }
+    }
+
+    // ── multiple triples (no graph) ──────────────────────────────────────────
+
+    #[test]
+    fn test_multiple_triples() {
+        let doc =
+            parse("@prefix ex: <http://example.org/> . ex:alice ex:age 30 . ex:bob ex:age 25 .");
+        assert_eq!(doc.triples.len(), 2);
+        assert!(nn_eq(
+            term_nn(doc.triples[0].value().subject.value()),
+            &prefixed("ex", "alice")
+        ));
+        assert!(nn_eq(
+            term_nn(doc.triples[1].value().subject.value()),
+            &prefixed("ex", "bob")
+        ));
+    }
+
+    // ── fault-tolerant parsing ────────────────────────────────────────────────
+
+    fn parse_raw(input: &str) -> crate::Parse {
+        let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::TrigDoc), input);
+        result
+    }
+
+    #[test]
+    fn test_valid_input_has_no_errors() {
+        let p = parse_raw("@prefix ex: <http://example.org/> . ex:alice ex:age 30 .");
+        assert_eq!(p.errors.len(), 0, "valid input should produce no errors");
+    }
+
+    #[test]
+    fn test_missing_trailing_dot_reports_error() {
+        let p = parse_raw("@prefix ex: <http://example.org/> . ex:alice ex:age 30");
+        assert!(
+            p.errors.len() > 0,
+            "missing trailing dot should produce an error"
+        );
+        assert!(
+            p.errors.iter().any(|e| e.contains("Stop")),
+            "expected an error mentioning Stop, got: {:?}",
+            p.errors.iter().collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn test_missing_prefix_iri_reports_error() {
+        let p = parse_raw("@prefix ex: .");
+        assert!(
+            p.errors.len() > 0,
+            "missing prefix IRI should produce an error"
+        );
     }
 
     // ── mixed content ────────────────────────────────────────────────────────
@@ -825,14 +937,182 @@ mod tests {
 
     #[test]
     fn test_named_graph_blank_node_graph_name() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> . GRAPH _:g1 { ex:alice ex:knows ex:bob . }",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> . GRAPH _:g1 { ex:alice ex:knows ex:bob . }");
         assert_eq!(doc.triples.len(), 1);
-        let graph = doc.triples[0].value().graph.as_ref().expect("should have graph");
+        let graph = doc.triples[0]
+            .value()
+            .graph
+            .as_ref()
+            .expect("should have graph");
         match graph.value() {
             Term::BlankNode(BlankNode::Named(name, _)) => assert_eq!(name, "g1"),
             other => panic!("expected Named blank node graph, got {:?}", other),
+        }
+    }
+
+    // ── incremental: remove graph IRI ────────────────────────────────────────
+
+    /// Going from `{ <b> <c> <d> }` to `<b> <c> <d> .` (removing the wrapping
+    /// curly braces), the incremental parser should produce one triple in the
+    /// default graph with no errors.  The inner tokens shift from bracket depth
+    /// 1 to depth 0; the depth-delta mechanism pays the adoption cost once and
+    /// gives subsequent tokens a free pass.
+    #[test]
+    fn test_incremental_remove_curly_braces() {
+        let before = "{ <b> <c> <d> }";
+        let after = "<b> <c> <d> }";
+
+        let (result, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TrigDoc),
+            after,
+            Some(&prev_info(before)),
+            IncrementalBias::default(),
+        );
+        assert!(
+            result.errors.len() == 1,
+            "expected one parse errors, got: {:?}",
+            result.errors.iter().collect::<Vec<_>>()
+        );
+
+        let root = result.syntax::<lang::Lang>();
+        println!("{:#?}", root);
+        let doc = convert(&root);
+
+        assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
+
+        let t = doc.triples[0].value();
+        assert!(t.graph.is_none(), "triple should be in the default graph");
+
+        match t.subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as subject, got {:?}", other),
+        }
+        match t.po[0].value().predicate.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "c"),
+            other => panic!("expected <c> as predicate, got {:?}", other),
+        }
+        match t.po[0].value().object[0].value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "d"),
+            other => panic!("expected <d> as object, got {:?}", other),
+        }
+    }
+
+    /// Going from `<a> { <b> <c> <d> }` to `{ <b> <c> <d> }` (dropping the
+    /// named-graph IRI), the incremental parser should produce one triple in
+    /// the default graph with subject <b>, predicate <c>, object <d>.
+    #[test]
+    fn test_incremental_remove_graph_iri() {
+        let before = "<a> { <b> <c> <d> }";
+        let after = "{ <b> <c> <d> }";
+
+        let doc = parse_incr(before, after);
+
+        assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
+
+        let t = doc.triples[0].value();
+        assert!(t.graph.is_none(), "triple should be in the default graph");
+
+        match t.subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as subject, got {:?}", other),
+        }
+        match t.po[0].value().predicate.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "c"),
+            other => panic!("expected <c> as predicate, got {:?}", other),
+        }
+        match t.po[0].value().object[0].value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "d"),
+            other => panic!("expected <d> as object, got {:?}", other),
+        }
+    }
+
+    /// Add a named-graph IRI: `{ <b> <c> <d> }` → `<g> { <b> <c> <d> }`
+    /// The tokens inside the graph shift context; the A* must find the named-graph
+    /// parse within budget, exercising graph_token and curly-brace weights.
+    #[test]
+    fn test_incremental_add_graph_iri() {
+        let doc = parse_incr("{ <b> <c> <d> }", "<g> { <b> <c> <d> }");
+
+        assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
+
+        let t = doc.triples[0].value();
+        match t.graph.as_ref().map(|g| g.value()) {
+            Some(Term::NamedNode(NamedNode::Full(iri, _))) => assert_eq!(iri, "g"),
+            other => panic!("expected <g> as graph name, got {:?}", other),
+        }
+        match t.subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as subject, got {:?}", other),
+        }
+    }
+
+    /// Change the object inside a default-graph block:
+    /// `{ <b> <c> <d> }` → `{ <b> <c> <e> }`.  Only one token changes; the
+    /// curly-brace tokens are unchanged, exercising depth-delta stability.
+    #[test]
+    fn test_incremental_change_object_inside_graph() {
+        let doc = parse_incr("{ <b> <c> <d> }", "{ <b> <c> <e> }");
+
+        assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
+
+        let t = doc.triples[0].value();
+        assert!(t.graph.is_none(), "triple should be in the default graph");
+        match t.po[0].value().object[0].value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "e"),
+            other => panic!("expected <e> as object, got {:?}", other),
+        }
+    }
+
+    /// Add a triple inside a named graph:
+    /// `<g> { <b> <c> <d> }` → `<g> { <b> <c> <d> . <e> <f> <h> }`
+    /// The parser must handle the depth shift for the new tokens while keeping
+    /// both triples in the named graph.
+    #[test]
+    fn test_incremental_add_triple_inside_named_graph() {
+        let doc = parse_incr(
+            "<g> { <b> <c> <d> }",
+            "<g> { <b> <c> <d> . <e> <f> <h> }",
+        );
+
+        assert_eq!(doc.triples.len(), 2, "should produce two triples");
+
+        for t in doc.triples.iter() {
+            match t.value().graph.as_ref().map(|g| g.value()) {
+                Some(Term::NamedNode(NamedNode::Full(iri, _))) => assert_eq!(iri, "g"),
+                other => panic!("expected <g> as graph for both triples, got {:?}", other),
+            }
+        }
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as first subject, got {:?}", other),
+        }
+        match doc.triples[1].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "e"),
+            other => panic!("expected <e> as second subject, got {:?}", other),
+        }
+    }
+
+    /// Remove a triple from a named graph:
+    /// `<g> { <b> <c> <d> . <e> <f> <h> }` → `<g> { <b> <c> <d> }`
+    /// After removal the parser should produce one triple still in graph <g>.
+    #[test]
+    fn test_incremental_remove_triple_inside_named_graph() {
+        let doc = parse_incr(
+            "<g> { <b> <c> <d> . <e> <f> <h> }",
+            "<g> { <b> <c> <d> }",
+        );
+
+        assert_eq!(doc.triples.len(), 1, "should produce exactly one triple");
+
+        let t = doc.triples[0].value();
+        match t.graph.as_ref().map(|g| g.value()) {
+            Some(Term::NamedNode(NamedNode::Full(iri, _))) => assert_eq!(iri, "g"),
+            other => panic!("expected <g> as graph, got {:?}", other),
+        }
+        match t.subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
+            other => panic!("expected <b> as subject, got {:?}", other),
         }
     }
 }

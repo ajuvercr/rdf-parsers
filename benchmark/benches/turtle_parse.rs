@@ -9,7 +9,7 @@ use swls_lang_turtle::lang::{
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
 };
 use turtle::{
-    IncrementalBias, PrevParseInfo, parse, parse_incremental,
+    IncrementalBias, PrevParseInfo, TokenTrait, parse, parse_incremental,
     turtle::parser::{Rule, SyntaxKind},
 };
 
@@ -32,9 +32,16 @@ fn oxttl_parse(text: &str) {
 }
 
 fn build_prev_info(text: &str) -> PrevParseInfo {
-    let (_, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
+    let (parse, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
+    let had_errors = parse.errors.len() > 0;
+    let mut depth: i32 = 0;
     PrevParseInfo {
-        tokens: tokens.iter().map(|t| t.to_prev_token()).collect(),
+        tokens: tokens.iter().map(|t| {
+            let d = depth.clamp(0, 255) as u8;
+            depth += t.kind.bracket_delta() as i32;
+            t.to_prev_token(d)
+        }).collect(),
+        had_errors,
     }
 }
 

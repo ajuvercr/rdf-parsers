@@ -727,6 +727,104 @@ mod tests {
         }
     }
 
+    // ── string literal with lang and datatype ────────────────────────────────
+
+    #[test]
+    fn test_string_literal_with_lang() {
+        let doc = parse("@prefix ex: <http://example.org/> .\nex:alice ex:name \"Alice\"@en .");
+        let t = doc.triples[0].value();
+        match term_lit(t.po[0].object[0].value()) {
+            Literal::RDF(r) => {
+                assert_eq!(r.value, "Alice");
+                assert_eq!(r.lang.as_deref(), Some("en"));
+            }
+            other => panic!("expected RDF literal, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_string_literal_with_datatype() {
+        let doc = parse(
+            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@prefix ex: <http://example.org/> .\nex:alice ex:age \"30\"^^xsd:integer .",
+        );
+        let t = doc.triples[0].value();
+        match term_lit(t.po[0].object[0].value()) {
+            Literal::RDF(r) => {
+                assert_eq!(r.value, "30");
+                assert!(r.ty.is_some());
+                assert!(nn_eq(r.ty.as_ref().unwrap(), &prefixed("xsd", "integer")));
+            }
+            other => panic!("expected RDF literal, got {:?}", other),
+        }
+    }
+
+    // ── blank node as subject with property list ──────────────────────────────
+
+    #[test]
+    fn test_blank_node_subject_property_list() {
+        let doc = parse("@prefix ex: <http://example.org/> .\n[ ex:name \"Alice\" ] ex:age 30 .");
+        let t = doc.triples[0].value();
+        assert!(matches!(
+            t.subject.value(),
+            Term::BlankNode(BlankNode::Unnamed(_, _, _))
+        ));
+        assert_eq!(t.po.len(), 1);
+    }
+
+    // ── multiple triples ──────────────────────────────────────────────────────
+
+    #[test]
+    fn test_multiple_triples() {
+        let doc = parse(
+            "@prefix ex: <http://example.org/> .\nex:alice ex:age 30 .\nex:bob ex:age 25 .",
+        );
+        assert_eq!(doc.triples.len(), 2);
+        assert!(nn_eq(
+            term_nn(doc.triples[0].value().subject.value()),
+            &prefixed("ex", "alice")
+        ));
+        assert!(nn_eq(
+            term_nn(doc.triples[1].value().subject.value()),
+            &prefixed("ex", "bob")
+        ));
+    }
+
+    // ── fault-tolerant parsing ────────────────────────────────────────────────
+
+    fn parse_raw(input: &str) -> crate::Parse {
+        let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::N3Doc), input);
+        result
+    }
+
+    #[test]
+    fn test_valid_input_has_no_errors() {
+        let p = parse_raw("@prefix ex: <http://example.org/> .\nex:alice ex:age 30 .");
+        assert_eq!(p.errors.len(), 0, "valid input should produce no errors");
+    }
+
+    #[test]
+    fn test_trailing_dot_is_optional() {
+        // In N3, the trailing dot is optional — a statement without it should
+        // parse without errors and still produce the triple.
+        let p = parse_raw("@prefix ex: <http://example.org/> .\nex:alice ex:age 30");
+        assert_eq!(
+            p.errors.len(),
+            0,
+            "N3 trailing dot is optional; should produce no errors"
+        );
+        let doc = parse("@prefix ex: <http://example.org/> .\nex:alice ex:age 30");
+        assert_eq!(doc.triples.len(), 1);
+    }
+
+    #[test]
+    fn test_missing_prefix_iri_reports_error() {
+        let p = parse_raw("@prefix ex: .");
+        assert!(
+            p.errors.len() > 0,
+            "missing prefix IRI should produce an error"
+        );
+    }
+
     // ── quick variables ──────────────────────────────────────────────────────
 
     #[test]
@@ -835,5 +933,103 @@ mod tests {
             term_nn(doc.triples[2].value().subject.value()),
             &prefixed("", "Socrates")
         ));
+    }
+
+    // ── incremental re-parse tests ────────────────────────────────────────────
+    //
+    // These tests verify that the A* search finds the correct parse within its
+    // iteration budget after a small edit.  They catch grammar weight errors:
+    // if a token's error_value is set too high the heuristic becomes too
+    // optimistic and the search exhausts its budget before finding the solution.
+
+    use crate::{IncrementalBias, PrevParseInfo, TokenTrait, parse_incremental};
+
+    fn prev_info_incr(text: &str) -> PrevParseInfo {
+        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::N3Doc), text);
+        let mut depth: i32 = 0;
+        PrevParseInfo {
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
+            had_errors: false,
+        }
+    }
+
+    fn parse_incr(before: &str, after: &str) -> Turtle {
+        let prev = prev_info_incr(before);
+        let (result, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::N3Doc),
+            after,
+            Some(&prev),
+            IncrementalBias::default(),
+        );
+        let root = result.syntax::<lang::Lang>();
+        convert(&root)
+    }
+
+    /// Remove the object: `<a> <b> <c> .` → `<a> <b> .`
+    /// The parser should recover and produce one triple.
+    #[test]
+    fn test_incremental_remove_object() {
+        let doc = parse_incr("<a> <b> <c> .", "<a> <b> .");
+        assert_eq!(doc.triples.len(), 1, "should produce one triple");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as subject, got {:?}", other),
+        }
+    }
+
+    /// Add a second triple: `<a> <b> <c> .` → `<a> <b> <c> .\n<d> <e> <f> .`
+    /// The incremental parser should produce two triples.
+    #[test]
+    fn test_incremental_add_triple() {
+        let doc = parse_incr("<a> <b> <c> .", "<a> <b> <c> .\n<d> <e> <f> .");
+        assert_eq!(doc.triples.len(), 2, "should produce two triples");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as first subject, got {:?}", other),
+        }
+        match doc.triples[1].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "d"),
+            other => panic!("expected <d> as second subject, got {:?}", other),
+        }
+    }
+
+    /// Insert an extra IRI inside a formula: `{ <a> <b> <c> . }` → `{ <a> <b> <c> <d> . }`
+    /// The tokens inside shift their roles; the formula bracket weights must be
+    /// low enough for the A* to find the correct parse within budget.
+    #[test]
+    fn test_incremental_insert_token_inside_formula() {
+        let doc = parse_incr("{ <a> <b> <c> . }", "{ <a> <b> <c> <d> . }");
+        // Two triples are produced via error recovery (the extra <d> forces a
+        // new statement to start).
+        assert!(
+            doc.triples.len() >= 1,
+            "should produce at least one triple, got {}",
+            doc.triples.len()
+        );
+        // The first triple inside the formula should have <a> as its subject.
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as subject inside formula, got {:?}", other),
+        }
+    }
+
+    /// Remove a triple from a two-triple document:
+    /// `<a> <b> <c> .\n<d> <e> <f> .` → `<a> <b> <c> .`
+    /// The incremental parser should produce exactly one triple.
+    #[test]
+    fn test_incremental_remove_triple() {
+        let doc = parse_incr("<a> <b> <c> .\n<d> <e> <f> .", "<a> <b> <c> .");
+        assert_eq!(doc.triples.len(), 1, "should produce one triple");
+        match doc.triples[0].value().subject.value() {
+            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
+            other => panic!("expected <a> as subject, got {:?}", other),
+        }
     }
 }

@@ -1,8 +1,9 @@
 == rules ==
 === producing ===
 [1g]	trigDoc	::=	(directive | block)*
-[2g]	block	::=	triplesOrGraph | wrappedGraph | triples2 | "GRAPH" labelOrSubject wrappedGraph
-[3g]	triplesOrGraph	::=	labelOrSubject (wrappedGraph | predicateObjectList '.')
+[2g]	block	::=	graphBlock | triples2 | "GRAPH" labelOrSubject wrappedGraph | triplesOrGraph
+[2ag]	graphBlock	::=	labelOrSubject? wrappedGraph
+[3g]	triplesOrGraph	::=	labelOrSubject predicateObjectList '.'
 [4g]	triples2	::=	blankNodePropertyList predicateObjectList? '.' | collection predicateObjectList '.'
 [5g]	wrappedGraph	::=	'{' triplesBlock? '}'
 [6g]	triplesBlock	::=	triples ('.' triplesBlock?)?
@@ -82,14 +83,14 @@ prefix_token -> 100
 base_token -> 100
 sparql_base_token -> 100
 sparql_prefix_token -> 100
-stop -> 10
-graph_token -> 8
-cl_open -> 8
-cl_close -> 8
-sq_open -> 8
-sq_close -> 8
-curly_open -> 100
-curly_close -> 100
+stop -> 3
+graph_token -> 3
+cl_open -> 2
+cl_close -> 2
+sq_open -> 2
+sq_close -> 2
+curly_open -> 2
+curly_close -> 2
 === bracket_open ===
 sq_open
 cl_open
