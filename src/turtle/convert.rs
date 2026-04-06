@@ -1060,6 +1060,42 @@ mod tests {
         );
     }
 
+    /// Removing the `a` verb from `<b> a <c> .` incrementally should produce
+    /// an error that names the Verb grammar rule.  The raw CST error node is
+    /// zero-width, but `effective_error_span` widens it to cover the whitespace
+    /// gap between `<b>` and `<c>` — a span of 1.
+    #[test]
+    fn test_remove_verb_from_iri_triple_reports_verb_error() {
+        let prev = prev_info("<b> a <c> .");
+        let bias = IncrementalBias::default();
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            "<b> <c> .",
+            Some(&prev),
+            bias,
+        );
+
+        let errors: Vec<_> = parse.errors.iter().collect();
+        assert!(
+            errors.iter().any(|e| e.to_lowercase().contains("verb")),
+            "error should name the Verb grammar rule, got: {:?}",
+            errors
+        );
+
+        let root = parse.syntax::<lang::Lang>();
+        let error_node = root
+            .descendants()
+            .find(|n| n.kind() == lang::SyntaxKind::Error)
+            .expect("should have an error node");
+        let effective = crate::effective_error_span::<lang::Lang>(&error_node);
+        assert_eq!(
+            effective.end - effective.start,
+            1,
+            "effective_error_span should cover the whitespace gap (1 byte), got {:?}",
+            effective
+        );
+    }
+
     // ── fast (non-fault-tolerant) parsing ─────────────────────────────────────
 
     use crate::parse_fast;

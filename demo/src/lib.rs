@@ -9,7 +9,7 @@ use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
 use turtle::{
-    IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait,
+    IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait, effective_error_span,
     model::Turtle,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
@@ -36,7 +36,7 @@ pub fn start() {
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
 /// every Error node in source order.
-fn get_error_range_pairs<L>(parse: &Parse, text: &str) -> Vec<(Range<usize>, String)>
+fn get_error_range_pairs<L>(parse: &Parse) -> Vec<(Range<usize>, String)>
 where
     L: rowan::Language,
     L::Kind: TokenTrait,
@@ -65,28 +65,7 @@ where
     let ranges: Vec<Range<usize>> = root
         .descendants()
         .filter(|n| n.kind() == L::Kind::ERROR)
-        .map(|n| {
-            let pos = usize::from(n.text_range().start());
-            let prev_end = token_ends.partition_point(|&e| e <= pos);
-            if prev_end > 0 {
-                let end = token_ends[prev_end - 1].min(text.len());
-                let next_char_end = text[end..]
-                    .char_indices()
-                    .next()
-                    .map(|(i, c)| end + i + c.len_utf8())
-                    .unwrap_or(end + 1)
-                    .min(text.len());
-                end..next_char_end
-            } else {
-                let end = text[pos..]
-                    .char_indices()
-                    .next()
-                    .map(|(i, c)| pos + i + c.len_utf8())
-                    .unwrap_or(pos + 1)
-                    .min(text.len());
-                pos..end
-            }
-        })
+        .map(|n| effective_error_span::<L>(&n))
         .collect();
 
     ranges.into_iter().zip(msgs).collect()
@@ -107,7 +86,7 @@ fn render_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) ->
 
     let mut colors = ColorGenerator::from_state([10000, 15000, 15000], 0.8);
 
-    let report = errors.iter().rev().fold(
+    let report = errors.iter().fold(
         Report::build(ReportKind::Error, (loc, s..e))
             .with_config(Config::default().with_color(true)),
         |report: ReportBuilder<(&str, Range<usize>)>, (span, msg)| {
@@ -276,7 +255,7 @@ where
         let p = prev.borrow();
         parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
     };
-    let pairs = get_error_range_pairs::<L>(&parse, text);
+    let pairs = get_error_range_pairs::<L>(&parse);
     let turtle = convert_fn(&parse);
     *prev.borrow_mut() = Some(new_prev);
     ParseResult {
