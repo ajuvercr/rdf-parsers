@@ -1,9 +1,9 @@
 # A\* Error-Recovery Walkthrough: Incremental Token Insertion
 
 This document walks through a concrete example that exercises almost every
-mechanism in the incremental A\* parser: the heuristic, fingerprint-based
-role agreement, role conflict with bias, token deletion with role-aware
-penalty, error insertion fallbacks, and the `done`-map deduplication that
+mechanism in the incremental A\* parser: the heuristic, role agreement based
+on previous parse history, role conflicts, token deletion with history-aware
+penalties, error insertion as recovery, and the visited-state pruning that
 ultimately decides which path survives.
 
 ---
@@ -16,16 +16,18 @@ ultimately decides which path survives.
 <b> <c> <d> .
 ```
 
-Parsed successfully as one triple:
+Parsed successfully as one triple. Each token received a **role signature** — a
+hash that encodes the grammatical context in which it was matched:
 
-| Role      | Token | Fingerprint (symbolic) | max\_error\_value |
-|-----------|-------|------------------------|-------------------|
-| Subject   | `<b>` | `fp_subj_iri`          | 1                 |
-| Predicate | `<c>` | `fp_pred_iri`          | 1                 |
-| Object    | `<d>` | `fp_obj_iri`           | 1                 |
-| Stop      | `.`   | `fp_stop`              | 3                 |
+| Role      | Token | Role signature | Error weight |
+|-----------|-------|----------------|--------------|
+| Subject   | `<b>` | subject-iri    | 1            |
+| Predicate | `<c>` | predicate-iri  | 1            |
+| Object    | `<d>` | object-iri     | 1            |
+| Stop      | `.`   | stop           | 3            |
 
-These fingerprints and roles are stored in a `PrevParseInfo`.
+The **error weight** is the grammar's measure of how costly it is to get a
+token wrong — IRIs are cheap (1), while a missing dot is more serious (3).
 
 ### New document (invalid — one extra token)
 
@@ -33,61 +35,65 @@ These fingerprints and roles are stored in a `PrevParseInfo`.
 <a> <b> <c> <d> .
 ```
 
-A Myers diff between the old and new token streams yields:
+A diff between the old and new token streams transfers the previous role
+signatures to tokens that were already present:
 
-| Position | Token | Kind   | old\_kind (from diff) | mev |
-|----------|-------|--------|-----------------------|-----|
-| 0        | `<a>` | Iriref | **None** (new token)  | 1   |
-| 2        | `<b>` | Iriref | `fp_subj_iri`         | 1   |
-| 4        | `<c>` | Iriref | `fp_pred_iri`         | 1   |
-| 6        | `<d>` | Iriref | `fp_obj_iri`          | 1   |
-| 8        | `.`   | Stop   | `fp_stop`             | 3   |
+| Position | Token | Previous role?             | Error weight |
+|----------|-------|----------------------------|--------------|
+| 0        | `<a>` | **none** (new token)        | 1            |
+| 2        | `<b>` | subject-iri                 | 1            |
+| 4        | `<c>` | predicate-iri               | 1            |
+| 6        | `<d>` | object-iri                  | 1            |
+| 8        | `.`   | stop                        | 3            |
 
-(Odd positions are whitespace tokens that are skipped by `get_actual_index`.)
+(Odd positions are whitespace tokens that the parser skips.)
 
-### Parameters
+### Cost model parameters
 
-- `IncrementalBias { strength: 1 }` (the default)
-- Deletion base cost: `5 × mev`
-- Role-conflict bias: `+50`
+- **History bonus**: 1 (used to favour tokens that had a role in the previous parse)
+- **Deletion base cost**: 5 × error weight
+- **Role conflict penalty**: +50 (when a token's previous role contradicts its current assignment)
 
 ---
 
 ## 2. Heuristic Computation
 
-The heuristic `h[i]` is a suffix sum over `max_error_value`, but tokens with
-`old_kind` get a **discount** of `strength` (clamped to 0):
+The heuristic `h[i]` is a suffix sum of estimated remaining cost. Tokens that
+had a role in the previous parse get a **discount** (the history bonus,
+clamped to 0), because we expect them to match cheaply:
 
 ```
-offset(token) = if old_kind.is_some() { max(mev − strength, 0) } else { mev }
+estimated cost per token:
+  known token  →  max(error weight − history bonus, 0)
+  new token    →  error weight
 ```
 
-| Position | Token | old\_kind? | mev | offset         | h\[i\]                |
-|----------|-------|-----------|-----|----------------|-----------------------|
-| 8        | `.`   | yes       | 3   | max(3−1, 0) = 2 | **2**               |
-| 6        | `<d>` | yes       | 1   | max(1−1, 0) = 0 | 2 + 0 = **2**       |
-| 4        | `<c>` | yes       | 1   | 0              | 2 + 0 = **2**        |
-| 2        | `<b>` | yes       | 1   | 0              | 2 + 0 = **2**        |
-| 0        | `<a>` | **no**    | 1   | 1              | 2 + 1 = **3**        |
+| Position | Token | Known? | Error weight | Estimated cost | h |
+|----------|-------|--------|--------------|----------------|---|
+| 8        | `.`   | yes    | 3            | max(3−1, 0) = 2 | **2** |
+| 6        | `<d>` | yes    | 1            | max(1−1, 0) = 0 | 2 + 0 = **2** |
+| 4        | `<c>` | yes    | 1            | 0              | 2 + 0 = **2** |
+| 2        | `<b>` | yes    | 1            | 0              | 2 + 0 = **2** |
+| 0        | `<a>` | **no** | 1            | 1              | 2 + 1 = **3** |
 
-So `h[0] = 3`.  The initial element starts with `cost = 0`, `h = 3`, giving
+So `h[0] = 3`. The initial state starts with `cost = 0`, `h = 3`, giving
 **`f = 3`**.
 
-> **Key insight:** because all the "old" tokens have discounted offsets, the
-> heuristic is *optimistic* about paths that keep them — exactly the A\*
-> admissibility property, but tuned to favour incremental agreement.
+> **Key insight:** the heuristic is *optimistic* about paths that keep known
+> tokens — it assumes they'll slot into their old roles cheaply. This is the
+> A\* admissibility property, tuned for incremental re-parsing.
 
 ---
 
 ## 3. The Two Competing Deletion Paths
 
-The document has five non-whitespace tokens but a triple only needs three IRIs
-plus a dot.  One IRI must be deleted.  Two candidate paths are:
+The document has five tokens but a triple only needs three IRIs plus a dot.
+One IRI must be deleted. Two candidate paths are:
 
-| Path            | Deletes | Resulting triple        |
-|-----------------|---------|-------------------------|
-| **A** (desired) | `<a>`   | `<b> <c> <d> .`         |
-| **B** (wrong)   | `<b>`   | `<a> <c_pred> <d_obj> .`|
+| Path            | Deletes | Resulting triple |
+|-----------------|---------|------------------|
+| **A** (desired) | `<a>`   | `<b> <c> <d> .`  |
+| **B** (wrong)   | `<b>`   | `<a> <c> <d> .`  |
 
 ---
 
@@ -95,74 +101,74 @@ plus a dot.  One IRI must be deleted.  Two candidate paths are:
 
 The A\* explores this path first because matching `<a>` is cheap.
 
-### 4.1  Match `<a>` as Subject → Iri → Iriref
+### 4.1  Match `<a>` as Subject
 
 The grammar expands: TurtleDoc → Statement → Triples → Subject → Iri → expect
-`Iriref`.
+Iriref.
 
-Token `<a>` at position 0 **is** an `Iriref` — it matches.
+Token `<a>` at position 0 **is** an Iriref — it matches.
 
-```
-old_kind = None  →  IsExpectedElement::Unknown  →  bias = 0
-```
+Since `<a>` is a new token (no previous role), there is no agreement or
+conflict — just a neutral match.
 
 | field | value |
 |-------|-------|
-| cost  | 0 + mev + bias = **1** |
+| cost  | 0 + 1 (error weight) + 0 (no conflict) = **1** |
 | h     | h\[2\] = **2** |
 | **f** | **3** |
 | pos   | 2 (`<b>`) |
 
-> No conflict, no fallback created.  The A\* continues expanding the grammar.
+### 4.2  Expect predicate at `<b>` — role conflict!
 
-### 4.2  Expect predicate: Verb → Predicate → Iri → expect `Iriref` at `<b>`
-
-Token `<b>` matches `Iriref`.  Fingerprint check:
+The grammar now expects a predicate. Token `<b>` is an Iriref, so the type
+matches. But the **role check** fails:
 
 ```
-old_kind = fp_subj_iri   (was Subject in previous parse)
-state.0  = fp_pred_iri   (current position is Predicate → Iri)
-fp_subj_iri ≠ fp_pred_iri  →  IsExpectedElement::False
-depth_delta = 0, committed_delta = 0  →  genuine role conflict
+Previous role:  subject-iri   (was subject in the old parse)
+Current role:   predicate-iri (grammar is asking for a predicate)
+→ CONFLICT: these don't match — same depth, genuine role disagreement
 ```
 
-This creates **two** elements:
+This creates **two** alternatives:
 
-| Element                     | cost            | h   | **f** | pos | note                               |
-|-----------------------------|-----------------|-----|-------|-----|--------------------------------------|
-| **Match** (with conflict)   | 1 + 1 + 50 = **52** | 2 | **54** | 4 | prohibitively expensive            |
-| **Fallback** (insert error) | 1 + 1 = **2**  | 2   | **4** | 2  | stays at `<b>`, inserts error pred |
+| Alternative                | cost              | h | **f** | pos | note |
+|----------------------------|-------------------|---|-------|-----|------|
+| **Accept** (with conflict) | 1 + 1 + 50 = **52** | 2 | **54** | 4 | prohibitively expensive |
+| **Skip & insert error**    | 1 + 1 = **2**    | 2 | **4** | 2   | stays at `<b>`, inserts a dummy predicate |
 
-The match element (f=54) sinks to the bottom of the heap.  Only the fallback
-(f=4) continues.
+The accept option (f=54) sinks to the bottom of the priority queue.
+Only the error-insertion alternative (f=4) continues.
 
-### 4.3  Fallback cascade: insert errors for verb, object, and dot
+### 4.3  Error-insertion cascade: fill in a dummy triple
 
-The fallback element (cost=2, pos=2) pops through the grammar rules without
-consuming any tokens.  At each missing production the parser inserts an error:
+The error-insertion branch (cost=2, pos=2) advances through the grammar
+without consuming any tokens. At each missing piece, the parser inserts an
+error placeholder:
 
-| Inserted error for | mev of expected token | cost after | h   | **f** | pos |
-|--------------------|-----------------------|------------|-----|-------|-----|
-| Verb (Iriref)      | 1                     | 2          | 2   | 4     | 2   |
-| Object (Iriref)    | 1                     | 3          | 2   | 5     | 2   |
+| Inserted error for | Error weight | cost after | h | **f** | pos |
+|--------------------|--------------|------------|---|-------|-----|
+| Predicate (Iriref) | 1            | 2          | 2 | 4     | 2   |
+| Object (Iriref)    | 1            | 3          | 2 | 5     | 2   |
 
-After popping ObjectList → PredicateObjectList → Triples → Statement, the
-grammar expects a **Stop** (`.`).  Token `<b>` is not a dot:
+After completing the first triple's skeleton, the grammar expects a **dot**.
+Token `<b>` is not a dot, so that's another error:
 
-| Inserted error for | mev | cost after | h   | **f** | pos |
-|--------------------|-----|------------|-----|-------|-----|
-| Stop               | 3   | **6**      | 2   | **8** | 2   |
+| Inserted error for | Error weight | cost after | h | **f** | pos |
+|--------------------|--------------|------------|---|-------|-----|
+| Dot (`.`)          | 3            | **6**      | 2 | **8** | 2   |
 
 ### 4.4  Second triple: `<b> <c> <d> .`
 
-After Statement pops, TurtleDoc loops and begins a new Statement → Triples →
-Subject → Iri → Iriref.
+After closing the first (dummy) triple, the grammar loops and begins a new
+Statement → Triples → Subject.
 
-Now `<b>` at position 2 is matched as Subject:
+Now `<b>` at position 2 is matched as Subject — and this time the **role
+agrees** with its previous assignment:
 
 ```
-old_kind = fp_subj_iri  ==  state.0 (= fp_subj_iri)
-→  IsExpectedElement::True  →  bias = 0  ✓ agreement!
+Previous role:  subject-iri
+Current role:   subject-iri
+→ AGREEMENT ✓  — no penalty
 ```
 
 | step                | cost | h | **f** |
@@ -172,20 +178,23 @@ old_kind = fp_subj_iri  ==  state.0 (= fp_subj_iri)
 | Match `<d>` object  | 9    | 2 | 11    |
 | Match `.` stop      | 12   | 0 | 12    |
 
-**Path B total cost = 12, f = 12.**
+**Path B total cost = 12.**
 
 ---
 
-### 4.5  Meanwhile: the deletion of `<b>` inside Iri
+### 4.5  Meanwhile: the deletion of `<b>` inside the predicate slot
 
-When the grammar first reaches Iri state=1 for Predicate at position 2 (step
-4.2), the main loop *also* offers a **deletion branch** for `<b>`:
+When the grammar first reaches the predicate slot at position 2 (step 4.2),
+the A\* *also* considers **deleting** `<b>`:
 
 ```
-delete_cost = 5 × mev + role_penalty
-            = 5 × 1   + 1              ← old_kind is Some → penalty = strength
-            = 6
+deletion cost  = 5 × error weight + history penalty
+               = 5 × 1            + 1                ← known token → penalised
+               = 6
 ```
+
+The history penalty applies because `<b>` had a role in the previous parse —
+deleting a token with established history costs extra.
 
 | field | value |
 |-------|-------|
@@ -194,13 +203,8 @@ delete_cost = 5 × mev + role_penalty
 | **f** | **9** |
 | pos   | 4 (`<c>`) |
 
-After this deletion the grammar is still inside Iri (for Predicate).  Token
-`<c>` is next:
-
-```
-old_kind = fp_pred_iri  ==  state.0 (= fp_pred_iri, same context)
-→  agreement, bias = 0  ✓
-```
+After deleting `<b>`, the grammar still expects a predicate. Token `<c>` is
+next, and its previous role was predicate — **agreement** ✓.
 
 | step                   | cost | h | **f** |
 |------------------------|------|---|-------|
@@ -209,7 +213,7 @@ old_kind = fp_pred_iri  ==  state.0 (= fp_pred_iri, same context)
 | Match `<d>` object     | 9    | 2 | 11    |
 | Match `.` stop         | 12   | 0 | 12    |
 
-**Path B-delete total cost = 12, f = 12.**
+**This sub-path also totals cost = 12.**
 
 ---
 
@@ -217,15 +221,17 @@ old_kind = fp_pred_iri  ==  state.0 (= fp_pred_iri, same context)
 
 ### 5.1  Deletion of `<a>`
 
-Every time an element at position 0 is popped from the heap, the main loop
-offers a deletion branch for `<a>`.  The earliest such element is at the
-Subject → Iri level:
+Every time the A\* processes a state at position 0, it also offers a deletion
+branch for `<a>`. The earliest opportunity is at the Subject → Iri level:
 
 ```
-delete_cost = 5 × mev + role_penalty
-            = 5 × 1   + 0              ← old_kind is None → no penalty
-            = 5
+deletion cost  = 5 × error weight + history penalty
+               = 5 × 1            + 0                ← new token → no penalty
+               = 5
 ```
+
+No history penalty because `<a>` is new — it has no established role to
+preserve.
 
 | field | value |
 |-------|-------|
@@ -234,14 +240,15 @@ delete_cost = 5 × mev + role_penalty
 | **f** | **7** |
 | pos   | 2 (`<b>`) |
 
-### 5.2  Match `<b>` as Subject → Iri → Iriref  (agreement ✓)
+### 5.2  Match `<b>` as Subject (agreement ✓)
 
-The grammar context is still Subject → Iri (unchanged by the deletion, which
-only advanced the token pointer).
+After the deletion, the grammar is still at Subject → Iri — the deletion only
+advanced the token pointer.
 
 ```
-old_kind = fp_subj_iri  ==  state.0 (= fp_subj_iri)
-→  agreement, bias = 0
+Previous role:  subject-iri
+Current role:   subject-iri
+→ AGREEMENT ✓
 ```
 
 | field | value |
@@ -250,11 +257,12 @@ old_kind = fp_subj_iri  ==  state.0 (= fp_subj_iri)
 | h     | h\[4\] = **2** |
 | **f** | **8** |
 
-### 5.3  Match `<c>` as Predicate → Iri → Iriref  (agreement ✓)
+### 5.3  Match `<c>` as Predicate (agreement ✓)
 
 ```
-old_kind = fp_pred_iri  ==  state.0 (= fp_pred_iri)
-→  agreement, bias = 0
+Previous role:  predicate-iri
+Current role:   predicate-iri
+→ AGREEMENT ✓
 ```
 
 | field | value |
@@ -263,11 +271,12 @@ old_kind = fp_pred_iri  ==  state.0 (= fp_pred_iri)
 | h     | h\[6\] = **2** |
 | **f** | **9** |
 
-### 5.4  Match `<d>` as Object → Iri → Iriref  (agreement ✓)
+### 5.4  Match `<d>` as Object (agreement ✓)
 
 ```
-old_kind = fp_obj_iri  ==  state.0 (= fp_obj_iri)
-→  agreement, bias = 0
+Previous role:  object-iri
+Current role:   object-iri
+→ AGREEMENT ✓
 ```
 
 | field | value |
@@ -276,11 +285,12 @@ old_kind = fp_obj_iri  ==  state.0 (= fp_obj_iri)
 | h     | h\[8\] = **2** |
 | **f** | **10** |
 
-### 5.5  Match `.` as Stop  (agreement ✓)
+### 5.5  Match `.` as Stop (agreement ✓)
 
 ```
-old_kind = fp_stop  ==  state.0 (= fp_stop)
-→  agreement, bias = 0
+Previous role:  stop
+Current role:   stop
+→ AGREEMENT ✓
 ```
 
 | field | value |
@@ -289,47 +299,49 @@ old_kind = fp_stop  ==  state.0 (= fp_stop)
 | h     | 0 |
 | **f** | **11** |
 
-**Path A total cost = 11, f = 11.** ✓
+**Path A total cost = 11.** ✓
 
 ---
 
 ## 6. How the A\* Picks the Winner
 
-### 6.1  Exploration order (f-values over time)
+### 6.1  Exploration order
+
+The A\* always processes the lowest-f element first:
 
 ```
 f:  3 ···  4 ···  5 ···  7 ···  8 ···  9 ··· 10 ··· 11 ··· 12
     ↑            ↑       ↑      ↑      ↑      ↑      ↑      ↑
-    match <a>    fb      fb    del <a> A:<b>  A:<c>  A:<d>  A:. → SOLUTION (cost 11)
-    (Path B)  (inserts)       (Path A)                       ↑
-                                                     Path B reaches f=12 later
+    match <a>  errors  errors  del <a> A:<b>  A:<c>  A:<d>  A:. → SOLUTION (cost 11)
+    (Path B)                   (Path A)                      ↑
+                                                     Path B arrives later (cost 12)
 ```
 
-Path B's intermediate elements (f = 3, 4, 5, …) are explored first because
-matching `<a>` is cheap.  But every step down that path either hits a **role
-conflict** (+50) or an **error insertion** (+mev).  Path B cannot reach a
-complete parse below f = 12.
+Path B starts strong (f=3) because matching `<a>` is cheap. But every step
+hits either a **role conflict** (+50) or an **error insertion**, driving its
+cost up. Path B cannot finish below cost 12.
 
-Path A's first element appears at **f = 7** (the deletion of `<a>`).  From
-there, every token agrees with its previous role, so f advances by small
-increments (8, 9, 10, 11) straight to a complete parse.
+Path A first appears at **f = 7** (the deletion of `<a>`). From there, every
+token agrees with its previous role, so the cost grows by just the error
+weight at each step — straight to a complete parse at cost 11.
 
-### 6.2  The `done`-map convergence
+### 6.2  The decisive convergence point
 
-Both paths eventually reach the same grammar state: Predicate → Iri, at
-position 4 (`<c>`).  Their costs at that point:
+Both paths eventually reach the same grammar state: expecting a predicate at
+position 4 (`<c>`). Their costs at that point:
 
-| Path | cost at `<c>` | how                                   |
-|------|---------------|---------------------------------------|
-| A    | **6**         | delete `<a>` (5) + match `<b>` (1)    |
-| B    | **7**         | match `<a>` (1) + delete `<b>` (5+1)  |
+| Path | Cost at `<c>` | How |
+|------|---------------|-----|
+| A    | **6**         | delete `<a>` (5) + match `<b>` (1) |
+| B    | **7**         | match `<a>` (1) + delete `<b>` (5+1) |
 
-The `done` map keeps **the element with the lowest cost** for each state key
-`(fingerprint, position, grammar_state)`.  Path A arrives with cost 6; Path B
-arrives with cost 7.  **Path B is rejected.**
+The A\* tracks the best-known cost for each visited state (keyed by grammar
+position, token position, and role signature). When both paths reach the same
+state, **only the cheaper one survives** — Path A with cost 6. Path B (cost 7)
+is pruned.
 
-From that point on, only Path A continues.  It matches `<c>`, `<d>`, `.` with
-full agreement and produces the solution at cost 11.
+From that point on, only Path A continues. It matches `<c>`, `<d>`, `.` with
+full role agreement and produces the solution at cost 11.
 
 ---
 
@@ -337,23 +349,23 @@ full agreement and produces the solution at cost 11.
 
 | Mechanism | What it does in this example |
 |-----------|------------------------------|
-| **Heuristic discount** (`mev − strength` for old tokens) | Makes h\[0\]=3 instead of 7. Path A's deletion element gets f=7 instead of f=11, so it's explored earlier. |
-| **Role-conflict bias** (+50) | Makes matching `<b>` as predicate (f=54) prohibitively expensive — the A\* never goes down that path. |
-| **Error-insertion fallback** | Provides a cheaper alternative (f=4) to the role conflict, letting Path B attempt a two-triple recovery — but at cost 12. |
-| **Deletion with role penalty** (`+strength` for old tokens) | Deleting `<b>` costs 6 instead of 5. This 1-point difference is what separates the paths at the `done`-map convergence point. |
-| **`done`-map deduplication** | When both paths reach the same state (Predicate → Iri at `<c>`), the one with lower cost (Path A: 6) survives and the other (Path B: 7) is pruned. |
-| **Fingerprint agreement** (bias = 0) | In Path A, every remaining token matches its old role for free.  Four consecutive agreements is what keeps f at 11. |
+| **Heuristic discount for known tokens** | Reduces h\[0\] from 7 to 3. Path A's deletion gets f=7 instead of f=11, so it's explored early enough to matter. |
+| **Role conflict penalty** (+50) | Makes accepting `<b>` as predicate (f=54) prohibitively expensive — the A\* avoids that dead end. |
+| **Error insertion as fallback** | Offers a cheaper alternative (f=4) to the role conflict, letting Path B attempt a two-triple recovery — but at total cost 12. |
+| **History penalty on deletion** (+1 for known tokens) | Deleting `<b>` costs 6 instead of 5. This 1-point gap is what separates the two paths at the convergence point. |
+| **Visited-state pruning** | When both paths reach the same state (predicate at `<c>`), the cheaper one (Path A: 6) survives and the other (Path B: 7) is discarded. |
+| **Role agreement** (no penalty) | In Path A, every token matches its previous role for free. Four consecutive agreements keep the total at just 11. |
 
 ### Without the fix
 
-Without the heuristic discount **and** the deletion penalty, both paths would
-arrive at the convergence point with **cost = 6**.  The `done` map would keep
-whichever arrived first — and since Path B is explored at lower intermediate f
-values, it would win.  Result: `<a>` kept as subject, `<b>` deleted.
+Without the heuristic discount **and** the deletion history penalty, both
+paths would arrive at the convergence point with **cost = 6**. The A\* would
+keep whichever arrived first — and since Path B has lower intermediate f
+values, it would win. Result: `<a>` kept as subject, `<b>` deleted. ✗
 
 ### With the fix
 
-The deletion penalty makes Path B cost 7 at the convergence point while Path A
-costs 6.  The heuristic discount ensures Path A is explored early enough to
-register its lower cost first.  Result: `<a>` deleted, `<b>` preserved as
-subject.  ✓
+The history penalty makes Path B cost 7 at the convergence point while Path A
+costs 6. The heuristic discount ensures Path A is explored early enough to
+register its lower cost first. Result: `<a>` deleted, `<b>` preserved as
+subject. ✓
