@@ -245,7 +245,7 @@ fn parse_language<T, L>(
     convert_fn: impl FnOnce(&Parse) -> Turtle,
 ) -> ParseResult
 where
-    T: ParserTrait + 'static,
+    T: ParserTrait + 'static + Clone,
     for<'a> T::Kind: logos::Logos<'a, Source = str>,
     for<'a> <<T as ParserTrait>::Kind as logos::Logos<'a>>::Extras: Default,
     L: rowan::Language,
