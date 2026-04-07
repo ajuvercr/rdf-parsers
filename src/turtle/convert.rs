@@ -774,11 +774,14 @@ mod tests {
         let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
         let mut depth: i32 = 0;
         PrevParseInfo {
-            tokens: tokens.iter().map(|t| {
-                let d = depth.clamp(0, 255) as u8;
-                depth += t.kind.bracket_delta() as i32;
-                t.to_prev_token(d)
-            }).collect(),
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
             had_errors: false,
         }
     }
@@ -1026,6 +1029,47 @@ mod tests {
             doc.triples[0].0.po.len(),
             2,
             "should produce two predicate objects"
+        );
+    }
+
+    #[test]
+    fn test_changing_whitespace_does_not_influence_errors() {
+        let before = r#"<a> a <b> . "#;
+
+        let after_1 = r#"<a>  <b> . "#;
+        let after_2 = r#"<a> <b> . "#;
+
+        let prev = prev_info(before);
+        let bias = IncrementalBias::default();
+
+        let (parse, prev) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_1,
+            Some(&prev),
+            bias,
+        );
+        println!("First errors {:?}", parse.errors);
+        assert!(
+            parse
+                .errors
+                .iter()
+                .any(|x| x.to_lowercase().contains("verb")),
+            "expected a verb"
+        );
+        let (parse, _) = parse_incremental(
+            lang::Rule::new(lang::SyntaxKind::TurtleDoc),
+            after_2,
+            Some(&prev),
+            bias,
+        );
+
+        println!("Later errors {:?}", parse.errors);
+        assert!(
+            parse
+                .errors
+                .iter()
+                .any(|x| x.to_lowercase().contains("verb")),
+            "expected a verb"
         );
     }
 
