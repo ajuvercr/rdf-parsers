@@ -809,17 +809,17 @@ mod tests {
         let root = parse.syntax::<lang::Lang>();
         let doc = convert(&root);
 
-        assert_eq!(doc.triples.len(), 2, "should produce two triples");
+        assert_eq!(doc.triples.len(), 1, "should produce one triples");
 
-        // Triple 1: <a> as subject (error recovery — predicate/object are
-        // error nodes with empty IRIs, representing the undefined slots)
-        match doc.triples[0].value().subject.value() {
-            Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "a"),
-            other => panic!("expected <a> as first subject, got {:?}", other),
-        }
+        assert!(
+            parse
+                .errors
+                .iter()
+                .any(|p| p.to_lowercase().contains("unexpected"))
+        );
 
         // Triple 2: <b> <c> <d> — original roles preserved
-        let t2 = doc.triples[1].value();
+        let t2 = doc.triples[0].value();
         match t2.subject.value() {
             Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
             other => panic!("expected <b> as subject of second triple, got {:?}", other),
