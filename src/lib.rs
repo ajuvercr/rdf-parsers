@@ -246,7 +246,14 @@ impl Default for IncrementalBias {
 /// onto the matching new token via `FatToken::set_old_kind`.  The A* scorer
 /// then uses `bias` to adjust scores for parses that agree or disagree with
 /// the previous token positions in the grammar rule stack.
-pub fn parse_incremental<'a, T: a_star::ParserTrait + 'static>(
+///
+/// Fast path: if the document is currently valid (fast parse succeeds), the
+/// fault-tolerant search and incremental diffing are skipped entirely.  The
+/// fast result is returned with a `PrevParseInfo` marked `had_errors = false`,
+/// so subsequent edits receive full incremental guidance.  This avoids the
+/// case where fingerprints from an error-recovery parse mislead the A* when
+/// the document later becomes valid again.
+pub fn parse_incremental<'a, T: a_star::ParserTrait + Clone + 'static>(
     root: T,
     text: &'a str,
     prev: Option<&PrevParseInfo>,
@@ -256,6 +263,20 @@ where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
+    // Fast path: document is currently valid — no error recovery needed.
+    if let Some((parse, tokens)) = parse_fast(root.clone(), text) {
+        let mut depth = 0i32;
+        let prev_info = PrevParseInfo {
+            tokens: tokens.iter().map(|t| {
+                let d = depth.clamp(0, 255) as u8;
+                depth += t.kind.bracket_delta() as i32;
+                t.to_prev_token(d)
+            }).collect(),
+            had_errors: false,
+        };
+        return (parse, prev_info);
+    }
+
     let mut tokens = tokenize::<T::Kind>(text);
 
     if let Some(prev) = prev {
@@ -281,16 +302,15 @@ where
         }
 
         // Copy the old fingerprint and depth onto each unchanged new token.
-        // When the previous parse had errors, skip copying depth: error-
-        // recovery may have placed tokens at grammatically misleading depths,
-        // and we don't want the +50 same-depth bias to fire on them.
+        // Depth is always copied: valid documents are handled by the fast
+        // path above, so fault-tolerant parses only reach this point for
+        // invalid documents.  In that case the previous depth information
+        // is still the best available guide for role-conflict detection.
         for (new_idx, tok) in tokens.iter_mut().enumerate() {
             if let Some(&old_idx) = new_to_old.get(&new_idx) {
                 if let Some(prev_tok) = prev.tokens.get(old_idx) {
                     tok.set_old_kind(prev_tok.fingerprint);
-                    if !prev.had_errors {
-                        tok.set_old_depth(Some(prev_tok.depth));
-                    }
+                    tok.set_old_depth(Some(prev_tok.depth));
                 }
             }
         }

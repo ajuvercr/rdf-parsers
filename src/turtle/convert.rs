@@ -1048,13 +1048,13 @@ mod tests {
             Some(&prev),
             bias,
         );
-        println!("First errors {:?}", parse.errors);
         assert!(
             parse
                 .errors
                 .iter()
                 .any(|x| x.to_lowercase().contains("verb")),
-            "expected a verb"
+            "expected a verb error; got: {:?}",
+            parse.errors,
         );
         let (parse, _) = parse_incremental(
             lang::Rule::new(lang::SyntaxKind::TurtleDoc),
@@ -1062,14 +1062,13 @@ mod tests {
             Some(&prev),
             bias,
         );
-
-        println!("Later errors {:?}", parse.errors);
         assert!(
             parse
                 .errors
                 .iter()
                 .any(|x| x.to_lowercase().contains("verb")),
-            "expected a verb"
+            "expected a verb error; got: {:?}",
+            parse.errors,
         );
     }
 

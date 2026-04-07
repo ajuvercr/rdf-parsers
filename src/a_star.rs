@@ -325,7 +325,11 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     current_depth: element.current_depth,
                                 });
                                 // One-time delta-adoption cost: proportional to how much
-                                // the assumed delta changes.
+                                // the assumed delta changes.  When depth info is unavailable
+                                // (None — because the previous parse had errors and the token
+                                // was not at depth 0), treat as a free adoption: we cannot
+                                // distinguish a genuine role conflict from a legitimate depth
+                                // shift, so we do not penalise either.
                                 let new_delta = depth_delta
                                     .map(|d| d.clamp(i8::MIN as i16, i8::MAX as i16) as i8)
                                     .unwrap_or(element.assumed_depth_delta);
