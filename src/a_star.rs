@@ -84,9 +84,17 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             let offset = if tokens[i].kind.skips() {
                 0
             } else {
-                tokens[i].kind.max_error_value()
+                let mev = tokens[i].kind.max_error_value();
+                // Tokens with an old_kind can potentially agree with their
+                // previous role, yielding a zero-bias match.  Discount their
+                // heuristic contribution so paths that preserve old token roles
+                // are explored first.
+                if tokens[i].old_kind().is_some() {
+                    (mev - bias.strength).max(0)
+                } else {
+                    mev
+                }
             };
-            // Maybe off by one
             heuristic[i] = heuristic[i + 1] + offset;
         }
         Self {
@@ -169,6 +177,41 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 if self.iterations >= self.max_iterations {
                     println!("Max iterations reached");
                     break;
+                }
+
+                // Offer a deletion branch: skip the current token at cost =
+                // 2 * max_error_value.  This makes deletion as expensive as one
+                // insertion error (f increases by max_error_value), so the A*
+                // prefers correct parses and legitimate insertions over deletion.
+                // Only in FaultTolerant mode; skippable tokens (whitespace) are
+                // never deleted since they are already invisible to the grammar.
+                if self.mode == ParseMode::FaultTolerant {
+                    let idx = e.state.1;
+                    if let Some(token) = self.tokens.get(idx) {
+                        if !token.kind.skips() {
+                            let next = self.get_actual_index(idx + 1);
+                            let h = self.heuristic[next];
+                            // Tokens with old_kind have an established role from
+                            // the previous parse; deleting them is more costly
+                            // because it discards incremental structure.
+                            let role_penalty = if token.old_kind().is_some() {
+                                self.bias.strength
+                            } else {
+                                0
+                            };
+                            let delete_el = Element {
+                                list: e.list.prepend(Step::delete()),
+                                parent: e.parent.clone(),
+                                cost: e.cost + 5 * token.kind.max_error_value() + role_penalty,
+                                h,
+                                state: (e.state.0, next),
+                                has_error: true,
+                                assumed_depth_delta: e.assumed_depth_delta,
+                                current_depth: e.current_depth,
+                            };
+                            self.add_element(delete_el);
+                        }
+                    }
                 }
 
                 head.step(&e, self);
