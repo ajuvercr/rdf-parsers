@@ -555,20 +555,16 @@ GRAPH ex:metadata {
 :Socrates a :Human .
 `,
             jsonld: `{
-  "@context": {
-    "name": "http://schema.org/name",
-    "knows": {
-      "@id": "http://schema.org/knows",
-      "@type": "@id"
-    },
-    "Person": "http://schema.org/Person"
-  },
-  "@id": "http://example.org/alice",
+  "@context": "https://schema.org/docs/jsonldcontext.json",
   "@type": "Person",
+  "@id": "https://example.com/alice",
   "name": "Alice",
-  "knows": "http://example.org/bob"
-}
-`,
+  "url": "https://alice.example.com",
+  "knows": {
+    "@type": "Person",
+    "name": "Bob"
+  }
+}`,
         };
 
         const MODES = {
@@ -665,11 +661,11 @@ GRAPH ex:metadata {
         }
         astTabs.forEach(tab => tab.addEventListener('click', () => switchAstTab(tab.dataset.tab)));
 
-        function runParse() {
+        async function runParse() {
             if (!wasmReady) return;
             const text = cm.getValue();
             const t0 = performance.now();
-            const {ariadne, ast, triples} = parse(currentLang, text);
+            const {ariadne, ast, triples} = await parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = ariadne.startsWith('No errors');

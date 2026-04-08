@@ -1,12 +1,16 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Write as FmtWrite;
+use std::future::Future;
 use std::io::Cursor;
 use std::ops::Range;
+use std::pin::Pin;
 
 use ariadne::{ColorGenerator, Config, Label, Report, ReportBuilder, ReportKind, Source};
 use rowan::{NodeOrToken, SyntaxElement};
+use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 
 use rdf_parsers::{
     IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait, effective_error_span,
@@ -267,8 +271,28 @@ where
     }
 }
 
+/// A `ContextLoader` that fetches remote JSON-LD context documents using the
+/// browser `fetch()` API.
+struct WasmFetchLoader;
+
+impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
+    fn load<'a>(&'a self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+        let url = url.to_string();
+        Box::pin(async move {
+            let window = web_sys::window()?;
+            let resp_val = JsFuture::from(window.fetch_with_str(&url)).await.ok()?;
+            let resp: web_sys::Response = resp_val.dyn_into().ok()?;
+            if !resp.ok() {
+                return None;
+            }
+            let text_val = JsFuture::from(resp.text().ok()?).await.ok()?;
+            text_val.as_string()
+        })
+    }
+}
+
 #[wasm_bindgen]
-pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
+pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
             parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, |p| {
@@ -301,14 +325,36 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 rdf_parsers::n3::convert::convert(&p.syntax::<N3Lang>())
             })
         }),
-        "jsonld" => PREV_JSONLD.with(|prev| {
-            parse_language::<_, JsonLdLang>(
-                JsonLdRule::new(JsonLdSyntaxKind::JsonldDoc),
-                text,
-                prev,
-                |p| rdf_parsers::jsonld::convert::convert(&p.syntax::<JsonLdLang>()),
+        "jsonld" => {
+            // Parse the CST synchronously (updates the incremental cache),
+            // then convert asynchronously so the WasmFetchLoader can await
+            // fetch() calls for any remote @context URLs.
+            let (parse, pairs) = PREV_JSONLD.with(|prev| {
+                let (parse, new_prev) = {
+                    let p = prev.borrow();
+                    parse_incremental(
+                        JsonLdRule::new(JsonLdSyntaxKind::JsonldDoc),
+                        text,
+                        p.as_ref(),
+                        IncrementalBias::default(),
+                    )
+                };
+                let pairs = get_error_range_pairs::<JsonLdLang>(&parse);
+                *prev.borrow_mut() = Some(new_prev);
+                (parse, pairs)
+            });
+            let root = parse.syntax::<JsonLdLang>();
+            let turtle = rdf_parsers::jsonld::convert::convert_with_loader(
+                &root,
+                &WasmFetchLoader,
             )
-        }),
+            .await;
+            ParseResult {
+                ariadne: render_ariadne(&pairs, text, "input"),
+                ast: render_ast::<JsonLdLang>(&parse, &pairs),
+                triples: render_triples(&turtle),
+            }
+        }
         _ => return Err("Unknown language".into()),
     })
 }
