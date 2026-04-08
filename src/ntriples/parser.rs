@@ -125,49 +125,69 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the set of all terminals that can be consumed *anywhere*"]
-    #[doc = r" in a parse of `kind` — including inside sub-rules at any depth."]
-    #[doc = r#" An empty slice means "unknown / no pruning"."#]
-    pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
+    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
+    #[doc = r" is nullable); positive means the rule cannot make progress without"]
+    #[doc = r" at least that much error cost."]
+    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
         match kind {
-            SyntaxKind::Literal => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::StringLiteralQuote,
-            ],
-            SyntaxKind::NtriplesDoc => &[
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteralQuote,
-            ],
-            SyntaxKind::Object => &[
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::StringLiteralQuote,
-            ],
-            SyntaxKind::Predicate => &[SyntaxKind::Iriref],
-            SyntaxKind::Subject => &[SyntaxKind::BlankNodeLabel, SyntaxKind::Iriref],
-            SyntaxKind::Triple => &[
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteralQuote,
-            ],
-            SyntaxKind::Stop => &[SyntaxKind::Stop],
-            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
-            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
-            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
-            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
-            SyntaxKind::StringLiteralQuote => &[SyntaxKind::StringLiteralQuote],
-            _ => &[],
+            SyntaxKind::Literal => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::StringLiteralQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Object => match tok {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::StringLiteralQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Predicate => match tok {
+                SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Subject => match tok {
+                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Triple => match tok {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteralQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Stop => match tok {
+                SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Datatype => match tok {
+                SyntaxKind::Datatype => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodeLabel => match tok {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iriref => match tok {
+                SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Langtag => match tok {
+                SyntaxKind::Langtag => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralQuote => match tok {
+                SyntaxKind::StringLiteralQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            _ => 0,
         }
     }
     impl crate::a_star::ParserTrait for Rule {
@@ -528,8 +548,8 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
-        all_tokens(*self)
+    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
+        min_error_for_token(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]

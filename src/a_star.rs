@@ -187,27 +187,34 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         })
     }
 
-    /// Like `add_element` but also applies reachable-token pruning when in
-    /// Fast mode.  This is called by generated `push_rule` code so that
-    /// pruning happens precisely at sub-rule entry, where the reachable-token
-    /// set is semantically correct (the sub-rule hasn't consumed anything yet).
-    /// Calling this at other sites (Star/Option decision states) would be
-    /// incorrect because those states can exit without consuming a token.
+    /// Like `add_element` but pre-charges the element with the minimum error
+    /// cost implied by the current token before adding it.  Called by
+    /// generated `push_rule` code at sub-rule entry.
+    ///
+    /// `pushed_kind.min_error_for_token(tok)` returns 0 when the token is
+    /// reachable inside the sub-rule (or the rule is nullable), and a positive
+    /// value otherwise.  Pre-charging lets FaultTolerant mode still explore
+    /// the branch (with a higher cost), while Fast mode drops it automatically
+    /// via the `has_error` guard in `add_element`.
     pub fn add_element_checked(&mut self, element: Element<R>, pushed_kind: R::Kind) -> bool {
-        if self.mode == ParseMode::Fast {
-            let reachable = pushed_kind.all_reachable_tokens();
-            if !reachable.is_empty() {
-                let mut pos = element.state.1;
-                while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
-                    pos += 1;
-                }
-                if let Some(tok) = self.tokens.get(pos) {
-                    if !reachable.contains(&tok.kind) {
-                        return false;
-                    }
-                }
-            }
+        let mut pos = element.state.1;
+        while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
+            pos += 1;
         }
+        let element = if let Some(tok) = self.tokens.get(pos) {
+            let min_err = pushed_kind.min_error_for_token(&tok.kind);
+            if min_err > 0 {
+                Element {
+                    cost: element.cost + min_err,
+                    has_error: true,
+                    ..element
+                }
+            } else {
+                element
+            }
+        } else {
+            element
+        };
         self.add_element(element)
     }
 

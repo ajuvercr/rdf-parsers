@@ -2772,9416 +2772,9301 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the set of all terminals that can be consumed *anywhere*"]
-    #[doc = r" in a parse of `kind` — including inside sub-rules at any depth."]
-    #[doc = r#" An empty slice means "unknown / no pruning"."#]
-    pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
+    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
+    #[doc = r" is nullable); positive means the rule cannot make progress without"]
+    #[doc = r" at least that much error cost."]
+    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
         match kind {
-            SyntaxKind::Add => &[
-                SyntaxKind::AddLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-                SyntaxKind::ToLit,
-            ],
-            SyntaxKind::AdditiveExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Aggregate => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ArgList => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::AskQuery => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AskLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::BaseDecl => &[SyntaxKind::Iriref, SyntaxKind::SparqlBaseToken],
-            SyntaxKind::Bind => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::BlankNode => &[SyntaxKind::Anon, SyntaxKind::BlankNodeLabel],
-            SyntaxKind::BlankNodePropertyList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::BlankNodePropertyListPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::BooleanLiteral => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
-            SyntaxKind::BrackettedExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::BuiltInCall => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Clear => &[
-                SyntaxKind::AllLit,
-                SyntaxKind::ClearLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-            ],
-            SyntaxKind::Collection => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::CollectionPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::ConditionalAndExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ConditionalOrExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Constraint => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ConstructQuery => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ConstructLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ConstructTemplate => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::ConstructTriples => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Copy => &[
-                SyntaxKind::CopyLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-                SyntaxKind::ToLit,
-            ],
-            SyntaxKind::Create => &[
-                SyntaxKind::CreateLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-            ],
-            SyntaxKind::DataBlock => &[
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::DataBlockValue => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-            ],
-            SyntaxKind::DatasetClause => &[
-                SyntaxKind::FromLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::DefaultGraphClause => {
-                &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs]
-            }
-            SyntaxKind::DeleteClause => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::DeleteData => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::DeleteWhere => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::DescribeQuery => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DescribeLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Drop => &[
-                SyntaxKind::AllLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::DropLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-            ],
-            SyntaxKind::ExistsFunc => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Expression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ExpressionList => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Filter => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::FunctionCall => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GraphGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GraphNode => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::GraphNodePath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::GraphOrDefault => &[
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::GraphPatternNotTriples => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GraphRef => &[
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::GraphRefAll => &[
-                SyntaxKind::AllLit,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::GraphTerm => &[
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::GroupClause => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GroupCondition => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GroupGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GroupGraphPatternSub => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::GroupOrUnionGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::HavingClause => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::HavingCondition => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::InlineData => &[
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::InlineDataFull => &[
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::InlineDataOneVar => &[
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::InsertClause => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::InsertData => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::LimitClause => &[SyntaxKind::Integer, SyntaxKind::LimitLit],
-            SyntaxKind::LimitOffsetClauses => &[
-                SyntaxKind::Integer,
-                SyntaxKind::LimitLit,
-                SyntaxKind::OffsetLit,
-            ],
-            SyntaxKind::Load => &[
-                SyntaxKind::GraphLit,
-                SyntaxKind::IntoLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::LoadLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-            ],
-            SyntaxKind::MinusGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Modify => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UsingLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Move => &[
-                SyntaxKind::DefaultLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::MoveLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SilentLit,
-                SyntaxKind::ToLit,
-            ],
-            SyntaxKind::MultiplicativeExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::NamedGraphClause => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::NotExistsFunc => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::NumericExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::NumericLiteral => &[
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-            ],
-            SyntaxKind::NumericLiteralNegative => &[
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::IntegerNegative,
-            ],
-            SyntaxKind::NumericLiteralPositive => &[
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::IntegerPositive,
-            ],
-            SyntaxKind::NumericLiteralUnsigned => {
-                &[SyntaxKind::Decimal, SyntaxKind::Double, SyntaxKind::Integer]
-            }
-            SyntaxKind::Object => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::ObjectList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::ObjectListPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::ObjectPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::OffsetClause => &[SyntaxKind::Integer, SyntaxKind::OffsetLit],
-            SyntaxKind::OptionalGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::OrderClause => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::OrderCondition => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Path => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PathAlternative => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PathElt => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PathEltOrInverse => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PathMod => &[SyntaxKind::Plus, SyntaxKind::Questionmark, SyntaxKind::Star],
-            SyntaxKind::PathNegatedPropertySet => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::PathOneInPropertySet => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::PathPrimary => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PathSequence => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::PrefixDecl => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SparqlPrefixToken,
-            ],
-            SyntaxKind::PrefixedName => &[SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::PrimaryExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Prologue => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-            ],
-            SyntaxKind::PropertyList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::PropertyListNotEmpty => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::PropertyListPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::PropertyListPathNotEmpty => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::QuadData => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::QuadPattern => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Quads => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::QuadsNotTriples => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Query => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AskLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ConstructLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DescribeLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::QueryUnit => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AskLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ConstructLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DescribeLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Rdfliteral => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-            ],
-            SyntaxKind::RegexExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::RelationalExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::SelectClause => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::SelectQuery => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::FromLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ServiceGraphPattern => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::SolutionModifier => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::SourceSelector => {
-                &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs]
-            }
-            SyntaxKind::StrReplaceExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::MyString => &[
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-            ],
-            SyntaxKind::SubSelect => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Subject1 => &[
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Subject2 => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::SubstringExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::TriplesBlock => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::TriplesNode => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::TriplesNodePath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::TriplesSameSubject => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::TriplesSameSubjectPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::Bang,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Hat,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::TriplesTemplate => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::UnaryExpression => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Update => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::AddLit,
-                SyntaxKind::Alit,
-                SyntaxKind::AllLit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::ClearLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CopyLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::CreateLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::DropLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IntoLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::MoveLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::ToLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UsingLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Update1 => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::AddLit,
-                SyntaxKind::Alit,
-                SyntaxKind::AllLit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::ClearLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CopyLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::CreateLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::DropLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IntoLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::MoveLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::ToLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UsingLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::UpdateUnit => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::AddLit,
-                SyntaxKind::Alit,
-                SyntaxKind::AllLit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::ClearLit,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CopyLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::CreateLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DefaultLit,
-                SyntaxKind::DeleteDataLit,
-                SyntaxKind::DeleteLit,
-                SyntaxKind::DeleteWhereLit,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::DropLit,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::InsertDataLit,
-                SyntaxKind::InsertLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IntoLit,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::LoadLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::MoveLit,
-                SyntaxKind::NamedLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::ToLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UsingLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::WithLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::UsingClause => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::NamedLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::UsingLit,
-            ],
-            SyntaxKind::ValueLogical => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::ValuesClause => &[
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Var => &[SyntaxKind::Var1, SyntaxKind::Var2],
-            SyntaxKind::VarOrIri => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::VarOrTerm => &[
-                SyntaxKind::Anon,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::Nil,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::TrueLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::Verb => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-            ],
-            SyntaxKind::VerbPath => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Bang,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::Div,
-                SyntaxKind::Hat,
-                SyntaxKind::Iriref,
-                SyntaxKind::Pipe,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::Star,
-            ],
-            SyntaxKind::VerbSimple => &[SyntaxKind::Var1, SyntaxKind::Var2],
-            SyntaxKind::WhereClause => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Iri => &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::IriOrFunction => &[
-                SyntaxKind::AbsLit,
-                SyntaxKind::Alit,
-                SyntaxKind::Amp2,
-                SyntaxKind::Anon,
-                SyntaxKind::AsLit,
-                SyntaxKind::AscLit,
-                SyntaxKind::AvgLit,
-                SyntaxKind::Bang,
-                SyntaxKind::Bar,
-                SyntaxKind::BindLit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BnodeLit,
-                SyntaxKind::BoundLit,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ByLit,
-                SyntaxKind::CeilLit,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::CoalesceLit,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::ConcatLit,
-                SyntaxKind::ContainsLit,
-                SyntaxKind::CountLit,
-                SyntaxKind::Datatype,
-                SyntaxKind::DatatypeLit,
-                SyntaxKind::DayLit,
-                SyntaxKind::Decimal,
-                SyntaxKind::DecimalNegative,
-                SyntaxKind::DecimalPositive,
-                SyntaxKind::DescLit,
-                SyntaxKind::DistinctLit,
-                SyntaxKind::Div,
-                SyntaxKind::Double,
-                SyntaxKind::DoubleNegative,
-                SyntaxKind::DoublePositive,
-                SyntaxKind::EncodeForUriLit,
-                SyntaxKind::Eq,
-                SyntaxKind::ExistsLit,
-                SyntaxKind::FalseLit,
-                SyntaxKind::FilterLit,
-                SyntaxKind::FloorLit,
-                SyntaxKind::GraphLit,
-                SyntaxKind::GroupConcatLit,
-                SyntaxKind::GroupLit,
-                SyntaxKind::Gt,
-                SyntaxKind::Gte,
-                SyntaxKind::Hat,
-                SyntaxKind::HavingLit,
-                SyntaxKind::HoursLit,
-                SyntaxKind::IfLit,
-                SyntaxKind::InLit,
-                SyntaxKind::Integer,
-                SyntaxKind::IntegerNegative,
-                SyntaxKind::IntegerPositive,
-                SyntaxKind::IriLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsBlankLit,
-                SyntaxKind::IsIriLit,
-                SyntaxKind::IsLiteralLit,
-                SyntaxKind::IsNumericLit,
-                SyntaxKind::IsUriLit,
-                SyntaxKind::LangLit,
-                SyntaxKind::LangmatchesLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::LcaseLit,
-                SyntaxKind::LimitLit,
-                SyntaxKind::Lt,
-                SyntaxKind::Lte,
-                SyntaxKind::MaxLit,
-                SyntaxKind::Md5Lit,
-                SyntaxKind::MinLit,
-                SyntaxKind::MinusLit,
-                SyntaxKind::MinutesLit,
-                SyntaxKind::MonthLit,
-                SyntaxKind::Neq,
-                SyntaxKind::Nil,
-                SyntaxKind::NotLit,
-                SyntaxKind::NowLit,
-                SyntaxKind::OffsetLit,
-                SyntaxKind::OptionalLit,
-                SyntaxKind::OrderLit,
-                SyntaxKind::Pipe,
-                SyntaxKind::Pipe2,
-                SyntaxKind::Plus,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::Questionmark,
-                SyntaxKind::RandLit,
-                SyntaxKind::ReducedLit,
-                SyntaxKind::RegexLit,
-                SyntaxKind::ReplaceLit,
-                SyntaxKind::RoundLit,
-                SyntaxKind::SameTermLit,
-                SyntaxKind::SampleLit,
-                SyntaxKind::SecondsLit,
-                SyntaxKind::SelectLit,
-                SyntaxKind::SeparatorLit,
-                SyntaxKind::ServiceLit,
-                SyntaxKind::Sha1Lit,
-                SyntaxKind::Sha256Lit,
-                SyntaxKind::Sha384Lit,
-                SyntaxKind::Sha512Lit,
-                SyntaxKind::SilentLit,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Star,
-                SyntaxKind::Stop,
-                SyntaxKind::StrLit,
-                SyntaxKind::StrafterLit,
-                SyntaxKind::StrbeforeLit,
-                SyntaxKind::StrdtLit,
-                SyntaxKind::StrendsLit,
-                SyntaxKind::StringLiteral1,
-                SyntaxKind::StringLiteral2,
-                SyntaxKind::StringLiteralLong1,
-                SyntaxKind::StringLiteralLong2,
-                SyntaxKind::StrlangLit,
-                SyntaxKind::StrlenLit,
-                SyntaxKind::StrstartsLit,
-                SyntaxKind::StruuidLit,
-                SyntaxKind::SubstrLit,
-                SyntaxKind::SumLit,
-                SyntaxKind::TimezoneLit,
-                SyntaxKind::TrueLit,
-                SyntaxKind::TzLit,
-                SyntaxKind::UcaseLit,
-                SyntaxKind::UndefLit,
-                SyntaxKind::UnionLit,
-                SyntaxKind::UriLit,
-                SyntaxKind::UuidLit,
-                SyntaxKind::ValuesLit,
-                SyntaxKind::Var1,
-                SyntaxKind::Var2,
-                SyntaxKind::WhereLit,
-                SyntaxKind::YearLit,
-            ],
-            SyntaxKind::Bang => &[SyntaxKind::Bang],
-            SyntaxKind::Neq => &[SyntaxKind::Neq],
-            SyntaxKind::Amp2 => &[SyntaxKind::Amp2],
-            SyntaxKind::BrOpen => &[SyntaxKind::BrOpen],
-            SyntaxKind::BrClose => &[SyntaxKind::BrClose],
-            SyntaxKind::Star => &[SyntaxKind::Star],
-            SyntaxKind::Plus => &[SyntaxKind::Plus],
-            SyntaxKind::Comma => &[SyntaxKind::Comma],
-            SyntaxKind::Bar => &[SyntaxKind::Bar],
-            SyntaxKind::Stop => &[SyntaxKind::Stop],
-            SyntaxKind::Div => &[SyntaxKind::Div],
-            SyntaxKind::Colon => &[SyntaxKind::Colon],
-            SyntaxKind::Lt => &[SyntaxKind::Lt],
-            SyntaxKind::Lte => &[SyntaxKind::Lte],
-            SyntaxKind::Eq => &[SyntaxKind::Eq],
-            SyntaxKind::Gt => &[SyntaxKind::Gt],
-            SyntaxKind::Gte => &[SyntaxKind::Gte],
-            SyntaxKind::Questionmark => &[SyntaxKind::Questionmark],
-            SyntaxKind::AbsLit => &[SyntaxKind::AbsLit],
-            SyntaxKind::AddLit => &[SyntaxKind::AddLit],
-            SyntaxKind::AllLit => &[SyntaxKind::AllLit],
-            SyntaxKind::AsLit => &[SyntaxKind::AsLit],
-            SyntaxKind::AscLit => &[SyntaxKind::AscLit],
-            SyntaxKind::AskLit => &[SyntaxKind::AskLit],
-            SyntaxKind::AvgLit => &[SyntaxKind::AvgLit],
-            SyntaxKind::SparqlBaseToken => &[SyntaxKind::SparqlBaseToken],
-            SyntaxKind::BindLit => &[SyntaxKind::BindLit],
-            SyntaxKind::BnodeLit => &[SyntaxKind::BnodeLit],
-            SyntaxKind::BoundLit => &[SyntaxKind::BoundLit],
-            SyntaxKind::ByLit => &[SyntaxKind::ByLit],
-            SyntaxKind::CeilLit => &[SyntaxKind::CeilLit],
-            SyntaxKind::ClearLit => &[SyntaxKind::ClearLit],
-            SyntaxKind::CoalesceLit => &[SyntaxKind::CoalesceLit],
-            SyntaxKind::ConcatLit => &[SyntaxKind::ConcatLit],
-            SyntaxKind::ConstructLit => &[SyntaxKind::ConstructLit],
-            SyntaxKind::ContainsLit => &[SyntaxKind::ContainsLit],
-            SyntaxKind::CopyLit => &[SyntaxKind::CopyLit],
-            SyntaxKind::CountLit => &[SyntaxKind::CountLit],
-            SyntaxKind::CreateLit => &[SyntaxKind::CreateLit],
-            SyntaxKind::DatatypeLit => &[SyntaxKind::DatatypeLit],
-            SyntaxKind::DayLit => &[SyntaxKind::DayLit],
-            SyntaxKind::DefaultLit => &[SyntaxKind::DefaultLit],
-            SyntaxKind::DeleteLit => &[SyntaxKind::DeleteLit],
-            SyntaxKind::DeleteDataLit => &[SyntaxKind::DeleteDataLit],
-            SyntaxKind::DeleteWhereLit => &[SyntaxKind::DeleteWhereLit],
-            SyntaxKind::DescLit => &[SyntaxKind::DescLit],
-            SyntaxKind::DescribeLit => &[SyntaxKind::DescribeLit],
-            SyntaxKind::DistinctLit => &[SyntaxKind::DistinctLit],
-            SyntaxKind::DropLit => &[SyntaxKind::DropLit],
-            SyntaxKind::EncodeForUriLit => &[SyntaxKind::EncodeForUriLit],
-            SyntaxKind::ExistsLit => &[SyntaxKind::ExistsLit],
-            SyntaxKind::FilterLit => &[SyntaxKind::FilterLit],
-            SyntaxKind::FloorLit => &[SyntaxKind::FloorLit],
-            SyntaxKind::FromLit => &[SyntaxKind::FromLit],
-            SyntaxKind::GraphLit => &[SyntaxKind::GraphLit],
-            SyntaxKind::GroupLit => &[SyntaxKind::GroupLit],
-            SyntaxKind::GroupConcatLit => &[SyntaxKind::GroupConcatLit],
-            SyntaxKind::HavingLit => &[SyntaxKind::HavingLit],
-            SyntaxKind::HoursLit => &[SyntaxKind::HoursLit],
-            SyntaxKind::IfLit => &[SyntaxKind::IfLit],
-            SyntaxKind::InLit => &[SyntaxKind::InLit],
-            SyntaxKind::InsertLit => &[SyntaxKind::InsertLit],
-            SyntaxKind::InsertDataLit => &[SyntaxKind::InsertDataLit],
-            SyntaxKind::IntoLit => &[SyntaxKind::IntoLit],
-            SyntaxKind::IriLit => &[SyntaxKind::IriLit],
-            SyntaxKind::LangLit => &[SyntaxKind::LangLit],
-            SyntaxKind::LangmatchesLit => &[SyntaxKind::LangmatchesLit],
-            SyntaxKind::LcaseLit => &[SyntaxKind::LcaseLit],
-            SyntaxKind::LimitLit => &[SyntaxKind::LimitLit],
-            SyntaxKind::LoadLit => &[SyntaxKind::LoadLit],
-            SyntaxKind::MaxLit => &[SyntaxKind::MaxLit],
-            SyntaxKind::Md5Lit => &[SyntaxKind::Md5Lit],
-            SyntaxKind::MinLit => &[SyntaxKind::MinLit],
-            SyntaxKind::MinusLit => &[SyntaxKind::MinusLit],
-            SyntaxKind::MinutesLit => &[SyntaxKind::MinutesLit],
-            SyntaxKind::MonthLit => &[SyntaxKind::MonthLit],
-            SyntaxKind::MoveLit => &[SyntaxKind::MoveLit],
-            SyntaxKind::NamedLit => &[SyntaxKind::NamedLit],
-            SyntaxKind::NotLit => &[SyntaxKind::NotLit],
-            SyntaxKind::NowLit => &[SyntaxKind::NowLit],
-            SyntaxKind::OffsetLit => &[SyntaxKind::OffsetLit],
-            SyntaxKind::OptionalLit => &[SyntaxKind::OptionalLit],
-            SyntaxKind::OrderLit => &[SyntaxKind::OrderLit],
-            SyntaxKind::SparqlPrefixToken => &[SyntaxKind::SparqlPrefixToken],
-            SyntaxKind::RandLit => &[SyntaxKind::RandLit],
-            SyntaxKind::ReducedLit => &[SyntaxKind::ReducedLit],
-            SyntaxKind::RegexLit => &[SyntaxKind::RegexLit],
-            SyntaxKind::ReplaceLit => &[SyntaxKind::ReplaceLit],
-            SyntaxKind::RoundLit => &[SyntaxKind::RoundLit],
-            SyntaxKind::SampleLit => &[SyntaxKind::SampleLit],
-            SyntaxKind::SecondsLit => &[SyntaxKind::SecondsLit],
-            SyntaxKind::SelectLit => &[SyntaxKind::SelectLit],
-            SyntaxKind::SeparatorLit => &[SyntaxKind::SeparatorLit],
-            SyntaxKind::ServiceLit => &[SyntaxKind::ServiceLit],
-            SyntaxKind::Sha1Lit => &[SyntaxKind::Sha1Lit],
-            SyntaxKind::Sha256Lit => &[SyntaxKind::Sha256Lit],
-            SyntaxKind::Sha384Lit => &[SyntaxKind::Sha384Lit],
-            SyntaxKind::Sha512Lit => &[SyntaxKind::Sha512Lit],
-            SyntaxKind::SilentLit => &[SyntaxKind::SilentLit],
-            SyntaxKind::StrLit => &[SyntaxKind::StrLit],
-            SyntaxKind::StrafterLit => &[SyntaxKind::StrafterLit],
-            SyntaxKind::StrbeforeLit => &[SyntaxKind::StrbeforeLit],
-            SyntaxKind::StrdtLit => &[SyntaxKind::StrdtLit],
-            SyntaxKind::StrendsLit => &[SyntaxKind::StrendsLit],
-            SyntaxKind::StrlangLit => &[SyntaxKind::StrlangLit],
-            SyntaxKind::StrlenLit => &[SyntaxKind::StrlenLit],
-            SyntaxKind::StrstartsLit => &[SyntaxKind::StrstartsLit],
-            SyntaxKind::StruuidLit => &[SyntaxKind::StruuidLit],
-            SyntaxKind::SubstrLit => &[SyntaxKind::SubstrLit],
-            SyntaxKind::SumLit => &[SyntaxKind::SumLit],
-            SyntaxKind::TimezoneLit => &[SyntaxKind::TimezoneLit],
-            SyntaxKind::ToLit => &[SyntaxKind::ToLit],
-            SyntaxKind::TzLit => &[SyntaxKind::TzLit],
-            SyntaxKind::UcaseLit => &[SyntaxKind::UcaseLit],
-            SyntaxKind::UndefLit => &[SyntaxKind::UndefLit],
-            SyntaxKind::UnionLit => &[SyntaxKind::UnionLit],
-            SyntaxKind::UriLit => &[SyntaxKind::UriLit],
-            SyntaxKind::UsingLit => &[SyntaxKind::UsingLit],
-            SyntaxKind::UuidLit => &[SyntaxKind::UuidLit],
-            SyntaxKind::ValuesLit => &[SyntaxKind::ValuesLit],
-            SyntaxKind::WhereLit => &[SyntaxKind::WhereLit],
-            SyntaxKind::WithLit => &[SyntaxKind::WithLit],
-            SyntaxKind::YearLit => &[SyntaxKind::YearLit],
-            SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
-            SyntaxKind::SqClose => &[SyntaxKind::SqClose],
-            SyntaxKind::Hat => &[SyntaxKind::Hat],
-            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
-            SyntaxKind::Alit => &[SyntaxKind::Alit],
-            SyntaxKind::FalseLit => &[SyntaxKind::FalseLit],
-            SyntaxKind::IsBlankLit => &[SyntaxKind::IsBlankLit],
-            SyntaxKind::IsIriLit => &[SyntaxKind::IsIriLit],
-            SyntaxKind::IsLiteralLit => &[SyntaxKind::IsLiteralLit],
-            SyntaxKind::IsNumericLit => &[SyntaxKind::IsNumericLit],
-            SyntaxKind::IsUriLit => &[SyntaxKind::IsUriLit],
-            SyntaxKind::SameTermLit => &[SyntaxKind::SameTermLit],
-            SyntaxKind::TrueLit => &[SyntaxKind::TrueLit],
-            SyntaxKind::ClOpen => &[SyntaxKind::ClOpen],
-            SyntaxKind::Pipe => &[SyntaxKind::Pipe],
-            SyntaxKind::Pipe2 => &[SyntaxKind::Pipe2],
-            SyntaxKind::ClClose => &[SyntaxKind::ClClose],
-            SyntaxKind::Anon => &[SyntaxKind::Anon],
-            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
-            SyntaxKind::Decimal => &[SyntaxKind::Decimal],
-            SyntaxKind::DecimalNegative => &[SyntaxKind::DecimalNegative],
-            SyntaxKind::DecimalPositive => &[SyntaxKind::DecimalPositive],
-            SyntaxKind::Double => &[SyntaxKind::Double],
-            SyntaxKind::DoubleNegative => &[SyntaxKind::DoubleNegative],
-            SyntaxKind::DoublePositive => &[SyntaxKind::DoublePositive],
-            SyntaxKind::Integer => &[SyntaxKind::Integer],
-            SyntaxKind::IntegerNegative => &[SyntaxKind::IntegerNegative],
-            SyntaxKind::IntegerPositive => &[SyntaxKind::IntegerPositive],
-            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
-            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
-            SyntaxKind::Nil => &[SyntaxKind::Nil],
-            SyntaxKind::PnameLn => &[SyntaxKind::PnameLn],
-            SyntaxKind::PnameNs => &[SyntaxKind::PnameNs],
-            SyntaxKind::StringLiteral1 => &[SyntaxKind::StringLiteral1],
-            SyntaxKind::StringLiteral2 => &[SyntaxKind::StringLiteral2],
-            SyntaxKind::StringLiteralLong1 => &[SyntaxKind::StringLiteralLong1],
-            SyntaxKind::StringLiteralLong2 => &[SyntaxKind::StringLiteralLong2],
-            SyntaxKind::Var1 => &[SyntaxKind::Var1],
-            SyntaxKind::Var2 => &[SyntaxKind::Var2],
-            _ => &[],
+            SyntaxKind::Add => match tok {
+                SyntaxKind::AddLit
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit
+                | SyntaxKind::ToLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AdditiveExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Aggregate => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ArgList => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AskQuery => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AskLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BaseDecl => match tok {
+                SyntaxKind::Iriref | SyntaxKind::SparqlBaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Bind => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNode => match tok {
+                SyntaxKind::Anon | SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodePropertyList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodePropertyListPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BooleanLiteral => match tok {
+                SyntaxKind::FalseLit | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BrackettedExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BuiltInCall => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Clear => match tok {
+                SyntaxKind::AllLit
+                | SyntaxKind::ClearLit
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Collection => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CollectionPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConditionalAndExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConditionalOrExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Constraint => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConstructQuery => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ConstructLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConstructTemplate => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConstructTriples => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Copy => match tok {
+                SyntaxKind::CopyLit
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit
+                | SyntaxKind::ToLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Create => match tok {
+                SyntaxKind::CreateLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DataBlock => match tok {
+                SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DataBlockValue => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::UndefLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DatasetClause => match tok {
+                SyntaxKind::FromLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DefaultGraphClause => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteClause => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DeleteLit
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteData => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DeleteDataLit
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteWhere => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DeleteWhereLit
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DescribeQuery => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DescribeLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Drop => match tok {
+                SyntaxKind::AllLit
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::DropLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ExistsFunc => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Expression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ExpressionList => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Filter => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FunctionCall => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphNode => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphNodePath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphOrDefault => match tok {
+                SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphPatternNotTriples => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphRef => match tok {
+                SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphRefAll => match tok {
+                SyntaxKind::AllLit
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphTerm => match tok {
+                SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupClause => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupCondition => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupOrUnionGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::HavingClause => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::HavingCondition => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InlineData => match tok {
+                SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InlineDataFull => match tok {
+                SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InlineDataOneVar => match tok {
+                SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InsertClause => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::InsertLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InsertData => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::InsertDataLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LimitClause => match tok {
+                SyntaxKind::Integer | SyntaxKind::LimitLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LimitOffsetClauses => match tok {
+                SyntaxKind::Integer | SyntaxKind::LimitLit | SyntaxKind::OffsetLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Load => match tok {
+                SyntaxKind::GraphLit
+                | SyntaxKind::IntoLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::LoadLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MinusGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Modify => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DeleteLit
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::InsertLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UsingLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::WithLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Move => match tok {
+                SyntaxKind::DefaultLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::MoveLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SilentLit
+                | SyntaxKind::ToLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MultiplicativeExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NamedGraphClause => match tok {
+                SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NotExistsFunc => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteral => match tok {
+                SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteralNegative => match tok {
+                SyntaxKind::DecimalNegative
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::IntegerNegative => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteralPositive => match tok {
+                SyntaxKind::DecimalPositive
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::IntegerPositive => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteralUnsigned => match tok {
+                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Object => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ObjectList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ObjectListPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ObjectPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OffsetClause => match tok {
+                SyntaxKind::Integer | SyntaxKind::OffsetLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OptionalGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OrderClause => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OrderCondition => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Path => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathAlternative => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathElt => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathEltOrInverse => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathMod => match tok {
+                SyntaxKind::Plus | SyntaxKind::Questionmark | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathNegatedPropertySet => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathOneInPropertySet => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathPrimary => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathSequence => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixDecl => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameNs | SyntaxKind::SparqlPrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixedName => match tok {
+                SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrimaryExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PropertyListNotEmpty => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PropertyListPathNotEmpty => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QuadData => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QuadPattern => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QuadsNotTriples => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Query => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AskLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ConstructLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DescribeLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SparqlBaseToken
+                | SyntaxKind::SparqlPrefixToken
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QueryUnit => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AskLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ConstructLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DescribeLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SparqlBaseToken
+                | SyntaxKind::SparqlPrefixToken
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Rdfliteral => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RegexExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RelationalExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SelectClause => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SelectQuery => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::FromLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ServiceGraphPattern => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SourceSelector => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrReplaceExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MyString => match tok {
+                SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SubSelect => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Subject1 => match tok {
+                SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Subject2 => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SubstringExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesBlock => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesNode => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesNodePath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesSameSubject => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesSameSubjectPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::Bang
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Hat
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TriplesTemplate => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UnaryExpression => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Update1 => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::AddLit
+                | SyntaxKind::Alit
+                | SyntaxKind::AllLit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::ClearLit
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CopyLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::CreateLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DefaultLit
+                | SyntaxKind::DeleteDataLit
+                | SyntaxKind::DeleteLit
+                | SyntaxKind::DeleteWhereLit
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::DropLit
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::InsertDataLit
+                | SyntaxKind::InsertLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IntoLit
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::LoadLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::MoveLit
+                | SyntaxKind::NamedLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::ToLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UsingLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::WithLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UsingClause => match tok {
+                SyntaxKind::Iriref
+                | SyntaxKind::NamedLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::UsingLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ValueLogical => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Var => match tok {
+                SyntaxKind::Var1 | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::VarOrIri => match tok {
+                SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::VarOrTerm => match tok {
+                SyntaxKind::Anon
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::Nil
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::TrueLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Verb => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::VerbPath => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Bang
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::Div
+                | SyntaxKind::Hat
+                | SyntaxKind::Iriref
+                | SyntaxKind::Pipe
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::VerbSimple => match tok {
+                SyntaxKind::Var1 | SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::WhereClause => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iri => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IriOrFunction => match tok {
+                SyntaxKind::AbsLit
+                | SyntaxKind::Alit
+                | SyntaxKind::Amp2
+                | SyntaxKind::Anon
+                | SyntaxKind::AsLit
+                | SyntaxKind::AscLit
+                | SyntaxKind::AvgLit
+                | SyntaxKind::Bang
+                | SyntaxKind::Bar
+                | SyntaxKind::BindLit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BnodeLit
+                | SyntaxKind::BoundLit
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ByLit
+                | SyntaxKind::CeilLit
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::CoalesceLit
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::ConcatLit
+                | SyntaxKind::ContainsLit
+                | SyntaxKind::CountLit
+                | SyntaxKind::Datatype
+                | SyntaxKind::DatatypeLit
+                | SyntaxKind::DayLit
+                | SyntaxKind::Decimal
+                | SyntaxKind::DecimalNegative
+                | SyntaxKind::DecimalPositive
+                | SyntaxKind::DescLit
+                | SyntaxKind::DistinctLit
+                | SyntaxKind::Div
+                | SyntaxKind::Double
+                | SyntaxKind::DoubleNegative
+                | SyntaxKind::DoublePositive
+                | SyntaxKind::EncodeForUriLit
+                | SyntaxKind::Eq
+                | SyntaxKind::ExistsLit
+                | SyntaxKind::FalseLit
+                | SyntaxKind::FilterLit
+                | SyntaxKind::FloorLit
+                | SyntaxKind::GraphLit
+                | SyntaxKind::GroupConcatLit
+                | SyntaxKind::GroupLit
+                | SyntaxKind::Gt
+                | SyntaxKind::Gte
+                | SyntaxKind::Hat
+                | SyntaxKind::HavingLit
+                | SyntaxKind::HoursLit
+                | SyntaxKind::IfLit
+                | SyntaxKind::InLit
+                | SyntaxKind::Integer
+                | SyntaxKind::IntegerNegative
+                | SyntaxKind::IntegerPositive
+                | SyntaxKind::IriLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsBlankLit
+                | SyntaxKind::IsIriLit
+                | SyntaxKind::IsLiteralLit
+                | SyntaxKind::IsNumericLit
+                | SyntaxKind::IsUriLit
+                | SyntaxKind::LangLit
+                | SyntaxKind::LangmatchesLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::LcaseLit
+                | SyntaxKind::LimitLit
+                | SyntaxKind::Lt
+                | SyntaxKind::Lte
+                | SyntaxKind::MaxLit
+                | SyntaxKind::Md5Lit
+                | SyntaxKind::MinLit
+                | SyntaxKind::MinusLit
+                | SyntaxKind::MinutesLit
+                | SyntaxKind::MonthLit
+                | SyntaxKind::Neq
+                | SyntaxKind::Nil
+                | SyntaxKind::NotLit
+                | SyntaxKind::NowLit
+                | SyntaxKind::OffsetLit
+                | SyntaxKind::OptionalLit
+                | SyntaxKind::OrderLit
+                | SyntaxKind::Pipe
+                | SyntaxKind::Pipe2
+                | SyntaxKind::Plus
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::Questionmark
+                | SyntaxKind::RandLit
+                | SyntaxKind::ReducedLit
+                | SyntaxKind::RegexLit
+                | SyntaxKind::ReplaceLit
+                | SyntaxKind::RoundLit
+                | SyntaxKind::SameTermLit
+                | SyntaxKind::SampleLit
+                | SyntaxKind::SecondsLit
+                | SyntaxKind::SelectLit
+                | SyntaxKind::SeparatorLit
+                | SyntaxKind::ServiceLit
+                | SyntaxKind::Sha1Lit
+                | SyntaxKind::Sha256Lit
+                | SyntaxKind::Sha384Lit
+                | SyntaxKind::Sha512Lit
+                | SyntaxKind::SilentLit
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Star
+                | SyntaxKind::Stop
+                | SyntaxKind::StrLit
+                | SyntaxKind::StrafterLit
+                | SyntaxKind::StrbeforeLit
+                | SyntaxKind::StrdtLit
+                | SyntaxKind::StrendsLit
+                | SyntaxKind::StringLiteral1
+                | SyntaxKind::StringLiteral2
+                | SyntaxKind::StringLiteralLong1
+                | SyntaxKind::StringLiteralLong2
+                | SyntaxKind::StrlangLit
+                | SyntaxKind::StrlenLit
+                | SyntaxKind::StrstartsLit
+                | SyntaxKind::StruuidLit
+                | SyntaxKind::SubstrLit
+                | SyntaxKind::SumLit
+                | SyntaxKind::TimezoneLit
+                | SyntaxKind::TrueLit
+                | SyntaxKind::TzLit
+                | SyntaxKind::UcaseLit
+                | SyntaxKind::UndefLit
+                | SyntaxKind::UnionLit
+                | SyntaxKind::UriLit
+                | SyntaxKind::UuidLit
+                | SyntaxKind::ValuesLit
+                | SyntaxKind::Var1
+                | SyntaxKind::Var2
+                | SyntaxKind::WhereLit
+                | SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Bang => match tok {
+                SyntaxKind::Bang => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Neq => match tok {
+                SyntaxKind::Neq => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Amp2 => match tok {
+                SyntaxKind::Amp2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BrOpen => match tok {
+                SyntaxKind::BrOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BrClose => match tok {
+                SyntaxKind::BrClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Star => match tok {
+                SyntaxKind::Star => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Plus => match tok {
+                SyntaxKind::Plus => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Comma => match tok {
+                SyntaxKind::Comma => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Bar => match tok {
+                SyntaxKind::Bar => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Stop => match tok {
+                SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Div => match tok {
+                SyntaxKind::Div => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Colon => match tok {
+                SyntaxKind::Colon => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Lt => match tok {
+                SyntaxKind::Lt => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Lte => match tok {
+                SyntaxKind::Lte => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Eq => match tok {
+                SyntaxKind::Eq => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Gt => match tok {
+                SyntaxKind::Gt => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Gte => match tok {
+                SyntaxKind::Gte => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Questionmark => match tok {
+                SyntaxKind::Questionmark => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AbsLit => match tok {
+                SyntaxKind::AbsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AddLit => match tok {
+                SyntaxKind::AddLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AllLit => match tok {
+                SyntaxKind::AllLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AsLit => match tok {
+                SyntaxKind::AsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AscLit => match tok {
+                SyntaxKind::AscLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AskLit => match tok {
+                SyntaxKind::AskLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::AvgLit => match tok {
+                SyntaxKind::AvgLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlBaseToken => match tok {
+                SyntaxKind::SparqlBaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BindLit => match tok {
+                SyntaxKind::BindLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BnodeLit => match tok {
+                SyntaxKind::BnodeLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BoundLit => match tok {
+                SyntaxKind::BoundLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ByLit => match tok {
+                SyntaxKind::ByLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CeilLit => match tok {
+                SyntaxKind::CeilLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClearLit => match tok {
+                SyntaxKind::ClearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CoalesceLit => match tok {
+                SyntaxKind::CoalesceLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConcatLit => match tok {
+                SyntaxKind::ConcatLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ConstructLit => match tok {
+                SyntaxKind::ConstructLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ContainsLit => match tok {
+                SyntaxKind::ContainsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CopyLit => match tok {
+                SyntaxKind::CopyLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CountLit => match tok {
+                SyntaxKind::CountLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::CreateLit => match tok {
+                SyntaxKind::CreateLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DatatypeLit => match tok {
+                SyntaxKind::DatatypeLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DayLit => match tok {
+                SyntaxKind::DayLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DefaultLit => match tok {
+                SyntaxKind::DefaultLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteLit => match tok {
+                SyntaxKind::DeleteLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteDataLit => match tok {
+                SyntaxKind::DeleteDataLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DeleteWhereLit => match tok {
+                SyntaxKind::DeleteWhereLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DescLit => match tok {
+                SyntaxKind::DescLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DescribeLit => match tok {
+                SyntaxKind::DescribeLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DistinctLit => match tok {
+                SyntaxKind::DistinctLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DropLit => match tok {
+                SyntaxKind::DropLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::EncodeForUriLit => match tok {
+                SyntaxKind::EncodeForUriLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ExistsLit => match tok {
+                SyntaxKind::ExistsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FilterLit => match tok {
+                SyntaxKind::FilterLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FloorLit => match tok {
+                SyntaxKind::FloorLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FromLit => match tok {
+                SyntaxKind::FromLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GraphLit => match tok {
+                SyntaxKind::GraphLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupLit => match tok {
+                SyntaxKind::GroupLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::GroupConcatLit => match tok {
+                SyntaxKind::GroupConcatLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::HavingLit => match tok {
+                SyntaxKind::HavingLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::HoursLit => match tok {
+                SyntaxKind::HoursLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IfLit => match tok {
+                SyntaxKind::IfLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InLit => match tok {
+                SyntaxKind::InLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InsertLit => match tok {
+                SyntaxKind::InsertLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::InsertDataLit => match tok {
+                SyntaxKind::InsertDataLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IntoLit => match tok {
+                SyntaxKind::IntoLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IriLit => match tok {
+                SyntaxKind::IriLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LangLit => match tok {
+                SyntaxKind::LangLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LangmatchesLit => match tok {
+                SyntaxKind::LangmatchesLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LcaseLit => match tok {
+                SyntaxKind::LcaseLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LimitLit => match tok {
+                SyntaxKind::LimitLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::LoadLit => match tok {
+                SyntaxKind::LoadLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MaxLit => match tok {
+                SyntaxKind::MaxLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Md5Lit => match tok {
+                SyntaxKind::Md5Lit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MinLit => match tok {
+                SyntaxKind::MinLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MinusLit => match tok {
+                SyntaxKind::MinusLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MinutesLit => match tok {
+                SyntaxKind::MinutesLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MonthLit => match tok {
+                SyntaxKind::MonthLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MoveLit => match tok {
+                SyntaxKind::MoveLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NamedLit => match tok {
+                SyntaxKind::NamedLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NotLit => match tok {
+                SyntaxKind::NotLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NowLit => match tok {
+                SyntaxKind::NowLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OffsetLit => match tok {
+                SyntaxKind::OffsetLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OptionalLit => match tok {
+                SyntaxKind::OptionalLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OrderLit => match tok {
+                SyntaxKind::OrderLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlPrefixToken => match tok {
+                SyntaxKind::SparqlPrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RandLit => match tok {
+                SyntaxKind::RandLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ReducedLit => match tok {
+                SyntaxKind::ReducedLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RegexLit => match tok {
+                SyntaxKind::RegexLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ReplaceLit => match tok {
+                SyntaxKind::ReplaceLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RoundLit => match tok {
+                SyntaxKind::RoundLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SampleLit => match tok {
+                SyntaxKind::SampleLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SecondsLit => match tok {
+                SyntaxKind::SecondsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SelectLit => match tok {
+                SyntaxKind::SelectLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SeparatorLit => match tok {
+                SyntaxKind::SeparatorLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ServiceLit => match tok {
+                SyntaxKind::ServiceLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Sha1Lit => match tok {
+                SyntaxKind::Sha1Lit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Sha256Lit => match tok {
+                SyntaxKind::Sha256Lit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Sha384Lit => match tok {
+                SyntaxKind::Sha384Lit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Sha512Lit => match tok {
+                SyntaxKind::Sha512Lit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SilentLit => match tok {
+                SyntaxKind::SilentLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrLit => match tok {
+                SyntaxKind::StrLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrafterLit => match tok {
+                SyntaxKind::StrafterLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrbeforeLit => match tok {
+                SyntaxKind::StrbeforeLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrdtLit => match tok {
+                SyntaxKind::StrdtLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrendsLit => match tok {
+                SyntaxKind::StrendsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrlangLit => match tok {
+                SyntaxKind::StrlangLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrlenLit => match tok {
+                SyntaxKind::StrlenLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StrstartsLit => match tok {
+                SyntaxKind::StrstartsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StruuidLit => match tok {
+                SyntaxKind::StruuidLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SubstrLit => match tok {
+                SyntaxKind::SubstrLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SumLit => match tok {
+                SyntaxKind::SumLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TimezoneLit => match tok {
+                SyntaxKind::TimezoneLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ToLit => match tok {
+                SyntaxKind::ToLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TzLit => match tok {
+                SyntaxKind::TzLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UcaseLit => match tok {
+                SyntaxKind::UcaseLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UndefLit => match tok {
+                SyntaxKind::UndefLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UnionLit => match tok {
+                SyntaxKind::UnionLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UriLit => match tok {
+                SyntaxKind::UriLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UsingLit => match tok {
+                SyntaxKind::UsingLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::UuidLit => match tok {
+                SyntaxKind::UuidLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ValuesLit => match tok {
+                SyntaxKind::ValuesLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::WhereLit => match tok {
+                SyntaxKind::WhereLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::WithLit => match tok {
+                SyntaxKind::WithLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::YearLit => match tok {
+                SyntaxKind::YearLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqOpen => match tok {
+                SyntaxKind::SqOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqClose => match tok {
+                SyntaxKind::SqClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Hat => match tok {
+                SyntaxKind::Hat => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Datatype => match tok {
+                SyntaxKind::Datatype => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Alit => match tok {
+                SyntaxKind::Alit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FalseLit => match tok {
+                SyntaxKind::FalseLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsBlankLit => match tok {
+                SyntaxKind::IsBlankLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsIriLit => match tok {
+                SyntaxKind::IsIriLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsLiteralLit => match tok {
+                SyntaxKind::IsLiteralLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsNumericLit => match tok {
+                SyntaxKind::IsNumericLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsUriLit => match tok {
+                SyntaxKind::IsUriLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SameTermLit => match tok {
+                SyntaxKind::SameTermLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TrueLit => match tok {
+                SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClOpen => match tok {
+                SyntaxKind::ClOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Pipe => match tok {
+                SyntaxKind::Pipe => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Pipe2 => match tok {
+                SyntaxKind::Pipe2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClClose => match tok {
+                SyntaxKind::ClClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Anon => match tok {
+                SyntaxKind::Anon => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodeLabel => match tok {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Decimal => match tok {
+                SyntaxKind::Decimal => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DecimalNegative => match tok {
+                SyntaxKind::DecimalNegative => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DecimalPositive => match tok {
+                SyntaxKind::DecimalPositive => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Double => match tok {
+                SyntaxKind::Double => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DoubleNegative => match tok {
+                SyntaxKind::DoubleNegative => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::DoublePositive => match tok {
+                SyntaxKind::DoublePositive => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Integer => match tok {
+                SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IntegerNegative => match tok {
+                SyntaxKind::IntegerNegative => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IntegerPositive => match tok {
+                SyntaxKind::IntegerPositive => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iriref => match tok {
+                SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Langtag => match tok {
+                SyntaxKind::Langtag => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Nil => match tok {
+                SyntaxKind::Nil => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameLn => match tok {
+                SyntaxKind::PnameLn => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameNs => match tok {
+                SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteral1 => match tok {
+                SyntaxKind::StringLiteral1 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteral2 => match tok {
+                SyntaxKind::StringLiteral2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralLong1 => match tok {
+                SyntaxKind::StringLiteralLong1 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralLong2 => match tok {
+                SyntaxKind::StringLiteralLong2 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Var1 => match tok {
+                SyntaxKind::Var1 => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Var2 => match tok {
+                SyntaxKind::Var2 => 0,
+                _ => kind.max_error_value(),
+            },
+            _ => 0,
         }
     }
     impl crate::a_star::ParserTrait for Rule {
@@ -23733,8 +23618,8 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
-        all_tokens(*self)
+    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
+        min_error_for_token(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]

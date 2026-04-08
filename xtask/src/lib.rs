@@ -891,16 +891,22 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .collect();
 
-    // Build all_tokens arms: the set of every terminal reachable anywhere in
-    // the parse of a producing rule.  Used at runtime for reachable-token pruning.
+    // Build sorted_reachable: terminal sets for each producing rule, used by min_error_for_token.
     let mut sorted_reachable: Vec<_> = reachable_terminals
         .iter()
         .filter(|(name, _)| config.rules.producing.iter().any(|r| &r.name == *name))
         .collect();
     sorted_reachable.sort_by_key(|(name, _)| name.as_str());
 
-    let all_token_producing_arms: Vec<_> = sorted_reachable
+    let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
+    producing.sort();
+
+    // Build min_error_for_token arms for each non-nullable producing rule:
+    // returns 0 if tok is in the reachable set, max_error_value() otherwise.
+    // Nullable rules are omitted (fall through to the default arm that returns 0).
+    let min_error_producing_arms: Vec<_> = sorted_reachable
         .iter()
+        .filter(|(name, _)| !can_be_empty.get(*name).copied().unwrap_or(false))
         .map(|(name, toks)| {
             let n = config.context.ident_for(name);
             let mut tok_idents: Vec<_> = toks
@@ -909,21 +915,29 @@ pub fn generate(path: &str, contents: &str) -> String {
                 .collect();
             tok_idents.sort_by_key(|id| id.to_string());
             tok_idents.dedup_by_key(|id| id.to_string());
-            quote! { SyntaxKind::#n => &[#( SyntaxKind::#tok_idents ),*], }
+            quote! {
+                SyntaxKind::#n => match tok {
+                    #( SyntaxKind::#tok_idents )|* => 0,
+                    _ => kind.max_error_value(),
+                },
+            }
         })
         .collect();
-
-    let all_token_terminal_arms: Vec<_> = sorted_terminals
+    // Terminal rules: they match exactly one token kind; return 0 for that
+    // token and max_error_value() for everything else.
+    let min_error_terminal_arms: Vec<_> = sorted_terminals
         .iter()
         .map(|x| {
             let name = x.ident(&config);
             let n = config.context.ident_for(&name);
-            quote! { SyntaxKind::#n => &[SyntaxKind::#n], }
+            quote! {
+                SyntaxKind::#n => match tok {
+                    SyntaxKind::#n => 0,
+                    _ => kind.max_error_value(),
+                },
+            }
         })
         .collect();
-
-    let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
-    producing.sort();
 
     let terminals: Vec<_> = sorted_terminals
         .iter()
@@ -1070,14 +1084,15 @@ pub fn generate(path: &str, contents: &str) -> String {
             }
         }
 
-        /// Returns the set of all terminals that can be consumed *anywhere*
-        /// in a parse of `kind` — including inside sub-rules at any depth.
-        /// An empty slice means "unknown / no pruning".
-        pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+        /// Returns the minimum error cost that `kind` must incur when `tok`
+        /// is the current token.  0 means the token is reachable (or the rule
+        /// is nullable); positive means the rule cannot make progress without
+        /// at least that much error cost.
+        pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
             match kind {
-                #( #all_token_producing_arms )*
-                #( #all_token_terminal_arms )*
-                _ => &[],
+                #( #min_error_producing_arms )*
+                #( #min_error_terminal_arms )*
+                _ => 0,
             }
         }
 
@@ -1128,8 +1143,8 @@ pub fn generate(path: &str, contents: &str) -> String {
             &[]
         }
 
-        fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
-            all_tokens(*self)
+        fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
+            min_error_for_token(*self, *tok)
         }
 
 

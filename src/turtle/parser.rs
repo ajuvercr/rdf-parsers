@@ -367,364 +367,447 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the set of all terminals that can be consumed *anywhere*"]
-    #[doc = r" in a parse of `kind` — including inside sub-rules at any depth."]
-    #[doc = r#" An empty slice means "unknown / no pruning"."#]
-    pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
+    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
+    #[doc = r" is nullable); positive means the rule cannot make progress without"]
+    #[doc = r" at least that much error cost."]
+    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
         match kind {
-            SyntaxKind::BlankNode => &[
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-            ],
-            SyntaxKind::BooleanLiteral => &[SyntaxKind::FalseLit, SyntaxKind::TrueLit],
-            SyntaxKind::NumericLiteral => {
-                &[SyntaxKind::Decimal, SyntaxKind::Double, SyntaxKind::Integer]
-            }
-            SyntaxKind::PrefixedName => &[SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::Rdfliteral => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-            ],
-            SyntaxKind::MyString => &[
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-            ],
-            SyntaxKind::Base => &[SyntaxKind::BaseToken, SyntaxKind::Iriref, SyntaxKind::Stop],
-            SyntaxKind::BlankNodePropertyList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::BlankNodePropertyList2 => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Collection => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Directive => &[
-                SyntaxKind::BaseToken,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::Stop,
-            ],
-            SyntaxKind::Iri => &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::Literal => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Object => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::ObjectList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Predicate => {
-                &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs]
-            }
-            SyntaxKind::PredicateObjectList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::PrefixId => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::Stop,
-            ],
-            SyntaxKind::SparqlBase => &[SyntaxKind::Iriref, SyntaxKind::SparqlBaseToken],
-            SyntaxKind::SparqlPrefix => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SparqlPrefixToken,
-            ],
-            SyntaxKind::Statement => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Subject => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Triples => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::TurtleDoc => &[
-                SyntaxKind::Alit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::FalseLit,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::SparqlBaseToken,
-                SyntaxKind::SparqlPrefixToken,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::StringLiteralLongQuote,
-                SyntaxKind::StringLiteralLongSingleQuote,
-                SyntaxKind::StringLiteralQuote,
-                SyntaxKind::StringLiteralSingleQuote,
-                SyntaxKind::TrueLit,
-            ],
-            SyntaxKind::Verb => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-            ],
-            SyntaxKind::ClOpen => &[SyntaxKind::ClOpen],
-            SyntaxKind::ClClose => &[SyntaxKind::ClClose],
-            SyntaxKind::Comma => &[SyntaxKind::Comma],
-            SyntaxKind::Stop => &[SyntaxKind::Stop],
-            SyntaxKind::Colon => &[SyntaxKind::Colon],
-            SyntaxKind::BaseToken => &[SyntaxKind::BaseToken],
-            SyntaxKind::PrefixToken => &[SyntaxKind::PrefixToken],
-            SyntaxKind::SparqlBaseToken => &[SyntaxKind::SparqlBaseToken],
-            SyntaxKind::SparqlPrefixToken => &[SyntaxKind::SparqlPrefixToken],
-            SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
-            SyntaxKind::SqClose => &[SyntaxKind::SqClose],
-            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
-            SyntaxKind::Alit => &[SyntaxKind::Alit],
-            SyntaxKind::FalseLit => &[SyntaxKind::FalseLit],
-            SyntaxKind::TrueLit => &[SyntaxKind::TrueLit],
-            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
-            SyntaxKind::Decimal => &[SyntaxKind::Decimal],
-            SyntaxKind::Double => &[SyntaxKind::Double],
-            SyntaxKind::Integer => &[SyntaxKind::Integer],
-            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
-            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
-            SyntaxKind::PnameLn => &[SyntaxKind::PnameLn],
-            SyntaxKind::PnameNs => &[SyntaxKind::PnameNs],
-            SyntaxKind::StringLiteralLongQuote => &[SyntaxKind::StringLiteralLongQuote],
-            SyntaxKind::StringLiteralLongSingleQuote => &[SyntaxKind::StringLiteralLongSingleQuote],
-            SyntaxKind::StringLiteralQuote => &[SyntaxKind::StringLiteralQuote],
-            SyntaxKind::StringLiteralSingleQuote => &[SyntaxKind::StringLiteralSingleQuote],
-            _ => &[],
+            SyntaxKind::BlankNode => match tok {
+                SyntaxKind::BlankNodeLabel | SyntaxKind::SqClose | SyntaxKind::SqOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BooleanLiteral => match tok {
+                SyntaxKind::FalseLit | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteral => match tok {
+                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixedName => match tok {
+                SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Rdfliteral => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::MyString => match tok {
+                SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Base => match tok {
+                SyntaxKind::BaseToken | SyntaxKind::Iriref | SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodePropertyList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodePropertyList2 => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Collection => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Directive => match tok {
+                SyntaxKind::BaseToken
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::SparqlBaseToken
+                | SyntaxKind::SparqlPrefixToken
+                | SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iri => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Literal => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Object => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ObjectList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Predicate => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PredicateObjectList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixId => match tok {
+                SyntaxKind::Iriref
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlBase => match tok {
+                SyntaxKind::Iriref | SyntaxKind::SparqlBaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlPrefix => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameNs | SyntaxKind::SparqlPrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Statement => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::SparqlBaseToken
+                | SyntaxKind::SparqlPrefixToken
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Subject => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Triples => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Verb => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClOpen => match tok {
+                SyntaxKind::ClOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClClose => match tok {
+                SyntaxKind::ClClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Comma => match tok {
+                SyntaxKind::Comma => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Stop => match tok {
+                SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Colon => match tok {
+                SyntaxKind::Colon => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BaseToken => match tok {
+                SyntaxKind::BaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixToken => match tok {
+                SyntaxKind::PrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlBaseToken => match tok {
+                SyntaxKind::SparqlBaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlPrefixToken => match tok {
+                SyntaxKind::SparqlPrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqOpen => match tok {
+                SyntaxKind::SqOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqClose => match tok {
+                SyntaxKind::SqClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Datatype => match tok {
+                SyntaxKind::Datatype => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Alit => match tok {
+                SyntaxKind::Alit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FalseLit => match tok {
+                SyntaxKind::FalseLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::TrueLit => match tok {
+                SyntaxKind::TrueLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodeLabel => match tok {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Decimal => match tok {
+                SyntaxKind::Decimal => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Double => match tok {
+                SyntaxKind::Double => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Integer => match tok {
+                SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iriref => match tok {
+                SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Langtag => match tok {
+                SyntaxKind::Langtag => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameLn => match tok {
+                SyntaxKind::PnameLn => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameNs => match tok {
+                SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralLongQuote => match tok {
+                SyntaxKind::StringLiteralLongQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralLongSingleQuote => match tok {
+                SyntaxKind::StringLiteralLongSingleQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralQuote => match tok {
+                SyntaxKind::StringLiteralQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::StringLiteralSingleQuote => match tok {
+                SyntaxKind::StringLiteralSingleQuote => 0,
+                _ => kind.max_error_value(),
+            },
+            _ => 0,
         }
     }
     impl crate::a_star::ParserTrait for Rule {
@@ -2303,8 +2386,8 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
-        all_tokens(*self)
+    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
+        min_error_for_token(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
