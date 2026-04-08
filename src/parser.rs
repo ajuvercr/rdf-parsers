@@ -70,7 +70,7 @@ fn coalesce_empty_rules<T: crate::TokenTrait>(steps: Vec<Step<T>>) -> Vec<Step<T
                 stack.push((kind.clone(), out.len(), false, false));
                 out.push(step);
             }
-            Step::Bump(_) | Step::Delete => {
+            Step::Bump(_) => {
                 for entry in &mut stack {
                     entry.2 = true;
                 }
@@ -206,16 +206,6 @@ impl Parse {
                         at += 1;
                     }
                 }
-                Step::Delete => {
-                    skip_white_with_builder(&mut builder, &mut at);
-                    if let Some(i) = tokens.get(at) {
-                        error_msgs.push(format!("Unexpected({:?})", i.kind));
-                        builder.start_node(T::ERROR.into());
-                        builder.token(i.kind.clone().into(), &i.text);
-                        builder.finish_node();
-                        at += 1;
-                    }
-                }
             }
         }
         skip_white_with_builder(&mut builder, &mut at);
@@ -339,10 +329,6 @@ pub enum Step<T> {
     Error(Error),
     End,
     Bump(crate::Fingerprint),
-    /// Skip a spurious input token: advance the cursor without consuming the
-    /// token into any grammar rule.  The token is emitted into an Error node in
-    /// the CST so the tree remains lossless.
-    Delete,
 }
 impl<T: TokenTrait> Step<T> {
     pub fn start(kind: T) -> Self {
@@ -354,9 +340,5 @@ impl<T: TokenTrait> Step<T> {
 
     pub fn end() -> Self {
         Step::End
-    }
-
-    pub fn delete() -> Self {
-        Step::Delete
     }
 }
