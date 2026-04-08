@@ -12,6 +12,7 @@ pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
 pub mod list;
 pub mod model;
+pub mod jsonld;
 pub mod n3;
 pub mod ntriples;
 mod parser;
