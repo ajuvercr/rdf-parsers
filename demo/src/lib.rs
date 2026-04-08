@@ -8,7 +8,7 @@ use ariadne::{ColorGenerator, Config, Label, Report, ReportBuilder, ReportKind, 
 use rowan::{NodeOrToken, SyntaxElement};
 use wasm_bindgen::prelude::*;
 
-use turtle::{
+use rdf_parsers::{
     IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait, effective_error_span,
     model::Turtle,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
@@ -242,6 +242,7 @@ fn parse_language<T, L>(
     root: T,
     text: &str,
     prev: &RefCell<Option<PrevParseInfo>>,
+    bias: IncrementalBias,
     convert_fn: impl FnOnce(&Parse) -> Turtle,
 ) -> ParseResult
 where
@@ -253,7 +254,7 @@ where
 {
     let (parse, new_prev) = {
         let p = prev.borrow();
-        parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
+        parse_incremental(root, text, p.as_ref(), bias)
     };
     let pairs = get_error_range_pairs::<L>(&parse);
     let turtle = convert_fn(&parse);
@@ -266,11 +267,12 @@ where
 }
 
 #[wasm_bindgen]
-pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
+pub fn parse(language: &str, text: &str, allow_deletion: bool) -> Result<ParseResult, JsValue> {
+    let bias = IncrementalBias { allow_deletion, ..IncrementalBias::default() };
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
-            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, |p| {
-                turtle::turtle::convert::convert(&p.syntax::<Lang>())
+            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, bias, |p| {
+                rdf_parsers::turtle::convert::convert(&p.syntax::<Lang>())
             })
         }),
         "sparql" => PREV_SPARQL.with(|prev| {
@@ -278,12 +280,13 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                 text,
                 prev,
-                |p| turtle::sparql::convert::convert(&p.syntax::<SparqlLang>()),
+                bias,
+                |p| rdf_parsers::sparql::convert::convert(&p.syntax::<SparqlLang>()),
             )
         }),
         "trig" => PREV_TRIG.with(|prev| {
-            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, |p| {
-                turtle::trig::convert::convert(&p.syntax::<TrigLang>())
+            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, bias, |p| {
+                rdf_parsers::trig::convert::convert(&p.syntax::<TrigLang>())
             })
         }),
         "ntriples" => PREV_NTRIPLES.with(|prev| {
@@ -291,12 +294,13 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                 text,
                 prev,
-                |p| turtle::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
+                bias,
+                |p| rdf_parsers::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
             )
         }),
         "n3" => PREV_N3.with(|prev| {
-            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, |p| {
-                turtle::n3::convert::convert(&p.syntax::<N3Lang>())
+            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, bias, |p| {
+                rdf_parsers::n3::convert::convert(&p.syntax::<N3Lang>())
             })
         }),
         _ => return Err("Unknown language".into()),

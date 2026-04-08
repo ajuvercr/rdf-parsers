@@ -2535,7 +2535,7 @@ dependencies = [
 
 [[package]]
 name = "rdf-parsers"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "logos 0.16.1",
  "rowan",
