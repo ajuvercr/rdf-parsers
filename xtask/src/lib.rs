@@ -225,9 +225,10 @@ fn push_rule(
     initial_state: usize,
 ) -> token_stream::TokenStream {
     quote! {
-        state.add_element(
+        state.add_element_checked(
             element.pop_push(Rule { kind: self.kind, state: #next })
-                .push(Rule { kind: SyntaxKind::#n, state: #initial_state })
+                .push(Rule { kind: SyntaxKind::#n, state: #initial_state }),
+            SyntaxKind::#n,
         );
     }
 }
@@ -294,21 +295,16 @@ fn add_impl(
     state_count: &mut usize,
     next: usize,
     impls: &mut HashMap<usize, token_stream::TokenStream>,
+    body_to_state: &mut HashMap<String, usize>,
     reachable: &mut HashSet<usize>,
     initial_states: &HashMap<String, usize>,
 ) -> usize {
-    fn as_tt(
-        impls: &mut HashMap<usize, proc_macro2::TokenStream>,
-        x: usize,
-    ) -> proc_macro2::TokenStream {
-        if let Some(tt) = impls.get(&x) {
-            quote! {
-                #tt
-            }
-        } else {
-            quote! {
-                state.add_element(element.pop_push(Rule { kind: self.kind, state: #x }));
-            }
+    // Never inline: always emit pop_push(state:x).  This keeps every state as
+    // an explicit match arm so redirect states are always reachable.
+    fn as_tt(reachable: &mut HashSet<usize>, x: usize) -> proc_macro2::TokenStream {
+        reachable.insert(x);
+        quote! {
+            state.add_element(element.pop_push(Rule { kind: self.kind, state: #x }));
         }
     }
     let id = *state_count;
@@ -322,11 +318,12 @@ fn add_impl(
                 state_count,
                 next,
                 impls,
+                body_to_state,
                 reachable,
                 initial_states,
             );
-            let tt = as_tt(impls, thing);
-            let next = as_tt(impls, next);
+            let tt = as_tt(reachable, thing);
+            let next = as_tt(reachable, next);
 
             quote! {
                 #next
@@ -344,12 +341,13 @@ fn add_impl(
                 state_count,
                 done_once,
                 impls,
+                body_to_state,
                 reachable,
                 initial_states,
             );
-            let tt = as_tt(impls, thing);
+            let tt = as_tt(reachable, thing);
 
-            let next = as_tt(impls, next);
+            let next = as_tt(reachable, next);
 
             impls.insert(
                 done_once,
@@ -372,11 +370,12 @@ fn add_impl(
                 state_count,
                 id,
                 impls,
+                body_to_state,
                 reachable,
                 initial_states,
             );
-            let tt = as_tt(impls, thing);
-            let next = as_tt(impls, next);
+            let tt = as_tt(reachable, thing);
+            let next = as_tt(reachable, next);
             quote! {
                 #tt
                 #next
@@ -394,13 +393,14 @@ fn add_impl(
                         state_count,
                         next,
                         impls,
+                        body_to_state,
                         reachable,
                         initial_states,
                     )
                 })
                 .collect();
 
-            let things = things.into_iter().map(|x| as_tt(impls, x));
+            let things = things.into_iter().map(|x| as_tt(reachable, x));
 
             quote! {
                 #( #things )*
@@ -416,6 +416,7 @@ fn add_impl(
                     state_count,
                     target,
                     impls,
+                    body_to_state,
                     reachable,
                     initial_states,
                 );
@@ -423,6 +424,12 @@ fn add_impl(
 
             return target;
         }
+        // For leaf nodes (Literal, Reference) the generated body does NOT
+        // reference the newly-allocated state ID.  If an identical body was
+        // already emitted for a previous state, emit a one-line redirect arm
+        // instead of duplicating the body.  This keeps state numbering in sync
+        // with compute_entry_state while still letting the A* dedup converge
+        // both paths at the canonical state on the next step.
         Expr::Literal(lt, f) => {
             let ignore_case = if lt == &LiteralType::Double {
                 IgnoreCase::True
@@ -434,7 +441,20 @@ fn add_impl(
             let name = ctx.context.with(f);
             let n = ctx.context.ident_for(&name);
             reachable.insert(next);
-            inline_terminal_rule(next, &n)
+            let exp = inline_terminal_rule(next, &n);
+            let key = exp.to_string();
+            if let Some(&canonical) = body_to_state.get(&key) {
+                // Redirect: pop_push to the canonical state so the A* dedup
+                // collapses both paths at `canonical` on the next iteration.
+                let redirect = quote! {
+                    state.add_element(element.pop_push(Rule { kind: self.kind, state: #canonical }));
+                };
+                impls.insert(id, redirect);
+            } else {
+                body_to_state.insert(key, id);
+                impls.insert(id, exp);
+            }
+            return id;
         }
         Expr::Reference(re) => {
             *state_count += 1;
@@ -444,14 +464,25 @@ fn add_impl(
             }
             let n = ctx.context.ident_for(re);
             reachable.insert(next);
-            if is_terminal {
+            let exp = if is_terminal {
                 inline_terminal_rule(next, &n)
             } else {
                 let entry = *initial_states
                     .get(re)
                     .unwrap_or_else(|| panic!("unknown rule: {re}"));
                 push_rule(next, &n, entry)
+            };
+            let key = exp.to_string();
+            if let Some(&canonical) = body_to_state.get(&key) {
+                let redirect = quote! {
+                    state.add_element(element.pop_push(Rule { kind: self.kind, state: #canonical }));
+                };
+                impls.insert(id, redirect);
+            } else {
+                body_to_state.insert(key, id);
+                impls.insert(id, exp);
             }
+            return id;
         }
     };
 
@@ -479,6 +510,7 @@ fn producing_rule_arms(
         },
     );
     let mut reachable = HashSet::new();
+    let mut body_to_state: HashMap<String, usize> = HashMap::new();
     let imp = add_impl(
         expr,
         ctx,
@@ -486,6 +518,7 @@ fn producing_rule_arms(
         &mut state_count,
         0,
         &mut impls,
+        &mut body_to_state,
         &mut reachable,
         initial_states,
     );
@@ -687,6 +720,69 @@ fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>)
     }
 }
 
+/// Collect all terminal names reachable from `expr` into `set`, using already-
+/// computed results from `known` for non-terminal references.
+fn expr_reachable_terminals(
+    expr: &Expr,
+    ctx: &Config,
+    known: &HashMap<String, HashSet<String>>,
+    set: &mut HashSet<String>,
+) {
+    match expr {
+        Expr::Literal(lt, f) => {
+            let ignore_case = if lt == &LiteralType::Double {
+                IgnoreCase::True
+            } else {
+                IgnoreCase::False
+            };
+            let name = ctx.context.with(f);
+            set.insert(Terminal::Literal(f.clone(), ignore_case).ident(ctx));
+            let _ = name; // used via Terminal::Literal above
+        }
+        Expr::Reference(name) => {
+            let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == name);
+            if is_terminal {
+                set.insert(Terminal::Ref(name.clone()).ident(ctx));
+            } else if let Some(sub) = known.get(name) {
+                set.extend(sub.iter().cloned());
+            }
+        }
+        Expr::Seq(exprs) | Expr::Either(exprs) => {
+            for e in exprs {
+                expr_reachable_terminals(e, ctx, known, set);
+            }
+        }
+        Expr::Marked(inner, _) => {
+            expr_reachable_terminals(inner, ctx, known, set);
+        }
+    }
+}
+
+/// Compute the set of all terminal names that can be consumed *anywhere* in a
+/// parse of each producing rule.  Uses fixed-point iteration to handle mutual
+/// recursion.
+fn compute_reachable_terminals(
+    config: &Config,
+) -> HashMap<String, HashSet<String>> {
+    let mut result: HashMap<String, HashSet<String>> = HashMap::new();
+
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for rule in &config.rules.producing {
+            let prev_len = result.get(&rule.name).map(|s| s.len()).unwrap_or(0);
+            let snapshot = result.clone();
+            let entry = result.entry(rule.name.clone()).or_default();
+            expr_reachable_terminals(&rule.expression, config, &snapshot, entry);
+            if result[&rule.name].len() > prev_len {
+                changed = true;
+            }
+        }
+    }
+
+    result
+}
+
 /// Generate Rust source code from a grammar file.
 /// `path` is used only for error reporting; `contents` is the grammar text.
 pub fn generate(path: &str, contents: &str) -> String {
@@ -710,6 +806,9 @@ pub fn generate(path: &str, contents: &str) -> String {
         set_first_possible_item(&r.name, &config, &mut first_items, &mut can_be_empty);
         set_last_possible_item(&r.name, &config, &mut last_items, &mut can_be_empty, 0);
     }
+
+    // Compute reachable terminal sets for all_tokens() pruning.
+    let reachable_terminals = compute_reachable_terminals(&config);
 
     // Compact each rule's expression before code generation.
     let compacted: Vec<Expr> = config
@@ -784,6 +883,37 @@ pub fn generate(path: &str, contents: &str) -> String {
         .collect();
 
     let first_token_terminal_arms: Vec<_> = sorted_terminals
+        .iter()
+        .map(|x| {
+            let name = x.ident(&config);
+            let n = config.context.ident_for(&name);
+            quote! { SyntaxKind::#n => &[SyntaxKind::#n], }
+        })
+        .collect();
+
+    // Build all_tokens arms: the set of every terminal reachable anywhere in
+    // the parse of a producing rule.  Used at runtime for reachable-token pruning.
+    let mut sorted_reachable: Vec<_> = reachable_terminals
+        .iter()
+        .filter(|(name, _)| config.rules.producing.iter().any(|r| &r.name == *name))
+        .collect();
+    sorted_reachable.sort_by_key(|(name, _)| name.as_str());
+
+    let all_token_producing_arms: Vec<_> = sorted_reachable
+        .iter()
+        .map(|(name, toks)| {
+            let n = config.context.ident_for(name);
+            let mut tok_idents: Vec<_> = toks
+                .iter()
+                .map(|t| config.context.ident_for(t))
+                .collect();
+            tok_idents.sort_by_key(|id| id.to_string());
+            tok_idents.dedup_by_key(|id| id.to_string());
+            quote! { SyntaxKind::#n => &[#( SyntaxKind::#tok_idents ),*], }
+        })
+        .collect();
+
+    let all_token_terminal_arms: Vec<_> = sorted_terminals
         .iter()
         .map(|x| {
             let name = x.ident(&config);
@@ -940,6 +1070,17 @@ pub fn generate(path: &str, contents: &str) -> String {
             }
         }
 
+        /// Returns the set of all terminals that can be consumed *anywhere*
+        /// in a parse of `kind` — including inside sub-rules at any depth.
+        /// An empty slice means "unknown / no pruning".
+        pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+            match kind {
+                #( #all_token_producing_arms )*
+                #( #all_token_terminal_arms )*
+                _ => &[],
+            }
+        }
+
         impl crate::a_star::ParserTrait for Rule {
             type Kind = SyntaxKind;
 
@@ -986,6 +1127,11 @@ pub fn generate(path: &str, contents: &str) -> String {
         fn starting_tokens(&self) -> &'static [SyntaxKind] {
             &[]
         }
+
+        fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
+            all_tokens(*self)
+        }
+
 
         fn ending_tokens(&self) -> &'static [SyntaxKind] {
             &[]
