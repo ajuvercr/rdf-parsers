@@ -73,14 +73,14 @@ struct ActiveContext {
 /// }
 /// ```
 pub trait ContextLoader {
-    fn load<'a>(&'a self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>>;
+    fn load<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>>;
 }
 
 /// A no-op `ContextLoader` that never resolves remote contexts.
 pub struct NoopContextLoader;
 
 impl ContextLoader for NoopContextLoader {
-    fn load<'a>(&'a self, _url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+    fn load<'a>(&'a mut self, _url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
         Box::pin(std::future::ready(None))
     }
 }
@@ -94,7 +94,10 @@ struct ConvertState {
 
 impl ConvertState {
     fn new() -> Self {
-        Self { blank_counter: 0, triples: Vec::new() }
+        Self {
+            blank_counter: 0,
+            triples: Vec::new(),
+        }
     }
 
     fn fresh_blank(&mut self, offset: usize) -> Term {
@@ -305,7 +308,7 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
 fn process_context<'a>(
     mut active: ActiveContext,
     ctx_val: JsonLdVal,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
 ) -> Pin<Box<dyn Future<Output = ActiveContext> + 'a>> {
     Box::pin(async move {
         match ctx_val {
@@ -329,9 +332,7 @@ fn process_context<'a>(
                     match key.as_str() {
                         "@base" => match &val {
                             JsonLdVal::Str(s) if s.is_empty() => active.base = None,
-                            JsonLdVal::Str(s) => {
-                                active.base = Some(resolve_iri(&active.base, s))
-                            }
+                            JsonLdVal::Str(s) => active.base = Some(resolve_iri(&active.base, s)),
                             JsonLdVal::Null => active.base = None,
                             _ => {}
                         },
@@ -372,7 +373,10 @@ fn process_term_definition(
         JsonLdVal::Null => None,
         JsonLdVal::Str(s) => {
             let iri = expand_iri(active, s, true, false);
-            Some(TermDefinition { iri, ..Default::default() })
+            Some(TermDefinition {
+                iri,
+                ..Default::default()
+            })
         }
         JsonLdVal::Object(members, _) => {
             let mut def = TermDefinition::default();
@@ -411,7 +415,10 @@ fn process_term_definition(
 
             Some(def)
         }
-        _ => Some(TermDefinition { iri: None, ..Default::default() }),
+        _ => Some(TermDefinition {
+            iri: None,
+            ..Default::default()
+        }),
     }
 }
 
@@ -535,7 +542,10 @@ fn resolve_iri(base: &Option<String>, reference: &str) -> String {
 fn authority_end(iri: &str) -> Option<usize> {
     let after = iri.find("://")?;
     let start = after + 3;
-    let path_start = iri[start..].find('/').map(|i| start + i).unwrap_or(iri.len());
+    let path_start = iri[start..]
+        .find('/')
+        .map(|i| start + i)
+        .unwrap_or(iri.len());
     Some(path_start)
 }
 
@@ -547,7 +557,7 @@ fn authority_end(iri: &str) -> Option<usize> {
 fn process_document<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
 ) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
     Box::pin(async move {
@@ -572,7 +582,7 @@ fn process_document<'a>(
 fn process_document_with_graph<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
     graph: Option<&'a Term>,
 ) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
@@ -599,14 +609,13 @@ fn process_document_with_graph<'a>(
 fn process_node<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     members: &'a [(String, JsonLdVal)],
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
 ) -> Pin<Box<dyn Future<Output = Option<Term>> + 'a>> {
     Box::pin(async move {
-        let map: HashMap<&str, &JsonLdVal> =
-            members.iter().map(|(k, v)| (k.as_str(), v)).collect();
+        let map: HashMap<&str, &JsonLdVal> = members.iter().map(|(k, v)| (k.as_str(), v)).collect();
 
         // Value object — return as a literal, generate no subject-based triples
         if map.contains_key("@value") {
@@ -644,15 +653,13 @@ fn process_node<'a>(
         // Determine the subject
         let subject: Term = if let Some(id_val) = map.get("@id") {
             match id_val {
-                JsonLdVal::Str(s) => {
-                    match expand_iri(active, s, false, true) {
-                        Some(iri) if iri.starts_with("_:") => {
-                            Term::BlankNode(BlankNode::Named(iri[2..].to_string(), span.start))
-                        }
-                        Some(iri) => Term::NamedNode(NamedNode::Full(iri, span.start)),
-                        None => state.fresh_blank(span.start),
+                JsonLdVal::Str(s) => match expand_iri(active, s, false, true) {
+                    Some(iri) if iri.starts_with("_:") => {
+                        Term::BlankNode(BlankNode::Named(iri[2..].to_string(), span.start))
                     }
-                }
+                    Some(iri) => Term::NamedNode(NamedNode::Full(iri, span.start)),
+                    None => state.fresh_blank(span.start),
+                },
                 _ => state.fresh_blank(span.start),
             }
         } else {
@@ -743,7 +750,7 @@ fn process_node<'a>(
         for (key, val) in members {
             match key.as_str() {
                 "@context" | "@id" | "@type" | "@graph" | "@reverse" | "@included" | "@nest" => {
-                    continue
+                    continue;
                 }
                 k if k.starts_with('@') => continue,
                 _ => {}
@@ -758,8 +765,7 @@ fn process_node<'a>(
             };
 
             let term_def = active.terms.get(key.as_str());
-            let objects =
-                collect_objects(state, active, loader, val, span, graph, term_def).await;
+            let objects = collect_objects(state, active, loader, val, span, graph, term_def).await;
             if objects.is_empty() {
                 continue;
             }
@@ -770,10 +776,7 @@ fn process_node<'a>(
                     po: vec![Spanned(
                         PO {
                             predicate: Spanned(ConvertState::named(&pred_iri), s.clone()),
-                            object: objects
-                                .into_iter()
-                                .map(|o| Spanned(o, s.clone()))
-                                .collect(),
+                            object: objects.into_iter().map(|o| Spanned(o, s.clone())).collect(),
                         },
                         s.clone(),
                     )],
@@ -812,7 +815,7 @@ fn collect_strings(val: &JsonLdVal) -> Vec<String> {
 fn collect_objects<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
@@ -845,7 +848,7 @@ fn collect_objects<'a>(
 async fn value_to_rdf<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
@@ -1012,8 +1015,7 @@ fn process_value_object(
     // Explicit @type
     if let Some(ty) = type_str {
         let ty_owned = ty.to_string();
-        let ty_node = expand_iri(active, &ty_owned, true, false)
-            .map(|iri| NamedNode::Full(iri, 0));
+        let ty_node = expand_iri(active, &ty_owned, true, false).map(|iri| NamedNode::Full(iri, 0));
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
             value: value_str,
             quote_style: StringStyle::Double,
@@ -1060,7 +1062,7 @@ fn process_value_object(
 fn process_list<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
-    loader: &'a dyn ContextLoader,
+    loader: &'a mut dyn ContextLoader,
     items: &'a [JsonLdVal],
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
@@ -1072,10 +1074,9 @@ fn process_list<'a>(
         // Build the linked list in reverse
         let mut rest = ConvertState::named(RDF_NIL);
         for item in items.iter().rev() {
-            let first_term =
-                value_to_rdf(state, active, loader, item, span, graph, None)
-                    .await
-                    .unwrap_or(Term::Invalid);
+            let first_term = value_to_rdf(state, active, loader, item, span, graph, None)
+                .await
+                .unwrap_or(Term::Invalid);
             let node = state.fresh_blank(span.start);
             state.add_triple(
                 node.clone(),
@@ -1158,7 +1159,8 @@ pub fn convert(root: &Node) -> Turtle {
     // is always Poll::Ready on the first poll.
     let waker = unsafe { Waker::from_raw(RawWaker::new(std::ptr::null(), &NOOP_VTABLE)) };
     let mut cx = Context::from_waker(&waker);
-    let mut fut = std::pin::pin!(convert_with_loader(root, &NoopContextLoader));
+    let mut loader = NoopContextLoader;
+    let mut fut = std::pin::pin!(convert_with_loader(root, &mut loader));
     match fut.as_mut().poll(&mut cx) {
         Poll::Ready(v) => v,
         Poll::Pending => unreachable!("NoopContextLoader always resolves immediately"),
@@ -1167,7 +1169,7 @@ pub fn convert(root: &Node) -> Turtle {
 
 /// Convert a parsed JSON-LD CST to RDF triples, using `loader` to fetch
 /// remote `@context` documents asynchronously.
-pub async fn convert_with_loader(root: &Node, loader: &dyn ContextLoader) -> Turtle {
+pub async fn convert_with_loader(root: &Node, loader: &mut dyn ContextLoader) -> Turtle {
     let mut state = ConvertState::new();
     let active = ActiveContext::default();
 
@@ -1185,8 +1187,8 @@ pub async fn convert_with_loader(root: &Node, loader: &dyn ContextLoader) -> Tur
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::parser::{Rule, SyntaxKind as SK};
+    use super::*;
 
     fn parse_jsonld(input: &str) -> Turtle {
         use crate::parse as crate_parse;
@@ -1218,41 +1220,51 @@ mod tests {
     }
 
     fn object_iri(triple: &Triple) -> Option<&str> {
-        triple.po.first().and_then(|po| po.object.first()).and_then(|o| {
-            if let Term::NamedNode(NamedNode::Full(s, _)) = &o.0 {
-                Some(s.as_str())
-            } else {
-                None
-            }
-        })
-    }
-
-    fn object_literal(triple: &Triple) -> Option<(&str, Option<&str>, Option<&str>)> {
-        triple.po.first().and_then(|po| po.object.first()).and_then(|o| {
-            if let Term::Literal(Literal::RDF(lit)) = &o.0 {
-                let lang = lit.lang.as_deref();
-                let ty = if let Some(NamedNode::Full(s, _)) = &lit.ty {
+        triple
+            .po
+            .first()
+            .and_then(|po| po.object.first())
+            .and_then(|o| {
+                if let Term::NamedNode(NamedNode::Full(s, _)) = &o.0 {
                     Some(s.as_str())
                 } else {
                     None
-                };
-                Some((lit.value.as_str(), lang, ty))
-            } else {
-                None
-            }
-        })
+                }
+            })
+    }
+
+    fn object_literal(triple: &Triple) -> Option<(&str, Option<&str>, Option<&str>)> {
+        triple
+            .po
+            .first()
+            .and_then(|po| po.object.first())
+            .and_then(|o| {
+                if let Term::Literal(Literal::RDF(lit)) = &o.0 {
+                    let lang = lit.lang.as_deref();
+                    let ty = if let Some(NamedNode::Full(s, _)) = &lit.ty {
+                        Some(s.as_str())
+                    } else {
+                        None
+                    };
+                    Some((lit.value.as_str(), lang, ty))
+                } else {
+                    None
+                }
+            })
     }
 
     // ── 1. Basic node with @id and one property ───────────────────────────────
 
     #[test]
     fn test_basic_triple() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": "hello"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(subject_iri(&triples[0]), Some("http://example.org/s"));
@@ -1267,13 +1279,15 @@ mod tests {
 
     #[test]
     fn test_multiple_properties() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p1": "a",
               "http://example.org/p2": "b"
             }
-        "#);
+        "#,
+        );
         assert_eq!(triples_of(&t).len(), 2);
     }
 
@@ -1281,14 +1295,16 @@ mod tests {
 
     #[test]
     fn test_nested_blank_node() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": {
                 "http://example.org/q": "inner"
               }
             }
-        "#);
+        "#,
+        );
         // 2 triples: outer s→blank, inner blank→inner
         assert_eq!(triples_of(&t).len(), 2);
         let outer = &triples_of(&t)[1]; // outer triple
@@ -1307,13 +1323,15 @@ mod tests {
 
     #[test]
     fn test_inline_context_term() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@context": { "name": "http://schema.org/name" },
               "@id": "http://example.org/alice",
               "name": "Alice"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
@@ -1327,13 +1345,15 @@ mod tests {
 
     #[test]
     fn test_vocab_expansion() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@context": { "@vocab": "http://schema.org/" },
               "@id": "http://example.org/alice",
               "name": "Alice"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
@@ -1343,12 +1363,14 @@ mod tests {
 
     #[test]
     fn test_type_triple() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/alice",
               "@type": "http://schema.org/Person"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some(RDF_TYPE));
@@ -1359,12 +1381,14 @@ mod tests {
 
     #[test]
     fn test_type_array() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/x",
               "@type": ["http://example.org/A", "http://example.org/B"]
             }
-        "#);
+        "#,
+        );
         assert_eq!(triples_of(&t).len(), 2);
     }
 
@@ -1372,12 +1396,14 @@ mod tests {
 
     #[test]
     fn test_value_object_language() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": { "@value": "hello", "@language": "en" }
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(
@@ -1390,12 +1416,14 @@ mod tests {
 
     #[test]
     fn test_value_object_typed() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": { "@value": "42", "@type": "http://www.w3.org/2001/XMLSchema#integer" }
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(
@@ -1408,9 +1436,11 @@ mod tests {
 
     #[test]
     fn test_native_integer() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             { "@id": "http://example.org/s", "http://example.org/p": 42 }
-        "#);
+        "#,
+        );
         assert_eq!(
             object_literal(&triples_of(&t)[0]),
             Some(("42", None, Some(XSD_INTEGER)))
@@ -1419,9 +1449,11 @@ mod tests {
 
     #[test]
     fn test_native_double() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             { "@id": "http://example.org/s", "http://example.org/p": 3.14 }
-        "#);
+        "#,
+        );
         assert_eq!(
             object_literal(&triples_of(&t)[0]),
             Some(("3.14", None, Some(XSD_DOUBLE)))
@@ -1432,9 +1464,11 @@ mod tests {
 
     #[test]
     fn test_boolean() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             { "@id": "http://example.org/s", "http://example.org/p": true }
-        "#);
+        "#,
+        );
         assert_eq!(
             object_literal(&triples_of(&t)[0]),
             Some(("true", None, Some(XSD_BOOLEAN)))
@@ -1445,9 +1479,11 @@ mod tests {
 
     #[test]
     fn test_null_skipped() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             { "@id": "http://example.org/s", "http://example.org/p": null }
-        "#);
+        "#,
+        );
         assert_eq!(triples_of(&t).len(), 0);
     }
 
@@ -1455,12 +1491,14 @@ mod tests {
 
     #[test]
     fn test_list() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": { "@list": ["a", "b"] }
             }
-        "#);
+        "#,
+        );
         // 1 triple for the property + 2*2 triples for the two list nodes
         let triples = triples_of(&t);
         assert!(triples.len() >= 3);
@@ -1472,12 +1510,8 @@ mod tests {
             }
         }
         // rdf:first and rdf:rest triples should be present
-        let has_first = triples
-            .iter()
-            .any(|t| predicate_iri(t) == Some(RDF_FIRST));
-        let has_rest = triples
-            .iter()
-            .any(|t| predicate_iri(t) == Some(RDF_REST));
+        let has_first = triples.iter().any(|t| predicate_iri(t) == Some(RDF_FIRST));
+        let has_rest = triples.iter().any(|t| predicate_iri(t) == Some(RDF_REST));
         assert!(has_first);
         assert!(has_rest);
     }
@@ -1486,12 +1520,14 @@ mod tests {
 
     #[test]
     fn test_empty_list() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/s",
               "http://example.org/p": { "@list": [] }
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(object_iri(&triples[0]), Some(RDF_NIL));
@@ -1501,14 +1537,16 @@ mod tests {
 
     #[test]
     fn test_named_graph() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/g",
               "@graph": [
                 { "@id": "http://example.org/s", "http://example.org/p": "v" }
               ]
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         // One triple inside the named graph
         assert_eq!(triples.len(), 1);
@@ -1528,14 +1566,16 @@ mod tests {
 
     #[test]
     fn test_reverse() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@id": "http://example.org/child",
               "@reverse": {
                 "http://example.org/parent": { "@id": "http://example.org/dad" }
               }
             }
-        "#);
+        "#,
+        );
         // Triple: dad → parent → child
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
@@ -1547,12 +1587,14 @@ mod tests {
 
     #[test]
     fn test_top_level_array() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             [
               { "@id": "http://example.org/a", "http://example.org/p": "x" },
               { "@id": "http://example.org/b", "http://example.org/p": "y" }
             ]
-        "#);
+        "#,
+        );
         assert_eq!(triples_of(&t).len(), 2);
     }
 
@@ -1560,7 +1602,8 @@ mod tests {
 
     #[test]
     fn test_compact_iri() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@context": {
                 "schema": "http://schema.org/",
@@ -1569,7 +1612,8 @@ mod tests {
               "@id": "http://example.org/alice",
               "name": "Alice"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
@@ -1579,7 +1623,8 @@ mod tests {
 
     #[test]
     fn test_type_coercion_id() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@context": {
                 "knows": { "@id": "http://schema.org/knows", "@type": "@id" }
@@ -1587,7 +1632,8 @@ mod tests {
               "@id": "http://example.org/alice",
               "knows": "http://example.org/bob"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(object_iri(&triples[0]), Some("http://example.org/bob"));
@@ -1597,13 +1643,15 @@ mod tests {
 
     #[test]
     fn test_default_language() {
-        let t = parse_jsonld(r#"
+        let t = parse_jsonld(
+            r#"
             {
               "@context": { "@language": "fr" },
               "@id": "http://example.org/s",
               "http://example.org/p": "Bonjour"
             }
-        "#);
+        "#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(
@@ -1631,7 +1679,9 @@ mod tests {
     /// (i.e. no real I/O suspension).
     fn block_on_ready<T>(fut: impl std::future::Future<Output = T>) -> T {
         use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
-        fn clone(p: *const ()) -> RawWaker { RawWaker::new(p, &VTABLE) }
+        fn clone(p: *const ()) -> RawWaker {
+            RawWaker::new(p, &VTABLE)
+        }
         fn noop(_: *const ()) {}
         static VTABLE: RawWakerVTable = RawWakerVTable::new(clone, noop, noop, noop);
         let waker = unsafe { Waker::from_raw(RawWaker::new(std::ptr::null(), &VTABLE)) };
@@ -1649,7 +1699,7 @@ mod tests {
         struct MockLoader;
         impl ContextLoader for MockLoader {
             fn load<'a>(
-                &'a self,
+                &'a mut self,
                 url: &'a str,
             ) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
                 let result = if url == "https://example.org/context.jsonld" {
@@ -1683,7 +1733,7 @@ mod tests {
         let (result, _) = crate::parse(rule, input);
         let root = result.syntax::<Lang>();
 
-        let turtle = block_on_ready(convert_with_loader(&root, &MockLoader));
+        let turtle = block_on_ready(convert_with_loader(&root, &mut MockLoader));
         let triples = triples_of(&turtle);
 
         // @type → rdf:type + 2 data properties = 3 triples
