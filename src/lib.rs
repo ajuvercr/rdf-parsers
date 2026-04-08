@@ -119,16 +119,16 @@ pub trait TokenTrait:
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
 
-    /// The set of every terminal that can be consumed *anywhere* in a parse of
-    /// this rule — including inside nested sub-rules at any depth.
+    /// Returns the minimum error cost this rule must incur when `tok` is the
+    /// current token.  Returns 0 if `tok` is reachable anywhere inside the
+    /// rule or the rule is nullable (can match zero tokens).  Returns a
+    /// positive value otherwise — the rule cannot make progress without
+    /// producing at least that much error cost.
     ///
-    /// Used by the A* to prune parser elements whose current token cannot
-    /// appear anywhere in the rule's subtree: if the set is non-empty and the
-    /// current token is absent, the path must produce at least one error.
-    ///
-    /// Returns `&[]` (no pruning) by default; generated parsers override this.
-    fn all_reachable_tokens(&self) -> &'static [Self] {
-        &[]
+    /// Used by `add_element_checked` to pre-charge elements before adding
+    /// them to the A* search.  Defaults to 0 (no pre-charging).
+    fn min_error_for_token(&self, _tok: &Self) -> isize {
+        0
     }
 
 

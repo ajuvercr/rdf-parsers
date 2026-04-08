@@ -462,763 +462,873 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the set of all terminals that can be consumed *anywhere*"]
-    #[doc = r" in a parse of `kind` — including inside sub-rules at any depth."]
-    #[doc = r#" An empty slice means "unknown / no pruning"."#]
-    pub fn all_tokens(kind: SyntaxKind) -> &'static [SyntaxKind] {
+    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
+    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
+    #[doc = r" is nullable); positive means the rule cannot make progress without"]
+    #[doc = r" at least that much error cost."]
+    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
         match kind {
-            SyntaxKind::Base => &[SyntaxKind::BaseToken, SyntaxKind::Iriref],
-            SyntaxKind::BlankNode => &[SyntaxKind::Anon, SyntaxKind::BlankNodeLabel],
-            SyntaxKind::BlankNodePropertyList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Collection => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Expression => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Formula => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::FormulaContent => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Iri => &[SyntaxKind::Iriref, SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::IriPropertyList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Literal => &[
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Integer,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::N3Directive => &[
-                SyntaxKind::BaseToken,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-            ],
-            SyntaxKind::N3Doc => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::N3Statement => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::NumericLiteral => {
-                &[SyntaxKind::Decimal, SyntaxKind::Double, SyntaxKind::Integer]
-            }
-            SyntaxKind::Object => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::ObjectList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Path => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::PathItem => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Predicate => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::PredicateObjectList => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::PrefixId => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixToken,
-            ],
-            SyntaxKind::PrefixedName => &[SyntaxKind::PnameLn, SyntaxKind::PnameNs],
-            SyntaxKind::QuickVar => &[SyntaxKind::QuickVarName],
-            SyntaxKind::RdfLiteral => &[
-                SyntaxKind::Datatype,
-                SyntaxKind::Iriref,
-                SyntaxKind::Langtag,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::SparqlBase => &[SyntaxKind::BaseLit, SyntaxKind::Iriref],
-            SyntaxKind::SparqlDirective => &[
-                SyntaxKind::BaseLit,
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-            ],
-            SyntaxKind::SparqlPrefix => &[
-                SyntaxKind::Iriref,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-            ],
-            SyntaxKind::Subject => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Triples => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Verb => &[
-                SyntaxKind::Alit,
-                SyntaxKind::Anon,
-                SyntaxKind::ArrowLeft,
-                SyntaxKind::Bang,
-                SyntaxKind::BaseLit,
-                SyntaxKind::BaseToken,
-                SyntaxKind::BlankNodeLabel,
-                SyntaxKind::BooleanLiteral,
-                SyntaxKind::BrClose,
-                SyntaxKind::BrOpen,
-                SyntaxKind::ClClose,
-                SyntaxKind::ClOpen,
-                SyntaxKind::Colon,
-                SyntaxKind::Comma,
-                SyntaxKind::Datatype,
-                SyntaxKind::Decimal,
-                SyntaxKind::Double,
-                SyntaxKind::Eq,
-                SyntaxKind::HasLit,
-                SyntaxKind::Hat,
-                SyntaxKind::ImplyLeft,
-                SyntaxKind::ImplyRight,
-                SyntaxKind::Integer,
-                SyntaxKind::Iplstart,
-                SyntaxKind::Iriref,
-                SyntaxKind::IsLit,
-                SyntaxKind::Langtag,
-                SyntaxKind::OfLit,
-                SyntaxKind::PnameLn,
-                SyntaxKind::PnameNs,
-                SyntaxKind::PrefixLit,
-                SyntaxKind::PrefixToken,
-                SyntaxKind::QuickVarName,
-                SyntaxKind::SqClose,
-                SyntaxKind::SqOpen,
-                SyntaxKind::Stop,
-                SyntaxKind::String,
-            ],
-            SyntaxKind::Bang => &[SyntaxKind::Bang],
-            SyntaxKind::BrOpen => &[SyntaxKind::BrOpen],
-            SyntaxKind::BrClose => &[SyntaxKind::BrClose],
-            SyntaxKind::Comma => &[SyntaxKind::Comma],
-            SyntaxKind::Stop => &[SyntaxKind::Stop],
-            SyntaxKind::Colon => &[SyntaxKind::Colon],
-            SyntaxKind::ArrowLeft => &[SyntaxKind::ArrowLeft],
-            SyntaxKind::ImplyLeft => &[SyntaxKind::ImplyLeft],
-            SyntaxKind::Eq => &[SyntaxKind::Eq],
-            SyntaxKind::ImplyRight => &[SyntaxKind::ImplyRight],
-            SyntaxKind::BaseToken => &[SyntaxKind::BaseToken],
-            SyntaxKind::PrefixToken => &[SyntaxKind::PrefixToken],
-            SyntaxKind::BaseLit => &[SyntaxKind::BaseLit],
-            SyntaxKind::PrefixLit => &[SyntaxKind::PrefixLit],
-            SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
-            SyntaxKind::SqClose => &[SyntaxKind::SqClose],
-            SyntaxKind::Hat => &[SyntaxKind::Hat],
-            SyntaxKind::Datatype => &[SyntaxKind::Datatype],
-            SyntaxKind::Alit => &[SyntaxKind::Alit],
-            SyntaxKind::HasLit => &[SyntaxKind::HasLit],
-            SyntaxKind::IsLit => &[SyntaxKind::IsLit],
-            SyntaxKind::OfLit => &[SyntaxKind::OfLit],
-            SyntaxKind::ClOpen => &[SyntaxKind::ClOpen],
-            SyntaxKind::ClClose => &[SyntaxKind::ClClose],
-            SyntaxKind::Anon => &[SyntaxKind::Anon],
-            SyntaxKind::BlankNodeLabel => &[SyntaxKind::BlankNodeLabel],
-            SyntaxKind::BooleanLiteral => &[SyntaxKind::BooleanLiteral],
-            SyntaxKind::Decimal => &[SyntaxKind::Decimal],
-            SyntaxKind::Double => &[SyntaxKind::Double],
-            SyntaxKind::Integer => &[SyntaxKind::Integer],
-            SyntaxKind::Iplstart => &[SyntaxKind::Iplstart],
-            SyntaxKind::Iriref => &[SyntaxKind::Iriref],
-            SyntaxKind::Langtag => &[SyntaxKind::Langtag],
-            SyntaxKind::PnameLn => &[SyntaxKind::PnameLn],
-            SyntaxKind::PnameNs => &[SyntaxKind::PnameNs],
-            SyntaxKind::QuickVarName => &[SyntaxKind::QuickVarName],
-            SyntaxKind::String => &[SyntaxKind::String],
-            _ => &[],
+            SyntaxKind::Base => match tok {
+                SyntaxKind::BaseToken | SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNode => match tok {
+                SyntaxKind::Anon | SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodePropertyList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Collection => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Expression => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Formula => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::FormulaContent => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iri => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IriPropertyList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Literal => match tok {
+                SyntaxKind::BooleanLiteral
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::N3Directive => match tok {
+                SyntaxKind::BaseToken
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::N3Statement => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::NumericLiteral => match tok {
+                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Object => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ObjectList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Path => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PathItem => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Predicate => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PredicateObjectList => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixId => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameNs | SyntaxKind::PrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixedName => match tok {
+                SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QuickVar => match tok {
+                SyntaxKind::QuickVarName => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::RdfLiteral => match tok {
+                SyntaxKind::Datatype
+                | SyntaxKind::Iriref
+                | SyntaxKind::Langtag
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlBase => match tok {
+                SyntaxKind::BaseLit | SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlDirective => match tok {
+                SyntaxKind::BaseLit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SparqlPrefix => match tok {
+                SyntaxKind::Iriref | SyntaxKind::PnameNs | SyntaxKind::PrefixLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Subject => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Triples => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Verb => match tok {
+                SyntaxKind::Alit
+                | SyntaxKind::Anon
+                | SyntaxKind::ArrowLeft
+                | SyntaxKind::Bang
+                | SyntaxKind::BaseLit
+                | SyntaxKind::BaseToken
+                | SyntaxKind::BlankNodeLabel
+                | SyntaxKind::BooleanLiteral
+                | SyntaxKind::BrClose
+                | SyntaxKind::BrOpen
+                | SyntaxKind::ClClose
+                | SyntaxKind::ClOpen
+                | SyntaxKind::Colon
+                | SyntaxKind::Comma
+                | SyntaxKind::Datatype
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::Eq
+                | SyntaxKind::HasLit
+                | SyntaxKind::Hat
+                | SyntaxKind::ImplyLeft
+                | SyntaxKind::ImplyRight
+                | SyntaxKind::Integer
+                | SyntaxKind::Iplstart
+                | SyntaxKind::Iriref
+                | SyntaxKind::IsLit
+                | SyntaxKind::Langtag
+                | SyntaxKind::OfLit
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::PrefixLit
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::QuickVarName
+                | SyntaxKind::SqClose
+                | SyntaxKind::SqOpen
+                | SyntaxKind::Stop
+                | SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Bang => match tok {
+                SyntaxKind::Bang => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BrOpen => match tok {
+                SyntaxKind::BrOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BrClose => match tok {
+                SyntaxKind::BrClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Comma => match tok {
+                SyntaxKind::Comma => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Stop => match tok {
+                SyntaxKind::Stop => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Colon => match tok {
+                SyntaxKind::Colon => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ArrowLeft => match tok {
+                SyntaxKind::ArrowLeft => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ImplyLeft => match tok {
+                SyntaxKind::ImplyLeft => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Eq => match tok {
+                SyntaxKind::Eq => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ImplyRight => match tok {
+                SyntaxKind::ImplyRight => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BaseToken => match tok {
+                SyntaxKind::BaseToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixToken => match tok {
+                SyntaxKind::PrefixToken => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BaseLit => match tok {
+                SyntaxKind::BaseLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PrefixLit => match tok {
+                SyntaxKind::PrefixLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqOpen => match tok {
+                SyntaxKind::SqOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::SqClose => match tok {
+                SyntaxKind::SqClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Hat => match tok {
+                SyntaxKind::Hat => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Datatype => match tok {
+                SyntaxKind::Datatype => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Alit => match tok {
+                SyntaxKind::Alit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::HasLit => match tok {
+                SyntaxKind::HasLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::IsLit => match tok {
+                SyntaxKind::IsLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::OfLit => match tok {
+                SyntaxKind::OfLit => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClOpen => match tok {
+                SyntaxKind::ClOpen => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::ClClose => match tok {
+                SyntaxKind::ClClose => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Anon => match tok {
+                SyntaxKind::Anon => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BlankNodeLabel => match tok {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::BooleanLiteral => match tok {
+                SyntaxKind::BooleanLiteral => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Decimal => match tok {
+                SyntaxKind::Decimal => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Double => match tok {
+                SyntaxKind::Double => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Integer => match tok {
+                SyntaxKind::Integer => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iplstart => match tok {
+                SyntaxKind::Iplstart => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Iriref => match tok {
+                SyntaxKind::Iriref => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::Langtag => match tok {
+                SyntaxKind::Langtag => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameLn => match tok {
+                SyntaxKind::PnameLn => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::PnameNs => match tok {
+                SyntaxKind::PnameNs => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::QuickVarName => match tok {
+                SyntaxKind::QuickVarName => 0,
+                _ => kind.max_error_value(),
+            },
+            SyntaxKind::String => match tok {
+                SyntaxKind::String => 0,
+                _ => kind.max_error_value(),
+            },
+            _ => 0,
         }
     }
     impl crate::a_star::ParserTrait for Rule {
@@ -3163,8 +3273,8 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn all_reachable_tokens(&self) -> &'static [SyntaxKind] {
-        all_tokens(*self)
+    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
+        min_error_for_token(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
