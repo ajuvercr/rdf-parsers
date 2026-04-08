@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::future::Future;
 use std::ops::Range;
+use std::pin::Pin;
 
 use rowan::SyntaxNode;
 
@@ -55,35 +57,44 @@ struct ActiveContext {
 
 // ── Context loader hook ───────────────────────────────────────────────────────
 
-/// Hook for fetching remote JSON-LD context documents.
+/// Hook for fetching remote JSON-LD context documents asynchronously.
 ///
 /// Implement this trait to support `@context` values that are URLs.  The
 /// `load` method receives the URL and should return the raw JSON-LD document
 /// content as a string, or `None` if the document cannot be fetched.
+///
+/// # Example (sync wrapper)
+/// ```rust,ignore
+/// struct MyLoader;
+/// impl ContextLoader for MyLoader {
+///     fn load<'a>(&'a self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+///         Box::pin(async move { Some(fetch_remote(url).await) })
+///     }
+/// }
+/// ```
 pub trait ContextLoader {
-    fn load(&self, url: &str) -> Option<String>;
+    fn load<'a>(&'a self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>>;
 }
 
 /// A no-op `ContextLoader` that never resolves remote contexts.
 pub struct NoopContextLoader;
 
 impl ContextLoader for NoopContextLoader {
-    fn load(&self, _url: &str) -> Option<String> {
-        None
+    fn load<'a>(&'a self, _url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+        Box::pin(std::future::ready(None))
     }
 }
 
 // ── Convert state ─────────────────────────────────────────────────────────────
 
-struct ConvertState<'a> {
-    loader: &'a dyn ContextLoader,
+struct ConvertState {
     blank_counter: usize,
     triples: Vec<Spanned<Triple>>,
 }
 
-impl<'a> ConvertState<'a> {
-    fn new(loader: &'a dyn ContextLoader) -> Self {
-        Self { loader, blank_counter: 0, triples: Vec::new() }
+impl ConvertState {
+    fn new() -> Self {
+        Self { blank_counter: 0, triples: Vec::new() }
     }
 
     fn fresh_blank(&mut self, offset: usize) -> Term {
@@ -287,63 +298,69 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
 
 // ── Context processing ────────────────────────────────────────────────────────
 
-fn process_context(
+/// Process a JSON-LD `@context` value and return the updated active context.
+///
+/// This is a boxed future because it is recursively called for arrays of
+/// contexts and for remote contexts loaded via the `loader`.
+fn process_context<'a>(
     mut active: ActiveContext,
-    ctx_val: &JsonLdVal,
-    loader: &dyn ContextLoader,
-) -> ActiveContext {
-    match ctx_val {
-        JsonLdVal::Null => {
-            active = ActiveContext::default();
-        }
-        JsonLdVal::Str(url) => {
-            if let Some(content) = loader.load(url) {
-                if let Some(remote_ctx) = parse_jsonld_for_context(&content) {
-                    active = process_context(active, &remote_ctx, loader);
-                }
+    ctx_val: JsonLdVal,
+    loader: &'a dyn ContextLoader,
+) -> Pin<Box<dyn Future<Output = ActiveContext> + 'a>> {
+    Box::pin(async move {
+        match ctx_val {
+            JsonLdVal::Null => {
+                active = ActiveContext::default();
             }
-        }
-        JsonLdVal::Array(items) => {
-            for item in items {
-                active = process_context(active, item, loader);
-            }
-        }
-        JsonLdVal::Object(members, _) => {
-            for (key, val) in members {
-                match key.as_str() {
-                    "@base" => match val {
-                        JsonLdVal::Str(s) if s.is_empty() => active.base = None,
-                        JsonLdVal::Str(s) => {
-                            active.base = Some(resolve_iri(&active.base, s))
-                        }
-                        JsonLdVal::Null => active.base = None,
-                        _ => {}
-                    },
-                    "@vocab" => match val {
-                        JsonLdVal::Str(s) => active.vocab = Some(s.clone()),
-                        JsonLdVal::Null => active.vocab = None,
-                        _ => {}
-                    },
-                    "@language" => match val {
-                        JsonLdVal::Str(s) => active.language = Some(s.clone()),
-                        JsonLdVal::Null => active.language = None,
-                        _ => {}
-                    },
-                    // TODO: @version, @import, @propagate, @protected, @direction
-                    k if !k.starts_with('@') => {
-                        if let Some(def) = process_term_definition(&active, k, val) {
-                            active.terms.insert(k.to_string(), def);
-                        } else {
-                            active.terms.remove(k);
-                        }
+            JsonLdVal::Str(ref url) => {
+                if let Some(content) = loader.load(url).await {
+                    if let Some(remote_ctx) = parse_jsonld_for_context(&content) {
+                        active = process_context(active, remote_ctx, loader).await;
                     }
-                    _ => {}
                 }
             }
+            JsonLdVal::Array(items) => {
+                for item in items {
+                    active = process_context(active, item, loader).await;
+                }
+            }
+            JsonLdVal::Object(members, _) => {
+                for (key, val) in members {
+                    match key.as_str() {
+                        "@base" => match &val {
+                            JsonLdVal::Str(s) if s.is_empty() => active.base = None,
+                            JsonLdVal::Str(s) => {
+                                active.base = Some(resolve_iri(&active.base, s))
+                            }
+                            JsonLdVal::Null => active.base = None,
+                            _ => {}
+                        },
+                        "@vocab" => match val {
+                            JsonLdVal::Str(s) => active.vocab = Some(s),
+                            JsonLdVal::Null => active.vocab = None,
+                            _ => {}
+                        },
+                        "@language" => match val {
+                            JsonLdVal::Str(s) => active.language = Some(s),
+                            JsonLdVal::Null => active.language = None,
+                            _ => {}
+                        },
+                        // TODO: @version, @import, @propagate, @protected, @direction
+                        k if !k.starts_with('@') => {
+                            if let Some(def) = process_term_definition(&active, k, &val) {
+                                active.terms.insert(k.to_string(), def);
+                            } else {
+                                active.terms.remove(k);
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
         }
-        _ => {}
-    }
-    active
+        active
+    })
 }
 
 fn process_term_definition(
@@ -525,214 +542,249 @@ fn authority_end(iri: &str) -> Option<usize> {
 // ── Document processing ───────────────────────────────────────────────────────
 
 /// Top-level: process one JSON-LD value (document or item in a top-level array).
-fn process_document(state: &mut ConvertState, active: &ActiveContext, val: &JsonLdVal) {
-    match val {
-        JsonLdVal::Object(members, span) => {
-            process_node(state, active, members, span, None);
-        }
-        JsonLdVal::Array(items) => {
-            for item in items {
-                process_document(state, active, item);
+///
+/// Boxed because it is directly self-recursive for top-level arrays.
+fn process_document<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    val: &'a JsonLdVal,
+) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
+    Box::pin(async move {
+        match val {
+            JsonLdVal::Object(members, span) => {
+                process_node(state, active, loader, members, span, None).await;
             }
+            JsonLdVal::Array(items) => {
+                for item in items {
+                    process_document(state, active, loader, item).await;
+                }
+            }
+            _ => {}
         }
-        _ => {}
-    }
+    })
 }
 
-fn process_document_with_graph(
-    state: &mut ConvertState,
-    active: &ActiveContext,
-    val: &JsonLdVal,
-    graph: Option<&Term>,
-) {
-    match val {
-        JsonLdVal::Object(members, span) => {
-            process_node(state, active, members, span, graph);
-        }
-        JsonLdVal::Array(items) => {
-            for item in items {
-                process_document_with_graph(state, active, item, graph);
+/// Process a JSON-LD value in the context of a named graph.
+///
+/// Boxed because it is directly self-recursive for arrays and mutually
+/// recursive with [`process_node`].
+fn process_document_with_graph<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    val: &'a JsonLdVal,
+    graph: Option<&'a Term>,
+) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
+    Box::pin(async move {
+        match val {
+            JsonLdVal::Object(members, span) => {
+                process_node(state, active, loader, members, span, graph).await;
             }
+            JsonLdVal::Array(items) => {
+                for item in items {
+                    process_document_with_graph(state, active, loader, item, graph).await;
+                }
+            }
+            _ => {}
         }
-        _ => {}
-    }
+    })
 }
 
 /// Process a JSON-LD node object.  Returns the subject term if the node can
 /// serve as an object in another triple (e.g., a nested node).
-fn process_node(
-    state: &mut ConvertState,
-    active: &ActiveContext,
-    members: &[(String, JsonLdVal)],
-    span: &Range<usize>,
-    graph: Option<&Term>,
-) -> Option<Term> {
-    let map: HashMap<&str, &JsonLdVal> = members.iter().map(|(k, v)| (k.as_str(), v)).collect();
+///
+/// Boxed because it is mutually recursive with `process_document_with_graph`
+/// and transitively recursive through `collect_objects` → `value_to_rdf`.
+fn process_node<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    members: &'a [(String, JsonLdVal)],
+    span: &'a Range<usize>,
+    graph: Option<&'a Term>,
+) -> Pin<Box<dyn Future<Output = Option<Term>> + 'a>> {
+    Box::pin(async move {
+        let map: HashMap<&str, &JsonLdVal> =
+            members.iter().map(|(k, v)| (k.as_str(), v)).collect();
 
-    // Value object — return as a literal, generate no subject-based triples
-    if map.contains_key("@value") {
-        return process_value_object(active, &map, span);
-    }
-
-    // List object
-    if let Some(list_val) = map.get("@list") {
-        let items = match list_val {
-            JsonLdVal::Array(items) => items.as_slice(),
-            other => std::slice::from_ref(*other),
-        };
-        return Some(process_list(state, active, items, span, graph));
-    }
-
-    // Set object — process contents but return nothing as a subject
-    if let Some(set_val) = map.get("@set") {
-        if let JsonLdVal::Array(items) = set_val {
-            for item in items {
-                process_document_with_graph(state, active, item, graph);
-            }
+        // Value object — return as a literal, generate no subject-based triples
+        if map.contains_key("@value") {
+            return process_value_object(active, &map, span);
         }
-        return None;
-    }
 
-    // Update active context if @context present in this node
-    let updated;
-    let active = if let Some(ctx_val) = map.get("@context") {
-        updated = process_context(active.clone(), ctx_val, state.loader);
-        &updated
-    } else {
-        active
-    };
-
-    // Determine the subject
-    let subject: Term = if let Some(id_val) = map.get("@id") {
-        match id_val {
-            JsonLdVal::Str(s) => {
-                match expand_iri(active, s, false, true) {
-                    Some(iri) if iri.starts_with("_:") => {
-                        Term::BlankNode(BlankNode::Named(iri[2..].to_string(), span.start))
-                    }
-                    Some(iri) => Term::NamedNode(NamedNode::Full(iri, span.start)),
-                    None => state.fresh_blank(span.start),
-                }
-            }
-            _ => state.fresh_blank(span.start),
+        // List object
+        if let Some(list_val) = map.get("@list") {
+            let items = match list_val {
+                JsonLdVal::Array(items) => items.as_slice(),
+                other => std::slice::from_ref(*other),
+            };
+            return Some(process_list(state, active, loader, items, span, graph).await);
         }
-    } else {
-        state.fresh_blank(span.start)
-    };
 
-    // @type → rdf:type triples
-    if let Some(type_val) = map.get("@type") {
-        for type_str in collect_strings(type_val) {
-            if let Some(iri) = expand_iri(active, &type_str, true, true) {
-                let obj = iri_or_blank(iri, span.start);
-                state.add_triple(
-                    subject.clone(),
-                    ConvertState::named(RDF_TYPE),
-                    obj,
-                    graph.cloned(),
-                    span.clone(),
-                );
-            }
-        }
-    }
-
-    // @graph → named graph containing nested nodes
-    if let Some(graph_val) = map.get("@graph") {
-        let named_graph = subject.clone();
-        match graph_val {
-            JsonLdVal::Array(items) => {
+        // Set object — process contents but return nothing as a subject
+        if let Some(set_val) = map.get("@set") {
+            if let JsonLdVal::Array(items) = set_val {
                 for item in items {
-                    process_document_with_graph(state, active, item, Some(&named_graph));
+                    process_document_with_graph(state, active, loader, item, graph).await;
                 }
             }
-            JsonLdVal::Object(m, s) => {
-                process_node(state, active, m, s, Some(&named_graph));
-            }
-            _ => {}
-        }
-    }
-
-    // @reverse → reverse-property triples (object becomes subject)
-    if let Some(rev_val) = map.get("@reverse") {
-        if let JsonLdVal::Object(rev_members, _) = rev_val {
-            for (prop, val) in rev_members {
-                if prop.starts_with('@') {
-                    continue;
-                }
-                if let Some(pred_iri) = expand_iri(active, prop, true, false) {
-                    let pred = ConvertState::named(&pred_iri);
-                    let objects = collect_objects(state, active, val, span, graph, None);
-                    for obj in objects {
-                        // Subject and object are swapped for reverse properties
-                        state.add_triple(
-                            obj,
-                            pred.clone(),
-                            subject.clone(),
-                            graph.cloned(),
-                            span.clone(),
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    // @included → additional node objects (processed in default graph)
-    if let Some(included_val) = map.get("@included") {
-        match included_val {
-            JsonLdVal::Array(items) => {
-                for item in items {
-                    process_document(state, active, item);
-                }
-            }
-            JsonLdVal::Object(m, s) => {
-                process_node(state, active, m, s, None);
-            }
-            _ => {}
-        }
-    }
-
-    // Regular properties
-    for (key, val) in members {
-        match key.as_str() {
-            "@context" | "@id" | "@type" | "@graph" | "@reverse" | "@included" | "@nest" => {
-                continue
-            }
-            k if k.starts_with('@') => continue,
-            _ => {}
+            return None;
         }
 
-        // Handle @nest: the value must be an object whose properties are promoted
-        // TODO: full @nest support — for now we skip nested containers
-
-        let pred_iri = match expand_iri(active, key, true, false) {
-            Some(iri) if !iri.starts_with('@') => iri,
-            _ => continue,
+        // Update active context if @context present in this node
+        let updated;
+        let active: &ActiveContext = if let Some(ctx_val) = map.get("@context") {
+            updated = process_context(active.clone(), (*ctx_val).clone(), loader).await;
+            &updated
+        } else {
+            active
         };
 
-        let term_def = active.terms.get(key.as_str());
-        let objects = collect_objects(state, active, val, span, graph, term_def);
-        if objects.is_empty() {
-            continue;
-        }
-        let s = span.clone();
-        state.triples.push(Spanned(
-            Triple {
-                subject: Spanned(subject.clone(), s.clone()),
-                po: vec![Spanned(
-                    PO {
-                        predicate: Spanned(ConvertState::named(&pred_iri), s.clone()),
-                        object: objects.into_iter().map(|o| Spanned(o, s.clone())).collect(),
-                    },
-                    s.clone(),
-                )],
-                graph: graph.map(|g| Spanned(g.clone(), s.clone())),
-            },
-            s,
-        ));
-    }
+        // Determine the subject
+        let subject: Term = if let Some(id_val) = map.get("@id") {
+            match id_val {
+                JsonLdVal::Str(s) => {
+                    match expand_iri(active, s, false, true) {
+                        Some(iri) if iri.starts_with("_:") => {
+                            Term::BlankNode(BlankNode::Named(iri[2..].to_string(), span.start))
+                        }
+                        Some(iri) => Term::NamedNode(NamedNode::Full(iri, span.start)),
+                        None => state.fresh_blank(span.start),
+                    }
+                }
+                _ => state.fresh_blank(span.start),
+            }
+        } else {
+            state.fresh_blank(span.start)
+        };
 
-    Some(subject)
+        // @type → rdf:type triples
+        if let Some(type_val) = map.get("@type") {
+            for type_str in collect_strings(type_val) {
+                if let Some(iri) = expand_iri(active, &type_str, true, true) {
+                    let obj = iri_or_blank(iri, span.start);
+                    state.add_triple(
+                        subject.clone(),
+                        ConvertState::named(RDF_TYPE),
+                        obj,
+                        graph.cloned(),
+                        span.clone(),
+                    );
+                }
+            }
+        }
+
+        // @graph → named graph containing nested nodes
+        if let Some(graph_val) = map.get("@graph") {
+            let named_graph = subject.clone();
+            match graph_val {
+                JsonLdVal::Array(items) => {
+                    for item in items {
+                        process_document_with_graph(
+                            state,
+                            active,
+                            loader,
+                            item,
+                            Some(&named_graph),
+                        )
+                        .await;
+                    }
+                }
+                JsonLdVal::Object(m, s) => {
+                    process_node(state, active, loader, m, s, Some(&named_graph)).await;
+                }
+                _ => {}
+            }
+        }
+
+        // @reverse → reverse-property triples (object becomes subject)
+        if let Some(rev_val) = map.get("@reverse") {
+            if let JsonLdVal::Object(rev_members, _) = rev_val {
+                for (prop, val) in rev_members {
+                    if prop.starts_with('@') {
+                        continue;
+                    }
+                    if let Some(pred_iri) = expand_iri(active, prop, true, false) {
+                        let pred = ConvertState::named(&pred_iri);
+                        let objects =
+                            collect_objects(state, active, loader, val, span, graph, None).await;
+                        for obj in objects {
+                            // Subject and object are swapped for reverse properties
+                            state.add_triple(
+                                obj,
+                                pred.clone(),
+                                subject.clone(),
+                                graph.cloned(),
+                                span.clone(),
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        // @included → additional node objects (processed in default graph)
+        if let Some(included_val) = map.get("@included") {
+            match included_val {
+                JsonLdVal::Array(items) => {
+                    for item in items {
+                        process_document(state, active, loader, item).await;
+                    }
+                }
+                JsonLdVal::Object(m, s) => {
+                    process_node(state, active, loader, m, s, None).await;
+                }
+                _ => {}
+            }
+        }
+
+        // Regular properties
+        for (key, val) in members {
+            match key.as_str() {
+                "@context" | "@id" | "@type" | "@graph" | "@reverse" | "@included" | "@nest" => {
+                    continue
+                }
+                k if k.starts_with('@') => continue,
+                _ => {}
+            }
+
+            // Handle @nest: the value must be an object whose properties are promoted
+            // TODO: full @nest support — for now we skip nested containers
+
+            let pred_iri = match expand_iri(active, key, true, false) {
+                Some(iri) if !iri.starts_with('@') => iri,
+                _ => continue,
+            };
+
+            let term_def = active.terms.get(key.as_str());
+            let objects =
+                collect_objects(state, active, loader, val, span, graph, term_def).await;
+            if objects.is_empty() {
+                continue;
+            }
+            let s = span.clone();
+            state.triples.push(Spanned(
+                Triple {
+                    subject: Spanned(subject.clone(), s.clone()),
+                    po: vec![Spanned(
+                        PO {
+                            predicate: Spanned(ConvertState::named(&pred_iri), s.clone()),
+                            object: objects
+                                .into_iter()
+                                .map(|o| Spanned(o, s.clone()))
+                                .collect(),
+                        },
+                        s.clone(),
+                    )],
+                    graph: graph.map(|g| Spanned(g.clone(), s.clone())),
+                },
+                s,
+            ));
+        }
+
+        Some(subject)
+    })
 }
 
 // ── Value helpers ─────────────────────────────────────────────────────────────
@@ -754,32 +806,50 @@ fn collect_strings(val: &JsonLdVal) -> Vec<String> {
     }
 }
 
-fn collect_objects(
-    state: &mut ConvertState,
-    active: &ActiveContext,
-    val: &JsonLdVal,
-    span: &Range<usize>,
-    graph: Option<&Term>,
-    term_def: Option<&TermDefinition>,
-) -> Vec<Term> {
-    match val {
-        JsonLdVal::Array(items) => items
-            .iter()
-            .flat_map(|item| collect_objects(state, active, item, span, graph, term_def))
-            .collect(),
-        _ => value_to_rdf(state, active, val, span, graph, term_def)
-            .into_iter()
-            .collect(),
-    }
+/// Collect zero or more RDF terms from a JSON-LD value.
+///
+/// Boxed because it is directly self-recursive for arrays.
+fn collect_objects<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    val: &'a JsonLdVal,
+    span: &'a Range<usize>,
+    graph: Option<&'a Term>,
+    term_def: Option<&'a TermDefinition>,
+) -> Pin<Box<dyn Future<Output = Vec<Term>> + 'a>> {
+    Box::pin(async move {
+        match val {
+            JsonLdVal::Array(items) => {
+                let mut result = Vec::new();
+                for item in items {
+                    let mut sub =
+                        collect_objects(state, active, loader, item, span, graph, term_def).await;
+                    result.append(&mut sub);
+                }
+                result
+            }
+            _ => value_to_rdf(state, active, loader, val, span, graph, term_def)
+                .await
+                .into_iter()
+                .collect(),
+        }
+    })
 }
 
-fn value_to_rdf(
-    state: &mut ConvertState,
-    active: &ActiveContext,
-    val: &JsonLdVal,
-    span: &Range<usize>,
-    graph: Option<&Term>,
-    term_def: Option<&TermDefinition>,
+/// Map a single JSON-LD value to zero or one RDF term.
+///
+/// This is a plain `async fn` (not boxed) because it is not directly
+/// self-recursive — the only cycle is through the boxed `process_node` and
+/// `process_list` calls.
+async fn value_to_rdf<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    val: &'a JsonLdVal,
+    span: &'a Range<usize>,
+    graph: Option<&'a Term>,
+    term_def: Option<&'a TermDefinition>,
 ) -> Option<Term> {
     match val {
         JsonLdVal::Object(members, obj_span) => {
@@ -793,9 +863,9 @@ fn value_to_rdf(
                     JsonLdVal::Array(items) => items.as_slice(),
                     other => std::slice::from_ref(*other),
                 };
-                return Some(process_list(state, active, items, obj_span, graph));
+                return Some(process_list(state, active, loader, items, obj_span, graph).await);
             }
-            process_node(state, active, members, obj_span, graph)
+            process_node(state, active, loader, members, obj_span, graph).await
         }
 
         JsonLdVal::Str(s) => {
@@ -983,39 +1053,48 @@ fn process_value_object(
     })))
 }
 
-fn process_list(
-    state: &mut ConvertState,
-    active: &ActiveContext,
-    items: &[JsonLdVal],
-    span: &Range<usize>,
-    graph: Option<&Term>,
-) -> Term {
-    if items.is_empty() {
-        return ConvertState::named(RDF_NIL);
-    }
-    // Build the linked list in reverse
-    let mut rest = ConvertState::named(RDF_NIL);
-    for item in items.iter().rev() {
-        let first_term =
-            value_to_rdf(state, active, item, span, graph, None).unwrap_or(Term::Invalid);
-        let node = state.fresh_blank(span.start);
-        state.add_triple(
-            node.clone(),
-            ConvertState::named(RDF_FIRST),
-            first_term,
-            graph.cloned(),
-            span.clone(),
-        );
-        state.add_triple(
-            node.clone(),
-            ConvertState::named(RDF_REST),
-            rest,
-            graph.cloned(),
-            span.clone(),
-        );
-        rest = node;
-    }
-    rest
+/// Build an `rdf:first`/`rdf:rest` list and return the head node.
+///
+/// Boxed because it is mutually recursive with `value_to_rdf` (which may
+/// call `process_list` again for nested `@list` values).
+fn process_list<'a>(
+    state: &'a mut ConvertState,
+    active: &'a ActiveContext,
+    loader: &'a dyn ContextLoader,
+    items: &'a [JsonLdVal],
+    span: &'a Range<usize>,
+    graph: Option<&'a Term>,
+) -> Pin<Box<dyn Future<Output = Term> + 'a>> {
+    Box::pin(async move {
+        if items.is_empty() {
+            return ConvertState::named(RDF_NIL);
+        }
+        // Build the linked list in reverse
+        let mut rest = ConvertState::named(RDF_NIL);
+        for item in items.iter().rev() {
+            let first_term =
+                value_to_rdf(state, active, loader, item, span, graph, None)
+                    .await
+                    .unwrap_or(Term::Invalid);
+            let node = state.fresh_blank(span.start);
+            state.add_triple(
+                node.clone(),
+                ConvertState::named(RDF_FIRST),
+                first_term,
+                graph.cloned(),
+                span.clone(),
+            );
+            state.add_triple(
+                node.clone(),
+                ConvertState::named(RDF_REST),
+                rest,
+                graph.cloned(),
+                span.clone(),
+            );
+            rest = node;
+        }
+        rest
+    })
 }
 
 fn iri_or_blank(iri: String, offset: usize) -> Term {
@@ -1061,21 +1140,41 @@ fn json_escape(s: &str) -> String {
 /// Convert a parsed JSON-LD CST to RDF triples.
 ///
 /// Remote `@context` references are not resolved.  Use
-/// [`convert_with_loader`] to supply a context-loading hook.
+/// [`convert_with_loader`] to supply an async context-loading hook.
 pub fn convert(root: &Node) -> Turtle {
-    convert_with_loader(root, &NoopContextLoader)
+    // NoopContextLoader always resolves immediately (std::future::ready),
+    // so polling once is sufficient and safe without a real async runtime.
+    use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
+
+    fn noop_clone(p: *const ()) -> RawWaker {
+        RawWaker::new(p, &NOOP_VTABLE)
+    }
+    fn noop(_: *const ()) {}
+    static NOOP_VTABLE: RawWakerVTable = RawWakerVTable::new(noop_clone, noop, noop, noop);
+
+    // SAFETY: The waker never actually wakes anything; it is only used to drive
+    // the future to completion in a single synchronous poll.  This is safe
+    // because NoopContextLoader::load returns std::future::ready(None), which
+    // is always Poll::Ready on the first poll.
+    let waker = unsafe { Waker::from_raw(RawWaker::new(std::ptr::null(), &NOOP_VTABLE)) };
+    let mut cx = Context::from_waker(&waker);
+    let mut fut = std::pin::pin!(convert_with_loader(root, &NoopContextLoader));
+    match fut.as_mut().poll(&mut cx) {
+        Poll::Ready(v) => v,
+        Poll::Pending => unreachable!("NoopContextLoader always resolves immediately"),
+    }
 }
 
 /// Convert a parsed JSON-LD CST to RDF triples, using `loader` to fetch
-/// remote `@context` documents.
-pub fn convert_with_loader(root: &Node, loader: &dyn ContextLoader) -> Turtle {
-    let mut state = ConvertState::new(loader);
+/// remote `@context` documents asynchronously.
+pub async fn convert_with_loader(root: &Node, loader: &dyn ContextLoader) -> Turtle {
+    let mut state = ConvertState::new();
     let active = ActiveContext::default();
 
     // jsonldDoc ::= jsonValue — the JsonValue is a direct child of ROOT.
     if let Some(json_val_node) = root.children().find(|c| c.kind() == SyntaxKind::JsonValue) {
         if let Some(val) = cst_to_value(&json_val_node) {
-            process_document(&mut state, &active, &val);
+            process_document(&mut state, &active, loader, &val).await;
         }
     }
 
@@ -1523,5 +1622,97 @@ mod tests {
         // but the converter should not panic.
         let _ = triples_of(&t);
     }
-}
 
+    // ── 22. Remote @context via a custom ContextLoader ────────────────────────
+
+    /// Drive an async future to completion using a no-op waker.
+    ///
+    /// Safe as long as the future only awaits immediately-ready sub-futures
+    /// (i.e. no real I/O suspension).
+    fn block_on_ready<T>(fut: impl std::future::Future<Output = T>) -> T {
+        use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
+        fn clone(p: *const ()) -> RawWaker { RawWaker::new(p, &VTABLE) }
+        fn noop(_: *const ()) {}
+        static VTABLE: RawWakerVTable = RawWakerVTable::new(clone, noop, noop, noop);
+        let waker = unsafe { Waker::from_raw(RawWaker::new(std::ptr::null(), &VTABLE)) };
+        let mut cx = Context::from_waker(&waker);
+        let mut pinned = std::pin::pin!(fut);
+        match pinned.as_mut().poll(&mut cx) {
+            Poll::Ready(v) => v,
+            Poll::Pending => panic!("future did not complete synchronously"),
+        }
+    }
+
+    #[test]
+    fn test_remote_context_loader() {
+        // A mock loader that returns a hardcoded context document for one URL.
+        struct MockLoader;
+        impl ContextLoader for MockLoader {
+            fn load<'a>(
+                &'a self,
+                url: &'a str,
+            ) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+                let result = if url == "https://example.org/context.jsonld" {
+                    Some(
+                        r#"{
+                          "@context": {
+                            "name":   "http://schema.org/name",
+                            "email":  "http://schema.org/email",
+                            "Person": "http://schema.org/Person"
+                          }
+                        }"#
+                        .to_string(),
+                    )
+                } else {
+                    None
+                };
+                Box::pin(std::future::ready(result))
+            }
+        }
+
+        let input = r#"
+        {
+          "@context": "https://example.org/context.jsonld",
+          "@id":   "http://example.org/alice",
+          "@type": "Person",
+          "name":  "Alice",
+          "email": "alice@example.org"
+        }"#;
+
+        let rule = Rule::new(SK::JsonldDoc);
+        let (result, _) = crate::parse(rule, input);
+        let root = result.syntax::<Lang>();
+
+        let turtle = block_on_ready(convert_with_loader(&root, &MockLoader));
+        let triples = triples_of(&turtle);
+
+        // @type → rdf:type + 2 data properties = 3 triples
+        assert_eq!(triples.len(), 3);
+
+        // rdf:type triple
+        let type_triple = triples
+            .iter()
+            .find(|t| predicate_iri(t) == Some(RDF_TYPE))
+            .expect("missing rdf:type triple");
+        assert_eq!(subject_iri(type_triple), Some("http://example.org/alice"));
+        assert_eq!(object_iri(type_triple), Some("http://schema.org/Person"));
+
+        // name triple — expanded via the remote context
+        let name_triple = triples
+            .iter()
+            .find(|t| predicate_iri(t) == Some("http://schema.org/name"))
+            .expect("missing schema:name triple");
+        assert_eq!(
+            object_literal(name_triple),
+            Some(("Alice", None, Some(XSD_STRING)))
+        );
+
+        // email triple
+        assert!(
+            triples
+                .iter()
+                .any(|t| predicate_iri(t) == Some("http://schema.org/email")),
+            "missing schema:email triple"
+        );
+    }
+}

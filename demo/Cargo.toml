@@ -14,3 +14,5 @@ rowan = "0.16.1"
 ariadne = "0.6.0"
 concolor = { version = "0.1", features = ["api"] }
 console_error_panic_hook = "0.1"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["Window", "Response"] }
