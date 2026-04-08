@@ -5,6 +5,13 @@ members = ["xtask", "demo", "benchmark"]
 name = "rdf-parsers"
 version = "0.1.0"
 edition = "2024"
+authors = ["Arthur Vercruysse <arthur.vercruysse@ugent.be>"]
+description = "Error-tolerant RDF/SPARQL parsers (Turtle, TriG, N3, N-Triples, SPARQL) using an A* search algorithm to recover from malformed input and produce a lossless rowan CST."
+repository = "https://github.com/ajuvercr/rdf-parsers"
+license = "MIT"
+keywords = ["rdf", "turtle", "sparql", "parser", "n3"]
+categories = ["parser-implementations", "encoding"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [dependencies]
 logos = "0.16.1"
