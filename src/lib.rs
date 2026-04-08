@@ -119,6 +119,19 @@ pub trait TokenTrait:
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
 
+    /// The set of every terminal that can be consumed *anywhere* in a parse of
+    /// this rule — including inside nested sub-rules at any depth.
+    ///
+    /// Used by the A* to prune parser elements whose current token cannot
+    /// appear anywhere in the rule's subtree: if the set is non-empty and the
+    /// current token is absent, the path must produce at least one error.
+    ///
+    /// Returns `&[]` (no pruning) by default; generated parsers override this.
+    fn all_reachable_tokens(&self) -> &'static [Self] {
+        &[]
+    }
+
+
     /// Maximum `error_value` for this token kind across all grammar rules that
     /// may match it.
     ///
