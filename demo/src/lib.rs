@@ -33,6 +33,7 @@ thread_local! {
     static PREV_NTRIPLES: RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static PREV_N3:       RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static PREV_JSONLD:   RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static JSONLD_CACHE:   RefCell<WasmFetchLoader> = RefCell::new(WasmFetchLoader::default());
 }
 
 #[wasm_bindgen(start)]
@@ -273,12 +274,19 @@ where
 
 /// A `ContextLoader` that fetches remote JSON-LD context documents using the
 /// browser `fetch()` API.
-struct WasmFetchLoader;
+
+#[derive(Default)]
+struct WasmFetchLoader {
+    cache: HashMap<String, Option<String>>,
+}
 
 impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
-    fn load<'a>(&'a self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+    fn load<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
         let url = url.to_string();
         Box::pin(async move {
+            if let Some(o) = self.cache.get(&url) {
+                return o.clone();
+            }
             let window = web_sys::window()?;
             let resp_val = JsFuture::from(window.fetch_with_str(&url)).await.ok()?;
             let resp: web_sys::Response = resp_val.dyn_into().ok()?;
@@ -286,7 +294,9 @@ impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
                 return None;
             }
             let text_val = JsFuture::from(resp.text().ok()?).await.ok()?;
-            text_val.as_string()
+            let v = text_val.as_string();
+            self.cache.insert(url, v.clone());
+            v
         })
     }
 }
@@ -344,11 +354,11 @@ pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 (parse, pairs)
             });
             let root = parse.syntax::<JsonLdLang>();
-            let turtle = rdf_parsers::jsonld::convert::convert_with_loader(
-                &root,
-                &WasmFetchLoader,
-            )
-            .await;
+
+            let mut cache = JSONLD_CACHE.take();
+            let turtle = rdf_parsers::jsonld::convert::convert_with_loader(&root, &mut cache).await;
+            JSONLD_CACHE.set(cache);
+
             ParseResult {
                 ariadne: render_ariadne(&pairs, text, "input"),
                 ast: render_ast::<JsonLdLang>(&parse, &pairs),
