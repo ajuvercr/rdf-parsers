@@ -75,6 +75,9 @@ pub struct AStar<'a, R: ParserTrait> {
     best_at_eof: Option<(isize, List<Step<R::Kind>>, usize)>,
     /// Whether to perform fault-tolerant error recovery.
     mode: ParseMode,
+    /// Whether to offer deletion (token-skip) branches during fault-tolerant
+    /// search.  Mirrors `IncrementalBias::allow_deletion`.
+    allow_deletion: bool,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -101,6 +104,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             tokens,
             done: HashMap::new(),
             todo: BinaryHeap::new(),
+            allow_deletion: bias.allow_deletion,
             bias,
             heuristic,
             iterations: 0,
@@ -119,7 +123,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             tokens,
             done: HashMap::new(),
             todo: BinaryHeap::new(),
-            bias: IncrementalBias { strength: 0 },
+            allow_deletion: false,
+            bias: IncrementalBias { strength: 0, allow_deletion: false },
             heuristic: Vec::new(),
             iterations: 0,
             max_iterations: usize::MAX,
@@ -183,9 +188,10 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // 2 * max_error_value.  This makes deletion as expensive as one
                 // insertion error (f increases by max_error_value), so the A*
                 // prefers correct parses and legitimate insertions over deletion.
-                // Only in FaultTolerant mode; skippable tokens (whitespace) are
-                // never deleted since they are already invisible to the grammar.
-                if self.mode == ParseMode::FaultTolerant {
+                // Only in FaultTolerant mode and when deletion is enabled;
+                // skippable tokens (whitespace) are never deleted since they
+                // are already invisible to the grammar.
+                if self.mode == ParseMode::FaultTolerant && self.allow_deletion {
                     let idx = e.state.1;
                     if let Some(token) = self.tokens.get(idx) {
                         if !token.kind.skips() {
