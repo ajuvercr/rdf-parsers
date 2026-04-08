@@ -1,8 +1,8 @@
 use std::fs::read_to_string;
 
-use turtle::parse;
-use turtle::turtle as lang;
-use turtle::turtle::convert::convert;
+use rdf_parsers::parse;
+use rdf_parsers::turtle as lang;
+use rdf_parsers::turtle::convert::convert;
 
 fn main() {
     let path = std::env::args()

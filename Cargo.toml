@@ -2,14 +2,12 @@
 members = ["xtask", "demo", "benchmark"]
 
 [package]
-name = "turtle"
+name = "rdf-parsers"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ariadne = { version = "0.6.0", features = ["auto-color"] }
 logos = "0.16.1"
-m_lexer = "0.0.4"
 rowan = "0.16.1"
 similar = "2.7.0"
 

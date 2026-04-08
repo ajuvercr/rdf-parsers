@@ -457,7 +457,7 @@ fn strip_string_delimiters(text: &str) -> (&str, StringStyle) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{parse as crate_parse, n3::parser as lang};
+    use crate::{n3::parser as lang, parse as crate_parse};
 
     fn parse(input: &str) -> Turtle {
         let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::N3Doc), input);
@@ -590,7 +590,9 @@ mod tests {
 
     #[test]
     fn test_full_iri_triple() {
-        let doc = parse("<http://example.org/alice> <http://example.org/knows> <http://example.org/bob> .");
+        let doc = parse(
+            "<http://example.org/alice> <http://example.org/knows> <http://example.org/bob> .",
+        );
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         assert!(nn_eq(
@@ -689,10 +691,7 @@ mod tests {
     fn test_boolean_literal() {
         let doc = parse("@prefix ex: <http://example.org/> .\nex:alice ex:active true .");
         let t = doc.triples[0].value();
-        assert_eq!(
-            *term_lit(t.po[0].object[0].value()),
-            Literal::Boolean(true)
-        );
+        assert_eq!(*term_lit(t.po[0].object[0].value()), Literal::Boolean(true));
     }
 
     // ── named blank node ─────────────────────────────────────────────────────
@@ -711,9 +710,8 @@ mod tests {
 
     #[test]
     fn test_anon_blank_node_property_list() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> .\nex:alice ex:knows [ ex:name \"Bob\" ] .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> .\nex:alice ex:knows [ ex:name \"Bob\" ] .");
         let t = doc.triples[0].value();
         match term_bn(t.po[0].object[0].value()) {
             BlankNode::Unnamed(pos, _, _) => {
@@ -775,9 +773,8 @@ mod tests {
 
     #[test]
     fn test_multiple_triples() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> .\nex:alice ex:age 30 .\nex:bob ex:age 25 .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> .\nex:alice ex:age 30 .\nex:bob ex:age 25 .");
         assert_eq!(doc.triples.len(), 2);
         assert!(nn_eq(
             term_nn(doc.triples[0].value().subject.value()),
@@ -862,9 +859,8 @@ mod tests {
 
     #[test]
     fn test_formula_nested_triples() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> .\n{ ex:a ex:b ex:c } ex:implies ex:d .",
-        );
+        let doc =
+            parse("@prefix ex: <http://example.org/> .\n{ ex:a ex:b ex:c } ex:implies ex:d .");
         // The top-level triple has a formula as subject (Term::Invalid), so it's
         // skipped. Only the nested triple inside the formula is collected.
         assert_eq!(doc.triples.len(), 1);
@@ -880,15 +876,10 @@ mod tests {
 
     #[test]
     fn test_has_verb() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> .\nex:alice has ex:friend ex:bob .",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> .\nex:alice has ex:friend ex:bob .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
-        assert!(nn_eq(
-            term_nn(t.subject.value()),
-            &prefixed("ex", "alice")
-        ));
+        assert!(nn_eq(term_nn(t.subject.value()), &prefixed("ex", "alice")));
         // The predicate from "has ex:friend" should be ex:friend
         assert!(nn_eq(
             term_nn(t.po[0].predicate.value()),
@@ -904,9 +895,7 @@ mod tests {
 
     #[test]
     fn test_is_of_verb() {
-        let doc = parse(
-            "@prefix ex: <http://example.org/> .\nex:bob is ex:friend of ex:alice .",
-        );
+        let doc = parse("@prefix ex: <http://example.org/> .\nex:bob is ex:friend of ex:alice .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         // The predicate from "is ex:friend of" should be ex:friend

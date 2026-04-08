@@ -8,8 +8,8 @@ pub use parser::*;
 
 mod a_star;
 pub use a_star::Fingerprint;
-pub use a_star::ParserTrait;
 pub use a_star::ParseMode;
+pub use a_star::ParserTrait;
 pub mod list;
 pub mod model;
 pub mod n3;
@@ -302,11 +302,14 @@ where
     // Compute bracket depths for the new token sequence to populate PrevParseInfo.
     let mut depth: i32 = 0;
     let prev = PrevParseInfo {
-        tokens: tokens.iter().map(|t| {
-            let d = depth.clamp(0, 255) as u8;
-            depth += t.kind.bracket_delta() as i32;
-            t.to_prev_token(d)
-        }).collect(),
+        tokens: tokens
+            .iter()
+            .map(|t| {
+                let d = depth.clamp(0, 255) as u8;
+                depth += t.kind.bracket_delta() as i32;
+                t.to_prev_token(d)
+            })
+            .collect(),
         had_errors,
     };
     (parse, prev)

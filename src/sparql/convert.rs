@@ -989,9 +989,8 @@ mod tests {
 
 #[cfg(test)]
 mod demo_sim_tests {
-    use super::*;
     use crate::sparql::parser as lang;
-    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
+    use crate::{IncrementalBias, parse_incremental};
 
     // Simulate demo flow: use parse_incremental's returned prev (not crate_parse)
     #[test]
@@ -1028,7 +1027,6 @@ mod demo_sim_tests {
 
 #[cfg(test)]
 mod real_demo_tests {
-    use super::*;
     use crate::sparql::parser as lang;
     use crate::{IncrementalBias, parse_incremental};
 
@@ -1106,9 +1104,8 @@ ORDER BY ?name"#;
 
 #[cfg(test)]
 mod multi_step_tests {
-    use super::*;
-    use crate::{IncrementalBias, parse_incremental};
     use crate::sparql::parser as lang;
+    use crate::{IncrementalBias, parse_incremental};
 
     #[test]
     fn test_filter_move_via_intermediate_delete() {
@@ -1166,14 +1163,23 @@ ORDER BY ?name";
         // Show what depths the intermediate parse assigned to FILTER tokens
         for tok in &prev2.tokens {
             if tok.text.contains("FILTER") || tok.text == "(" {
-                eprintln!("  token {:?} fp={:?} depth={}", tok.text, tok.fingerprint.is_some(), tok.depth);
+                eprintln!(
+                    "  token {:?} fp={:?} depth={}",
+                    tok.text,
+                    tok.fingerprint.is_some(),
+                    tok.depth
+                );
             }
         }
 
         let (parse3, _) = parse_incremental(rule(), step3, Some(&prev2), bias);
         let errors: Vec<_> = parse3.errors.iter().collect();
         eprintln!("Step 3 errors: {:?}", errors);
-        assert_eq!(errors.len(), 0,
-            "three-step edit: valid SPARQL should parse without errors; got: {:?}", errors);
+        assert_eq!(
+            errors.len(),
+            0,
+            "three-step edit: valid SPARQL should parse without errors; got: {:?}",
+            errors
+        );
     }
 }

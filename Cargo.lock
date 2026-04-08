@@ -246,11 +246,11 @@ dependencies = [
  "criterion",
  "lsp-types",
  "oxttl",
+ "rdf-parsers",
  "rowan",
  "swls-core",
  "swls-lang-turtle",
  "tower-lsp",
- "turtle",
 ]
 
 [[package]]
@@ -873,8 +873,8 @@ dependencies = [
  "concolor",
  "console_error_panic_hook",
  "logos 0.16.1",
+ "rdf-parsers",
  "rowan",
- "turtle",
  "wasm-bindgen",
 ]
 
@@ -1784,15 +1784,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "m_lexer"
-version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7e51ebf91162d585a5bae05e4779efc4a276171cb880d61dd6fab11c98467a7"
-dependencies = [
- "regex",
-]
-
-[[package]]
 name = "matchers"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2540,6 +2531,15 @@ checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
+]
+
+[[package]]
+name = "rdf-parsers"
+version = "0.1.0"
+dependencies = [
+ "logos 0.16.1",
+ "rowan",
+ "similar",
 ]
 
 [[package]]
@@ -3933,17 +3933,6 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
-
-[[package]]
-name = "turtle"
-version = "0.1.0"
-dependencies = [
- "ariadne",
- "logos 0.16.1",
- "m_lexer",
- "rowan",
- "similar",
-]
 
 [[package]]
 name = "typenum"

@@ -1,6 +1,5 @@
-use std::{collections::HashSet, ops::Range};
+use std::collections::HashSet;
 
-use ariadne::Span;
 use rowan::{NodeOrToken, SyntaxToken, TextSize};
 
 use crate::TokenTrait;
@@ -103,32 +102,4 @@ where
 
     let e: usize = end.end().into();
     start.start().into()..e + 1
-}
-
-pub fn print_ariadne(errors: &[(Range<usize>, &String)], source: &str) {
-    if errors.is_empty() {
-        return;
-    }
-
-    use ariadne::{ColorGenerator, Label, Report, ReportKind, Source};
-    let loc = "sample.ttl";
-
-    let s = errors.iter().map(|x| x.0.start()).min().unwrap_or_default();
-    let e = errors.iter().map(|x| x.0.end()).max().unwrap_or_default();
-
-    let mut colors = ColorGenerator::from_state([10000, 15000, 15000], 0.8);
-
-    let report = errors.iter().rev().fold(
-        Report::build(ReportKind::Error, (loc, s..e)),
-        |report, (span, e)| {
-            report.with_label(
-                Label::new((loc, span.clone()))
-                    .with_message(e)
-                    .with_color(colors.next()),
-            )
-        },
-    );
-    println!("report {:?}", report);
-
-    report.finish().print((loc, Source::from(source))).unwrap();
 }

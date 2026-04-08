@@ -774,11 +774,14 @@ mod tests {
         let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
         let mut depth: i32 = 0;
         PrevParseInfo {
-            tokens: tokens.iter().map(|t| {
-                let d = depth.clamp(0, 255) as u8;
-                depth += t.kind.bracket_delta() as i32;
-                t.to_prev_token(d)
-            }).collect(),
+            tokens: tokens
+                .iter()
+                .map(|t| {
+                    let d = depth.clamp(0, 255) as u8;
+                    depth += t.kind.bracket_delta() as i32;
+                    t.to_prev_token(d)
+                })
+                .collect(),
             had_errors: false,
         }
     }
