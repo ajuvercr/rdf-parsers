@@ -10,6 +10,7 @@ use wasm_bindgen::prelude::*;
 
 use rdf_parsers::{
     IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait, effective_error_span,
+    jsonld::parser::{Lang as JsonLdLang, Rule as JsonLdRule, SyntaxKind as JsonLdSyntaxKind},
     model::Turtle,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
@@ -27,6 +28,7 @@ thread_local! {
     static PREV_TRIG:     RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static PREV_NTRIPLES: RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static PREV_N3:       RefCell<Option<PrevParseInfo>> = RefCell::new(None);
+    static PREV_JSONLD:   RefCell<Option<PrevParseInfo>> = RefCell::new(None);
 }
 
 #[wasm_bindgen(start)]
@@ -298,6 +300,14 @@ pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
             parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, |p| {
                 rdf_parsers::n3::convert::convert(&p.syntax::<N3Lang>())
             })
+        }),
+        "jsonld" => PREV_JSONLD.with(|prev| {
+            parse_language::<_, JsonLdLang>(
+                JsonLdRule::new(JsonLdSyntaxKind::JsonldDoc),
+                text,
+                prev,
+                |p| rdf_parsers::jsonld::convert::convert(&p.syntax::<JsonLdLang>()),
+            )
         }),
         _ => return Err("Unknown language".into()),
     })
