@@ -330,9 +330,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         IsExpectedElement::False => {
                             // Compute the depth delta this token carries from the
                             // previous parse and how it relates to the current depth.
-                            let depth_delta = found.old_depth().map(|old| {
-                                element.current_depth as i16 - old as i16
-                            });
+                            let depth_delta = found
+                                .old_depth()
+                                .map(|old| element.current_depth as i16 - old as i16);
                             let committed_delta = element.assumed_depth_delta as i16;
                             if depth_delta == Some(committed_delta) && committed_delta != 0 {
                                 // This conflict is fully explained by the depth shift
@@ -343,7 +343,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 // Restore the original +50 bias so the A* prefers a
                                 // correct parse over reusing a token in the wrong role.
                                 let insert_error = Some(Element {
-                                    list: create_list(Step::error(Error::Expected(token.clone().into()))),
+                                    list: create_list(Step::error(Error::Expected(
+                                        token.clone().into(),
+                                    ))),
                                     parent: element.parent.clone(),
                                     cost: element.cost + token.max_error_value(),
                                     h: element.h,
@@ -358,7 +360,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 // (a) adopt this depth delta (one-time cost), and
                                 // (b) insert an error token instead (don't consume).
                                 let insert_error = Some(Element {
-                                    list: create_list(Step::error(Error::Expected(token.clone().into()))),
+                                    list: create_list(Step::error(Error::Expected(
+                                        token.clone().into(),
+                                    ))),
                                     parent: element.parent.clone(),
                                     cost: element.cost + token.max_error_value(),
                                     h: element.h,
@@ -378,8 +382,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     .unwrap_or(element.assumed_depth_delta);
                                 let delta_change =
                                     (new_delta as i16 - element.assumed_depth_delta as i16).abs();
-                                let adoption_cost =
-                                    delta_change as isize * token.max_error_value();
+                                let adoption_cost = delta_change as isize * token.max_error_value();
                                 (insert_error, adoption_cost)
                             }
                         }
@@ -396,10 +399,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     has_error: element.has_error,
                     assumed_depth_delta: if bias > 0 {
                         // We adopted a new delta; compute it from the token's depth.
-                        found.old_depth()
+                        found
+                            .old_depth()
                             .map(|old| {
                                 (element.current_depth as i16 - old as i16)
-                                    .clamp(i8::MIN as i16, i8::MAX as i16) as i8
+                                    .clamp(i8::MIN as i16, i8::MAX as i16)
+                                    as i8
                             })
                             .unwrap_or(element.assumed_depth_delta)
                     } else {

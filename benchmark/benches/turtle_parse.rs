@@ -2,15 +2,15 @@ use benchmark::{Fixture, load_fixtures};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use lsp_types::Url;
 use oxttl::TurtleParser;
+use rdf_parsers::{
+    IncrementalBias, PrevParseInfo, TokenTrait, parse, parse_incremental,
+    turtle::parser::{Rule, SyntaxKind},
+};
 use swls_lang_turtle::lang::{
     context::{Context, TokenIdx},
     parse_source as lang_turtle_parse_source,
     parser::parse_turtle as chumsky_parse_turtle,
     tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
-};
-use turtle::{
-    IncrementalBias, PrevParseInfo, TokenTrait, parse, parse_incremental,
-    turtle::parser::{Rule, SyntaxKind},
 };
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -36,11 +36,14 @@ fn build_prev_info(text: &str) -> PrevParseInfo {
     let had_errors = parse.errors.len() > 0;
     let mut depth: i32 = 0;
     PrevParseInfo {
-        tokens: tokens.iter().map(|t| {
-            let d = depth.clamp(0, 255) as u8;
-            depth += t.kind.bracket_delta() as i32;
-            t.to_prev_token(d)
-        }).collect(),
+        tokens: tokens
+            .iter()
+            .map(|t| {
+                let d = depth.clamp(0, 255) as u8;
+                depth += t.kind.bracket_delta() as i32;
+                t.to_prev_token(d)
+            })
+            .collect(),
         had_errors,
     }
 }

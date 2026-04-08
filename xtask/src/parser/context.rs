@@ -128,7 +128,11 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .ignore_then(name_list)
         .map(CtxBlock::BracketClosers);
 
-    let block = rename.or(with).or(error_values).or(bracket_openers).or(bracket_closers);
+    let block = rename
+        .or(with)
+        .or(error_values)
+        .or(bracket_openers)
+        .or(bracket_closers);
 
     section_header("context", "==")
         .labelled("context header")

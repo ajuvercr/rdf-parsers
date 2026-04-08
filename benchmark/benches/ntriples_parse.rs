@@ -1,6 +1,6 @@
 use benchmark::{Fixture, load_fixtures_ext};
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
-use turtle::{
+use rdf_parsers::{
     IncrementalBias, PrevParseInfo, TokenTrait,
     ntriples::parser::{Rule, SyntaxKind},
     parse, parse_incremental,
@@ -17,11 +17,14 @@ fn build_prev_info(text: &str) -> PrevParseInfo {
     let had_errors = parse.errors.len() > 0;
     let mut depth: i32 = 0;
     PrevParseInfo {
-        tokens: tokens.iter().map(|t| {
-            let d = depth.clamp(0, 255) as u8;
-            depth += t.kind.bracket_delta() as i32;
-            t.to_prev_token(d)
-        }).collect(),
+        tokens: tokens
+            .iter()
+            .map(|t| {
+                let d = depth.clamp(0, 255) as u8;
+                depth += t.kind.bracket_delta() as i32;
+                t.to_prev_token(d)
+            })
+            .collect(),
         had_errors,
     }
 }

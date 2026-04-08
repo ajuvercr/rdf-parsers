@@ -2,16 +2,7 @@ use std::ops::Range;
 
 use ariadne::{ColorGenerator, Label, Report, ReportBuilder, ReportKind, Source};
 use benchmark::Fixture;
-use rowan::NodeOrToken;
-use swls_core::util::Spanned as ChumskySpanned;
-use swls_core::util::token::Token as ChumskyToken;
-use swls_lang_turtle::lang::{
-    context::{Context, TokenIdx},
-    parser::parse_turtle as chumsky_parse_turtle,
-    tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
-};
-use tower_lsp::lsp_types::Url;
-use turtle::{
+use rdf_parsers::{
     IncrementalBias, Parse, PrevParseInfo, TokenTrait,
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
@@ -21,6 +12,15 @@ use turtle::{
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
 };
+use rowan::NodeOrToken;
+use swls_core::util::Spanned as ChumskySpanned;
+use swls_core::util::token::Token as ChumskyToken;
+use swls_lang_turtle::lang::{
+    context::{Context, TokenIdx},
+    parser::parse_turtle as chumsky_parse_turtle,
+    tokenizer::parse_tokens_str as chumsky_parse_tokens_str,
+};
+use tower_lsp::lsp_types::Url;
 
 // ── ariadne output ────────────────────────────────────────────────────────────
 
@@ -52,18 +52,24 @@ fn print_ariadne(errors: &[(Range<usize>, String)], source: &str, loc: &str) {
 
 // ── A* helpers ────────────────────────────────────────────────────────────────
 
-fn make_prev_info<K>(parse_result: turtle::Parse, tokens: Vec<turtle::FatToken<K>>) -> PrevParseInfo
+fn make_prev_info<K>(
+    parse_result: rdf_parsers::Parse,
+    tokens: Vec<rdf_parsers::FatToken<K>>,
+) -> PrevParseInfo
 where
     K: TokenTrait,
 {
     let had_errors = parse_result.errors.len() > 0;
     let mut depth: i32 = 0;
     PrevParseInfo {
-        tokens: tokens.iter().map(|t| {
-            let d = depth.clamp(0, 255) as u8;
-            depth += t.kind.bracket_delta() as i32;
-            t.to_prev_token(d)
-        }).collect(),
+        tokens: tokens
+            .iter()
+            .map(|t| {
+                let d = depth.clamp(0, 255) as u8;
+                depth += t.kind.bracket_delta() as i32;
+                t.to_prev_token(d)
+            })
+            .collect(),
         had_errors,
     }
 }
@@ -84,7 +90,10 @@ fn astar_build_prev_trig(text: &str) -> PrevParseInfo {
 }
 
 fn astar_build_prev_n3(text: &str) -> PrevParseInfo {
-    let (p, t) = parse(turtle::n3::Rule::new(turtle::n3::SyntaxKind::N3Doc), text);
+    let (p, t) = parse(
+        rdf_parsers::n3::Rule::new(rdf_parsers::n3::SyntaxKind::N3Doc),
+        text,
+    );
     make_prev_info(p, t)
 }
 
@@ -349,7 +358,7 @@ fn run_astar_trig(fixture: &Fixture, loc: &str) {
 }
 
 fn run_n3(fixture: &Fixture, loc: &str) {
-    use turtle::n3::*;
+    use rdf_parsers::n3::*;
     let bias = IncrementalBias::default();
 
     if fixture.is_static {

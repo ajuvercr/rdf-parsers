@@ -8,7 +8,7 @@ swls-lang-turtle = "0.1.0"
 swls-core = "0.1.0"
 # tower-lsp (pulled in by lang-turtle → lsp-core) needs a runtime feature to compile
 tower-lsp = { version = "0.19", default-features = false, features = ["runtime-tokio"] }
-turtle = { path = ".." }
+rdf-parsers = { path = ".." }
 rowan = "0.16.1"
 ariadne = { version = "0.6.0", features = ["auto-color"] }
 chumsky = "0.9.0"

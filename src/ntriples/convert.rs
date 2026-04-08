@@ -151,7 +151,7 @@ fn convert_literal(node: &Node) -> Literal {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{parse as crate_parse, ntriples::parser as lang};
+    use crate::{ntriples::parser as lang, parse as crate_parse};
 
     fn parse(input: &str) -> Turtle {
         let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::NtriplesDoc), input);
@@ -214,9 +214,7 @@ mod tests {
 
     #[test]
     fn blank_node_as_subject() {
-        let doc = parse(
-            "_:b1 <http://example.org/name> <http://example.org/value> .",
-        );
+        let doc = parse("_:b1 <http://example.org/name> <http://example.org/value> .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         let bn = term_bn(t.subject.value());
@@ -225,9 +223,7 @@ mod tests {
 
     #[test]
     fn blank_node_as_object() {
-        let doc = parse(
-            "<http://example.org/alice> <http://example.org/knows> _:b2 .",
-        );
+        let doc = parse("<http://example.org/alice> <http://example.org/knows> _:b2 .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         let bn = term_bn(t.po[0].object[0].value());
@@ -236,9 +232,7 @@ mod tests {
 
     #[test]
     fn string_literal_object() {
-        let doc = parse(
-            "<http://example.org/alice> <http://example.org/name> \"Alice\" .",
-        );
+        let doc = parse("<http://example.org/alice> <http://example.org/name> \"Alice\" .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         let lit = term_lit(t.po[0].object[0].value());
@@ -255,9 +249,7 @@ mod tests {
 
     #[test]
     fn literal_with_language_tag() {
-        let doc = parse(
-            "<http://example.org/alice> <http://example.org/name> \"Alice\"@en .",
-        );
+        let doc = parse("<http://example.org/alice> <http://example.org/name> \"Alice\"@en .");
         assert_eq!(doc.triples.len(), 1);
         let t = doc.triples[0].value();
         let lit = term_lit(t.po[0].object[0].value());
@@ -286,10 +278,7 @@ mod tests {
                 let ty = rdf.ty.as_ref().expect("datatype should be present");
                 assert!(nn_eq(
                     ty,
-                    &NamedNode::Full(
-                        "http://www.w3.org/2001/XMLSchema#integer".to_string(),
-                        0
-                    )
+                    &NamedNode::Full("http://www.w3.org/2001/XMLSchema#integer".to_string(), 0)
                 ));
             }
             other => panic!("expected RDF literal, got {:?}", other),
@@ -326,17 +315,13 @@ mod tests {
 
     #[test]
     fn test_valid_input_has_no_errors() {
-        let p = parse_raw(
-            "<http://example.org/s> <http://example.org/p> <http://example.org/o> .",
-        );
+        let p = parse_raw("<http://example.org/s> <http://example.org/p> <http://example.org/o> .");
         assert_eq!(p.errors.len(), 0, "valid input should produce no errors");
     }
 
     #[test]
     fn test_missing_trailing_dot_reports_error() {
-        let p = parse_raw(
-            "<http://example.org/s> <http://example.org/p> <http://example.org/o>",
-        );
+        let p = parse_raw("<http://example.org/s> <http://example.org/p> <http://example.org/o>");
         assert!(
             p.errors.len() > 0,
             "missing trailing dot should produce an error"
@@ -350,9 +335,7 @@ mod tests {
 
     #[test]
     fn no_prefixes_and_no_base() {
-        let doc = parse(
-            "<http://example.org/s> <http://example.org/p> <http://example.org/o> .",
-        );
+        let doc = parse("<http://example.org/s> <http://example.org/p> <http://example.org/o> .");
         assert!(doc.base.is_none());
         assert!(doc.prefixes.is_empty());
     }
