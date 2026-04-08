@@ -246,18 +246,11 @@ pub struct IncrementalBias {
     /// Agreement: cost -= strength.  Conflict: cost += strength.
     /// Must be > 0; use 0 to disable incremental bias entirely.
     pub strength: isize,
-    /// Whether the fault-tolerant A* search is allowed to delete (skip)
-    /// spurious input tokens as an error-recovery strategy.  When `false`,
-    /// only token insertions are considered.  Defaults to `true`.
-    pub allow_deletion: bool,
 }
 
 impl Default for IncrementalBias {
     fn default() -> Self {
-        Self {
-            strength: 1,
-            allow_deletion: true,
-        }
+        Self { strength: 1 }
     }
 }
 

@@ -205,23 +205,6 @@
             border-left-color: #4a90d9;
         }
 
-        .option-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.55rem 1rem;
-            font-size: 0.78rem;
-            color: #778899;
-            cursor: pointer;
-            user-select: none;
-            margin-top: auto;
-        }
-
-        .option-toggle input[type="checkbox"] {
-            accent-color: #4a90d9;
-            cursor: pointer;
-        }
-
         /* ── Editor / output panes ── */
         .pane {
             display: flex;
@@ -474,10 +457,6 @@
             <button class="lang-tab" data-lang="trig">TriG</button>
             <button class="lang-tab" data-lang="n3">N3</button>
             <button class="lang-tab" data-lang="ntriples">N-Triples</button>
-            <label class="option-toggle" title="Allow the error-recovery search to delete spurious input tokens">
-                <input type="checkbox" id="allow-deletion-toggle" checked>
-                Allow deletion
-            </label>
         </nav>
 
         <div class="pane">
@@ -671,9 +650,8 @@ GRAPH ex:metadata {
         function runParse() {
             if (!wasmReady) return;
             const text = cm.getValue();
-            const allowDeletion = document.getElementById('allow-deletion-toggle').checked;
             const t0 = performance.now();
-            const {ariadne, ast, triples} = parse(currentLang, text, allowDeletion);
+            const {ariadne, ast, triples} = parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = ariadne.startsWith('No errors');
@@ -700,7 +678,6 @@ GRAPH ex:metadata {
         }
 
         tabs.forEach(tab => tab.addEventListener('click', () => switchLang(tab.dataset.lang)));
-        document.getElementById('allow-deletion-toggle').addEventListener('change', runParse);
         cm.on('change', scheduleParse);
 
         await init();

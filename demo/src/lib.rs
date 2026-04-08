@@ -242,7 +242,6 @@ fn parse_language<T, L>(
     root: T,
     text: &str,
     prev: &RefCell<Option<PrevParseInfo>>,
-    bias: IncrementalBias,
     convert_fn: impl FnOnce(&Parse) -> Turtle,
 ) -> ParseResult
 where
@@ -254,7 +253,7 @@ where
 {
     let (parse, new_prev) = {
         let p = prev.borrow();
-        parse_incremental(root, text, p.as_ref(), bias)
+        parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
     };
     let pairs = get_error_range_pairs::<L>(&parse);
     let turtle = convert_fn(&parse);
@@ -267,11 +266,10 @@ where
 }
 
 #[wasm_bindgen]
-pub fn parse(language: &str, text: &str, allow_deletion: bool) -> Result<ParseResult, JsValue> {
-    let bias = IncrementalBias { allow_deletion, ..IncrementalBias::default() };
+pub fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
-            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, bias, |p| {
+            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, |p| {
                 rdf_parsers::turtle::convert::convert(&p.syntax::<Lang>())
             })
         }),
@@ -280,12 +278,11 @@ pub fn parse(language: &str, text: &str, allow_deletion: bool) -> Result<ParseRe
                 SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                 text,
                 prev,
-                bias,
                 |p| rdf_parsers::sparql::convert::convert(&p.syntax::<SparqlLang>()),
             )
         }),
         "trig" => PREV_TRIG.with(|prev| {
-            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, bias, |p| {
+            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, |p| {
                 rdf_parsers::trig::convert::convert(&p.syntax::<TrigLang>())
             })
         }),
@@ -294,12 +291,11 @@ pub fn parse(language: &str, text: &str, allow_deletion: bool) -> Result<ParseRe
                 NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                 text,
                 prev,
-                bias,
                 |p| rdf_parsers::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
             )
         }),
         "n3" => PREV_N3.with(|prev| {
-            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, bias, |p| {
+            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, |p| {
                 rdf_parsers::n3::convert::convert(&p.syntax::<N3Lang>())
             })
         }),
