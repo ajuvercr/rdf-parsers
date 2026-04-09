@@ -570,6 +570,47 @@ impl<'a> RuleCodegen<'a> {
         }
     }
 
+    /// Like `goto` but wraps the transition in `add_element_checked`, pruning
+    /// branches where the current token can't match `terminal_kind`.
+    fn goto_checked(
+        &mut self,
+        target: usize,
+        terminal_kind: &proc_macro2::Ident,
+    ) -> token_stream::TokenStream {
+        self.reachable.insert(target);
+        quote! {
+            state.add_element_checked(
+                element.pop_push(Rule { kind: self.kind, state: #target }),
+                SyntaxKind::#terminal_kind,
+            );
+        }
+    }
+
+    /// If `expr` is a single terminal (literal or terminal reference), return
+    /// its SyntaxKind ident.  Used by `Either` to emit checked gotos.
+    fn terminal_kind_of(&self, expr: &Expr) -> Option<proc_macro2::Ident> {
+        match expr {
+            Expr::Literal(lt, f) => {
+                let ignore_case = if lt == &LiteralType::Double {
+                    IgnoreCase::True
+                } else {
+                    IgnoreCase::False
+                };
+                let name = Terminal::Literal(f.clone(), ignore_case).ident(self.ctx);
+                Some(self.ctx.context.ident_for(&name))
+            }
+            Expr::Reference(re) => {
+                let is_terminal = !self.ctx.rules.producing.iter().any(|r| &r.name == re);
+                if is_terminal {
+                    Some(self.ctx.context.ident_for(re))
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
+    }
+
     /// Store `body` under `id`, or redirect to the canonical state if a duplicate body
     /// was already registered.
     fn register(&mut self, id: usize, body: token_stream::TokenStream) {
@@ -629,8 +670,23 @@ impl<'a> RuleCodegen<'a> {
             Expr::Either(exprs) => {
                 let id = self.alloc();
                 let things: Vec<_> = exprs.iter().map(|e| self.emit(e, next)).collect();
-                let things: Vec<_> = things.into_iter().map(|x| self.goto(x)).collect();
-                self.impls.insert(id, quote! { #( #things )* });
+                // For each alternative, determine whether it starts with a single
+                // terminal.  If so, use add_element_checked to prune branches where
+                // the current token can't possibly match.  This avoids the
+                // combinatorial explosion that e.g. jsonString (24 keyword
+                // alternatives) would cause.
+                let gotos: Vec<_> = exprs
+                    .iter()
+                    .zip(things.iter())
+                    .map(|(expr, &target)| {
+                        if let Some(terminal_kind) = self.terminal_kind_of(expr) {
+                            self.goto_checked(target, &terminal_kind)
+                        } else {
+                            self.goto(target)
+                        }
+                    })
+                    .collect();
+                self.impls.insert(id, quote! { #( #gotos )* });
                 id
             }
             // For leaf nodes (Literal, Reference) the generated body does NOT
