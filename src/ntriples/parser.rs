@@ -196,8 +196,16 @@ mod definitions {
     #[doc = r" (admissible — parent context might accept the terminal after a pop)."]
     pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
         match (kind, state, terminal) {
-            (SyntaxKind::Literal, 5usize, _) => match terminal {
-                SyntaxKind::Langtag => 0,
+            (SyntaxKind::Literal, 2usize, _) => match terminal {
+                SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Literal, 6usize, _) => match terminal {
+                SyntaxKind::StringLiteralQuote => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Literal, 3usize, _) => match terminal {
+                SyntaxKind::Iriref => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Literal, 4usize, _) => match terminal {
@@ -208,27 +216,17 @@ mod definitions {
                 SyntaxKind::Stop => 2isize,
                 _ => 0,
             },
-            (SyntaxKind::Literal, 2usize, _) => match terminal {
-                SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Literal, 3usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Literal, 6usize, _) => match terminal {
-                SyntaxKind::StringLiteralQuote => 0,
+            (SyntaxKind::Literal, 5usize, _) => match terminal {
+                SyntaxKind::Langtag => 0,
                 _ => 1isize,
             },
             (SyntaxKind::NtriplesDoc, 2usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Object, 1usize, _) => match terminal {
-                SyntaxKind::Langtag => 1isize,
-                SyntaxKind::Datatype => 1isize,
-                SyntaxKind::Stop => 1isize,
-                _ => 0,
+            (SyntaxKind::Object, 2usize, _) => match terminal {
+                SyntaxKind::Iriref => 0,
+                _ => 1isize,
             },
             (SyntaxKind::Object, 3usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel => 0,
@@ -238,32 +236,34 @@ mod definitions {
                 SyntaxKind::StringLiteralQuote => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Object, 2usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
+            (SyntaxKind::Object, 1usize, _) => match terminal {
+                SyntaxKind::Langtag => 1isize,
+                SyntaxKind::Datatype => 1isize,
+                SyntaxKind::Stop => 1isize,
+                _ => 0,
             },
             (SyntaxKind::Predicate, 1usize, _) => match terminal {
                 SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Subject, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Subject, 3usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Subject, 2usize, _) => match terminal {
                 SyntaxKind::Iriref => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Triple, 4usize, _) => match terminal {
+            (SyntaxKind::Subject, 3usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Subject, 1usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Triple, 3usize, _) => match terminal {
                 SyntaxKind::Iriref => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Triple, 4usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Triple, 1usize, _) => match terminal {

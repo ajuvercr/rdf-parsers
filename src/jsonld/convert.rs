@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::future::Future;
 use std::ops::Range;
@@ -26,8 +27,8 @@ const XSD_BOOLEAN: &str = "http://www.w3.org/2001/XMLSchema#boolean";
 // ── Intermediate JSON-LD value representation ─────────────────────────────────
 
 #[derive(Debug, Clone)]
-enum JsonLdVal {
-    // Object carries its span so we can pass it as the triple span for nodes.
+pub enum JsonLdVal {
+    /// Object carries its span so we can pass it as the triple span for nodes.
     Object(Vec<(String, JsonLdVal)>, Range<usize>),
     Array(Vec<JsonLdVal>),
     Str(String),
@@ -301,6 +302,19 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
 
 // ── Context processing ────────────────────────────────────────────────────────
 
+thread_local! {
+    /// Cache for parsed remote JSON-LD context documents (keyed by URL).
+    /// Avoids re-parsing large contexts (e.g. schema.org, ~300KB) on every
+    /// incremental re-parse.  Persists for the thread/session lifetime.
+    static PARSED_CTX_CACHE: RefCell<HashMap<String, JsonLdVal>> = RefCell::new(HashMap::new());
+}
+
+/// Clear the parsed-context cache.  Call this if a remote context document
+/// has been updated and the stale cached version should be discarded.
+pub fn clear_parsed_context_cache() {
+    PARSED_CTX_CACHE.with(|c| c.borrow_mut().clear());
+}
+
 /// Process a JSON-LD `@context` value and return the updated active context.
 ///
 /// This is a boxed future because it is recursively called for arrays of
@@ -316,8 +330,15 @@ fn process_context<'a>(
                 active = ActiveContext::default();
             }
             JsonLdVal::Str(ref url) => {
-                if let Some(content) = loader.load(url).await {
+                // Check thread-local parsed-context cache first.
+                let cached = PARSED_CTX_CACHE.with(|c| c.borrow().get(url).cloned());
+                if let Some(remote_ctx) = cached {
+                    active = process_context(active, remote_ctx, loader).await;
+                } else if let Some(content) = loader.load(url).await {
                     if let Some(remote_ctx) = parse_jsonld_for_context(&content) {
+                        PARSED_CTX_CACHE.with(|c| {
+                            c.borrow_mut().insert(url.clone(), remote_ctx.clone())
+                        });
                         active = process_context(active, remote_ctx, loader).await;
                     }
                 }
