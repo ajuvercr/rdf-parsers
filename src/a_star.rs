@@ -34,6 +34,13 @@ pub trait ParserTrait: Debug + Sized + 'static {
     fn step(&self, el: &Element<Self>, state: &mut AStar<Self>);
     fn at(&self) -> usize;
     fn element_kind(&self) -> Self::Kind;
+
+    /// Precomputed dist(q, a): minimum insertion cost to reach a point where
+    /// terminal `terminal` can be matched, starting from this parser state
+    /// (kind, state_number).  Default: 0 (always admissible).
+    fn state_dist(&self, _terminal: &Self::Kind) -> isize {
+        0
+    }
 }
 
 enum IsExpectedElement {
@@ -255,7 +262,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         self.add_element(element)
     }
 
-    pub fn add_element(&mut self, element: Element<R>) -> bool {
+    pub fn add_element(&mut self, mut element: Element<R>) -> bool {
         // In Fast mode, elements that already contain an error can never
         // contribute to a valid parse.  Dropping them here prevents the heap
         // from filling with dead branches and stops infinite-loop searches on
@@ -267,6 +274,24 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         // Drop elements that have exceeded the maximum consecutive error span.
         if element.consecutive_errors > self.max_repair_span {
             return false;
+        }
+
+        // dist(q, a) heuristic boost: if the top-of-stack rule has a known
+        // minimum insertion cost to reach the next input token, add it to h.
+        // This is the recursive-descent analog of the paper's dist(q, a_p).
+        if self.mode == ParseMode::FaultTolerant {
+            if let Some((head, _)) = element.parent.head() {
+                let mut pos = element.state.1;
+                while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
+                    pos += 1;
+                }
+                if let Some(tok) = self.tokens.get(pos) {
+                    let d = head.state_dist(&tok.kind);
+                    if d > 0 {
+                        element.h = element.h.max(d);
+                    }
+                }
+            }
         }
 
         let at = element.parent.head().map(|x| x.0.at()).unwrap_or(0);

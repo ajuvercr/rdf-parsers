@@ -832,6 +832,653 @@ mod definitions {
             _ => 0,
         }
     }
+    #[doc = r" Precomputed dist(q, a): minimum insertion cost to reach a point"]
+    #[doc = r" where terminal `terminal` can be matched, starting from parser"]
+    #[doc = r" state `(kind, state)`.  Returns 0 as the conservative default"]
+    #[doc = r" (admissible — parent context might accept the terminal after a pop)."]
+    pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
+        match (kind, state, terminal) {
+            (SyntaxKind::JsonArray, 1usize, _) => match terminal {
+                SyntaxKind::SqClose => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonArray, 2usize, _) => match terminal {
+                SyntaxKind::Colon => 1isize,
+                SyntaxKind::Comma => 1isize,
+                SyntaxKind::CurlyClose => 1isize,
+                _ => 0,
+            },
+            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonArray, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 4usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonObject, 1usize, _) => match terminal {
+                SyntaxKind::CurlyClose => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonObject, 2usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyClose => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 13usize, _) => match terminal {
+                SyntaxKind::AtLanguage => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 20usize, _) => match terminal {
+                SyntaxKind::AtReverse => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 21usize, _) => match terminal {
+                SyntaxKind::AtSet => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 12usize, _) => match terminal {
+                SyntaxKind::AtJson => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 1usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 11usize, _) => match terminal {
+                SyntaxKind::AtIndex => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 9usize, _) => match terminal {
+                SyntaxKind::AtImport => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 22usize, _) => match terminal {
+                SyntaxKind::AtType => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 3usize, _) => match terminal {
+                SyntaxKind::AtBase => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 16usize, _) => match terminal {
+                SyntaxKind::AtNone => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 25usize, _) => match terminal {
+                SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 14usize, _) => match terminal {
+                SyntaxKind::AtList => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 6usize, _) => match terminal {
+                SyntaxKind::AtDirection => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 17usize, _) => match terminal {
+                SyntaxKind::AtPrefix => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 2usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 5usize, _) => match terminal {
+                SyntaxKind::AtContext => 0,
+                _ => 100isize,
+            },
+            (SyntaxKind::JsonString, 18usize, _) => match terminal {
+                SyntaxKind::AtPropagate => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 8usize, _) => match terminal {
+                SyntaxKind::AtId => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 19usize, _) => match terminal {
+                SyntaxKind::AtProtected => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 15usize, _) => match terminal {
+                SyntaxKind::AtNest => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 23usize, _) => match terminal {
+                SyntaxKind::AtValue => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 24usize, _) => match terminal {
+                SyntaxKind::AtVersion => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 10usize, _) => match terminal {
+                SyntaxKind::AtIncluded => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 7usize, _) => match terminal {
+                SyntaxKind::AtGraph => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 4usize, _) => match terminal {
+                SyntaxKind::AtContainer => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
+                SyntaxKind::NullLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 6usize, _) => match terminal {
+                SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
+                SyntaxKind::FalseLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonValue, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Member, 2usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 3isize,
+                SyntaxKind::StringToken => 3isize,
+                SyntaxKind::AtBase => 3isize,
+                SyntaxKind::AtContainer => 3isize,
+                SyntaxKind::AtContext => 3isize,
+                SyntaxKind::AtDirection => 3isize,
+                SyntaxKind::AtGraph => 3isize,
+                SyntaxKind::AtId => 3isize,
+                SyntaxKind::AtImport => 3isize,
+                SyntaxKind::AtIncluded => 3isize,
+                SyntaxKind::AtIndex => 3isize,
+                SyntaxKind::AtJson => 3isize,
+                SyntaxKind::AtLanguage => 3isize,
+                SyntaxKind::AtList => 3isize,
+                SyntaxKind::AtNest => 3isize,
+                SyntaxKind::AtNone => 3isize,
+                SyntaxKind::AtPrefix => 3isize,
+                SyntaxKind::AtPropagate => 3isize,
+                SyntaxKind::AtProtected => 3isize,
+                SyntaxKind::AtReverse => 3isize,
+                SyntaxKind::AtSet => 3isize,
+                SyntaxKind::AtType => 3isize,
+                SyntaxKind::AtValue => 3isize,
+                SyntaxKind::AtVersion => 3isize,
+                SyntaxKind::AtVocab => 3isize,
+                SyntaxKind::Comma => 4isize,
+                SyntaxKind::CurlyClose => 4isize,
+                SyntaxKind::CurlyOpen => 3isize,
+                SyntaxKind::FalseLit => 3isize,
+                SyntaxKind::NullLit => 3isize,
+                SyntaxKind::SqClose => 4isize,
+                SyntaxKind::SqOpen => 3isize,
+                SyntaxKind::TrueLit => 3isize,
+                _ => 0,
+            },
+            (SyntaxKind::Member, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Member, 3usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MemberList, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 3isize,
+                SyntaxKind::StringToken => 2isize,
+                SyntaxKind::AtBase => 2isize,
+                SyntaxKind::AtContainer => 2isize,
+                SyntaxKind::AtContext => 2isize,
+                SyntaxKind::AtDirection => 2isize,
+                SyntaxKind::AtGraph => 2isize,
+                SyntaxKind::AtId => 2isize,
+                SyntaxKind::AtImport => 2isize,
+                SyntaxKind::AtIncluded => 2isize,
+                SyntaxKind::AtIndex => 2isize,
+                SyntaxKind::AtJson => 2isize,
+                SyntaxKind::AtLanguage => 2isize,
+                SyntaxKind::AtList => 2isize,
+                SyntaxKind::AtNest => 2isize,
+                SyntaxKind::AtNone => 2isize,
+                SyntaxKind::AtPrefix => 2isize,
+                SyntaxKind::AtPropagate => 2isize,
+                SyntaxKind::AtProtected => 2isize,
+                SyntaxKind::AtReverse => 2isize,
+                SyntaxKind::AtSet => 2isize,
+                SyntaxKind::AtType => 2isize,
+                SyntaxKind::AtValue => 2isize,
+                SyntaxKind::AtVersion => 2isize,
+                SyntaxKind::AtVocab => 2isize,
+                SyntaxKind::Colon => 3isize,
+                SyntaxKind::CurlyClose => 3isize,
+                SyntaxKind::CurlyOpen => 3isize,
+                SyntaxKind::FalseLit => 3isize,
+                SyntaxKind::NullLit => 3isize,
+                SyntaxKind::SqClose => 3isize,
+                SyntaxKind::SqOpen => 3isize,
+                SyntaxKind::TrueLit => 3isize,
+                _ => 0,
+            },
+            (SyntaxKind::MemberList, 4usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MemberList, 2usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::ValueList, 2usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::ValueList, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 2isize,
+                SyntaxKind::StringToken => 2isize,
+                SyntaxKind::AtBase => 2isize,
+                SyntaxKind::AtContainer => 2isize,
+                SyntaxKind::AtContext => 2isize,
+                SyntaxKind::AtDirection => 2isize,
+                SyntaxKind::AtGraph => 2isize,
+                SyntaxKind::AtId => 2isize,
+                SyntaxKind::AtImport => 2isize,
+                SyntaxKind::AtIncluded => 2isize,
+                SyntaxKind::AtIndex => 2isize,
+                SyntaxKind::AtJson => 2isize,
+                SyntaxKind::AtLanguage => 2isize,
+                SyntaxKind::AtList => 2isize,
+                SyntaxKind::AtNest => 2isize,
+                SyntaxKind::AtNone => 2isize,
+                SyntaxKind::AtPrefix => 2isize,
+                SyntaxKind::AtPropagate => 2isize,
+                SyntaxKind::AtProtected => 2isize,
+                SyntaxKind::AtReverse => 2isize,
+                SyntaxKind::AtSet => 2isize,
+                SyntaxKind::AtType => 2isize,
+                SyntaxKind::AtValue => 2isize,
+                SyntaxKind::AtVersion => 2isize,
+                SyntaxKind::AtVocab => 2isize,
+                SyntaxKind::Colon => 3isize,
+                SyntaxKind::CurlyClose => 3isize,
+                SyntaxKind::CurlyOpen => 2isize,
+                SyntaxKind::FalseLit => 2isize,
+                SyntaxKind::NullLit => 2isize,
+                SyntaxKind::SqClose => 3isize,
+                SyntaxKind::SqOpen => 2isize,
+                SyntaxKind::TrueLit => 2isize,
+                _ => 0,
+            },
+            (SyntaxKind::ValueList, 4usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            _ => 0,
+        }
+    }
     impl crate::a_star::ParserTrait for Rule {
         type Kind = SyntaxKind;
         fn step(
@@ -1867,6 +2514,9 @@ mod definitions {
         }
         fn element_kind(&self) -> SyntaxKind {
             self.kind
+        }
+        fn state_dist(&self, terminal: &SyntaxKind) -> isize {
+            state_dist(self.kind, self.state, *terminal)
         }
     }
 }
