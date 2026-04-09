@@ -313,6 +313,201 @@ fn compute_entry_state(expr: &Expr, state_count: &mut usize, next: usize) -> usi
     }
 }
 
+// ── dist(q, a) transition analysis ────────────────────────────────────────────
+//
+// To compute the paper's dist(q, a) heuristic, we need a structural
+// representation of each parser state's transitions.  The following builds
+// that representation by walking the grammar expressions in the same order
+// as compute_entry_state() / RuleCodegen::emit().
+
+/// A transition from one parser state.
+#[derive(Debug, Clone)]
+enum Transition {
+    /// State expects terminal `ident`, then transitions to `next`.
+    Expect { ident: String, next: usize },
+    /// State pushes sub-rule `rule` (at its `entry` state), then continues
+    /// at `next` after the rule completes.
+    Push { rule: String, entry: usize, next: usize },
+    /// State can pop (return to parent).  Terminates the rule.
+    Pop,
+    /// State branches to one of several alternative states.
+    Goto(Vec<usize>),
+}
+
+/// Build transition info for `expr`, mirroring compute_entry_state's allocation.
+fn build_transitions(
+    expr: &Expr,
+    ctx: &Config,
+    initial_states: &HashMap<String, usize>,
+    state_count: &mut usize,
+    next: usize,
+    transitions: &mut HashMap<usize, Vec<Transition>>,
+) -> usize {
+    match expr {
+        Expr::Seq(exprs) => {
+            let mut target = next;
+            for e in exprs.iter().rev() {
+                target = build_transitions(e, ctx, initial_states, state_count, target, transitions);
+            }
+            target
+        }
+        Expr::Marked(inner, Mark::Option) => {
+            let id = *state_count;
+            *state_count += 1;
+            let thing = build_transitions(inner, ctx, initial_states, state_count, next, transitions);
+            transitions.entry(id).or_default().push(Transition::Goto(vec![thing, next]));
+            id
+        }
+        Expr::Marked(inner, Mark::Plus) => {
+            let id = *state_count;
+            *state_count += 1;
+            let done_once = *state_count;
+            *state_count += 1;
+            let thing = build_transitions(inner, ctx, initial_states, state_count, done_once, transitions);
+            transitions.entry(done_once).or_default().push(Transition::Goto(vec![thing, next]));
+            transitions.entry(id).or_default().push(Transition::Goto(vec![thing]));
+            id
+        }
+        Expr::Marked(inner, Mark::Star) => {
+            let id = *state_count;
+            *state_count += 1;
+            let thing = build_transitions(inner, ctx, initial_states, state_count, id, transitions);
+            transitions.entry(id).or_default().push(Transition::Goto(vec![thing, next]));
+            id
+        }
+        Expr::Either(exprs) => {
+            let id = *state_count;
+            *state_count += 1;
+            let targets: Vec<usize> = exprs
+                .iter()
+                .map(|e| build_transitions(e, ctx, initial_states, state_count, next, transitions))
+                .collect();
+            transitions.entry(id).or_default().push(Transition::Goto(targets));
+            id
+        }
+        Expr::Literal(lt, f) => {
+            let id = *state_count;
+            *state_count += 1;
+            let ignore_case = if lt == &LiteralType::Double {
+                IgnoreCase::True
+            } else {
+                IgnoreCase::False
+            };
+            let ident = Terminal::Literal(f.clone(), ignore_case).ident(ctx);
+            transitions.entry(id).or_default().push(Transition::Expect { ident, next });
+            id
+        }
+        Expr::Reference(re) => {
+            let id = *state_count;
+            *state_count += 1;
+            let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == re);
+            if is_terminal {
+                let ident = Terminal::Ref(re.clone()).ident(ctx);
+                transitions.entry(id).or_default().push(Transition::Expect { ident, next });
+            } else {
+                let entry = *initial_states.get(re.as_str()).unwrap_or(&0);
+                transitions.entry(id).or_default().push(Transition::Push {
+                    rule: re.clone(),
+                    entry,
+                    next,
+                });
+            }
+            id
+        }
+    }
+}
+
+/// Compute `dist(state, terminal)` for all states in a rule.
+///
+/// Returns a map from `(state_id, terminal_ident)` to minimum insertion cost.
+/// Missing entries default to 0 (admissible lower bound — the parent context
+/// might accept the terminal after a pop).
+fn compute_dist_for_rule(
+    transitions: &HashMap<usize, Vec<Transition>>,
+    state_count: usize,
+    terminal_idents: &[String],
+    error_values: &HashMap<String, isize>,
+    min_completion_costs: &HashMap<String, isize>,
+    initial_states: &HashMap<String, usize>,
+    // dist table for all rules computed so far (rule_name → per-rule dist map)
+    all_dists: &HashMap<String, HashMap<(usize, String), isize>>,
+) -> HashMap<(usize, String), isize> {
+    let mut dist: HashMap<(usize, String), isize> = HashMap::new();
+
+    // Fixed-point iteration.
+    let mut changed = true;
+    let mut iterations = 0;
+    while changed && iterations < 100 {
+        changed = false;
+        iterations += 1;
+
+        for state_id in 0..state_count {
+            let actions = match transitions.get(&state_id) {
+                Some(a) => a.clone(),
+                None => continue,
+            };
+
+            // State 0 is always Pop — dist = 0 for all terminals (default).
+            if state_id == 0 {
+                continue;
+            }
+
+            for terminal in terminal_idents {
+                let ev = *error_values.get(terminal.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT);
+                let key = (state_id, terminal.clone());
+
+                let mut best = dist.get(&key).copied().unwrap_or(isize::MAX);
+
+                for action in &actions {
+                    let cost = match action {
+                        Transition::Pop => 0,
+                        Transition::Expect { ident, next } => {
+                            if ident == terminal {
+                                0
+                            } else {
+                                let expect_ev = *error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT);
+                                let next_dist = dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
+                                expect_ev.saturating_add(next_dist)
+                            }
+                        }
+                        Transition::Push { rule, entry, next } => {
+                            // Option 1: terminal is matched inside the pushed rule.
+                            let inside = all_dists
+                                .get(rule.as_str())
+                                .and_then(|d| d.get(&(*entry, terminal.clone())))
+                                .copied()
+                                .unwrap_or(0);
+
+                            // Option 2: pushed rule completes, terminal matched after.
+                            let completion = *min_completion_costs.get(rule.as_str()).unwrap_or(&0);
+                            let after = dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
+                            let outside = completion.saturating_add(after);
+
+                            inside.min(outside)
+                        }
+                        Transition::Goto(targets) => {
+                            targets
+                                .iter()
+                                .map(|t| dist.get(&(*t, terminal.clone())).copied().unwrap_or(0))
+                                .min()
+                                .unwrap_or(0)
+                        }
+                    };
+
+                    best = best.min(cost);
+                }
+
+                if best < isize::MAX && best != dist.get(&key).copied().unwrap_or(0) {
+                    dist.insert(key, best);
+                    changed = true;
+                }
+            }
+        }
+    }
+
+    dist
+}
+
 /// Holds the mutable state for generating the state machine of one grammar rule.
 ///
 /// State 0 is reserved for "rule finished — pop frame and return to parent".
@@ -734,6 +929,35 @@ fn compute_min_completion_costs(config: &Config) -> HashMap<String, isize> {
     result
 }
 
+/// Collect all terminal idents from `expr` into `set` (non-recursive into sub-rules).
+fn expr_reachable_terminals_flat(expr: &Expr, ctx: &Config, set: &mut HashSet<String>) {
+    match expr {
+        Expr::Literal(lt, f) => {
+            let ignore_case = if lt == &LiteralType::Double {
+                IgnoreCase::True
+            } else {
+                IgnoreCase::False
+            };
+            set.insert(Terminal::Literal(f.clone(), ignore_case).ident(ctx));
+        }
+        Expr::Reference(name) => {
+            let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == name);
+            if is_terminal {
+                set.insert(Terminal::Ref(name.clone()).ident(ctx));
+            }
+            // Don't recurse into producing rules — the outer loop handles all rules.
+        }
+        Expr::Seq(exprs) | Expr::Either(exprs) => {
+            for e in exprs {
+                expr_reachable_terminals_flat(e, ctx, set);
+            }
+        }
+        Expr::Marked(inner, _) => {
+            expr_reachable_terminals_flat(inner, ctx, set);
+        }
+    }
+}
+
 /// Collect all terminal names reachable from `expr` into `set`, using already-
 /// computed results from `known` for non-terminal references.
 fn expr_reachable_terminals(
@@ -846,6 +1070,62 @@ pub fn generate(path: &str, contents: &str) -> String {
             (rule.name.clone(), entry)
         })
         .collect();
+
+    // ── Phase 3b: Build transition graphs and compute dist(state, terminal) ──
+    // Collect all terminal idents for the dist computation.
+    let all_terminal_idents: Vec<String> = {
+        let mut t = HashSet::new();
+        for rule in &config.rules.producing {
+            expr_reachable_terminals_flat(&rule.expression, &config, &mut t);
+        }
+        let mut v: Vec<_> = t.into_iter().collect();
+        v.sort();
+        v
+    };
+
+    // Build transitions for each producing rule and compute dist tables.
+    let dist_tables: HashMap<String, HashMap<(usize, String), isize>> = {
+        // Collect error_values for terminals.
+        let error_values: HashMap<String, isize> = config
+            .context
+            .error_values
+            .iter()
+            .map(|(k, v)| (k.clone(), *v))
+            .collect();
+
+        let mut all_dists: HashMap<String, HashMap<(usize, String), isize>> = HashMap::new();
+
+        // Fixed-point: iterate until all cross-rule references stabilise.
+        let mut changed = true;
+        let mut outer_iters = 0;
+        while changed && outer_iters < 20 {
+            changed = false;
+            outer_iters += 1;
+
+            for (rule, expr) in config.rules.producing.iter().zip(compacted.iter()) {
+                let mut transitions = HashMap::new();
+                let mut sc = 1usize; // state 0 = pop
+                transitions.insert(0usize, vec![Transition::Pop]);
+                build_transitions(expr, &config, &initial_states, &mut sc, 0, &mut transitions);
+
+                let new_dist = compute_dist_for_rule(
+                    &transitions,
+                    sc,
+                    &all_terminal_idents,
+                    &error_values,
+                    &min_completion_costs,
+                    &initial_states,
+                    &all_dists,
+                );
+
+                if all_dists.get(&rule.name) != Some(&new_dist) {
+                    all_dists.insert(rule.name.clone(), new_dist);
+                    changed = true;
+                }
+            }
+        }
+        all_dists
+    };
 
     // ── Phase 4: Generate state-machine code (pass 2) ──
     let mut terminals = HashSet::new();
@@ -1052,6 +1332,81 @@ pub fn generate(path: &str, contents: &str) -> String {
             .collect()
     };
 
+    // Build state_dist match arms from the precomputed dist tables.
+    // Group by (kind, state) and emit inner match on terminal.
+    // Optimisation: when all terminals share the same dist, emit a single
+    // wildcard arm instead of enumerating every terminal.
+    let state_dist_arms: Vec<_> = {
+        let mut arms = Vec::new();
+        let mut sorted_rules: Vec<_> = config.rules.producing.iter().map(|r| &r.name).collect();
+        sorted_rules.sort();
+
+        for rule_name in &sorted_rules {
+            if let Some(dist_map) = dist_tables.get(*rule_name) {
+                // Group entries by state_id.
+                let mut by_state: HashMap<usize, Vec<(&String, &isize)>> = HashMap::new();
+                for ((state_id, terminal), cost) in dist_map {
+                    if *cost > 0 {
+                        by_state.entry(*state_id).or_default().push((terminal, cost));
+                    }
+                }
+
+                let kind_ident = config.context.ident_for(rule_name);
+
+                for (state_id, mut entries) in by_state {
+                    if entries.is_empty() {
+                        continue;
+                    }
+                    entries.sort_by_key(|(t, _)| t.to_string());
+                    let st = state_id;
+
+                    // Check if all entries share the same cost value.
+                    let first_cost = *entries[0].1;
+                    let all_same = entries.iter().all(|(_, c)| **c == first_cost);
+
+                    if all_same && entries.len() > 3 {
+                        // Emit a compact wildcard arm with exceptions for 0-cost terminals.
+                        let zero_terminals: Vec<_> = all_terminal_idents
+                            .iter()
+                            .filter(|t| !entries.iter().any(|(et, _)| et == t))
+                            .map(|t| config.context.ident_for(t))
+                            .collect();
+                        let c = first_cost;
+                        if zero_terminals.is_empty() {
+                            arms.push(quote! {
+                                (SyntaxKind::#kind_ident, #st, _) => #c,
+                            });
+                        } else {
+                            arms.push(quote! {
+                                (SyntaxKind::#kind_ident, #st, _) => match terminal {
+                                    #( SyntaxKind::#zero_terminals )|* => 0,
+                                    _ => #c,
+                                },
+                            });
+                        }
+                    } else {
+                        // Emit individual terminal arms.
+                        let terminal_arms: Vec<_> = entries
+                            .iter()
+                            .map(|(terminal, cost)| {
+                                let t_ident = config.context.ident_for(terminal);
+                                let c = **cost;
+                                quote! { SyntaxKind::#t_ident => #c, }
+                            })
+                            .collect();
+                        arms.push(quote! {
+                            (SyntaxKind::#kind_ident, #st, _) => match terminal {
+                                #( #terminal_arms )*
+                                _ => 0,
+                            },
+                        });
+                    }
+                }
+            }
+        }
+        arms
+    };
+
     let enum_definition = quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
         #(#sub_pattersn)*
@@ -1143,6 +1498,17 @@ pub fn generate(path: &str, contents: &str) -> String {
             }
         }
 
+        /// Precomputed dist(q, a): minimum insertion cost to reach a point
+        /// where terminal `terminal` can be matched, starting from parser
+        /// state `(kind, state)`.  Returns 0 as the conservative default
+        /// (admissible — parent context might accept the terminal after a pop).
+        pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
+            match (kind, state, terminal) {
+                #( #state_dist_arms )*
+                _ => 0,
+            }
+        }
+
         impl crate::a_star::ParserTrait for Rule {
             type Kind = SyntaxKind;
 
@@ -1164,6 +1530,10 @@ pub fn generate(path: &str, contents: &str) -> String {
 
             fn element_kind(&self) -> SyntaxKind {
                 self.kind
+            }
+
+            fn state_dist(&self, terminal: &SyntaxKind) -> isize {
+                state_dist(self.kind, self.state, *terminal)
             }
         }
     }
