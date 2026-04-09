@@ -48,15 +48,32 @@ fn codegen() {
 
         let out_path = module_dir.join("parser.rs");
         let existing = std::fs::read_to_string(&out_path).ok();
-        if existing.as_deref() != Some(&code) {
-            std::fs::write(&out_path, &code)
+
+        // Format the generated code via rustfmt before comparing so the
+        // idempotency check isn't defeated by formatting differences.
+        let formatted_code = {
+            let mut child = std::process::Command::new("rustfmt")
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .spawn()
+                .unwrap_or_else(|e| panic!("failed to run rustfmt: {}", e));
+            {
+                use std::io::Write;
+                child
+                    .stdin
+                    .take()
+                    .unwrap()
+                    .write_all(code.as_bytes())
+                    .unwrap();
+            }
+            let output = child.wait_with_output().unwrap();
+            assert!(output.status.success(), "rustfmt failed");
+            String::from_utf8(output.stdout).unwrap()
+        };
+
+        if existing.as_deref() != Some(&formatted_code) {
+            std::fs::write(&out_path, &formatted_code)
                 .unwrap_or_else(|e| panic!("failed to write {}: {}", out_path.display(), e));
-            std::process::Command::new("rustfmt")
-                .arg(&out_path)
-                .status()
-                .unwrap_or_else(|e| {
-                    panic!("failed to run rustfmt on {}: {}", out_path.display(), e)
-                });
             println!("wrote {}", out_path.display());
         } else {
             println!("up to date {}", out_path.display());

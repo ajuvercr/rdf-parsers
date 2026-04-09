@@ -1411,7 +1411,9 @@ pub fn generate(path: &str, contents: &str) -> String {
 
                 let kind_ident = config.context.ident_for(rule_name);
 
-                for (state_id, mut entries) in by_state {
+                let mut by_state_sorted: Vec<_> = by_state.into_iter().collect();
+                by_state_sorted.sort_by_key(|(state_id, _)| *state_id);
+                for (state_id, mut entries) in by_state_sorted {
                     if entries.is_empty() {
                         continue;
                     }
