@@ -222,6 +222,23 @@ impl Parse {
         }
         skip_white_with_builder(&mut builder, &mut at);
 
+        // Wrap any remaining unconsumed non-whitespace tokens in Error nodes.
+        // This happens when the A* search timed out and returned a partial
+        // parse that didn't consume the full input.
+        while at < tokens.len() {
+            let tok = &tokens[at];
+            if tok.kind.skips() {
+                builder.token(tok.kind.clone().into(), &tok.text);
+                at += 1;
+            } else {
+                builder.start_node(T::ERROR.into());
+                builder.token(tok.kind.clone().into(), &tok.text);
+                builder.finish_node();
+                error_msgs.push(format!("Unparsed({:?})", tok.kind));
+                at += 1;
+            }
+        }
+
         for (idx, fp, depth) in fingerprint_assignments {
             if let Some(tok) = tokens.get_mut(idx) {
                 tok.set_old_kind(Some(fp));
