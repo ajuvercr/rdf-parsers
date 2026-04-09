@@ -144,6 +144,23 @@ pub trait TokenTrait:
         2
     }
 
+    /// Minimum cost to complete this rule via insertions.  This is the sum of
+    /// error_values for all required terminals on the cheapest path through the
+    /// rule.  Used by `add_element_checked` to pre-charge elements that push
+    /// a rule the current token cannot start.  Defaults to `max_error_value()`.
+    fn min_completion_cost(&self) -> isize {
+        self.max_error_value()
+    }
+
+    /// Cost of deleting (skipping) this token during error recovery.
+    ///
+    /// Defaults to `5 × max_error_value()`.  Must be high enough that
+    /// matching tokens is always cheaper than deleting them, while still
+    /// cheaper than long cascades of error insertions.
+    fn deletion_cost(&self) -> isize {
+        self.max_error_value() * 5
+    }
+
     /// Bracket nesting delta for this token kind.
     ///
     /// Returns +1 for opening brackets (`{`, `[`, `(`), -1 for closing

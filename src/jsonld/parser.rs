@@ -1915,4 +1915,13 @@ impl TokenTrait for SyntaxKind {
             _ => 0,
         }
     }
+    fn min_completion_cost(&self) -> isize {
+        match self {
+            SyntaxKind::JsonArray => 4isize,
+            SyntaxKind::JsonObject => 4isize,
+            SyntaxKind::Member => 5isize,
+            SyntaxKind::MemberList => 5isize,
+            _ => Self::max_error_value(self),
+        }
+    }
 }

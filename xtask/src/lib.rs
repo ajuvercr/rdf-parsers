@@ -675,6 +675,65 @@ fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>)
     }
 }
 
+// ── Minimum completion cost ───────────────────────────────────────────────────
+
+/// Compute the minimum insertion cost to complete `expr` along its cheapest path.
+/// Returns `None` for recursive references not yet resolved (treated as 0).
+fn expr_min_completion_cost(
+    expr: &Expr,
+    ctx: &Config,
+    known: &HashMap<String, isize>,
+) -> isize {
+    match expr {
+        Expr::Literal(lt, f) => {
+            let ignore_case = if lt == &LiteralType::Double {
+                IgnoreCase::True
+            } else {
+                IgnoreCase::False
+            };
+            let ident = Terminal::Literal(f.clone(), ignore_case).ident(ctx);
+            *ctx.context.error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+        }
+        Expr::Reference(name) => {
+            let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == name);
+            if is_terminal {
+                let ident = Terminal::Ref(name.clone()).ident(ctx);
+                *ctx.context.error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+            } else {
+                // Non-terminal: use previously computed value, or 0 for cycles.
+                known.get(name).copied().unwrap_or(0)
+            }
+        }
+        Expr::Seq(exprs) => exprs.iter().map(|e| expr_min_completion_cost(e, ctx, known)).sum(),
+        Expr::Either(exprs) => exprs
+            .iter()
+            .map(|e| expr_min_completion_cost(e, ctx, known))
+            .min()
+            .unwrap_or(0),
+        Expr::Marked(inner, Mark::Star | Mark::Option) => 0, // nullable — can skip
+        Expr::Marked(inner, Mark::Plus) => expr_min_completion_cost(inner, ctx, known),
+    }
+}
+
+/// Compute `min_completion_cost(rule_name)` for every producing rule.
+/// Uses fixed-point iteration to handle mutual recursion.
+fn compute_min_completion_costs(config: &Config) -> HashMap<String, isize> {
+    let mut result: HashMap<String, isize> = HashMap::new();
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for rule in &config.rules.producing {
+            let new_cost = expr_min_completion_cost(&rule.expression, config, &result);
+            let prev = result.get(&rule.name).copied().unwrap_or(0);
+            if new_cost != prev {
+                result.insert(rule.name.clone(), new_cost);
+                changed = true;
+            }
+        }
+    }
+    result
+}
+
 /// Collect all terminal names reachable from `expr` into `set`, using already-
 /// computed results from `known` for non-terminal references.
 fn expr_reachable_terminals(
@@ -764,6 +823,9 @@ pub fn generate(path: &str, contents: &str) -> String {
 
     // Compute reachable terminal sets for all_tokens() pruning.
     let reachable_terminals = compute_reachable_terminals(&config);
+
+    // Compute minimum completion cost for each producing rule.
+    let min_completion_costs = compute_min_completion_costs(&config);
 
     // Compact each rule's expression before code generation.
     let compacted: Vec<Expr> = config
@@ -975,6 +1037,21 @@ pub fn generate(path: &str, contents: &str) -> String {
         openers.chain(closers).collect()
     };
 
+    // Build min_completion_cost arms for producing rules.
+    let min_completion_cost_arms: Vec<_> = {
+        let mut sorted: Vec<_> = min_completion_costs.iter().collect();
+        sorted.sort_by_key(|(name, _)| name.as_str());
+        sorted
+            .iter()
+            .filter(|&&(_, cost)| *cost > DEFAULT_TOKEN_WEIGHT) // only emit non-default
+            .map(|&(name, cost)| {
+                let n = config.context.ident_for(name);
+                let c = *cost;
+                quote! { SyntaxKind::#n => #c, }
+            })
+            .collect()
+    };
+
     let enum_definition = quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
         #(#sub_pattersn)*
@@ -1133,6 +1210,13 @@ pub fn generate(path: &str, contents: &str) -> String {
             match self {
                 #( #bracket_delta_arms )*
                 _ => 0,
+            }
+        }
+
+        fn min_completion_cost(&self) -> isize {
+            match self {
+                #( #min_completion_cost_arms )*
+                _ => Self::max_error_value(self),
             }
         }
     }

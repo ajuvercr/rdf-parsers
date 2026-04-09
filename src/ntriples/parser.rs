@@ -565,4 +565,10 @@ impl TokenTrait for SyntaxKind {
             _ => 0,
         }
     }
+    fn min_completion_cost(&self) -> isize {
+        match self {
+            SyntaxKind::Triple => 11isize,
+            _ => Self::max_error_value(self),
+        }
+    }
 }
