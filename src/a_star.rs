@@ -60,7 +60,10 @@ pub const DEFAULT_MAX_ITERATIONS: usize = 1_000_000;
 pub const DEFAULT_MAX_REPAIR_SPAN: u16 = 15;
 
 /// Number of consecutive error operations that triggers sync-point scanning.
-const SYNC_THRESHOLD: u16 = 5;
+/// The paper's (R3S-n) is always available; we gate it at 2 to avoid
+/// scanning overhead on isolated single-token errors while still activating
+/// early enough to prevent dead-end branch accumulation.
+const SYNC_THRESHOLD: u16 = 10;
 
 /// Maximum number of tokens to scan ahead when looking for a sync point.
 const MAX_SYNC_SCAN: usize = 50;
@@ -267,9 +270,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             return false;
         }
 
-        // dist(q, a) heuristic boost: if the top-of-stack rule has a known
-        // minimum insertion cost to reach the next input token, add it to h.
-        // This is the recursive-descent analog of the paper's dist(q, a_p).
+        // dist(q, a) heuristic boost: the top-of-stack rule's minimum
+        // insertion cost to reach the next input token.  This is additive with
+        // the suffix-sum heuristic (which counts matching costs for remaining
+        // tokens) because they measure different, non-overlapping costs:
+        //   h_suffix = lower bound on cost of matching all remaining tokens
+        //   dist     = lower bound on insertion cost before next token can match
         if self.mode == ParseMode::FaultTolerant {
             if let Some((head, _)) = element.parent.head() {
                 let mut pos = element.state.1;
@@ -279,7 +285,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 if let Some(tok) = self.tokens.get(pos) {
                     let d = head.state_dist(&tok.kind);
                     if d > 0 {
-                        element.h = element.h.max(d);
+                        element.h += d;
                     }
                 }
             }
@@ -402,6 +408,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     consecutive_errors: element
                                         .consecutive_errors
                                         .saturating_add(1),
+                                    shifts_since_pop: element.shifts_since_pop,
                                 });
                                 (insert_error, 50)
                             } else {
@@ -422,6 +429,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     consecutive_errors: element
                                         .consecutive_errors
                                         .saturating_add(1),
+                                    shifts_since_pop: element.shifts_since_pop,
                                 });
                                 // One-time delta-adoption cost: proportional to how much
                                 // the assumed delta changes.  When depth info is unavailable
@@ -464,6 +472,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     },
                     current_depth: new_depth,
                     consecutive_errors: 0, // successful match resets counter
+                    shifts_since_pop: element.shifts_since_pop.saturating_add(1),
                 };
 
                 return (matched, fallback);
@@ -487,6 +496,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             assumed_depth_delta: element.assumed_depth_delta,
             current_depth: element.current_depth,
             consecutive_errors: element.consecutive_errors.saturating_add(1),
+            shifts_since_pop: element.shifts_since_pop,
         };
 
         (error, None)
@@ -548,6 +558,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             assumed_depth_delta: element.assumed_depth_delta,
             current_depth: element.current_depth,
             consecutive_errors: element.consecutive_errors.saturating_add(1),
+            shifts_since_pop: element.shifts_since_pop,
         };
         self.add_element(del_element);
     }
@@ -612,6 +623,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         assumed_depth_delta: element.assumed_depth_delta,
                         current_depth: element.current_depth,
                         consecutive_errors: 0,
+                        shifts_since_pop: 0, // sync resets — we popped to ancestor
                     };
 
                     let f = candidate.cost + candidate.h;
@@ -667,6 +679,11 @@ pub struct Element<R: ParserTrait> {
     /// since the last successful token match (Bump).  Used by the bounded-repair
     /// mechanism: elements exceeding `max_repair_span` are dropped.
     consecutive_errors: u16,
+    /// Consecutive shifts (bumps) since the last reduction (pop).  Paper's `t`
+    /// counter.  When > 0, the parser is at a known intra-rule state, so
+    /// `dist(q, a)` is exact (not diluted by the conservative pop = 0 fallback).
+    /// This enables hard pruning of unreachable branches.
+    shifts_since_pop: u16,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -688,6 +705,7 @@ impl<R: ParserTrait> Element<R> {
             assumed_depth_delta: 0,
             current_depth: 0,
             consecutive_errors: 0,
+            shifts_since_pop: 0,
         }
     }
 
@@ -704,6 +722,7 @@ impl<R: ParserTrait> Element<R> {
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
+            shifts_since_pop: self.shifts_since_pop,
         }
     }
 
@@ -723,6 +742,7 @@ impl<R: ParserTrait> Element<R> {
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
+            shifts_since_pop: self.shifts_since_pop,
         }
     }
 
@@ -740,6 +760,7 @@ impl<R: ParserTrait> Element<R> {
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
+            shifts_since_pop: 0, // reduction resets t counter
         })
     }
 }

@@ -1151,10 +1151,12 @@ pub fn generate(path: &str, contents: &str) -> String {
 
         let mut all_dists: HashMap<String, HashMap<(usize, String), isize>> = HashMap::new();
 
-        // Fixed-point: iterate until all cross-rule references stabilise.
+        // Fixed-point: iterate until all cross-rule references converge.
+        // Large grammars (e.g. SPARQL, ~900 states) may need many iterations
+        // when deeply nested rules depend on each other.
         let mut changed = true;
         let mut outer_iters = 0;
-        while changed && outer_iters < 20 {
+        while changed && outer_iters < 100 {
             changed = false;
             outer_iters += 1;
 
