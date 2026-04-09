@@ -299,8 +299,18 @@ where
 {
     use rowan::NodeOrToken;
 
-    let error_start: usize = error_node.text_range().start().into();
+    let text_range = error_node.text_range();
+    let error_start: usize = text_range.start().into();
+    let error_end: usize = text_range.end().into();
 
+    // Non-zero-width Error nodes (e.g. from Step::Delete or Unparsed) contain
+    // actual tokens — use their text range directly.
+    if error_start != error_end {
+        return error_start..error_end;
+    }
+
+    // Zero-width Error nodes (from Step::Error insertions): widen to the
+    // surrounding whitespace gap for a visible highlight.
     let root = error_node
         .ancestors()
         .last()
