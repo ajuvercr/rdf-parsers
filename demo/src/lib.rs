@@ -52,9 +52,6 @@ where
         .errors
         .iter()
         .cloned()
-        .collect::<Vec<_>>()
-        .into_iter()
-        .rev()
         .collect();
 
     let root = parse.syntax::<L>();
