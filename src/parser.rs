@@ -149,14 +149,20 @@ impl Parse {
         let mut at = 0;
         // (token_index, fingerprint, bracket_depth_at_bump)
         let mut fingerprint_assignments: Vec<(usize, crate::Fingerprint, u8)> = Vec::new();
-        let skip_white_with_builder = |builder: &mut GreenNodeBuilder<'_>, at: &mut usize| {
-            while let Some(t) = tokens.get(*at)
-                && t.kind.skips()
-            {
-                builder.token(t.kind.clone().into(), &t.text);
-                *at += 1;
-            }
-        };
+        let skip_white_with_builder =
+            |builder: &mut GreenNodeBuilder<'_>,
+             at: &mut usize,
+             error_msgs: &mut Vec<String>| {
+                while let Some(t) = tokens.get(*at)
+                    && t.kind.skips()
+                {
+                    if t.kind == T::ERROR {
+                        error_msgs.push(format!("InvalidToken({:?})", t.text));
+                    }
+                    builder.token(t.kind.clone().into(), &t.text);
+                    *at += 1;
+                }
+            };
 
         let mut error_msgs: Vec<String> = Vec::new();
         let mut builder = GreenNodeBuilder::new();
@@ -175,7 +181,7 @@ impl Parse {
         for step in steps.into_iter() {
             match step {
                 Step::Start(kind) => {
-                    skip_white_with_builder(&mut builder, &mut at);
+                    skip_white_with_builder(&mut builder, &mut at, &mut error_msgs);
                     builder.start_node(kind.into());
                 }
                 Step::End => builder.finish_node(),
@@ -183,7 +189,7 @@ impl Parse {
                     // Skip whitespace so the zero-width error node is positioned at
                     // the first non-whitespace byte where the missing token was expected,
                     // not at the end of the previously-consumed token.
-                    skip_white_with_builder(&mut builder, &mut at);
+                    skip_white_with_builder(&mut builder, &mut at, &mut error_msgs);
                     builder.start_node(T::ERROR.into());
                     // Convert the rowan::SyntaxKind back to the language-specific T
                     // for a human-readable debug name (e.g. "Expected(Verb)" rather
@@ -194,7 +200,7 @@ impl Parse {
                     builder.finish_node();
                 }
                 Step::Bump(fp) => {
-                    skip_white_with_builder(&mut builder, &mut at);
+                    skip_white_with_builder(&mut builder, &mut at, &mut error_msgs);
                     if let Some(i) = tokens.get(at) {
                         // Record depth at the token's position (before adjusting for
                         // this token's own bracket_delta, so openers record the outer
@@ -207,7 +213,7 @@ impl Parse {
                     }
                 }
                 Step::Delete => {
-                    skip_white_with_builder(&mut builder, &mut at);
+                    skip_white_with_builder(&mut builder, &mut at, &mut error_msgs);
                     if let Some(i) = tokens.get(at) {
                         builder.start_node(T::ERROR.into());
                         builder.token(i.kind.clone().into(), &i.text);
@@ -220,7 +226,7 @@ impl Parse {
                 }
             }
         }
-        skip_white_with_builder(&mut builder, &mut at);
+        skip_white_with_builder(&mut builder, &mut at, &mut error_msgs);
 
         // Wrap any remaining unconsumed non-whitespace tokens in Error nodes.
         // This happens when the A* search timed out and returned a partial

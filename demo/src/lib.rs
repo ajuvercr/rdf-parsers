@@ -42,7 +42,8 @@ pub fn start() {
 }
 
 /// Walk a finished A* `Parse` and return `(byte_range, message)` pairs for
-/// every Error node in source order.
+/// every error indicator in source order: both Error *nodes* (grammar errors)
+/// and Error *tokens* (lexer failures).
 fn get_error_range_pairs<L>(parse: &Parse) -> Vec<(Range<usize>, String)>
 where
     L: rowan::Language,
@@ -56,21 +57,27 @@ where
 
     let root = parse.syntax::<L>();
 
-    let mut token_ends: Vec<usize> = root
-        .descendants_with_tokens()
-        .filter_map(|nt| match nt {
-            NodeOrToken::Token(t) if !t.kind().skips() => Some(usize::from(t.text_range().end())),
-            _ => None,
-        })
-        .collect();
-
-    token_ends.sort_unstable();
-
-    let ranges: Vec<Range<usize>> = root
-        .descendants()
-        .filter(|n| n.kind() == L::Kind::ERROR)
-        .map(|n| effective_error_span::<L>(&n))
-        .collect();
+    // Collect error ranges from both Error nodes and Error tokens, in source
+    // order.  Error nodes come from grammar-level recovery (Step::Error,
+    // Step::Delete, Unparsed); Error tokens come from lexer failures.
+    let mut ranges: Vec<Range<usize>> = Vec::new();
+    for elem in root.descendants_with_tokens() {
+        match elem {
+            NodeOrToken::Node(n) if n.kind() == L::Kind::ERROR => {
+                ranges.push(effective_error_span::<L>(&n));
+            }
+            NodeOrToken::Token(t) if t.kind() == L::Kind::ERROR => {
+                // Skip Error tokens that are children of Error nodes — those
+                // are already covered by the parent node's range.
+                let parent_is_error = t.parent().map_or(false, |p| p.kind() == L::Kind::ERROR);
+                if !parent_is_error {
+                    let r = t.text_range();
+                    ranges.push(usize::from(r.start())..usize::from(r.end()));
+                }
+            }
+            _ => {}
+        }
+    }
 
     ranges.into_iter().zip(msgs).collect()
 }
@@ -147,8 +154,10 @@ fn format_element<L>(
         NodeOrToken::Token(t) => {
             let range = t.text_range();
             let text = t.text();
+            let is_error_token = t.kind() == L::Kind::ERROR
+                && t.parent().map_or(true, |p| p.kind() != L::Kind::ERROR);
             if text.len() > 40 {
-                let _ = writeln!(
+                let _ = write!(
                     out,
                     "{}{:?}@{}..{}  \"{} ...\"",
                     indent,
@@ -158,7 +167,7 @@ fn format_element<L>(
                     &text[..40],
                 );
             } else {
-                let _ = writeln!(
+                let _ = write!(
                     out,
                     "{}{:?}@{}..{}  {:?}",
                     indent,
@@ -168,6 +177,13 @@ fn format_element<L>(
                     text,
                 );
             }
+            if is_error_token {
+                if let Some(msg) = error_msgs.get(error_idx) {
+                    let _ = write!(out, "  // {}", msg);
+                }
+                *error_idx += 1;
+            }
+            out.push('\n');
         }
     }
 }
