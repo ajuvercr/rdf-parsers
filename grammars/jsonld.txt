@@ -7,7 +7,7 @@
 [5]  member       ::=  jsonString ':' jsonValue
 [6]  jsonValue    ::=  jsonObject | jsonArray | jsonString | JSON_NUMBER | 'true' | 'false' | 'null'
 [7]  valueList    ::=  jsonValue (',' jsonValue)*
-[8]  jsonString   ::=  JSON_STRING | '"@base"' | '"@container"' | '"@context"' | '"@direction"' | '"@graph"' | '"@id"' | '"@import"' | '"@included"' | '"@index"' | '"@json"' | '"@language"' | '"@list"' | '"@nest"' | '"@none"' | '"@prefix"' | '"@propagate"' | '"@protected"' | '"@reverse"' | '"@set"' | '"@type"' | '"@value"' | '"@version"' | '"@vocab"'
+[8]  jsonString   ::=  JSON_STRING
 === terminals ===
 [9]  JSON_STRING  ::=  '"' ([^#x22#x5C] | '\' #x22 | '\' #x5C | '\' #x2F | '\b' | '\f' | '\n' | '\r' | '\t' | '\u' HEX HEX HEX HEX)* '"'
 [10] JSON_NUMBER  ::=  '-'? ('0' | [1-9] [0-9]*) ('.' [0-9]+)? ([eE] [+-]? [0-9]+)?
@@ -16,29 +16,6 @@
 === rename ===
 JSON_STRING -> stringToken
 === with ===
-"@base" -> at_base
-"@container" -> at_container
-"@context" -> at_context
-"@direction" -> at_direction
-"@graph" -> at_graph
-"@id" -> at_id
-"@import" -> at_import
-"@included" -> at_included
-"@index" -> at_index
-"@json" -> at_json
-"@language" -> at_language
-"@list" -> at_list
-"@nest" -> at_nest
-"@none" -> at_none
-"@prefix" -> at_prefix
-"@propagate" -> at_propagate
-"@protected" -> at_protected
-"@reverse" -> at_reverse
-"@set" -> at_set
-"@type" -> at_type
-"@value" -> at_value
-"@version" -> at_version
-"@vocab" -> at_vocab
 { -> curly_open
 } -> curly_close
 [ -> sq_open
@@ -49,7 +26,6 @@ null -> null_lit
 true -> true_lit
 false -> false_lit
 === error_value ===
-at_context -> 100
 curly_open -> 2
 curly_close -> 2
 sq_open -> 2

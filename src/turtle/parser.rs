@@ -816,6 +816,18 @@ mod definitions {
     #[doc = r" (admissible — parent context might accept the terminal after a pop)."]
     pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
         match (kind, state, terminal) {
+            (SyntaxKind::BlankNode, 1usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::BlankNode, 3usize, _) => match terminal {
+                SyntaxKind::SqClose => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::BlankNode, 2usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::BlankNode, 4usize, _) => match terminal {
                 SyntaxKind::Alit => 4isize,
                 SyntaxKind::BlankNodeLabel => 4isize,
@@ -845,18 +857,6 @@ mod definitions {
                 SyntaxKind::Stop => 4isize,
                 _ => 0,
             },
-            (SyntaxKind::BlankNode, 2usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::BlankNode, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::BlankNode, 3usize, _) => match terminal {
-                SyntaxKind::SqClose => 0,
-                _ => 2isize,
-            },
             (SyntaxKind::BooleanLiteral, 3usize, _) => match terminal {
                 SyntaxKind::FalseLit => 0,
                 _ => 1isize,
@@ -869,32 +869,32 @@ mod definitions {
                 SyntaxKind::FalseLit | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::NumericLiteral, 4usize, _) => match terminal {
-                SyntaxKind::Double => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::NumericLiteral, 3usize, _) => match terminal {
                 SyntaxKind::Decimal => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::NumericLiteral, 1usize, _) => match terminal {
-                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
                 _ => 1isize,
             },
             (SyntaxKind::NumericLiteral, 2usize, _) => match terminal {
                 SyntaxKind::Integer => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::PrefixedName, 2usize, _) => match terminal {
-                SyntaxKind::PnameLn => 0,
+            (SyntaxKind::NumericLiteral, 4usize, _) => match terminal {
+                SyntaxKind::Double => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::NumericLiteral, 1usize, _) => match terminal {
+                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::PrefixedName, 1usize, _) => match terminal {
+                SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
             (SyntaxKind::PrefixedName, 3usize, _) => match terminal {
                 SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::PrefixedName, 1usize, _) => match terminal {
-                SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+            (SyntaxKind::PrefixedName, 2usize, _) => match terminal {
+                SyntaxKind::PnameLn => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Rdfliteral, 6usize, _) => match terminal {
@@ -902,10 +902,6 @@ mod definitions {
                 | SyntaxKind::StringLiteralLongSingleQuote
                 | SyntaxKind::StringLiteralQuote
                 | SyntaxKind::StringLiteralSingleQuote => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Rdfliteral, 2usize, _) => match terminal {
-                SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Rdfliteral, 5usize, _) => match terminal {
@@ -937,28 +933,16 @@ mod definitions {
                 SyntaxKind::Stop => 2isize,
                 _ => 0,
             },
-            (SyntaxKind::Rdfliteral, 3usize, _) => match terminal {
-                SyntaxKind::Langtag => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::Rdfliteral, 4usize, _) => match terminal {
                 SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::MyString, 2usize, _) => match terminal {
-                SyntaxKind::StringLiteralQuote => 0,
+            (SyntaxKind::Rdfliteral, 2usize, _) => match terminal {
+                SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::MyString, 3usize, _) => match terminal {
-                SyntaxKind::StringLiteralSingleQuote => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::MyString, 4usize, _) => match terminal {
-                SyntaxKind::StringLiteralLongSingleQuote => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::MyString, 5usize, _) => match terminal {
-                SyntaxKind::StringLiteralLongQuote => 0,
+            (SyntaxKind::Rdfliteral, 3usize, _) => match terminal {
+                SyntaxKind::Langtag => 0,
                 _ => 1isize,
             },
             (SyntaxKind::MyString, 1usize, _) => match terminal {
@@ -967,6 +951,26 @@ mod definitions {
                 | SyntaxKind::StringLiteralQuote
                 | SyntaxKind::StringLiteralSingleQuote => 0,
                 _ => 1isize,
+            },
+            (SyntaxKind::MyString, 3usize, _) => match terminal {
+                SyntaxKind::StringLiteralSingleQuote => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MyString, 5usize, _) => match terminal {
+                SyntaxKind::StringLiteralLongQuote => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MyString, 2usize, _) => match terminal {
+                SyntaxKind::StringLiteralQuote => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MyString, 4usize, _) => match terminal {
+                SyntaxKind::StringLiteralLongSingleQuote => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Base, 1usize, _) => match terminal {
+                SyntaxKind::Stop => 0,
+                _ => 3isize,
             },
             (SyntaxKind::Base, 2usize, _) => match terminal {
                 SyntaxKind::Alit => 4isize,
@@ -997,10 +1001,6 @@ mod definitions {
                 SyntaxKind::Stop => 1isize,
                 _ => 0,
             },
-            (SyntaxKind::Base, 1usize, _) => match terminal {
-                SyntaxKind::Stop => 0,
-                _ => 3isize,
-            },
             (SyntaxKind::Base, 3usize, _) => match terminal {
                 SyntaxKind::Alit => 104isize,
                 SyntaxKind::BlankNodeLabel => 104isize,
@@ -1029,17 +1029,6 @@ mod definitions {
                 SyntaxKind::SqOpen => 104isize,
                 SyntaxKind::Stop => 101isize,
                 _ => 0,
-            },
-            (SyntaxKind::BlankNodePropertyList, 2usize, _) => match terminal {
-                SyntaxKind::Alit
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::BlankNodePropertyList, 1usize, _) => match terminal {
-                SyntaxKind::SqClose => 0,
-                _ => 2isize,
             },
             (SyntaxKind::BlankNodePropertyList, 3usize, _) => match terminal {
                 SyntaxKind::Alit => 2isize,
@@ -1070,12 +1059,15 @@ mod definitions {
                 SyntaxKind::Stop => 3isize,
                 _ => 0,
             },
-            (SyntaxKind::BlankNodePropertyList2, 2usize, _) => match terminal {
+            (SyntaxKind::BlankNodePropertyList, 1usize, _) => match terminal {
+                SyntaxKind::SqClose => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::BlankNodePropertyList, 2usize, _) => match terminal {
                 SyntaxKind::Alit
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::SqClose => 0,
+                | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
             (SyntaxKind::BlankNodePropertyList2, 1usize, _) => match terminal {
@@ -1087,6 +1079,14 @@ mod definitions {
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
                 | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::BlankNodePropertyList2, 2usize, _) => match terminal {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose => 0,
                 _ => 1isize,
             },
             (SyntaxKind::BlankNodePropertyList2, 4usize, _) => match terminal {
@@ -1112,10 +1112,6 @@ mod definitions {
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Collection, 1usize, _) => match terminal {
-                SyntaxKind::ClClose => 0,
-                _ => 2isize,
-            },
             (SyntaxKind::Collection, 3usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel
                 | SyntaxKind::Decimal
@@ -1134,37 +1130,38 @@ mod definitions {
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::Collection, 1usize, _) => match terminal {
+                SyntaxKind::ClClose => 0,
+                _ => 2isize,
+            },
             (SyntaxKind::Collection, 4usize, _) => match terminal {
                 SyntaxKind::ClOpen => 0,
                 _ => 2isize,
             },
-            (SyntaxKind::Directive, 4usize, _) => match terminal {
-                SyntaxKind::Alit => 102isize,
-                SyntaxKind::BlankNodeLabel => 102isize,
-                SyntaxKind::Decimal => 102isize,
-                SyntaxKind::Double => 102isize,
-                SyntaxKind::FalseLit => 102isize,
-                SyntaxKind::Integer => 102isize,
-                SyntaxKind::Iriref => 101isize,
-                SyntaxKind::Langtag => 102isize,
-                SyntaxKind::PnameLn => 102isize,
+            (SyntaxKind::Directive, 1usize, _) => match terminal {
+                SyntaxKind::Alit => 101isize,
+                SyntaxKind::BlankNodeLabel => 101isize,
+                SyntaxKind::Decimal => 101isize,
+                SyntaxKind::Double => 101isize,
+                SyntaxKind::FalseLit => 101isize,
+                SyntaxKind::Integer => 101isize,
+                SyntaxKind::Iriref => 100isize,
+                SyntaxKind::Langtag => 101isize,
+                SyntaxKind::PnameLn => 101isize,
                 SyntaxKind::PnameNs => 100isize,
-                SyntaxKind::StringLiteralLongQuote => 102isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 102isize,
-                SyntaxKind::StringLiteralQuote => 102isize,
-                SyntaxKind::StringLiteralSingleQuote => 102isize,
-                SyntaxKind::TrueLit => 102isize,
-                SyntaxKind::BaseToken => 102isize,
-                SyntaxKind::ClClose => 102isize,
-                SyntaxKind::ClOpen => 102isize,
-                SyntaxKind::Colon => 102isize,
-                SyntaxKind::Comma => 102isize,
-                SyntaxKind::Datatype => 102isize,
-                SyntaxKind::PrefixToken => 102isize,
-                SyntaxKind::SparqlBaseToken => 102isize,
-                SyntaxKind::SqClose => 102isize,
-                SyntaxKind::SqOpen => 102isize,
-                SyntaxKind::Stop => 102isize,
+                SyntaxKind::StringLiteralLongQuote => 101isize,
+                SyntaxKind::StringLiteralLongSingleQuote => 101isize,
+                SyntaxKind::StringLiteralQuote => 101isize,
+                SyntaxKind::StringLiteralSingleQuote => 101isize,
+                SyntaxKind::TrueLit => 101isize,
+                SyntaxKind::ClClose => 101isize,
+                SyntaxKind::ClOpen => 101isize,
+                SyntaxKind::Colon => 101isize,
+                SyntaxKind::Comma => 101isize,
+                SyntaxKind::Datatype => 101isize,
+                SyntaxKind::SqClose => 101isize,
+                SyntaxKind::SqOpen => 101isize,
+                SyntaxKind::Stop => 101isize,
                 _ => 0,
             },
             (SyntaxKind::Directive, 2usize, _) => match terminal {
@@ -1225,32 +1222,6 @@ mod definitions {
                 SyntaxKind::Stop => 101isize,
                 _ => 0,
             },
-            (SyntaxKind::Directive, 1usize, _) => match terminal {
-                SyntaxKind::Alit => 101isize,
-                SyntaxKind::BlankNodeLabel => 101isize,
-                SyntaxKind::Decimal => 101isize,
-                SyntaxKind::Double => 101isize,
-                SyntaxKind::FalseLit => 101isize,
-                SyntaxKind::Integer => 101isize,
-                SyntaxKind::Iriref => 100isize,
-                SyntaxKind::Langtag => 101isize,
-                SyntaxKind::PnameLn => 101isize,
-                SyntaxKind::PnameNs => 100isize,
-                SyntaxKind::StringLiteralLongQuote => 101isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 101isize,
-                SyntaxKind::StringLiteralQuote => 101isize,
-                SyntaxKind::StringLiteralSingleQuote => 101isize,
-                SyntaxKind::TrueLit => 101isize,
-                SyntaxKind::ClClose => 101isize,
-                SyntaxKind::ClOpen => 101isize,
-                SyntaxKind::Colon => 101isize,
-                SyntaxKind::Comma => 101isize,
-                SyntaxKind::Datatype => 101isize,
-                SyntaxKind::SqClose => 101isize,
-                SyntaxKind::SqOpen => 101isize,
-                SyntaxKind::Stop => 101isize,
-                _ => 0,
-            },
             (SyntaxKind::Directive, 5usize, _) => match terminal {
                 SyntaxKind::Alit => 101isize,
                 SyntaxKind::BlankNodeLabel => 101isize,
@@ -1280,6 +1251,39 @@ mod definitions {
                 SyntaxKind::Stop => 101isize,
                 _ => 0,
             },
+            (SyntaxKind::Directive, 4usize, _) => match terminal {
+                SyntaxKind::Alit => 102isize,
+                SyntaxKind::BlankNodeLabel => 102isize,
+                SyntaxKind::Decimal => 102isize,
+                SyntaxKind::Double => 102isize,
+                SyntaxKind::FalseLit => 102isize,
+                SyntaxKind::Integer => 102isize,
+                SyntaxKind::Iriref => 101isize,
+                SyntaxKind::Langtag => 102isize,
+                SyntaxKind::PnameLn => 102isize,
+                SyntaxKind::PnameNs => 100isize,
+                SyntaxKind::StringLiteralLongQuote => 102isize,
+                SyntaxKind::StringLiteralLongSingleQuote => 102isize,
+                SyntaxKind::StringLiteralQuote => 102isize,
+                SyntaxKind::StringLiteralSingleQuote => 102isize,
+                SyntaxKind::TrueLit => 102isize,
+                SyntaxKind::BaseToken => 102isize,
+                SyntaxKind::ClClose => 102isize,
+                SyntaxKind::ClOpen => 102isize,
+                SyntaxKind::Colon => 102isize,
+                SyntaxKind::Comma => 102isize,
+                SyntaxKind::Datatype => 102isize,
+                SyntaxKind::PrefixToken => 102isize,
+                SyntaxKind::SparqlBaseToken => 102isize,
+                SyntaxKind::SqClose => 102isize,
+                SyntaxKind::SqOpen => 102isize,
+                SyntaxKind::Stop => 102isize,
+                _ => 0,
+            },
+            (SyntaxKind::Iri, 1usize, _) => match terminal {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::Iri, 2usize, _) => match terminal {
                 SyntaxKind::Iriref => 0,
                 _ => 1isize,
@@ -1288,12 +1292,19 @@ mod definitions {
                 SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Iri, 1usize, _) => match terminal {
-                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
+            (SyntaxKind::Literal, 2usize, _) => match terminal {
+                SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Literal, 4usize, _) => match terminal {
                 SyntaxKind::FalseLit | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Literal, 3usize, _) => match terminal {
+                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Literal, 1usize, _) => match terminal {
@@ -1308,20 +1319,33 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Literal, 2usize, _) => match terminal {
-                SyntaxKind::StringLiteralLongQuote
+            (SyntaxKind::Object, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::Object, 6usize, _) => match terminal {
+                SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::StringLiteralLongQuote
                 | SyntaxKind::StringLiteralLongSingleQuote
                 | SyntaxKind::StringLiteralQuote
-                | SyntaxKind::StringLiteralSingleQuote => 0,
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::Literal, 3usize, _) => match terminal {
-                SyntaxKind::Decimal | SyntaxKind::Double | SyntaxKind::Integer => 0,
+            (SyntaxKind::Object, 2usize, _) => match terminal {
+                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Object, 5usize, _) => match terminal {
                 SyntaxKind::ClOpen => 0,
                 _ => 2isize,
+            },
+            (SyntaxKind::Object, 3usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel => 0,
+                _ => 1isize,
             },
             (SyntaxKind::Object, 1usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel
@@ -1340,30 +1364,6 @@ mod definitions {
                 | SyntaxKind::ClOpen
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
-            },
-            (SyntaxKind::Object, 3usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 2usize, _) => match terminal {
-                SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 6usize, _) => match terminal {
-                SyntaxKind::Decimal
-                | SyntaxKind::Double
-                | SyntaxKind::FalseLit
-                | SyntaxKind::Integer
-                | SyntaxKind::StringLiteralLongQuote
-                | SyntaxKind::StringLiteralLongSingleQuote
-                | SyntaxKind::StringLiteralQuote
-                | SyntaxKind::StringLiteralSingleQuote
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 4usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 2isize,
             },
             (SyntaxKind::ObjectList, 4usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel
@@ -1434,32 +1434,7 @@ mod definitions {
                 SyntaxKind::Iriref | SyntaxKind::PnameLn | SyntaxKind::PnameNs => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::PredicateObjectList, 3usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Decimal
-                | SyntaxKind::Double
-                | SyntaxKind::FalseLit
-                | SyntaxKind::Integer
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::StringLiteralLongQuote
-                | SyntaxKind::StringLiteralLongSingleQuote
-                | SyntaxKind::StringLiteralQuote
-                | SyntaxKind::StringLiteralSingleQuote
-                | SyntaxKind::TrueLit
-                | SyntaxKind::ClOpen
-                | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::PredicateObjectList, 7usize, _) => match terminal {
-                SyntaxKind::Alit
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::PredicateObjectList, 4usize, _) => match terminal {
                 SyntaxKind::Alit
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
@@ -1484,13 +1459,63 @@ mod definitions {
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::PredicateObjectList, 3usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Decimal
+                | SyntaxKind::Double
+                | SyntaxKind::FalseLit
+                | SyntaxKind::Integer
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::StringLiteralLongQuote
+                | SyntaxKind::StringLiteralLongSingleQuote
+                | SyntaxKind::StringLiteralQuote
+                | SyntaxKind::StringLiteralSingleQuote
+                | SyntaxKind::TrueLit
+                | SyntaxKind::ClOpen
+                | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::PredicateObjectList, 5usize, _) => match terminal {
                 SyntaxKind::Colon => 0,
                 _ => 2isize,
             },
-            (SyntaxKind::PrefixId, 1usize, _) => match terminal {
-                SyntaxKind::Stop => 0,
-                _ => 3isize,
+            (SyntaxKind::PredicateObjectList, 4usize, _) => match terminal {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::PrefixId, 4usize, _) => match terminal {
+                SyntaxKind::Alit => 105isize,
+                SyntaxKind::BlankNodeLabel => 105isize,
+                SyntaxKind::Decimal => 105isize,
+                SyntaxKind::Double => 105isize,
+                SyntaxKind::FalseLit => 105isize,
+                SyntaxKind::Integer => 105isize,
+                SyntaxKind::Iriref => 101isize,
+                SyntaxKind::Langtag => 105isize,
+                SyntaxKind::PnameLn => 105isize,
+                SyntaxKind::PnameNs => 100isize,
+                SyntaxKind::StringLiteralLongQuote => 105isize,
+                SyntaxKind::StringLiteralLongSingleQuote => 105isize,
+                SyntaxKind::StringLiteralQuote => 105isize,
+                SyntaxKind::StringLiteralSingleQuote => 105isize,
+                SyntaxKind::TrueLit => 105isize,
+                SyntaxKind::BaseToken => 105isize,
+                SyntaxKind::ClClose => 105isize,
+                SyntaxKind::ClOpen => 105isize,
+                SyntaxKind::Colon => 105isize,
+                SyntaxKind::Comma => 105isize,
+                SyntaxKind::Datatype => 105isize,
+                SyntaxKind::SparqlBaseToken => 105isize,
+                SyntaxKind::SparqlPrefixToken => 105isize,
+                SyntaxKind::SqClose => 105isize,
+                SyntaxKind::SqOpen => 105isize,
+                SyntaxKind::Stop => 102isize,
+                _ => 0,
             },
             (SyntaxKind::PrefixId, 2usize, _) => match terminal {
                 SyntaxKind::Alit => 4isize,
@@ -1521,34 +1546,9 @@ mod definitions {
                 SyntaxKind::Stop => 1isize,
                 _ => 0,
             },
-            (SyntaxKind::PrefixId, 4usize, _) => match terminal {
-                SyntaxKind::Alit => 105isize,
-                SyntaxKind::BlankNodeLabel => 105isize,
-                SyntaxKind::Decimal => 105isize,
-                SyntaxKind::Double => 105isize,
-                SyntaxKind::FalseLit => 105isize,
-                SyntaxKind::Integer => 105isize,
-                SyntaxKind::Iriref => 101isize,
-                SyntaxKind::Langtag => 105isize,
-                SyntaxKind::PnameLn => 105isize,
-                SyntaxKind::PnameNs => 100isize,
-                SyntaxKind::StringLiteralLongQuote => 105isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 105isize,
-                SyntaxKind::StringLiteralQuote => 105isize,
-                SyntaxKind::StringLiteralSingleQuote => 105isize,
-                SyntaxKind::TrueLit => 105isize,
-                SyntaxKind::BaseToken => 105isize,
-                SyntaxKind::ClClose => 105isize,
-                SyntaxKind::ClOpen => 105isize,
-                SyntaxKind::Colon => 105isize,
-                SyntaxKind::Comma => 105isize,
-                SyntaxKind::Datatype => 105isize,
-                SyntaxKind::SparqlBaseToken => 105isize,
-                SyntaxKind::SparqlPrefixToken => 105isize,
-                SyntaxKind::SqClose => 105isize,
-                SyntaxKind::SqOpen => 105isize,
-                SyntaxKind::Stop => 102isize,
-                _ => 0,
+            (SyntaxKind::PrefixId, 1usize, _) => match terminal {
+                SyntaxKind::Stop => 0,
+                _ => 3isize,
             },
             (SyntaxKind::PrefixId, 3usize, _) => match terminal {
                 SyntaxKind::Alit => 5isize,
@@ -1674,6 +1674,32 @@ mod definitions {
                 SyntaxKind::Stop => 2isize,
                 _ => 0,
             },
+            (SyntaxKind::Statement, 4usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::ClOpen
+                | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Statement, 1usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::BaseToken
+                | SyntaxKind::ClOpen
+                | SyntaxKind::PrefixToken
+                | SyntaxKind::SparqlBaseToken
+                | SyntaxKind::SparqlPrefixToken
+                | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Statement, 3usize, _) => match terminal {
+                SyntaxKind::Stop => 0,
+                _ => 3isize,
+            },
             (SyntaxKind::Statement, 2usize, _) => match terminal {
                 SyntaxKind::Alit => 101isize,
                 SyntaxKind::BlankNodeLabel => 101isize,
@@ -1700,20 +1726,7 @@ mod definitions {
                 SyntaxKind::Stop => 101isize,
                 _ => 0,
             },
-            (SyntaxKind::Statement, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::BaseToken
-                | SyntaxKind::ClOpen
-                | SyntaxKind::PrefixToken
-                | SyntaxKind::SparqlBaseToken
-                | SyntaxKind::SparqlPrefixToken
-                | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Statement, 4usize, _) => match terminal {
+            (SyntaxKind::Subject, 1usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
@@ -1721,10 +1734,6 @@ mod definitions {
                 | SyntaxKind::ClOpen
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
-            },
-            (SyntaxKind::Statement, 3usize, _) => match terminal {
-                SyntaxKind::Stop => 0,
-                _ => 3isize,
             },
             (SyntaxKind::Subject, 3usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel | SyntaxKind::SqOpen => 0,
@@ -1737,47 +1746,6 @@ mod definitions {
             (SyntaxKind::Subject, 4usize, _) => match terminal {
                 SyntaxKind::ClOpen => 0,
                 _ => 2isize,
-            },
-            (SyntaxKind::Subject, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::ClOpen
-                | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triples, 6usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::ClOpen
-                | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triples, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs
-                | SyntaxKind::ClOpen
-                | SyntaxKind::SqOpen => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triples, 3usize, _) => match terminal {
-                SyntaxKind::Alit
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triples, 5usize, _) => match terminal {
-                SyntaxKind::Alit
-                | SyntaxKind::Iriref
-                | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
             },
             (SyntaxKind::Triples, 4usize, _) => match terminal {
                 SyntaxKind::Alit => 2isize,
@@ -1808,6 +1776,38 @@ mod definitions {
                 SyntaxKind::Stop => 3isize,
                 _ => 0,
             },
+            (SyntaxKind::Triples, 3usize, _) => match terminal {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Triples, 6usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::ClOpen
+                | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Triples, 5usize, _) => match terminal {
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Triples, 1usize, _) => match terminal {
+                SyntaxKind::BlankNodeLabel
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs
+                | SyntaxKind::ClOpen
+                | SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::TurtleDoc, 2usize, _) => match terminal {
                 SyntaxKind::BlankNodeLabel
                 | SyntaxKind::Iriref
@@ -1821,15 +1821,15 @@ mod definitions {
                 | SyntaxKind::SqOpen => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::Verb, 3usize, _) => match terminal {
+                SyntaxKind::Alit => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::Verb, 1usize, _) => match terminal {
                 SyntaxKind::Alit
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
                 | SyntaxKind::PnameNs => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Verb, 3usize, _) => match terminal {
-                SyntaxKind::Alit => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Verb, 2usize, _) => match terminal {
