@@ -842,16 +842,6 @@ mod definitions {
                 SyntaxKind::SqClose => 0,
                 _ => 2isize,
             },
-            (SyntaxKind::JsonArray, 2usize, _) => match terminal {
-                SyntaxKind::Colon => 1isize,
-                SyntaxKind::Comma => 1isize,
-                SyntaxKind::CurlyClose => 1isize,
-                _ => 0,
-            },
-            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 2isize,
-            },
             (SyntaxKind::JsonArray, 3usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
@@ -885,40 +875,15 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonObject, 4usize, _) => match terminal {
-                SyntaxKind::CurlyOpen => 0,
+            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
                 _ => 2isize,
             },
-            (SyntaxKind::JsonObject, 1usize, _) => match terminal {
-                SyntaxKind::CurlyClose => 0,
-                _ => 2isize,
+            (SyntaxKind::JsonArray, 2usize, _) => match terminal {
+                SyntaxKind::Colon => 1isize,
+                SyntaxKind::Comma => 1isize,
+                SyntaxKind::CurlyClose => 1isize,
+                _ => 0,
             },
             (SyntaxKind::JsonObject, 2usize, _) => match terminal {
                 SyntaxKind::StringToken
@@ -948,20 +913,79 @@ mod definitions {
                 | SyntaxKind::CurlyClose => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 13usize, _) => match terminal {
-                SyntaxKind::AtLanguage => 0,
+            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 20usize, _) => match terminal {
-                SyntaxKind::AtReverse => 0,
+            (SyntaxKind::JsonObject, 1usize, _) => match terminal {
+                SyntaxKind::CurlyClose => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonObject, 4usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonString, 2usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 21usize, _) => match terminal {
-                SyntaxKind::AtSet => 0,
+            (SyntaxKind::JsonString, 6usize, _) => match terminal {
+                SyntaxKind::AtDirection => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 12usize, _) => match terminal {
-                SyntaxKind::AtJson => 0,
+            (SyntaxKind::JsonString, 16usize, _) => match terminal {
+                SyntaxKind::AtNone => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 22usize, _) => match terminal {
+                SyntaxKind::AtType => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 15usize, _) => match terminal {
+                SyntaxKind::AtNest => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 24usize, _) => match terminal {
+                SyntaxKind::AtVersion => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 17usize, _) => match terminal {
+                SyntaxKind::AtPrefix => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 8usize, _) => match terminal {
+                SyntaxKind::AtId => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 3usize, _) => match terminal {
+                SyntaxKind::AtBase => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 11usize, _) => match terminal {
+                SyntaxKind::AtIndex => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonString, 1usize, _) => match terminal {
@@ -991,101 +1015,73 @@ mod definitions {
                 | SyntaxKind::AtVocab => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 11usize, _) => match terminal {
-                SyntaxKind::AtIndex => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 9usize, _) => match terminal {
-                SyntaxKind::AtImport => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 22usize, _) => match terminal {
-                SyntaxKind::AtType => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 3usize, _) => match terminal {
-                SyntaxKind::AtBase => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 16usize, _) => match terminal {
-                SyntaxKind::AtNone => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 25usize, _) => match terminal {
-                SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 14usize, _) => match terminal {
-                SyntaxKind::AtList => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 6usize, _) => match terminal {
-                SyntaxKind::AtDirection => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 17usize, _) => match terminal {
-                SyntaxKind::AtPrefix => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 2usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 5usize, _) => match terminal {
-                SyntaxKind::AtContext => 0,
-                _ => 100isize,
-            },
-            (SyntaxKind::JsonString, 18usize, _) => match terminal {
-                SyntaxKind::AtPropagate => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 8usize, _) => match terminal {
-                SyntaxKind::AtId => 0,
+            (SyntaxKind::JsonString, 21usize, _) => match terminal {
+                SyntaxKind::AtSet => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonString, 19usize, _) => match terminal {
                 SyntaxKind::AtProtected => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 15usize, _) => match terminal {
-                SyntaxKind::AtNest => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::JsonString, 23usize, _) => match terminal {
                 SyntaxKind::AtValue => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 24usize, _) => match terminal {
-                SyntaxKind::AtVersion => 0,
+            (SyntaxKind::JsonString, 9usize, _) => match terminal {
+                SyntaxKind::AtImport => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 10usize, _) => match terminal {
-                SyntaxKind::AtIncluded => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 7usize, _) => match terminal {
-                SyntaxKind::AtGraph => 0,
+            (SyntaxKind::JsonString, 12usize, _) => match terminal {
+                SyntaxKind::AtJson => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonString, 4usize, _) => match terminal {
                 SyntaxKind::AtContainer => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 2isize,
+            (SyntaxKind::JsonString, 14usize, _) => match terminal {
+                SyntaxKind::AtList => 0,
+                _ => 1isize,
             },
-            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
-                SyntaxKind::NullLit => 0,
+            (SyntaxKind::JsonString, 20usize, _) => match terminal {
+                SyntaxKind::AtReverse => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 7usize, _) => match terminal {
+                SyntaxKind::AtGraph => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 13usize, _) => match terminal {
+                SyntaxKind::AtLanguage => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 10usize, _) => match terminal {
+                SyntaxKind::AtIncluded => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 18usize, _) => match terminal {
+                SyntaxKind::AtPropagate => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 5usize, _) => match terminal {
+                SyntaxKind::AtContext => 0,
+                _ => 100isize,
+            },
+            (SyntaxKind::JsonString, 25usize, _) => match terminal {
+                SyntaxKind::AtVocab => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonValue, 6usize, _) => match terminal {
                 SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 0,
+            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
+                SyntaxKind::NullLit => 0,
                 _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::JsonValue, 4usize, _) => match terminal {
                 SyntaxKind::StringToken
@@ -1113,14 +1109,6 @@ mod definitions {
                 | SyntaxKind::AtVersion
                 | SyntaxKind::AtVocab => 0,
                 _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
-                SyntaxKind::FalseLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
-                SyntaxKind::CurlyOpen => 0,
-                _ => 2isize,
             },
             (SyntaxKind::JsonValue, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
@@ -1154,6 +1142,18 @@ mod definitions {
                 | SyntaxKind::SqOpen
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
+                SyntaxKind::FalseLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
@@ -1224,6 +1224,33 @@ mod definitions {
                 SyntaxKind::TrueLit => 3isize,
                 _ => 0,
             },
+            (SyntaxKind::Member, 3usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::Member, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
@@ -1255,33 +1282,6 @@ mod definitions {
                 | SyntaxKind::NullLit
                 | SyntaxKind::SqOpen
                 | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Member, 3usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
                 _ => 1isize,
             },
             (SyntaxKind::MemberList, 3usize, _) => match terminal {
@@ -1320,6 +1320,33 @@ mod definitions {
                 SyntaxKind::TrueLit => 3isize,
                 _ => 0,
             },
+            (SyntaxKind::MemberList, 2usize, _) => match terminal {
+                SyntaxKind::StringToken
+                | SyntaxKind::AtBase
+                | SyntaxKind::AtContainer
+                | SyntaxKind::AtContext
+                | SyntaxKind::AtDirection
+                | SyntaxKind::AtGraph
+                | SyntaxKind::AtId
+                | SyntaxKind::AtImport
+                | SyntaxKind::AtIncluded
+                | SyntaxKind::AtIndex
+                | SyntaxKind::AtJson
+                | SyntaxKind::AtLanguage
+                | SyntaxKind::AtList
+                | SyntaxKind::AtNest
+                | SyntaxKind::AtNone
+                | SyntaxKind::AtPrefix
+                | SyntaxKind::AtPropagate
+                | SyntaxKind::AtProtected
+                | SyntaxKind::AtReverse
+                | SyntaxKind::AtSet
+                | SyntaxKind::AtType
+                | SyntaxKind::AtValue
+                | SyntaxKind::AtVersion
+                | SyntaxKind::AtVocab => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::MemberList, 4usize, _) => match terminal {
                 SyntaxKind::StringToken
                 | SyntaxKind::AtBase
@@ -1347,8 +1374,9 @@ mod definitions {
                 | SyntaxKind::AtVocab => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::MemberList, 2usize, _) => match terminal {
-                SyntaxKind::StringToken
+            (SyntaxKind::ValueList, 4usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
                 | SyntaxKind::AtBase
                 | SyntaxKind::AtContainer
                 | SyntaxKind::AtContext
@@ -1371,7 +1399,12 @@ mod definitions {
                 | SyntaxKind::AtType
                 | SyntaxKind::AtValue
                 | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
+                | SyntaxKind::AtVocab
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
             (SyntaxKind::ValueList, 2usize, _) => match terminal {
@@ -1442,39 +1475,6 @@ mod definitions {
                 SyntaxKind::SqOpen => 2isize,
                 SyntaxKind::TrueLit => 2isize,
                 _ => 0,
-            },
-            (SyntaxKind::ValueList, 4usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
             },
             _ => 0,
         }
@@ -1728,22 +1728,34 @@ mod definitions {
                         kind: self.kind,
                         state: 4usize,
                     }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 5usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 6usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 8usize,
-                    }));
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 5usize,
+                        }),
+                        SyntaxKind::JsonNumber,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 6usize,
+                        }),
+                        SyntaxKind::TrueLit,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }),
+                        SyntaxKind::FalseLit,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 8usize,
+                        }),
+                        SyntaxKind::NullLit,
+                    );
                 }
                 (SyntaxKind::JsonValue, 2usize) => {
                     state.add_element_checked(
@@ -1893,102 +1905,174 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::JsonString, 1usize) => {
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 2usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 3usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 4usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 5usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 6usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 7usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 8usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 9usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 10usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 11usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 12usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 13usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 14usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 15usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 16usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 17usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 18usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 19usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 20usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 21usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 22usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 23usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 24usize,
-                    }));
-                    state.add_element(element.pop_push(Rule {
-                        kind: self.kind,
-                        state: 25usize,
-                    }));
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 2usize,
+                        }),
+                        SyntaxKind::StringToken,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 3usize,
+                        }),
+                        SyntaxKind::AtBase,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 4usize,
+                        }),
+                        SyntaxKind::AtContainer,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 5usize,
+                        }),
+                        SyntaxKind::AtContext,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 6usize,
+                        }),
+                        SyntaxKind::AtDirection,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 7usize,
+                        }),
+                        SyntaxKind::AtGraph,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 8usize,
+                        }),
+                        SyntaxKind::AtId,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 9usize,
+                        }),
+                        SyntaxKind::AtImport,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 10usize,
+                        }),
+                        SyntaxKind::AtIncluded,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 11usize,
+                        }),
+                        SyntaxKind::AtIndex,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 12usize,
+                        }),
+                        SyntaxKind::AtJson,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 13usize,
+                        }),
+                        SyntaxKind::AtLanguage,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 14usize,
+                        }),
+                        SyntaxKind::AtList,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 15usize,
+                        }),
+                        SyntaxKind::AtNest,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 16usize,
+                        }),
+                        SyntaxKind::AtNone,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 17usize,
+                        }),
+                        SyntaxKind::AtPrefix,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 18usize,
+                        }),
+                        SyntaxKind::AtPropagate,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 19usize,
+                        }),
+                        SyntaxKind::AtProtected,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 20usize,
+                        }),
+                        SyntaxKind::AtReverse,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 21usize,
+                        }),
+                        SyntaxKind::AtSet,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 22usize,
+                        }),
+                        SyntaxKind::AtType,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 23usize,
+                        }),
+                        SyntaxKind::AtValue,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 24usize,
+                        }),
+                        SyntaxKind::AtVersion,
+                    );
+                    state.add_element_checked(
+                        element.pop_push(Rule {
+                            kind: self.kind,
+                            state: 25usize,
+                        }),
+                        SyntaxKind::AtVocab,
+                    );
                 }
                 (SyntaxKind::JsonString, 2usize) => {
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StringToken);
