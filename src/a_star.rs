@@ -279,23 +279,30 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             return false;
         }
 
-        // dist(q, a) heuristic boost: the top-of-stack rule's minimum
-        // insertion cost to reach the next input token.  This is additive with
-        // the suffix-sum heuristic (which counts matching costs for remaining
-        // tokens) because they measure different, non-overlapping costs:
-        //   h_suffix = lower bound on cost of matching all remaining tokens
-        //   dist     = lower bound on insertion cost before next token can match
-        if self.mode == ParseMode::FaultTolerant {
-            if let Some((head, _)) = element.parent.head() {
-                let mut pos = element.state.1;
-                while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
-                    pos += 1;
-                }
-                if let Some(tok) = self.tokens.get(pos) {
-                    let d = head.state_dist(&tok.kind);
-                    if d > 0 {
-                        element.h += d;
+        // dist(q, a) pruning / heuristic boost: the top-of-stack rule's
+        // minimum insertion cost to reach the next input token.
+        //
+        // In Fast mode: reject outright when d > 0.  Any element that needs
+        // insertions will eventually produce an error and be dropped, so we
+        // save two wasted heap operations (enqueue + pop + fail) per branch.
+        // This is critical for grammars with high branching (e.g. JSON-LD's
+        // jsonValue has 7 alternatives — only 1 matches per token).
+        //
+        // In FaultTolerant mode: add d to h.  The suffix-sum heuristic and
+        // dist measure non-overlapping costs (token matching vs. insertion
+        // cost) so they are additive and admissible.
+        if let Some((head, _)) = element.parent.head() {
+            let mut pos = element.state.1;
+            while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
+                pos += 1;
+            }
+            if let Some(tok) = self.tokens.get(pos) {
+                let d = head.state_dist(&tok.kind);
+                if d > 0 {
+                    if self.mode == ParseMode::Fast {
+                        return false;
                     }
+                    element.h += d;
                 }
             }
         }
