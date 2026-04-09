@@ -374,7 +374,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     has_error: true,
                                     assumed_depth_delta: element.assumed_depth_delta,
                                     current_depth: element.current_depth,
-                                    consecutive_errors: element.consecutive_errors.saturating_add(1),
+                                    consecutive_errors: element
+                                        .consecutive_errors
+                                        .saturating_add(1),
                                 });
                                 (insert_error, 50)
                             } else {
@@ -392,7 +394,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     has_error: true,
                                     assumed_depth_delta: element.assumed_depth_delta,
                                     current_depth: element.current_depth,
-                                    consecutive_errors: element.consecutive_errors.saturating_add(1),
+                                    consecutive_errors: element
+                                        .consecutive_errors
+                                        .saturating_add(1),
                                 });
                                 // One-time delta-adoption cost: proportional to how much
                                 // the assumed delta changes.  When depth info is unavailable
@@ -554,7 +558,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             let mut list = element.list.clone();
 
             loop {
-                let Some(((rule, saved_fp), tail)) = parent.slice().map(|((r, fp), t)| ((r, fp), t)) else {
+                let Some(((rule, saved_fp), tail)) =
+                    parent.slice().map(|((r, fp), t)| ((r, fp), t))
+                else {
                     break;
                 };
 
