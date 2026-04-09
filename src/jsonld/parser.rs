@@ -21,52 +21,6 @@ pub enum SyntaxKind {
     MemberList,
     ValueList,
     #[doc = r" terminals"]
-    #[token("\"@base\"")]
-    AtBase,
-    #[token("\"@container\"")]
-    AtContainer,
-    #[token("\"@context\"")]
-    AtContext,
-    #[token("\"@direction\"")]
-    AtDirection,
-    #[token("\"@graph\"")]
-    AtGraph,
-    #[token("\"@id\"")]
-    AtId,
-    #[token("\"@import\"")]
-    AtImport,
-    #[token("\"@included\"")]
-    AtIncluded,
-    #[token("\"@index\"")]
-    AtIndex,
-    #[token("\"@json\"")]
-    AtJson,
-    #[token("\"@language\"")]
-    AtLanguage,
-    #[token("\"@list\"")]
-    AtList,
-    #[token("\"@nest\"")]
-    AtNest,
-    #[token("\"@none\"")]
-    AtNone,
-    #[token("\"@prefix\"")]
-    AtPrefix,
-    #[token("\"@propagate\"")]
-    AtPropagate,
-    #[token("\"@protected\"")]
-    AtProtected,
-    #[token("\"@reverse\"")]
-    AtReverse,
-    #[token("\"@set\"")]
-    AtSet,
-    #[token("\"@type\"")]
-    AtType,
-    #[token("\"@value\"")]
-    AtValue,
-    #[token("\"@version\"")]
-    AtVersion,
-    #[token("\"@vocab\"")]
-    AtVocab,
     #[token(",")]
     Comma,
     #[token(":")]
@@ -157,29 +111,6 @@ mod definitions {
                     kind,
                     state: 1usize,
                 },
-                SyntaxKind::AtBase => Rule { kind, state: 0 },
-                SyntaxKind::AtContainer => Rule { kind, state: 0 },
-                SyntaxKind::AtContext => Rule { kind, state: 0 },
-                SyntaxKind::AtDirection => Rule { kind, state: 0 },
-                SyntaxKind::AtGraph => Rule { kind, state: 0 },
-                SyntaxKind::AtId => Rule { kind, state: 0 },
-                SyntaxKind::AtImport => Rule { kind, state: 0 },
-                SyntaxKind::AtIncluded => Rule { kind, state: 0 },
-                SyntaxKind::AtIndex => Rule { kind, state: 0 },
-                SyntaxKind::AtJson => Rule { kind, state: 0 },
-                SyntaxKind::AtLanguage => Rule { kind, state: 0 },
-                SyntaxKind::AtList => Rule { kind, state: 0 },
-                SyntaxKind::AtNest => Rule { kind, state: 0 },
-                SyntaxKind::AtNone => Rule { kind, state: 0 },
-                SyntaxKind::AtPrefix => Rule { kind, state: 0 },
-                SyntaxKind::AtPropagate => Rule { kind, state: 0 },
-                SyntaxKind::AtProtected => Rule { kind, state: 0 },
-                SyntaxKind::AtReverse => Rule { kind, state: 0 },
-                SyntaxKind::AtSet => Rule { kind, state: 0 },
-                SyntaxKind::AtType => Rule { kind, state: 0 },
-                SyntaxKind::AtValue => Rule { kind, state: 0 },
-                SyntaxKind::AtVersion => Rule { kind, state: 0 },
-                SyntaxKind::AtVocab => Rule { kind, state: 0 },
                 SyntaxKind::Comma => Rule { kind, state: 0 },
                 SyntaxKind::Colon => Rule { kind, state: 0 },
                 SyntaxKind::SqOpen => Rule { kind, state: 0 },
@@ -199,55 +130,8 @@ mod definitions {
         match kind {
             SyntaxKind::JsonArray => &[SyntaxKind::SqOpen],
             SyntaxKind::JsonObject => &[SyntaxKind::CurlyOpen],
-            SyntaxKind::JsonString => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
-            ],
+            SyntaxKind::JsonString => &[],
             SyntaxKind::JsonValue => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
                 SyntaxKind::CurlyOpen,
                 SyntaxKind::FalseLit,
                 SyntaxKind::NullLit,
@@ -255,138 +139,21 @@ mod definitions {
                 SyntaxKind::TrueLit,
             ],
             SyntaxKind::JsonldDoc => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
                 SyntaxKind::CurlyOpen,
                 SyntaxKind::FalseLit,
                 SyntaxKind::NullLit,
                 SyntaxKind::SqOpen,
                 SyntaxKind::TrueLit,
             ],
-            SyntaxKind::Member => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
-            ],
-            SyntaxKind::MemberList => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
-            ],
+            SyntaxKind::Member => &[],
+            SyntaxKind::MemberList => &[],
             SyntaxKind::ValueList => &[
-                SyntaxKind::AtBase,
-                SyntaxKind::AtContainer,
-                SyntaxKind::AtContext,
-                SyntaxKind::AtDirection,
-                SyntaxKind::AtGraph,
-                SyntaxKind::AtId,
-                SyntaxKind::AtImport,
-                SyntaxKind::AtIncluded,
-                SyntaxKind::AtIndex,
-                SyntaxKind::AtJson,
-                SyntaxKind::AtLanguage,
-                SyntaxKind::AtList,
-                SyntaxKind::AtNest,
-                SyntaxKind::AtNone,
-                SyntaxKind::AtPrefix,
-                SyntaxKind::AtPropagate,
-                SyntaxKind::AtProtected,
-                SyntaxKind::AtReverse,
-                SyntaxKind::AtSet,
-                SyntaxKind::AtType,
-                SyntaxKind::AtValue,
-                SyntaxKind::AtVersion,
-                SyntaxKind::AtVocab,
                 SyntaxKind::CurlyOpen,
                 SyntaxKind::FalseLit,
                 SyntaxKind::NullLit,
                 SyntaxKind::SqOpen,
                 SyntaxKind::TrueLit,
             ],
-            SyntaxKind::AtBase => &[SyntaxKind::AtBase],
-            SyntaxKind::AtContainer => &[SyntaxKind::AtContainer],
-            SyntaxKind::AtContext => &[SyntaxKind::AtContext],
-            SyntaxKind::AtDirection => &[SyntaxKind::AtDirection],
-            SyntaxKind::AtGraph => &[SyntaxKind::AtGraph],
-            SyntaxKind::AtId => &[SyntaxKind::AtId],
-            SyntaxKind::AtImport => &[SyntaxKind::AtImport],
-            SyntaxKind::AtIncluded => &[SyntaxKind::AtIncluded],
-            SyntaxKind::AtIndex => &[SyntaxKind::AtIndex],
-            SyntaxKind::AtJson => &[SyntaxKind::AtJson],
-            SyntaxKind::AtLanguage => &[SyntaxKind::AtLanguage],
-            SyntaxKind::AtList => &[SyntaxKind::AtList],
-            SyntaxKind::AtNest => &[SyntaxKind::AtNest],
-            SyntaxKind::AtNone => &[SyntaxKind::AtNone],
-            SyntaxKind::AtPrefix => &[SyntaxKind::AtPrefix],
-            SyntaxKind::AtPropagate => &[SyntaxKind::AtPropagate],
-            SyntaxKind::AtProtected => &[SyntaxKind::AtProtected],
-            SyntaxKind::AtReverse => &[SyntaxKind::AtReverse],
-            SyntaxKind::AtSet => &[SyntaxKind::AtSet],
-            SyntaxKind::AtType => &[SyntaxKind::AtType],
-            SyntaxKind::AtValue => &[SyntaxKind::AtValue],
-            SyntaxKind::AtVersion => &[SyntaxKind::AtVersion],
-            SyntaxKind::AtVocab => &[SyntaxKind::AtVocab],
             SyntaxKind::Comma => &[SyntaxKind::Comma],
             SyntaxKind::Colon => &[SyntaxKind::Colon],
             SyntaxKind::SqOpen => &[SyntaxKind::SqOpen],
@@ -408,30 +175,7 @@ mod definitions {
     pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
         match kind {
             SyntaxKind::JsonArray => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -445,30 +189,7 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::JsonObject => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -482,57 +203,11 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::JsonString => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::StringToken => 0,
+                SyntaxKind::StringToken => 0,
                 _ => kind.max_error_value(),
             },
             SyntaxKind::JsonValue => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -546,30 +221,7 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::JsonldDoc => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -583,30 +235,7 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::Member => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -620,30 +249,7 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::MemberList => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -657,30 +263,7 @@ mod definitions {
                 _ => kind.max_error_value(),
             },
             SyntaxKind::ValueList => match tok {
-                SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::Colon
+                SyntaxKind::Colon
                 | SyntaxKind::Comma
                 | SyntaxKind::CurlyClose
                 | SyntaxKind::CurlyOpen
@@ -691,98 +274,6 @@ mod definitions {
                 | SyntaxKind::SqOpen
                 | SyntaxKind::StringToken
                 | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtBase => match tok {
-                SyntaxKind::AtBase => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtContainer => match tok {
-                SyntaxKind::AtContainer => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtContext => match tok {
-                SyntaxKind::AtContext => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtDirection => match tok {
-                SyntaxKind::AtDirection => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtGraph => match tok {
-                SyntaxKind::AtGraph => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtId => match tok {
-                SyntaxKind::AtId => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtImport => match tok {
-                SyntaxKind::AtImport => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtIncluded => match tok {
-                SyntaxKind::AtIncluded => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtIndex => match tok {
-                SyntaxKind::AtIndex => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtJson => match tok {
-                SyntaxKind::AtJson => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtLanguage => match tok {
-                SyntaxKind::AtLanguage => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtList => match tok {
-                SyntaxKind::AtList => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtNest => match tok {
-                SyntaxKind::AtNest => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtNone => match tok {
-                SyntaxKind::AtNone => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtPrefix => match tok {
-                SyntaxKind::AtPrefix => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtPropagate => match tok {
-                SyntaxKind::AtPropagate => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtProtected => match tok {
-                SyntaxKind::AtProtected => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtReverse => match tok {
-                SyntaxKind::AtReverse => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtSet => match tok {
-                SyntaxKind::AtSet => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtType => match tok {
-                SyntaxKind::AtType => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtValue => match tok {
-                SyntaxKind::AtValue => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtVersion => match tok {
-                SyntaxKind::AtVersion => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::AtVocab => match tok {
-                SyntaxKind::AtVocab => 0,
                 _ => kind.max_error_value(),
             },
             SyntaxKind::Comma => match tok {
@@ -845,29 +336,6 @@ mod definitions {
             (SyntaxKind::JsonArray, 3usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
                 | SyntaxKind::CurlyOpen
                 | SyntaxKind::FalseLit
                 | SyntaxKind::NullLit
@@ -875,70 +343,15 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 2isize,
-            },
             (SyntaxKind::JsonArray, 2usize, _) => match terminal {
                 SyntaxKind::Colon => 1isize,
                 SyntaxKind::Comma => 1isize,
                 SyntaxKind::CurlyClose => 1isize,
                 _ => 0,
             },
-            (SyntaxKind::JsonObject, 2usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::CurlyClose => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
-                _ => 1isize,
+            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::JsonObject, 1usize, _) => match terminal {
                 SyntaxKind::CurlyClose => 0,
@@ -948,203 +361,16 @@ mod definitions {
                 SyntaxKind::CurlyOpen => 0,
                 _ => 2isize,
             },
-            (SyntaxKind::JsonString, 2usize, _) => match terminal {
+            (SyntaxKind::JsonObject, 2usize, _) => match terminal {
+                SyntaxKind::StringToken | SyntaxKind::CurlyClose => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
                 SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonString, 6usize, _) => match terminal {
-                SyntaxKind::AtDirection => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 16usize, _) => match terminal {
-                SyntaxKind::AtNone => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 22usize, _) => match terminal {
-                SyntaxKind::AtType => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 15usize, _) => match terminal {
-                SyntaxKind::AtNest => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 24usize, _) => match terminal {
-                SyntaxKind::AtVersion => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 17usize, _) => match terminal {
-                SyntaxKind::AtPrefix => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 8usize, _) => match terminal {
-                SyntaxKind::AtId => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 3usize, _) => match terminal {
-                SyntaxKind::AtBase => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 11usize, _) => match terminal {
-                SyntaxKind::AtIndex => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::JsonString, 1usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 21usize, _) => match terminal {
-                SyntaxKind::AtSet => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 19usize, _) => match terminal {
-                SyntaxKind::AtProtected => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 23usize, _) => match terminal {
-                SyntaxKind::AtValue => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 9usize, _) => match terminal {
-                SyntaxKind::AtImport => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 12usize, _) => match terminal {
-                SyntaxKind::AtJson => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 4usize, _) => match terminal {
-                SyntaxKind::AtContainer => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 14usize, _) => match terminal {
-                SyntaxKind::AtList => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 20usize, _) => match terminal {
-                SyntaxKind::AtReverse => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 7usize, _) => match terminal {
-                SyntaxKind::AtGraph => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 13usize, _) => match terminal {
-                SyntaxKind::AtLanguage => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 10usize, _) => match terminal {
-                SyntaxKind::AtIncluded => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 18usize, _) => match terminal {
-                SyntaxKind::AtPropagate => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonString, 5usize, _) => match terminal {
-                SyntaxKind::AtContext => 0,
-                _ => 100isize,
-            },
-            (SyntaxKind::JsonString, 25usize, _) => match terminal {
-                SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 6usize, _) => match terminal {
-                SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
-                SyntaxKind::NullLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
-                SyntaxKind::CurlyOpen => 0,
-                _ => 2isize,
-            },
-            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 1usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 0,
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonValue, 7usize, _) => match terminal {
@@ -1155,32 +381,39 @@ mod definitions {
                 SyntaxKind::SqOpen => 0,
                 _ => 2isize,
             },
+            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 2isize,
+            },
+            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
+                SyntaxKind::NullLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 6usize, _) => match terminal {
+                SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
                 | SyntaxKind::CurlyOpen
                 | SyntaxKind::FalseLit
                 | SyntaxKind::NullLit
@@ -1191,29 +424,6 @@ mod definitions {
             (SyntaxKind::Member, 2usize, _) => match terminal {
                 SyntaxKind::JsonNumber => 3isize,
                 SyntaxKind::StringToken => 3isize,
-                SyntaxKind::AtBase => 3isize,
-                SyntaxKind::AtContainer => 3isize,
-                SyntaxKind::AtContext => 3isize,
-                SyntaxKind::AtDirection => 3isize,
-                SyntaxKind::AtGraph => 3isize,
-                SyntaxKind::AtId => 3isize,
-                SyntaxKind::AtImport => 3isize,
-                SyntaxKind::AtIncluded => 3isize,
-                SyntaxKind::AtIndex => 3isize,
-                SyntaxKind::AtJson => 3isize,
-                SyntaxKind::AtLanguage => 3isize,
-                SyntaxKind::AtList => 3isize,
-                SyntaxKind::AtNest => 3isize,
-                SyntaxKind::AtNone => 3isize,
-                SyntaxKind::AtPrefix => 3isize,
-                SyntaxKind::AtPropagate => 3isize,
-                SyntaxKind::AtProtected => 3isize,
-                SyntaxKind::AtReverse => 3isize,
-                SyntaxKind::AtSet => 3isize,
-                SyntaxKind::AtType => 3isize,
-                SyntaxKind::AtValue => 3isize,
-                SyntaxKind::AtVersion => 3isize,
-                SyntaxKind::AtVocab => 3isize,
                 SyntaxKind::Comma => 4isize,
                 SyntaxKind::CurlyClose => 4isize,
                 SyntaxKind::CurlyOpen => 3isize,
@@ -1224,59 +434,9 @@ mod definitions {
                 SyntaxKind::TrueLit => 3isize,
                 _ => 0,
             },
-            (SyntaxKind::Member, 3usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::Member, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
                 | SyntaxKind::CurlyOpen
                 | SyntaxKind::FalseLit
                 | SyntaxKind::NullLit
@@ -1284,32 +444,13 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::Member, 3usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::MemberList, 3usize, _) => match terminal {
                 SyntaxKind::JsonNumber => 3isize,
                 SyntaxKind::StringToken => 2isize,
-                SyntaxKind::AtBase => 2isize,
-                SyntaxKind::AtContainer => 2isize,
-                SyntaxKind::AtContext => 2isize,
-                SyntaxKind::AtDirection => 2isize,
-                SyntaxKind::AtGraph => 2isize,
-                SyntaxKind::AtId => 2isize,
-                SyntaxKind::AtImport => 2isize,
-                SyntaxKind::AtIncluded => 2isize,
-                SyntaxKind::AtIndex => 2isize,
-                SyntaxKind::AtJson => 2isize,
-                SyntaxKind::AtLanguage => 2isize,
-                SyntaxKind::AtList => 2isize,
-                SyntaxKind::AtNest => 2isize,
-                SyntaxKind::AtNone => 2isize,
-                SyntaxKind::AtPrefix => 2isize,
-                SyntaxKind::AtPropagate => 2isize,
-                SyntaxKind::AtProtected => 2isize,
-                SyntaxKind::AtReverse => 2isize,
-                SyntaxKind::AtSet => 2isize,
-                SyntaxKind::AtType => 2isize,
-                SyntaxKind::AtValue => 2isize,
-                SyntaxKind::AtVersion => 2isize,
-                SyntaxKind::AtVocab => 2isize,
                 SyntaxKind::Colon => 3isize,
                 SyntaxKind::CurlyClose => 3isize,
                 SyntaxKind::CurlyOpen => 3isize,
@@ -1321,85 +462,16 @@ mod definitions {
                 _ => 0,
             },
             (SyntaxKind::MemberList, 2usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
             (SyntaxKind::MemberList, 4usize, _) => match terminal {
-                SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab => 0,
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::ValueList, 4usize, _) => match terminal {
+            (SyntaxKind::ValueList, 2usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
                 | SyntaxKind::CurlyOpen
                 | SyntaxKind::FalseLit
                 | SyntaxKind::NullLit
@@ -1407,32 +479,9 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::ValueList, 2usize, _) => match terminal {
+            (SyntaxKind::ValueList, 4usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
-                | SyntaxKind::AtBase
-                | SyntaxKind::AtContainer
-                | SyntaxKind::AtContext
-                | SyntaxKind::AtDirection
-                | SyntaxKind::AtGraph
-                | SyntaxKind::AtId
-                | SyntaxKind::AtImport
-                | SyntaxKind::AtIncluded
-                | SyntaxKind::AtIndex
-                | SyntaxKind::AtJson
-                | SyntaxKind::AtLanguage
-                | SyntaxKind::AtList
-                | SyntaxKind::AtNest
-                | SyntaxKind::AtNone
-                | SyntaxKind::AtPrefix
-                | SyntaxKind::AtPropagate
-                | SyntaxKind::AtProtected
-                | SyntaxKind::AtReverse
-                | SyntaxKind::AtSet
-                | SyntaxKind::AtType
-                | SyntaxKind::AtValue
-                | SyntaxKind::AtVersion
-                | SyntaxKind::AtVocab
                 | SyntaxKind::CurlyOpen
                 | SyntaxKind::FalseLit
                 | SyntaxKind::NullLit
@@ -1443,29 +492,6 @@ mod definitions {
             (SyntaxKind::ValueList, 3usize, _) => match terminal {
                 SyntaxKind::JsonNumber => 2isize,
                 SyntaxKind::StringToken => 2isize,
-                SyntaxKind::AtBase => 2isize,
-                SyntaxKind::AtContainer => 2isize,
-                SyntaxKind::AtContext => 2isize,
-                SyntaxKind::AtDirection => 2isize,
-                SyntaxKind::AtGraph => 2isize,
-                SyntaxKind::AtId => 2isize,
-                SyntaxKind::AtImport => 2isize,
-                SyntaxKind::AtIncluded => 2isize,
-                SyntaxKind::AtIndex => 2isize,
-                SyntaxKind::AtJson => 2isize,
-                SyntaxKind::AtLanguage => 2isize,
-                SyntaxKind::AtList => 2isize,
-                SyntaxKind::AtNest => 2isize,
-                SyntaxKind::AtNone => 2isize,
-                SyntaxKind::AtPrefix => 2isize,
-                SyntaxKind::AtPropagate => 2isize,
-                SyntaxKind::AtProtected => 2isize,
-                SyntaxKind::AtReverse => 2isize,
-                SyntaxKind::AtSet => 2isize,
-                SyntaxKind::AtType => 2isize,
-                SyntaxKind::AtValue => 2isize,
-                SyntaxKind::AtVersion => 2isize,
-                SyntaxKind::AtVocab => 2isize,
                 SyntaxKind::Colon => 3isize,
                 SyntaxKind::CurlyClose => 3isize,
                 SyntaxKind::CurlyOpen => 2isize,
@@ -1905,176 +931,6 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::JsonString, 1usize) => {
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 2usize,
-                        }),
-                        SyntaxKind::StringToken,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 3usize,
-                        }),
-                        SyntaxKind::AtBase,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 4usize,
-                        }),
-                        SyntaxKind::AtContainer,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 5usize,
-                        }),
-                        SyntaxKind::AtContext,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 6usize,
-                        }),
-                        SyntaxKind::AtDirection,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 7usize,
-                        }),
-                        SyntaxKind::AtGraph,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 8usize,
-                        }),
-                        SyntaxKind::AtId,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 9usize,
-                        }),
-                        SyntaxKind::AtImport,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 10usize,
-                        }),
-                        SyntaxKind::AtIncluded,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 11usize,
-                        }),
-                        SyntaxKind::AtIndex,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 12usize,
-                        }),
-                        SyntaxKind::AtJson,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 13usize,
-                        }),
-                        SyntaxKind::AtLanguage,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 14usize,
-                        }),
-                        SyntaxKind::AtList,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 15usize,
-                        }),
-                        SyntaxKind::AtNest,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 16usize,
-                        }),
-                        SyntaxKind::AtNone,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 17usize,
-                        }),
-                        SyntaxKind::AtPrefix,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 18usize,
-                        }),
-                        SyntaxKind::AtPropagate,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 19usize,
-                        }),
-                        SyntaxKind::AtProtected,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 20usize,
-                        }),
-                        SyntaxKind::AtReverse,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 21usize,
-                        }),
-                        SyntaxKind::AtSet,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 22usize,
-                        }),
-                        SyntaxKind::AtType,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 23usize,
-                        }),
-                        SyntaxKind::AtValue,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 24usize,
-                        }),
-                        SyntaxKind::AtVersion,
-                    );
-                    state.add_element_checked(
-                        element.pop_push(Rule {
-                            kind: self.kind,
-                            state: 25usize,
-                        }),
-                        SyntaxKind::AtVocab,
-                    );
-                }
-                (SyntaxKind::JsonString, 2usize) => {
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::StringToken);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
@@ -2085,443 +941,6 @@ mod definitions {
                             kind: self.kind,
                             state: 0usize,
                         }));
-                    }
-                }
-                (SyntaxKind::JsonString, 3usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtBase);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 4usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtContainer);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 5usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtContext);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 6usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtDirection);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 7usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtGraph);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 8usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtId);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 9usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtImport);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 10usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtIncluded);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 11usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtIndex);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 12usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtJson);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 13usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtLanguage);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 14usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtList);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 15usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtNest);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 16usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtNone);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 17usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtPrefix);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 18usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtPropagate);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 19usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtProtected);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 20usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtReverse);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 21usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtSet);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 22usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtType);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 23usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtValue);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 24usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtVersion);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::JsonString, 25usize) => {
-                    let (matched, fb) = state.expect_as_inline(element, SyntaxKind::AtVocab);
-                    state.add_element(matched.pop_push(Rule {
-                        kind: self.kind,
-                        state: 0usize,
-                    }));
-                    if let Some(fb) = fb {
-                        state.add_element(fb.pop_push(Rule {
-                            kind: self.kind,
-                            state: 0usize,
-                        }));
-                    }
-                }
-                (SyntaxKind::AtBase, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtBase);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtContainer, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtContainer);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtContext, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtContext);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtDirection, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtDirection);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtGraph, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtGraph);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtId, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtId);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtImport, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtImport);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtIncluded, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtIncluded);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtIndex, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtIndex);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtJson, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtJson);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtLanguage, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtLanguage);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtList, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtList);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtNest, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtNest);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtNone, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtNone);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtPrefix, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtPrefix);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtPropagate, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtPropagate);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtProtected, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtProtected);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtReverse, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtReverse);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtSet, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtSet);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtType, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtType);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtValue, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtValue);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtVersion, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtVersion);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
-                    }
-                }
-                (SyntaxKind::AtVocab, _) => {
-                    let added = state.expect_as(element, SyntaxKind::AtVocab);
-                    if let Some(parent) = added.pop() {
-                        state.add_element(parent);
                     }
                 }
                 (SyntaxKind::Comma, _) => {
@@ -2630,7 +1049,6 @@ impl TokenTrait for SyntaxKind {
     }
     fn max_error_value(&self) -> isize {
         match self {
-            SyntaxKind::AtContext => 100isize,
             SyntaxKind::Comma => 2isize,
             SyntaxKind::Colon => 3isize,
             SyntaxKind::SqOpen => 2isize,
