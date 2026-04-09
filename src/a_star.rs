@@ -220,6 +220,14 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     /// value otherwise.  Pre-charging lets FaultTolerant mode still explore
     /// the branch (with a higher cost), while Fast mode drops it automatically
     /// via the `has_error` guard in `add_element`.
+    ///
+    /// When the token is unreachable, we also boost the heuristic (`h`) by
+    /// `min_completion_cost` — the cheapest insertion cost to complete the
+    /// entire pushed rule.  This gives the A* a tighter lower bound on
+    /// remaining work, deprioritising dead-end branches without inflating
+    /// the actual cost.  Child elements produced by expanding this one will
+    /// receive fresh `h` values from the heuristic table, so the boost is
+    /// naturally shed as progress is made.
     pub fn add_element_checked(&mut self, element: Element<R>, pushed_kind: R::Kind) -> bool {
         let mut pos = element.state.1;
         while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
@@ -228,8 +236,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         let element = if let Some(tok) = self.tokens.get(pos) {
             let min_err = pushed_kind.min_error_for_token(&tok.kind);
             if min_err > 0 {
+                // Boost h (heuristic) by the rule's minimum completion cost.
+                // This is admissible: it's a lower bound on the insertion cost
+                // to complete the rule when the current token can't start it.
+                let h_boost = pushed_kind.min_completion_cost();
                 Element {
                     cost: element.cost + min_err,
+                    h: element.h + h_boost,
                     has_error: true,
                     ..element
                 }
