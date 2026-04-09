@@ -198,11 +198,15 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                 head.step(&e, self);
 
-                // Token deletion: in fault-tolerant mode, offer to skip the
-                // current token at a deletion cost.  The A* cost model ensures
-                // this branch is only selected when it's cheaper than cascading
-                // error insertions.
-                if self.mode == ParseMode::FaultTolerant {
+                // Token deletion and sync-ahead: in fault-tolerant mode, offer
+                // to skip the current token at a deletion cost.
+                //
+                // Gate on shifts_since_pop: the paper (Kim & Yi, §3.3) proves
+                // that when t > 1 (multiple shifts since last reduction), the
+                // only useful operations are insertions via shift/goto paths.
+                // Offering deletions at this point generates redundant configs
+                // that the A* will eventually discard — but they bloat the heap.
+                if self.mode == ParseMode::FaultTolerant && e.shifts_since_pop <= 1 {
                     self.try_delete_token(&e);
                     self.try_sync_ahead(&e);
                 }
