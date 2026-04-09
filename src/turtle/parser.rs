@@ -2417,4 +2417,20 @@ impl TokenTrait for SyntaxKind {
             _ => 0,
         }
     }
+    fn min_completion_cost(&self) -> isize {
+        match self {
+            SyntaxKind::Base => 104isize,
+            SyntaxKind::BlankNodePropertyList => 6isize,
+            SyntaxKind::BlankNodePropertyList2 => 4isize,
+            SyntaxKind::Collection => 4isize,
+            SyntaxKind::Directive => 101isize,
+            SyntaxKind::PredicateObjectList => 2isize,
+            SyntaxKind::PrefixId => 105isize,
+            SyntaxKind::SparqlBase => 101isize,
+            SyntaxKind::SparqlPrefix => 102isize,
+            SyntaxKind::Statement => 6isize,
+            SyntaxKind::Triples => 3isize,
+            _ => Self::max_error_value(self),
+        }
+    }
 }

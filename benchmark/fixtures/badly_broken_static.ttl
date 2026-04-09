@@ -1,0 +1,48 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:alice a foaf:Person ;
+    foaf:name "Alice Smith" ;
+    foaf:mbox <mailto:alice@example.org>
+    foaf:homepage <http://example.org/alice> ;
+    foaf:age "30"^^xsd:integer ;
+    foaf:knows ex:bob , ex:carol , ex:dave .
+
+ex:bob a foaf:Person ;
+    foaf:name "Bob Jones" GARBAGE_TOKEN more_garbage ;
+    foaf:mbox <mailto:bob@example.org> ;
+    foaf:age "25"^^xsd:integer ;
+    foaf:knows ex:alice
+
+ex:carol a foaf:Person ;
+    foaf:name "Carol White" ;
+    foaf:mbox <mailto:carol@example.org> ;
+    foaf:age "28"^^xsd:integer ;
+    foaf:knows ex:alice , ex:bob , ex:dave , ex:eve .
+
+ex:dave a foaf:Person
+    foaf:name "Dave Brown" ;
+    foaf:mbox <mailto:dave@example.org> ;
+    foaf:age "35"^^xsd:integer
+    foaf:knows ex:alice , ex:carol .
+
+ex:eve a foaf:Person ;
+    foaf:name "Eve Green" ;
+    foaf:mbox <mailto:eve@example.org> ;
+    foaf:homepage <http://example.org/eve>
+    foaf:age "22"^^xsd:integer ;
+    foaf:knows ex:bob , ex:carol , ex:dave
+
+ex:frank a foaf:Person ;
+    foaf:name "Frank Black" ;
+    foaf:mbox INVALID HERE LOTS OF GARBAGE TOKENS THAT DONT BELONG ;
+    foaf:age "40"^^xsd:integer ;
+    foaf:knows ex:alice , ex:eve .
+
+ex:grace a foaf:Person ;
+    foaf:name "Grace Blue" ;
+    foaf:mbox <mailto:grace@example.org> ;
+    foaf:age "27"^^xsd:integer ;
+    foaf:knows ex:frank , ex:eve .

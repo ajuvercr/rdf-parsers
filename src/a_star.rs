@@ -47,6 +47,17 @@ enum IsExpectedElement {
 /// blocking indefinitely.
 pub const DEFAULT_MAX_ITERATIONS: usize = 1_000_000;
 
+/// Maximum number of consecutive error operations (insertions + deletions)
+/// before an element is dropped.  Prevents unbounded error cascades on
+/// deeply broken input.
+pub const DEFAULT_MAX_REPAIR_SPAN: u16 = 15;
+
+/// Number of consecutive error operations that triggers sync-point scanning.
+const SYNC_THRESHOLD: u16 = 5;
+
+/// Maximum number of tokens to scan ahead when looking for a sync point.
+const MAX_SYNC_SCAN: usize = 50;
+
 pub struct AStar<'a, R: ParserTrait> {
     /// Maps each state key to the best (lowest) cost seen so far (queued or
     /// processed).  Used for lazy-deletion dedup: elements with worse (higher)
@@ -75,6 +86,8 @@ pub struct AStar<'a, R: ParserTrait> {
     best_at_eof: Option<(isize, List<Step<R::Kind>>, usize)>,
     /// Whether to perform fault-tolerant error recovery.
     mode: ParseMode,
+    /// Maximum consecutive error operations before an element is dropped.
+    max_repair_span: u16,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -99,6 +112,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             max_iterations,
             best_at_eof: None,
             mode: ParseMode::FaultTolerant,
+            max_repair_span: DEFAULT_MAX_REPAIR_SPAN,
         }
     }
 
@@ -117,6 +131,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             max_iterations: usize::MAX,
             best_at_eof: None,
             mode: ParseMode::Fast,
+            max_repair_span: u16::MAX,
         }
     }
 
@@ -172,6 +187,15 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 }
 
                 head.step(&e, self);
+
+                // Token deletion: in fault-tolerant mode, offer to skip the
+                // current token at a deletion cost.  The A* cost model ensures
+                // this branch is only selected when it's cheaper than cascading
+                // error insertions.
+                if self.mode == ParseMode::FaultTolerant {
+                    self.try_delete_token(&e);
+                    self.try_sync_ahead(&e);
+                }
             }
         }
 
@@ -224,6 +248,11 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         // from filling with dead branches and stops infinite-loop searches on
         // invalid documents.
         if self.mode == ParseMode::Fast && element.has_error {
+            return false;
+        }
+
+        // Drop elements that have exceeded the maximum consecutive error span.
+        if element.consecutive_errors > self.max_repair_span {
             return false;
         }
 
@@ -341,6 +370,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     has_error: true,
                                     assumed_depth_delta: element.assumed_depth_delta,
                                     current_depth: element.current_depth,
+                                    consecutive_errors: element.consecutive_errors.saturating_add(1),
                                 });
                                 (insert_error, 50)
                             } else {
@@ -358,6 +388,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     has_error: true,
                                     assumed_depth_delta: element.assumed_depth_delta,
                                     current_depth: element.current_depth,
+                                    consecutive_errors: element.consecutive_errors.saturating_add(1),
                                 });
                                 // One-time delta-adoption cost: proportional to how much
                                 // the assumed delta changes.  When depth info is unavailable
@@ -399,6 +430,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         element.assumed_depth_delta
                     },
                     current_depth: new_depth,
+                    consecutive_errors: 0, // successful match resets counter
                 };
 
                 return (matched, fallback);
@@ -421,6 +453,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             has_error: true,
             assumed_depth_delta: element.assumed_depth_delta,
             current_depth: element.current_depth,
+            consecutive_errors: element.consecutive_errors.saturating_add(1),
         };
 
         (error, None)
@@ -438,6 +471,135 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         token: R::Kind,
     ) -> (Element<R>, Option<Element<R>>) {
         self.expect_with_fallback(element, token, true)
+    }
+
+    /// Offer to skip (delete) the current token at a deletion cost.
+    ///
+    /// This is the recursive-descent analog of the (R3D) delete rule in
+    /// Kim & Yi.  The token is not consumed by any grammar rule — it will
+    /// appear in the CST wrapped in an Error node.  The grammar state and
+    /// parent stack are unchanged; only the token position advances.
+    fn try_delete_token(&mut self, element: &Element<R>) {
+        let pos = element.state.1;
+        let Some(tok) = self.tokens.get(pos) else {
+            return;
+        };
+        // Don't delete whitespace / trivia (positions always point past them).
+        if tok.kind.skips() {
+            return;
+        }
+
+        let del_cost = tok.kind.deletion_cost();
+        let next = self.get_actual_index(pos + 1);
+        let h = if let Some(&hv) = self.heuristic.get(next) {
+            hv
+        } else {
+            0
+        };
+
+        // History penalty: deleting a token that had a role in the previous
+        // parse is discouraged — it's more likely the user intended to keep it.
+        let history_penalty = if tok.old_kind().is_some() {
+            self.bias.strength
+        } else {
+            0
+        };
+
+        let del_element = Element {
+            list: element.list.prepend(Step::Delete),
+            parent: element.parent.clone(),
+            cost: element.cost + del_cost + history_penalty,
+            h,
+            state: (element.state.0, next),
+            has_error: true,
+            assumed_depth_delta: element.assumed_depth_delta,
+            current_depth: element.current_depth,
+            consecutive_errors: element.consecutive_errors.saturating_add(1),
+        };
+        self.add_element(del_element);
+    }
+
+    /// Synchronisation-point skip-ahead: when consecutive errors exceed a
+    /// threshold, scan ahead for a token that an ancestor rule can accept.
+    /// If found, create a single recovery element that:
+    ///   1. Pops rules to the accepting ancestor
+    ///   2. Wraps all skipped tokens in a single Error node (via Delete steps)
+    ///   3. Resets consecutive_errors to 0
+    ///
+    /// This is the recursive-descent analog of Kim & Yi's (R3S-n) unrestricted
+    /// shift — instead of shifting through LR states we pop grammar rules.
+    fn try_sync_ahead(&mut self, element: &Element<R>) {
+        if element.consecutive_errors < SYNC_THRESHOLD {
+            return;
+        }
+        let pos = element.state.1;
+        let max_scan = (pos + MAX_SYNC_SCAN).min(self.tokens.len());
+
+        // Track the best sync candidate (lowest cost).
+        let mut best: Option<Element<R>> = None;
+
+        for scan_pos in (pos + 1)..max_scan {
+            let tok = &self.tokens[scan_pos];
+            if tok.kind.skips() {
+                continue;
+            }
+
+            // Walk the parent stack looking for an ancestor that can accept
+            // this token (min_error_for_token == 0).
+            let mut parent = element.parent.clone();
+            let mut list = element.list.clone();
+
+            loop {
+                let Some(((rule, saved_fp), tail)) = parent.slice().map(|((r, fp), t)| ((r, fp), t)) else {
+                    break;
+                };
+
+                let kind = rule.element_kind();
+                if kind.min_error_for_token(&tok.kind) == 0 {
+                    // This ancestor can accept the sync token.
+                    // Cost: deletion cost for each non-trivia token we skip.
+                    let skip_cost: isize = (pos..scan_pos)
+                        .filter_map(|p| self.tokens.get(p))
+                        .filter(|t| !t.kind.skips())
+                        .map(|t| t.kind.deletion_cost())
+                        .sum();
+
+                    let next = self.get_actual_index(scan_pos);
+                    let h = self.heuristic.get(next).copied().unwrap_or(0);
+
+                    let candidate = Element {
+                        list,
+                        parent: parent.clone(),
+                        cost: element.cost + skip_cost,
+                        h,
+                        state: (*saved_fp, next),
+                        has_error: true,
+                        assumed_depth_delta: element.assumed_depth_delta,
+                        current_depth: element.current_depth,
+                        consecutive_errors: 0,
+                    };
+
+                    let f = candidate.cost + candidate.h;
+                    if best.as_ref().map_or(true, |b| f < b.cost + b.h) {
+                        best = Some(candidate);
+                    }
+                    break;
+                }
+
+                // Pop this rule: append an End step.
+                list = list.prepend(Step::end());
+                parent = tail.clone();
+
+                // Don't pop the root rule.
+                if parent.len() == 0 {
+                    break;
+                }
+            }
+        }
+
+        if let Some(sync_element) = best {
+            self.add_element(sync_element);
+        }
     }
 }
 
@@ -466,6 +628,10 @@ pub struct Element<R: ParserTrait> {
     /// The current bracket nesting depth of the parser at this element's token
     /// position.  Incremented when an opener is bumped, decremented for closers.
     current_depth: i8,
+    /// Number of consecutive error operations (Error insertions + Delete steps)
+    /// since the last successful token match (Bump).  Used by the bounded-repair
+    /// mechanism: elements exceeding `max_repair_span` are dropped.
+    consecutive_errors: u16,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -486,6 +652,7 @@ impl<R: ParserTrait> Element<R> {
             has_error: false,
             assumed_depth_delta: 0,
             current_depth: 0,
+            consecutive_errors: 0,
         }
     }
 
@@ -501,6 +668,7 @@ impl<R: ParserTrait> Element<R> {
             has_error: self.has_error,
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
+            consecutive_errors: self.consecutive_errors,
         }
     }
 
@@ -519,6 +687,7 @@ impl<R: ParserTrait> Element<R> {
             has_error: self.has_error,
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
+            consecutive_errors: self.consecutive_errors,
         }
     }
 
@@ -535,6 +704,7 @@ impl<R: ParserTrait> Element<R> {
             has_error: self.has_error,
             assumed_depth_delta: self.assumed_depth_delta,
             current_depth: self.current_depth,
+            consecutive_errors: self.consecutive_errors,
         })
     }
 }
