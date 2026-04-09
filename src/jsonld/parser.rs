@@ -373,16 +373,12 @@ mod definitions {
                 SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
-                SyntaxKind::FalseLit => 0,
+            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonValue, 5usize, _) => match terminal {
                 SyntaxKind::JsonNumber => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
             (SyntaxKind::JsonValue, 2usize, _) => match terminal {
@@ -393,13 +389,13 @@ mod definitions {
                 SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
+                SyntaxKind::FalseLit => 0,
+                _ => 1isize,
+            },
             (SyntaxKind::JsonValue, 8usize, _) => match terminal {
                 SyntaxKind::NullLit => 0,
                 _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 2isize,
             },
             (SyntaxKind::JsonValue, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
@@ -411,6 +407,10 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
+            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
+            },
             (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
@@ -419,6 +419,10 @@ mod definitions {
                 | SyntaxKind::NullLit
                 | SyntaxKind::SqOpen
                 | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Member, 3usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
             (SyntaxKind::Member, 1usize, _) => match terminal {
@@ -444,15 +448,7 @@ mod definitions {
                 SyntaxKind::TrueLit => 3isize,
                 _ => 0,
             },
-            (SyntaxKind::Member, 3usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
             (SyntaxKind::MemberList, 4usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::MemberList, 2usize, _) => match terminal {
                 SyntaxKind::StringToken => 0,
                 _ => 1isize,
             },
@@ -469,7 +465,11 @@ mod definitions {
                 SyntaxKind::TrueLit => 3isize,
                 _ => 0,
             },
-            (SyntaxKind::ValueList, 2usize, _) => match terminal {
+            (SyntaxKind::MemberList, 2usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::ValueList, 4usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
                 | SyntaxKind::CurlyOpen
@@ -479,7 +479,7 @@ mod definitions {
                 | SyntaxKind::TrueLit => 0,
                 _ => 1isize,
             },
-            (SyntaxKind::ValueList, 4usize, _) => match terminal {
+            (SyntaxKind::ValueList, 2usize, _) => match terminal {
                 SyntaxKind::JsonNumber
                 | SyntaxKind::StringToken
                 | SyntaxKind::CurlyOpen
