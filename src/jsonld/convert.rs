@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::future::Future;
 use std::ops::Range;
@@ -29,7 +28,10 @@ const XSD_BOOLEAN: &str = "http://www.w3.org/2001/XMLSchema#boolean";
 #[derive(Debug, Clone)]
 pub enum JsonLdVal {
     /// Object carries its span so we can pass it as the triple span for nodes.
-    Object(Vec<(String, JsonLdVal)>, Range<usize>),
+    /// Each member is `(key, key_span, value)` where `key_span` is the byte
+    /// range of the key string token in the source, enabling accurate predicate
+    /// source-mapping.
+    Object(Vec<(String, Range<usize>, JsonLdVal)>, Range<usize>),
     Array(Vec<JsonLdVal>),
     Str(String),
     Number(String),
@@ -75,6 +77,16 @@ struct ActiveContext {
 /// ```
 pub trait ContextLoader {
     fn load<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>>;
+
+    /// Fetch and parse a remote JSON-LD context document, returning its parsed
+    /// value.  The default implementation calls [`load`](Self::load) and parses
+    /// the result; override this to add caching of parsed values.
+    fn load_val<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<JsonLdVal>> + 'a>> {
+        Box::pin(async move {
+            let content = self.load(url).await?;
+            parse_jsonld_for_context(&content)
+        })
+    }
 }
 
 /// A no-op `ContextLoader` that never resolves remote contexts.
@@ -272,13 +284,14 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
                 let Some(key) = extract_json_string(&key_node) else {
                     continue;
                 };
+                let key_span = text_range(&key_node);
                 let Some(val_node) = child(&member, SyntaxKind::JsonValue) else {
                     continue;
                 };
                 let Some(val) = cst_to_value(&val_node) else {
                     continue;
                 };
-                members.push((key, val));
+                members.push((key, key_span, val));
             }
             Some(JsonLdVal::Object(members, span))
         }
@@ -302,19 +315,6 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
 
 // ── Context processing ────────────────────────────────────────────────────────
 
-thread_local! {
-    /// Cache for parsed remote JSON-LD context documents (keyed by URL).
-    /// Avoids re-parsing large contexts (e.g. schema.org, ~300KB) on every
-    /// incremental re-parse.  Persists for the thread/session lifetime.
-    static PARSED_CTX_CACHE: RefCell<HashMap<String, JsonLdVal>> = RefCell::new(HashMap::new());
-}
-
-/// Clear the parsed-context cache.  Call this if a remote context document
-/// has been updated and the stale cached version should be discarded.
-pub fn clear_parsed_context_cache() {
-    PARSED_CTX_CACHE.with(|c| c.borrow_mut().clear());
-}
-
 /// Process a JSON-LD `@context` value and return the updated active context.
 ///
 /// This is a boxed future because it is recursively called for arrays of
@@ -330,17 +330,8 @@ fn process_context<'a>(
                 active = ActiveContext::default();
             }
             JsonLdVal::Str(ref url) => {
-                // Check thread-local parsed-context cache first.
-                let cached = PARSED_CTX_CACHE.with(|c| c.borrow().get(url).cloned());
-                if let Some(remote_ctx) = cached {
+                if let Some(remote_ctx) = loader.load_val(url).await {
                     active = process_context(active, remote_ctx, loader).await;
-                } else if let Some(content) = loader.load(url).await {
-                    if let Some(remote_ctx) = parse_jsonld_for_context(&content) {
-                        PARSED_CTX_CACHE.with(|c| {
-                            c.borrow_mut().insert(url.clone(), remote_ctx.clone())
-                        });
-                        active = process_context(active, remote_ctx, loader).await;
-                    }
                 }
             }
             JsonLdVal::Array(items) => {
@@ -349,7 +340,7 @@ fn process_context<'a>(
                 }
             }
             JsonLdVal::Object(members, _) => {
-                for (key, val) in members {
+                for (key, _, val) in members {
                     match key.as_str() {
                         "@base" => match &val {
                             JsonLdVal::Str(s) if s.is_empty() => active.base = None,
@@ -402,7 +393,7 @@ fn process_term_definition(
         JsonLdVal::Object(members, _) => {
             let mut def = TermDefinition::default();
             let map: HashMap<&str, &JsonLdVal> =
-                members.iter().map(|(k, v)| (k.as_str(), v)).collect();
+                members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
 
             // @reverse takes priority over @id for the IRI
             if let Some(rev_val) = map.get("@reverse") {
@@ -446,7 +437,7 @@ fn process_term_definition(
 /// Parse a JSON-LD string (fetched from a remote URL) and return the value
 /// that should be used as a context.  If the document has a top-level
 /// `@context`, return that; otherwise return the whole document.
-fn parse_jsonld_for_context(content: &str) -> Option<JsonLdVal> {
+pub fn parse_jsonld_for_context(content: &str) -> Option<JsonLdVal> {
     use super::parser::{Rule, SyntaxKind as SK};
     let rule = Rule::new(SK::JsonldDoc);
     let (parse, _) = crate::parse(rule, content);
@@ -456,7 +447,7 @@ fn parse_jsonld_for_context(content: &str) -> Option<JsonLdVal> {
     let val = cst_to_value(&json_val_node)?;
     // If the document contains @context at the top level, return that.
     if let JsonLdVal::Object(members, _) = &val {
-        if let Some((_, ctx)) = members.iter().find(|(k, _)| k == "@context") {
+        if let Some((_, _, ctx)) = members.iter().find(|(k, _, _)| k == "@context") {
             return Some(ctx.clone());
         }
     }
@@ -631,12 +622,12 @@ fn process_node<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
     loader: &'a mut dyn ContextLoader,
-    members: &'a [(String, JsonLdVal)],
+    members: &'a [(String, Range<usize>, JsonLdVal)],
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
 ) -> Pin<Box<dyn Future<Output = Option<Term>> + 'a>> {
     Box::pin(async move {
-        let map: HashMap<&str, &JsonLdVal> = members.iter().map(|(k, v)| (k.as_str(), v)).collect();
+        let map: HashMap<&str, &JsonLdVal> = members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
 
         // Value object — return as a literal, generate no subject-based triples
         if map.contains_key("@value") {
@@ -729,7 +720,7 @@ fn process_node<'a>(
         // @reverse → reverse-property triples (object becomes subject)
         if let Some(rev_val) = map.get("@reverse") {
             if let JsonLdVal::Object(rev_members, _) = rev_val {
-                for (prop, val) in rev_members {
+                for (prop, _, val) in rev_members {
                     if prop.starts_with('@') {
                         continue;
                     }
@@ -768,7 +759,7 @@ fn process_node<'a>(
         }
 
         // Regular properties
-        for (key, val) in members {
+        for (key, key_span, val) in members {
             match key.as_str() {
                 "@context" | "@id" | "@type" | "@graph" | "@reverse" | "@included" | "@nest" => {
                     continue;
@@ -796,10 +787,10 @@ fn process_node<'a>(
                     subject: Spanned(subject.clone(), s.clone()),
                     po: vec![Spanned(
                         PO {
-                            predicate: Spanned(ConvertState::named(&pred_iri), s.clone()),
+                            predicate: Spanned(ConvertState::named(&pred_iri), key_span.clone()),
                             object: objects.into_iter().map(|o| Spanned(o, s.clone())).collect(),
                         },
-                        s.clone(),
+                        key_span.clone(),
                     )],
                     graph: graph.map(|g| Spanned(g.clone(), s.clone())),
                 },
@@ -878,7 +869,7 @@ async fn value_to_rdf<'a>(
     match val {
         JsonLdVal::Object(members, obj_span) => {
             let map: HashMap<&str, &JsonLdVal> =
-                members.iter().map(|(k, v)| (k.as_str(), v)).collect();
+                members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
             if map.contains_key("@value") {
                 return process_value_object(active, &map, obj_span);
             }
@@ -1132,7 +1123,7 @@ fn json_serialize(val: &JsonLdVal) -> String {
         JsonLdVal::Object(members, _) => {
             let pairs: Vec<String> = members
                 .iter()
-                .map(|(k, v)| format!("\"{}\":{}", json_escape(k), json_serialize(v)))
+                .map(|(k, _, v)| format!("\"{}\":{}", json_escape(k), json_serialize(v)))
                 .collect();
             format!("{{{}}}", pairs.join(","))
         }
