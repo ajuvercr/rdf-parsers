@@ -17,4 +17,5 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
 logos = "0.16.1"
 rowan = "0.16.1"
 similar = "2.7.0"
+oxiri = "0.2"
 

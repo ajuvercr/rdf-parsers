@@ -2540,6 +2540,7 @@ name = "rdf-parsers"
 version = "0.1.8"
 dependencies = [
  "logos 0.16.1",
+ "oxiri",
  "rowan",
  "similar",
 ]
