@@ -28,10 +28,14 @@ const XSD_BOOLEAN: &str = "http://www.w3.org/2001/XMLSchema#boolean";
 #[derive(Debug, Clone)]
 pub enum JsonLdVal {
     /// Object carries its span so we can pass it as the triple span for nodes.
-    /// Each member is `(key, key_span, value)` where `key_span` is the byte
-    /// range of the key string token in the source, enabling accurate predicate
-    /// source-mapping.
-    Object(Vec<(String, Range<usize>, JsonLdVal)>, Range<usize>),
+    /// Each member is `(key, key_span, val_span, value)` where `key_span` is
+    /// the byte range of the key string token and `val_span` is the byte range
+    /// of the value token/node in the source, enabling accurate predicate and
+    /// object source-mapping.
+    Object(
+        Vec<(String, Range<usize>, Range<usize>, JsonLdVal)>,
+        Range<usize>,
+    ),
     Array(Vec<JsonLdVal>),
     Str(String),
     Number(String),
@@ -291,10 +295,11 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
                 let Some(val_node) = child(&member, SyntaxKind::JsonValue) else {
                     continue;
                 };
+                let val_span = text_range(&val_node);
                 let Some(val) = cst_to_value(&val_node) else {
                     continue;
                 };
-                members.push((key, key_span, val));
+                members.push((key, key_span, val_span, val));
             }
             Some(JsonLdVal::Object(members, span))
         }
@@ -343,7 +348,7 @@ fn process_context<'a>(
                 }
             }
             JsonLdVal::Object(members, _) => {
-                for (key, _, val) in members {
+                for (key, _, _, val) in members {
                     match key.as_str() {
                         "@base" => match &val {
                             JsonLdVal::Str(s) if s.is_empty() => active.base = None,
@@ -396,7 +401,7 @@ fn process_term_definition(
         JsonLdVal::Object(members, _) => {
             let mut def = TermDefinition::default();
             let map: HashMap<&str, &JsonLdVal> =
-                members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
+                members.iter().map(|(k, _, _, v)| (k.as_str(), v)).collect();
 
             // @reverse takes priority over @id for the IRI
             if let Some(rev_val) = map.get("@reverse") {
@@ -450,7 +455,7 @@ pub fn parse_jsonld_for_context(content: &str) -> Option<JsonLdVal> {
     let val = cst_to_value(&json_val_node)?;
     // If the document contains @context at the top level, return that.
     if let JsonLdVal::Object(members, _) = &val {
-        if let Some((_, _, ctx)) = members.iter().find(|(k, _, _)| k == "@context") {
+        if let Some((_, _, _, ctx)) = members.iter().find(|(k, _, _, _)| k == "@context") {
             return Some(ctx.clone());
         }
     }
@@ -625,13 +630,13 @@ fn process_node<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
     loader: &'a mut dyn ContextLoader,
-    members: &'a [(String, Range<usize>, JsonLdVal)],
+    members: &'a [(String, Range<usize>, Range<usize>, JsonLdVal)],
     span: &'a Range<usize>,
     graph: Option<&'a Term>,
 ) -> Pin<Box<dyn Future<Output = Option<Term>> + 'a>> {
     Box::pin(async move {
         let map: HashMap<&str, &JsonLdVal> =
-            members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
+            members.iter().map(|(k, _, _, v)| (k.as_str(), v)).collect();
 
         // Value object — return as a literal, generate no subject-based triples
         if map.contains_key("@value") {
@@ -667,16 +672,21 @@ fn process_node<'a>(
         };
 
         // Determine the subject
+        let id_val_span: Range<usize> = members
+            .iter()
+            .find(|(k, _, _, _)| k == "@id")
+            .map(|(_, _, vs, _)| vs.clone())
+            .unwrap_or_else(|| span.clone());
         let subject: Term = if let Some(id_val) = map.get("@id") {
             match id_val {
                 JsonLdVal::Str(s) => match expand_iri(active, s, false, true) {
                     Some(iri) if iri.starts_with("_:") => {
-                        Term::BlankNode(BlankNode::Named(iri[2..].to_string(), span.start))
+                        Term::BlankNode(BlankNode::Named(iri[2..].to_string(), id_val_span.start))
                     }
-                    Some(iri) => Term::NamedNode(NamedNode::Full(iri, span.start)),
-                    None => state.fresh_blank(span.start),
+                    Some(iri) => Term::NamedNode(NamedNode::Full(iri, id_val_span.start)),
+                    None => state.fresh_blank(id_val_span.start),
                 },
-                _ => state.fresh_blank(span.start),
+                _ => state.fresh_blank(id_val_span.start),
             }
         } else {
             state.fresh_blank(span.start)
@@ -724,14 +734,15 @@ fn process_node<'a>(
         // @reverse → reverse-property triples (object becomes subject)
         if let Some(rev_val) = map.get("@reverse") {
             if let JsonLdVal::Object(rev_members, _) = rev_val {
-                for (prop, _, val) in rev_members {
+                for (prop, _, val_span, val) in rev_members {
                     if prop.starts_with('@') {
                         continue;
                     }
                     if let Some(pred_iri) = expand_iri(active, prop, true, false) {
                         let pred = ConvertState::named(&pred_iri);
                         let objects =
-                            collect_objects(state, active, loader, val, span, graph, None).await;
+                            collect_objects(state, active, loader, val, val_span, graph, None)
+                                .await;
                         for obj in objects {
                             // Subject and object are swapped for reverse properties
                             state.add_triple(
@@ -763,7 +774,7 @@ fn process_node<'a>(
         }
 
         // Regular properties
-        for (key, key_span, val) in members {
+        for (key, key_span, val_span, val) in members {
             match key.as_str() {
                 "@context" | "@id" | "@type" | "@graph" | "@reverse" | "@included" | "@nest" => {
                     continue;
@@ -781,18 +792,22 @@ fn process_node<'a>(
             };
 
             let term_def = active.terms.get(key.as_str());
-            let objects = collect_objects(state, active, loader, val, span, graph, term_def).await;
+            let objects =
+                collect_objects(state, active, loader, val, val_span, graph, term_def).await;
             if objects.is_empty() {
                 continue;
             }
             let s = span.clone();
             state.triples.push(Spanned(
                 Triple {
-                    subject: Spanned(subject.clone(), s.clone()),
+                    subject: Spanned(subject.clone(), id_val_span.clone()),
                     po: vec![Spanned(
                         PO {
                             predicate: Spanned(ConvertState::named(&pred_iri), key_span.clone()),
-                            object: objects.into_iter().map(|o| Spanned(o, s.clone())).collect(),
+                            object: objects
+                                .into_iter()
+                                .map(|o| Spanned(o, val_span.clone()))
+                                .collect(),
                         },
                         key_span.clone(),
                     )],
@@ -873,7 +888,7 @@ async fn value_to_rdf<'a>(
     match val {
         JsonLdVal::Object(members, obj_span) => {
             let map: HashMap<&str, &JsonLdVal> =
-                members.iter().map(|(k, _, v)| (k.as_str(), v)).collect();
+                members.iter().map(|(k, _, _, v)| (k.as_str(), v)).collect();
             if map.contains_key("@value") {
                 return process_value_object(active, &map, obj_span);
             }
@@ -1127,7 +1142,7 @@ fn json_serialize(val: &JsonLdVal) -> String {
         JsonLdVal::Object(members, _) => {
             let pairs: Vec<String> = members
                 .iter()
-                .map(|(k, _, v)| format!("\"{}\":{}", json_escape(k), json_serialize(v)))
+                .map(|(k, _, _, v)| format!("\"{}\":{}", json_escape(k), json_serialize(v)))
                 .collect();
             format!("{{{}}}", pairs.join(","))
         }
@@ -1685,6 +1700,152 @@ mod tests {
         // We may or may not get the triple depending on how error recovery works,
         // but the converter should not panic.
         let _ = triples_of(&t);
+    }
+
+    // ── Span tests ────────────────────────────────────────────────────────────
+    //
+    // Each test pinpoints where a token lives in the source string and asserts
+    // that the corresponding Spanned range starts at that position.
+
+    /// Byte offset of the first occurrence of `needle` in `haystack`.
+    fn offset_of(haystack: &str, needle: &str) -> usize {
+        haystack
+            .find(needle)
+            .unwrap_or_else(|| panic!("needle {:?} not found in {:?}", needle, haystack))
+    }
+
+    #[test]
+    fn test_subject_span_points_to_id_value() {
+        // Compact single-line so byte offsets are easy to calculate.
+        let input = r#"{"@id":"http://example.org/s","http://example.org/p":"v"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+
+        let expected_start = offset_of(input, "\"http://example.org/s\"");
+        let subject_span = &triples[0].subject.1;
+        assert_eq!(
+            subject_span.start, expected_start,
+            "subject span should start at the @id value, not the whole object"
+        );
+    }
+
+    #[test]
+    fn test_predicate_span_points_to_key_field() {
+        let input = r#"{"@id":"http://example.org/s","http://example.org/p":"v"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+
+        let expected_start = offset_of(input, "\"http://example.org/p\"");
+        let pred_span = &triples[0].po[0].predicate.1;
+        assert_eq!(
+            pred_span.start, expected_start,
+            "predicate span should start at the key field"
+        );
+    }
+
+    #[test]
+    fn test_predicate_span_points_to_compact_iri_key_not_expanded_iri() {
+        // The predicate "foaf:name" expands to the full FOAF URI via context, but
+        // the span must point to the compact source key "foaf:name", not to the
+        // expanded IRI (which doesn't exist in the source at all).
+        let input = r#"{"@context":{"foaf":"http://xmlns.com/foaf/0.1/"},"@id":"http://example.org/alice","foaf:name":"Alice"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(
+            predicate_iri(&triples[0]),
+            Some("http://xmlns.com/foaf/0.1/name")
+        );
+
+        let expected_start = offset_of(input, "\"foaf:name\"");
+        let pred_span = &triples[0].po[0].predicate.1;
+        assert_eq!(
+            pred_span.start, expected_start,
+            "predicate span should point to the compact key in source, not the expanded IRI"
+        );
+        // The span should cover exactly "foaf:name" (with quotes)
+        assert_eq!(
+            pred_span.end,
+            expected_start + "\"foaf:name\"".len(),
+            "predicate span end should be just past the compact key"
+        );
+    }
+
+    #[test]
+    fn test_object_span_points_to_value() {
+        let input = r#"{"@id":"http://example.org/s","http://example.org/p":"hello"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+
+        let expected_start = offset_of(input, "\"hello\"");
+        let obj_span = &triples[0].po[0].object[0].1;
+        assert_eq!(
+            obj_span.start, expected_start,
+            "object span should start at the value, not the whole object"
+        );
+    }
+
+    #[test]
+    fn test_object_span_for_iri_value() {
+        // Object is an IRI (via @type coercion)
+        let input = r#"{"@context":{"p":{"@id":"http://example.org/p","@type":"@id"}},"@id":"http://example.org/s","p":"http://example.org/o"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+
+        // The object "http://example.org/o" appears once at the end
+        let expected_start = offset_of(input, "\"http://example.org/o\"");
+        let obj_span = &triples[0].po[0].object[0].1;
+        assert_eq!(
+            obj_span.start, expected_start,
+            "object IRI span should point to the value string"
+        );
+    }
+
+    #[test]
+    fn test_object_span_for_number() {
+        let input = r#"{"@id":"http://example.org/s","http://example.org/p":42}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+
+        let expected_start = offset_of(input, "42");
+        let obj_span = &triples[0].po[0].object[0].1;
+        assert_eq!(
+            obj_span.start, expected_start,
+            "numeric object span should start at the number token"
+        );
+    }
+
+    #[test]
+    fn test_spans_are_independent_per_property() {
+        // Two properties — each should get spans from their own key/value tokens.
+        let input = r#"{"@id":"http://example.org/s","http://example.org/p1":"v1","http://example.org/p2":"v2"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 2);
+
+        // Subject span is the same @id value for both triples
+        let id_start = offset_of(input, "\"http://example.org/s\"");
+        for triple in triples {
+            assert_eq!(triple.subject.1.start, id_start);
+        }
+
+        // Predicate and object spans differ between the two triples
+        let p1_start = offset_of(input, "\"http://example.org/p1\"");
+        let p2_start = offset_of(input, "\"http://example.org/p2\"");
+        let pred_starts: Vec<usize> = triples.iter().map(|t| t.po[0].predicate.1.start).collect();
+        assert!(pred_starts.contains(&p1_start), "p1 span missing");
+        assert!(pred_starts.contains(&p2_start), "p2 span missing");
+
+        let v1_start = offset_of(input, "\"v1\"");
+        let v2_start = offset_of(input, "\"v2\"");
+        let obj_starts: Vec<usize> = triples.iter().map(|t| t.po[0].object[0].1.start).collect();
+        assert!(obj_starts.contains(&v1_start), "v1 span missing");
+        assert!(obj_starts.contains(&v2_start), "v2 span missing");
     }
 
     // ── 22. Remote @context via a custom ContextLoader ────────────────────────
