@@ -291,6 +291,7 @@ where
 #[derive(Default)]
 struct WasmFetchLoader {
     cache: HashMap<String, Option<String>>,
+    val_cache: HashMap<String, rdf_parsers::jsonld::convert::JsonLdVal>,
 }
 
 impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
@@ -310,6 +311,19 @@ impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
             let v = text_val.as_string();
             self.cache.insert(url, v.clone());
             v
+        })
+    }
+
+    fn load_val<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<rdf_parsers::jsonld::convert::JsonLdVal>> + 'a>> {
+        let url = url.to_string();
+        Box::pin(async move {
+            if let Some(v) = self.val_cache.get(&url) {
+                return Some(v.clone());
+            }
+            let content = self.load(&url).await?;
+            let val = rdf_parsers::jsonld::convert::parse_jsonld_for_context(&content)?;
+            self.val_cache.insert(url, val.clone());
+            Some(val)
         })
     }
 }
