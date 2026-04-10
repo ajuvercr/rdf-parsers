@@ -43,20 +43,23 @@ pub enum JsonLdVal {
 // ── Context types ─────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Default)]
-struct TermDefinition {
-    iri: Option<String>,
-    type_mapping: Option<String>,
-    language: Option<String>,
-    container: Option<String>,
-    reverse: bool,
+pub struct TermDefinition {
+    pub iri: Option<String>,
+    pub type_mapping: Option<String>,
+    pub language: Option<String>,
+    pub container: Option<String>,
+    pub reverse: bool,
 }
 
+/// The active context built up from all `@context` entries encountered during
+/// JSON-LD processing.  Returned alongside the [`Turtle`] triples by
+/// [`convert`] and [`convert_with_loader`].
 #[derive(Debug, Clone, Default)]
-struct ActiveContext {
-    base: Option<String>,
-    vocab: Option<String>,
-    language: Option<String>,
-    terms: HashMap<String, TermDefinition>,
+pub struct ActiveContext {
+    pub base: Option<String>,
+    pub vocab: Option<String>,
+    pub language: Option<String>,
+    pub terms: HashMap<String, TermDefinition>,
 }
 
 // ── Context loader hook ───────────────────────────────────────────────────────
@@ -104,14 +107,39 @@ impl ContextLoader for NoopContextLoader {
 struct ConvertState {
     blank_counter: usize,
     triples: Vec<Spanned<Triple>>,
+    prefixes: Vec<Spanned<TurtlePrefix>>,
+    /// Accumulates every term/base/vocab/language defined anywhere in the
+    /// document's `@context` entries (later definitions override earlier ones).
+    accumulated_context: ActiveContext,
+    /// The base IRI passed by the caller (document URL).  Stored so that
+    /// `into_turtle` can populate `Turtle::set_base` without re-deriving it.
+    initial_base: Option<String>,
 }
 
 impl ConvertState {
-    fn new() -> Self {
+    fn new(initial_base: Option<String>) -> Self {
         Self {
             blank_counter: 0,
             triples: Vec::new(),
+            prefixes: Vec::new(),
+            accumulated_context: ActiveContext::default(),
+            initial_base,
         }
+    }
+
+    fn register_prefix(&mut self, term: &str, iri: &str, term_span: Range<usize>, val_span: Range<usize>) {
+        // Overwrite any existing definition for this prefix (last definition wins,
+        // matching JSON-LD context-array merging semantics).
+        self.prefixes.retain(|p| p.value().prefix.value() != term);
+        let full_span = term_span.start..val_span.end;
+        self.prefixes.push(Spanned(
+            TurtlePrefix {
+                span: full_span.clone(),
+                prefix: Spanned(term.to_string(), term_span),
+                value: Spanned(NamedNode::Full(iri.to_string(), val_span.start), val_span),
+            },
+            full_span,
+        ));
     }
 
     fn fresh_blank(&mut self, offset: usize) -> Term {
@@ -149,8 +177,18 @@ impl ConvertState {
         Term::NamedNode(NamedNode::Full(iri.to_string(), 0))
     }
 
-    fn into_turtle(self) -> Turtle {
-        Turtle::new(None, Vec::new(), self.triples)
+    fn into_turtle(self) -> (Turtle, ActiveContext) {
+        // If the document declared an explicit @base, represent it as the
+        // syntactic Turtle base directive.  `accumulated_context.base` is only
+        // written when `@base` is encountered in a `@context` object, so it
+        // never reflects the caller-supplied `initial_base`.
+        let turtle_base = self.accumulated_context.base.as_deref().map(|iri| {
+            let nn = NamedNode::Full(iri.to_string(), 0);
+            Spanned(Base(0..0, Spanned(nn, 0..0)), 0..0)
+        });
+        let mut turtle = Turtle::new(turtle_base, self.prefixes, self.triples);
+        turtle.set_base = self.initial_base;
+        (turtle, self.accumulated_context)
     }
 }
 
@@ -325,6 +363,7 @@ fn process_context<'a>(
     mut active: ActiveContext,
     ctx_val: JsonLdVal,
     loader: &'a mut dyn ContextLoader,
+    state: &'a mut ConvertState,
 ) -> Pin<Box<dyn Future<Output = ActiveContext> + 'a>> {
     Box::pin(async move {
         match ctx_val {
@@ -332,37 +371,56 @@ fn process_context<'a>(
                 active = ActiveContext::default();
             }
             JsonLdVal::Str(ref url) => {
-                if let Some(remote_ctx) = loader.load_val(url).await {
-                    active = process_context(active, remote_ctx, loader).await;
+                // Resolve the context URL against the active base (from an
+                // earlier @base entry) or, if none, against the caller-supplied
+                // initial base IRI.  Absolute URLs pass through unchanged.
+                let base = active.base.clone().or_else(|| state.initial_base.clone());
+                let resolved_url = resolve_iri(&base, url);
+                if let Some(remote_ctx) = loader.load_val(&resolved_url).await {
+                    active = process_context(active, remote_ctx, loader, state).await;
                 }
             }
             JsonLdVal::Array(items) => {
                 for item in items {
-                    active = process_context(active, item, loader).await;
+                    active = process_context(active, item, loader, state).await;
                 }
             }
             JsonLdVal::Object(members, _) => {
-                for (key, _, _, val) in members {
+                for (key, key_span, val_span, val) in members {
                     match key.as_str() {
                         "@base" => match &val {
                             JsonLdVal::Str(s) if s.is_empty() => active.base = None,
-                            JsonLdVal::Str(s) => active.base = Some(resolve_iri(&active.base, s)),
+                            JsonLdVal::Str(s) => {
+                                let resolved = resolve_iri(&active.base, s);
+                                active.base = Some(resolved.clone());
+                                state.accumulated_context.base = Some(resolved);
+                            }
                             JsonLdVal::Null => active.base = None,
                             _ => {}
                         },
                         "@vocab" => match val {
-                            JsonLdVal::Str(s) => active.vocab = Some(s),
+                            JsonLdVal::Str(s) => {
+                                state.accumulated_context.vocab = Some(s.clone());
+                                active.vocab = Some(s);
+                            }
                             JsonLdVal::Null => active.vocab = None,
                             _ => {}
                         },
                         "@language" => match val {
-                            JsonLdVal::Str(s) => active.language = Some(s),
+                            JsonLdVal::Str(s) => {
+                                state.accumulated_context.language = Some(s.clone());
+                                active.language = Some(s);
+                            }
                             JsonLdVal::Null => active.language = None,
                             _ => {}
                         },
                         // TODO: @version, @import, @propagate, @protected, @direction
                         k if !k.starts_with('@') => {
                             if let Some(def) = process_term_definition(&active, k, &val) {
+                                if let (Some(iri), false) = (&def.iri, def.reverse) {
+                                    state.register_prefix(k, iri, key_span.clone(), val_span.clone());
+                                }
+                                state.accumulated_context.terms.insert(k.to_string(), def.clone());
                                 active.terms.insert(k.to_string(), def);
                             } else {
                                 active.terms.remove(k);
@@ -526,41 +584,16 @@ fn expand_iri(
 }
 
 fn resolve_iri(base: &Option<String>, reference: &str) -> String {
-    if reference.contains("://") || reference.starts_with("urn:") {
-        return reference.to_string();
-    }
-    match base {
-        None => reference.to_string(),
-        Some(base_iri) => {
-            if reference.starts_with('/') {
-                // Absolute path — combine with scheme+authority
-                if let Some(auth_end) = authority_end(base_iri) {
-                    format!("{}{}", &base_iri[..auth_end], reference)
-                } else {
-                    reference.to_string()
-                }
-            } else if reference.is_empty() {
-                base_iri.clone()
-            } else {
-                // Relative — append to the directory part of base
-                let dir = base_iri
-                    .rfind('/')
-                    .map(|i| &base_iri[..=i])
-                    .unwrap_or(base_iri);
-                format!("{}{}", dir, reference)
+    // Fast path: reference is already absolute.
+    if let Some(base_str) = base {
+        if let Ok(base_iri) = oxiri::Iri::parse(base_str.as_str()) {
+            if let Ok(resolved) = base_iri.resolve(reference) {
+                return resolved.to_string();
             }
         }
     }
-}
-
-fn authority_end(iri: &str) -> Option<usize> {
-    let after = iri.find("://")?;
-    let start = after + 3;
-    let path_start = iri[start..]
-        .find('/')
-        .map(|i| start + i)
-        .unwrap_or(iri.len());
-    Some(path_start)
+    // No base or resolution failed — return the reference unchanged.
+    reference.to_string()
 }
 
 // ── Document processing ───────────────────────────────────────────────────────
@@ -658,7 +691,7 @@ fn process_node<'a>(
         // Update active context if @context present in this node
         let updated;
         let active: &ActiveContext = if let Some(ctx_val) = map.get("@context") {
-            updated = process_context(active.clone(), (*ctx_val).clone(), loader).await;
+            updated = process_context(active.clone(), (*ctx_val).clone(), loader, state).await;
             &updated
         } else {
             active
@@ -1159,9 +1192,16 @@ fn json_escape(s: &str) -> String {
 
 /// Convert a parsed JSON-LD CST to RDF triples.
 ///
+/// `base_iri` sets the initial base IRI for resolving relative IRIs.  When the
+/// document was fetched from a URL, pass that URL here.  An explicit `@base` in
+/// the document's `@context` will override this value.
+///
+/// Returns `(turtle, context)` where `context` is the accumulated
+/// [`ActiveContext`] built from all `@context` entries in the document.
+///
 /// Remote `@context` references are not resolved.  Use
 /// [`convert_with_loader`] to supply an async context-loading hook.
-pub fn convert(root: &Node) -> Turtle {
+pub fn convert(root: &Node, base_iri: Option<String>) -> (Turtle, ActiveContext) {
     // NoopContextLoader always resolves immediately (std::future::ready),
     // so polling once is sufficient and safe without a real async runtime.
     use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
@@ -1179,7 +1219,7 @@ pub fn convert(root: &Node) -> Turtle {
     let waker = unsafe { Waker::from_raw(RawWaker::new(std::ptr::null(), &NOOP_VTABLE)) };
     let mut cx = Context::from_waker(&waker);
     let mut loader = NoopContextLoader;
-    let mut fut = std::pin::pin!(convert_with_loader(root, &mut loader));
+    let mut fut = std::pin::pin!(convert_with_loader(root, &mut loader, base_iri));
     match fut.as_mut().poll(&mut cx) {
         Poll::Ready(v) => v,
         Poll::Pending => unreachable!("NoopContextLoader always resolves immediately"),
@@ -1188,9 +1228,16 @@ pub fn convert(root: &Node) -> Turtle {
 
 /// Convert a parsed JSON-LD CST to RDF triples, using `loader` to fetch
 /// remote `@context` documents asynchronously.
-pub async fn convert_with_loader(root: &Node, loader: &mut dyn ContextLoader) -> Turtle {
-    let mut state = ConvertState::new();
-    let active = ActiveContext::default();
+///
+/// `base_iri` sets the initial base IRI for resolving relative IRIs.  When the
+/// document was fetched from a URL, pass that URL here.  An explicit `@base` in
+/// the document's `@context` will override this value.
+///
+/// Returns `(turtle, context)` where `context` is the accumulated
+/// [`ActiveContext`] built from all `@context` entries in the document.
+pub async fn convert_with_loader(root: &Node, loader: &mut dyn ContextLoader, base_iri: Option<String>) -> (Turtle, ActiveContext) {
+    let mut state = ConvertState::new(base_iri.clone());
+    let active = ActiveContext { base: base_iri, ..Default::default() };
 
     // jsonldDoc ::= jsonValue — the JsonValue is a direct child of ROOT.
     if let Some(json_val_node) = root.children().find(|c| c.kind() == SyntaxKind::JsonValue) {
@@ -1214,7 +1261,23 @@ mod tests {
         let rule = Rule::new(SK::JsonldDoc);
         let (result, _) = crate_parse(rule, input);
         let root = result.syntax::<Lang>();
-        convert(&root)
+        convert(&root, None).0
+    }
+
+    fn parse_jsonld_with_context(input: &str) -> (Turtle, ActiveContext) {
+        use crate::parse as crate_parse;
+        let rule = Rule::new(SK::JsonldDoc);
+        let (result, _) = crate_parse(rule, input);
+        let root = result.syntax::<Lang>();
+        convert(&root, None)
+    }
+
+    fn parse_jsonld_with_base(input: &str, base_iri: &str) -> (Turtle, ActiveContext) {
+        use crate::parse as crate_parse;
+        let rule = Rule::new(SK::JsonldDoc);
+        let (result, _) = crate_parse(rule, input);
+        let root = result.syntax::<Lang>();
+        convert(&root, Some(base_iri.to_string()))
     }
 
     fn triples_of(t: &Turtle) -> &[Spanned<Triple>] {
@@ -1899,7 +1962,7 @@ mod tests {
         let (result, _) = crate::parse(rule, input);
         let root = result.syntax::<Lang>();
 
-        let turtle = block_on_ready(convert_with_loader(&root, &mut MockLoader));
+        let (turtle, _ctx) = block_on_ready(convert_with_loader(&root, &mut MockLoader, None));
         let triples = triples_of(&turtle);
 
         // @type → rdf:type + 2 data properties = 3 triples
@@ -1930,5 +1993,388 @@ mod tests {
                 .any(|t| predicate_iri(t) == Some("http://schema.org/email")),
             "missing schema:email triple"
         );
+    }
+
+    #[test]
+    fn test_prefix_map_populated_from_context() {
+        let t = parse_jsonld(r#"{
+            "@context": {
+                "foaf": "http://xmlns.com/foaf/0.1/",
+                "schema": "http://schema.org/"
+            },
+            "@id": "http://example.org/bob",
+            "foaf:name": "Bob"
+        }"#);
+
+        let prefix_map: std::collections::HashMap<&str, &str> = t
+            .prefixes
+            .iter()
+            .map(|p| (p.value().prefix.value().as_str(), match p.value().value.value() { NamedNode::Full(s, _) => s.as_str(), _ => "" }))
+            .collect();
+
+        assert_eq!(prefix_map.get("foaf"), Some(&"http://xmlns.com/foaf/0.1/"), "foaf prefix missing");
+        assert_eq!(prefix_map.get("schema"), Some(&"http://schema.org/"), "schema prefix missing");
+    }
+
+    #[test]
+    fn test_prefix_map_object_term_definition() {
+        // Terms defined with @id objects should also populate the prefix map
+        let t = parse_jsonld(r#"{
+            "@context": {
+                "name": { "@id": "http://xmlns.com/foaf/0.1/name" }
+            },
+            "@id": "http://example.org/bob",
+            "name": "Bob"
+        }"#);
+
+        let prefix_map: std::collections::HashMap<&str, &str> = t
+            .prefixes
+            .iter()
+            .map(|p| (p.value().prefix.value().as_str(), match p.value().value.value() { NamedNode::Full(s, _) => s.as_str(), _ => "" }))
+            .collect();
+
+        assert_eq!(prefix_map.get("name"), Some(&"http://xmlns.com/foaf/0.1/name"), "name term missing");
+    }
+
+    #[test]
+    fn test_active_context_returned() {
+        let (_turtle, ctx) = parse_jsonld_with_context(r#"{
+            "@context": {
+                "@vocab": "http://schema.org/",
+                "@base": "http://example.org/",
+                "@language": "en",
+                "foaf": "http://xmlns.com/foaf/0.1/",
+                "name": { "@id": "http://xmlns.com/foaf/0.1/name" }
+            },
+            "@id": "bob",
+            "name": "Bob"
+        }"#);
+
+        assert_eq!(ctx.vocab.as_deref(), Some("http://schema.org/"));
+        assert_eq!(ctx.base.as_deref(), Some("http://example.org/"));
+        assert_eq!(ctx.language.as_deref(), Some("en"));
+        assert_eq!(ctx.terms["foaf"].iri.as_deref(), Some("http://xmlns.com/foaf/0.1/"));
+        assert_eq!(ctx.terms["name"].iri.as_deref(), Some("http://xmlns.com/foaf/0.1/name"));
+    }
+
+    // ── 23. base_iri parameter resolves relative IRIs ─────────────────────────
+
+    fn turtle_base_iri(t: &Turtle) -> Option<&str> {
+        t.base.as_ref().and_then(|b| {
+            if let NamedNode::Full(s, _) = &b.value().1.value() {
+                Some(s.as_str())
+            } else {
+                None
+            }
+        })
+    }
+
+    #[test]
+    fn test_base_iri_resolves_relative_subject() {
+        // Without a @base in the document, the base_iri parameter should be used.
+        let (t, _) = parse_jsonld_with_base(
+            r#"{ "@id": "alice", "http://schema.org/name": "Alice" }"#,
+            "http://example.org/",
+        );
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(subject_iri(&triples[0]), Some("http://example.org/alice"));
+        // No @base in the document → Turtle.base is None, set_base carries the URL
+        assert_eq!(turtle_base_iri(&t), None);
+        assert_eq!(t.set_base.as_deref(), Some("http://example.org/"));
+    }
+
+    #[test]
+    fn test_base_iri_resolves_relative_object_with_type_id() {
+        let (t, _) = parse_jsonld_with_base(
+            r#"{
+              "@context": { "knows": { "@id": "http://schema.org/knows", "@type": "@id" } },
+              "@id": "http://example.org/alice",
+              "knows": "bob"
+            }"#,
+            "http://example.org/",
+        );
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(object_iri(&triples[0]), Some("http://example.org/bob"));
+    }
+
+    #[test]
+    fn test_document_base_overrides_base_iri_parameter() {
+        // An explicit @base in the document must win over the base_iri parameter.
+        let (t, ctx) = parse_jsonld_with_base(
+            r#"{
+              "@context": { "@base": "http://override.org/" },
+              "@id": "carol",
+              "http://schema.org/name": "Carol"
+            }"#,
+            "http://example.org/",
+        );
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(subject_iri(&triples[0]), Some("http://override.org/carol"));
+        assert_eq!(ctx.base.as_deref(), Some("http://override.org/"));
+        // @base from the document is reflected in Turtle.base
+        assert_eq!(turtle_base_iri(&t), Some("http://override.org/"));
+        // The caller-supplied URL is still in set_base
+        assert_eq!(t.set_base.as_deref(), Some("http://example.org/"));
+    }
+
+    #[test]
+    fn test_base_iri_no_effect_on_absolute_iris() {
+        // Absolute IRIs must not be altered by the base_iri parameter.
+        let (t, _) = parse_jsonld_with_base(
+            r#"{ "@id": "http://absolute.example/s", "http://schema.org/name": "S" }"#,
+            "http://example.org/",
+        );
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(subject_iri(&triples[0]), Some("http://absolute.example/s"));
+    }
+
+    #[test]
+    fn test_document_at_base_without_base_iri_parameter() {
+        // @base in the document populates Turtle.base even when no base_iri is passed.
+        let (t, ctx) = parse_jsonld_with_context(r#"{
+            "@context": { "@base": "http://doc.example/" },
+            "@id": "thing",
+            "http://schema.org/name": "Thing"
+        }"#);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(subject_iri(&triples[0]), Some("http://doc.example/thing"));
+        assert_eq!(ctx.base.as_deref(), Some("http://doc.example/"));
+        assert_eq!(turtle_base_iri(&t), Some("http://doc.example/"));
+        assert_eq!(t.set_base, None);
+    }
+
+    // ── 24. Local context imports via ContextLoader ───────────────────────────
+
+    /// A loader that serves one or more hardcoded (URL → JSON-LD context) pairs,
+    /// simulating local file serving or a simple in-memory registry.
+    struct LocalLoader {
+        entries: Vec<(&'static str, &'static str)>,
+    }
+
+    impl LocalLoader {
+        fn new(entries: Vec<(&'static str, &'static str)>) -> Self {
+            Self { entries }
+        }
+    }
+
+    impl ContextLoader for LocalLoader {
+        fn load<'a>(
+            &'a mut self,
+            url: &'a str,
+        ) -> Pin<Box<dyn Future<Output = Option<String>> + 'a>> {
+            let result = self
+                .entries
+                .iter()
+                .find(|(u, _)| *u == url)
+                .map(|(_, body)| body.to_string());
+            Box::pin(std::future::ready(result))
+        }
+    }
+
+    fn parse_with_local_loader(input: &str, loader: &mut dyn ContextLoader) -> (Turtle, ActiveContext) {
+        let rule = Rule::new(SK::JsonldDoc);
+        let (result, _) = crate::parse(rule, input);
+        let root = result.syntax::<Lang>();
+        block_on_ready(convert_with_loader(&root, loader, None))
+    }
+
+    #[test]
+    fn test_local_context_terms_expanded() {
+        // The document references a local context URL; the loader provides it.
+        let mut loader = LocalLoader::new(vec![(
+            "file:///contexts/person.jsonld",
+            r#"{ "@context": { "name": "http://schema.org/name", "Person": "http://schema.org/Person" } }"#,
+        )]);
+
+        let (turtle, _) = parse_with_local_loader(
+            r#"{
+              "@context": "file:///contexts/person.jsonld",
+              "@id": "http://example.org/alice",
+              "@type": "Person",
+              "name": "Alice"
+            }"#,
+            &mut loader,
+        );
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 2);
+        assert!(
+            triples.iter().any(|t| predicate_iri(t) == Some(RDF_TYPE)
+                && object_iri(t) == Some("http://schema.org/Person")),
+            "missing rdf:type triple"
+        );
+        assert!(
+            triples.iter().any(|t| predicate_iri(t) == Some("http://schema.org/name")),
+            "missing schema:name triple"
+        );
+    }
+
+    #[test]
+    fn test_local_context_array_merges_multiple_imports() {
+        // A context array that mixes a local import with an inline object.
+        let mut loader = LocalLoader::new(vec![(
+            "file:///contexts/base.jsonld",
+            r#"{ "@context": { "schema": "http://schema.org/" } }"#,
+        )]);
+
+        let (turtle, ctx) = parse_with_local_loader(
+            r#"{
+              "@context": [
+                "file:///contexts/base.jsonld",
+                { "name": "schema:name" }
+              ],
+              "@id": "http://example.org/bob",
+              "name": "Bob"
+            }"#,
+            &mut loader,
+        );
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+        // Both the imported prefix and the inline term should be in the context.
+        assert_eq!(ctx.terms["schema"].iri.as_deref(), Some("http://schema.org/"));
+        assert_eq!(ctx.terms["name"].iri.as_deref(), Some("http://schema.org/name"));
+    }
+
+    #[test]
+    fn test_local_context_unknown_url_is_skipped() {
+        // If the loader returns None for a URL, processing continues without that
+        // context — no panic, no partial expansion.
+        let mut loader = LocalLoader::new(vec![]);  // serves nothing
+
+        let (turtle, _) = parse_with_local_loader(
+            r#"{
+              "@context": "file:///contexts/missing.jsonld",
+              "@id": "http://example.org/s",
+              "http://example.org/p": "v"
+            }"#,
+            &mut loader,
+        );
+        // The absolute-IRI property must still be emitted.
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(predicate_iri(&triples[0]), Some("http://example.org/p"));
+    }
+
+    #[test]
+    fn test_local_context_chained_imports() {
+        // context_a imports context_b; the document imports context_a.
+        // This verifies that the loader is called recursively for nested imports.
+        let mut loader = LocalLoader::new(vec![
+            (
+                "file:///ctx_a.jsonld",
+                r#"{ "@context": ["file:///ctx_b.jsonld", { "name": "http://schema.org/name" }] }"#,
+            ),
+            (
+                "file:///ctx_b.jsonld",
+                r#"{ "@context": { "schema": "http://schema.org/" } }"#,
+            ),
+        ]);
+
+        let (turtle, ctx) = parse_with_local_loader(
+            r#"{
+              "@context": "file:///ctx_a.jsonld",
+              "@id": "http://example.org/carol",
+              "name": "Carol"
+            }"#,
+            &mut loader,
+        );
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+        assert_eq!(ctx.terms["schema"].iri.as_deref(), Some("http://schema.org/"));
+    }
+
+    #[test]
+    fn test_relative_context_url_resolved_against_document_base() {
+        // The @context value is a relative URL.  With a base_iri parameter set,
+        // the loader should receive the fully-resolved absolute URL.
+        let rule = Rule::new(SK::JsonldDoc);
+        let input = r#"{
+          "@context": "context.jsonld",
+          "@id": "http://example.org/s",
+          "name": "Alice"
+        }"#;
+        let (result, _) = crate::parse(rule, input);
+        let root = result.syntax::<Lang>();
+
+        let mut loader = LocalLoader::new(vec![(
+            "http://example.org/context.jsonld",
+            r#"{ "@context": { "name": "http://schema.org/name" } }"#,
+        )]);
+
+        let (turtle, _) = block_on_ready(convert_with_loader(
+            &root,
+            &mut loader,
+            Some("http://example.org/".to_string()),
+        ));
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+    }
+
+    #[test]
+    fn test_relative_context_url_resolved_against_at_base() {
+        // When the document sets @base before the relative context URL appears
+        // (as part of an array context), that @base is used for resolution.
+        let rule = Rule::new(SK::JsonldDoc);
+        let input = r#"{
+          "@context": [
+            { "@base": "http://other.example/" },
+            "ctx.jsonld"
+          ],
+          "@id": "http://example.org/s",
+          "label": "Hello"
+        }"#;
+        let (result, _) = crate::parse(rule, input);
+        let root = result.syntax::<Lang>();
+
+        let mut loader = LocalLoader::new(vec![(
+            "http://other.example/ctx.jsonld",
+            r#"{ "@context": { "label": "http://schema.org/name" } }"#,
+        )]);
+
+        let (turtle, _) = block_on_ready(convert_with_loader(
+            &root,
+            &mut loader,
+            None,
+        ));
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+    }
+
+    #[test]
+    fn test_local_context_with_base_iri_parameter() {
+        // Combines a local context import with the base_iri parameter so that
+        // relative subject IRIs are resolved correctly.
+        let rule = Rule::new(SK::JsonldDoc);
+        let input = r#"{
+          "@context": "file:///contexts/vocab.jsonld",
+          "@id": "dave",
+          "name": "Dave"
+        }"#;
+        let (result, _) = crate::parse(rule, input);
+        let root = result.syntax::<Lang>();
+
+        let mut loader = LocalLoader::new(vec![(
+            "file:///contexts/vocab.jsonld",
+            r#"{ "@context": { "name": "http://schema.org/name" } }"#,
+        )]);
+
+        let (turtle, _) = block_on_ready(convert_with_loader(
+            &root,
+            &mut loader,
+            Some("http://example.org/people/".to_string()),
+        ));
+
+        let triples = triples_of(&turtle);
+        assert_eq!(triples.len(), 1);
+        assert_eq!(subject_iri(&triples[0]), Some("http://example.org/people/dave"));
+        assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
     }
 }
