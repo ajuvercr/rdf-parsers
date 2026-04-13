@@ -157,6 +157,7 @@ impl ConvertState {
     fn add_triple(
         &mut self,
         subject: Term,
+        subject_span: Range<usize>,
         predicate: Term,
         object: Term,
         graph: Option<Term>,
@@ -165,7 +166,7 @@ impl ConvertState {
         let s = span.clone();
         self.triples.push(Spanned(
             Triple {
-                subject: Spanned(subject, s.clone()),
+                subject: Spanned(subject, subject_span),
                 po: vec![Spanned(
                     PO {
                         predicate: Spanned(predicate, s.clone()),
@@ -709,7 +710,7 @@ fn process_node<'a>(
             .iter()
             .find(|(k, _, _, _)| k == "@id")
             .map(|(_, _, vs, _)| vs.clone())
-            .unwrap_or_else(|| span.clone());
+            .unwrap_or_else(|| span.start..span.start);
         let subject: Term = if let Some(id_val) = map.get("@id") {
             match id_val {
                 JsonLdVal::Str(s) => match expand_iri(active, s, false, true) {
@@ -732,6 +733,7 @@ fn process_node<'a>(
                     let obj = iri_or_blank(iri, span.start);
                     state.add_triple(
                         subject.clone(),
+                        id_val_span.clone(),
                         ConvertState::named(RDF_TYPE),
                         obj,
                         graph.cloned(),
@@ -780,6 +782,7 @@ fn process_node<'a>(
                             // Subject and object are swapped for reverse properties
                             state.add_triple(
                                 obj,
+                                val_span.clone(),
                                 pred.clone(),
                                 subject.clone(),
                                 graph.cloned(),
@@ -1144,6 +1147,7 @@ fn process_list<'a>(
             let node = state.fresh_blank(span.start);
             state.add_triple(
                 node.clone(),
+                span.start..span.start,
                 ConvertState::named(RDF_FIRST),
                 first_term,
                 graph.cloned(),
@@ -1151,6 +1155,7 @@ fn process_list<'a>(
             );
             state.add_triple(
                 node.clone(),
+                span.start..span.start,
                 ConvertState::named(RDF_REST),
                 rest,
                 graph.cloned(),

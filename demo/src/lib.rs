@@ -49,11 +49,7 @@ where
     L: rowan::Language,
     L::Kind: TokenTrait,
 {
-    let msgs: Vec<String> = parse
-        .errors
-        .iter()
-        .cloned()
-        .collect();
+    let msgs: Vec<String> = parse.errors.iter().cloned().collect();
 
     let root = parse.syntax::<L>();
 
@@ -314,7 +310,10 @@ impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
         })
     }
 
-    fn load_val<'a>(&'a mut self, url: &'a str) -> Pin<Box<dyn Future<Output = Option<rdf_parsers::jsonld::convert::JsonLdVal>> + 'a>> {
+    fn load_val<'a>(
+        &'a mut self,
+        url: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Option<rdf_parsers::jsonld::convert::JsonLdVal>> + 'a>> {
         let url = url.to_string();
         Box::pin(async move {
             if let Some(v) = self.val_cache.get(&url) {
@@ -383,7 +382,8 @@ pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
             let root = parse.syntax::<JsonLdLang>();
 
             let mut cache = JSONLD_CACHE.take();
-            let turtle = rdf_parsers::jsonld::convert::convert_with_loader(&root, &mut cache).await;
+            let (turtle, _) =
+                rdf_parsers::jsonld::convert::convert_with_loader(&root, &mut cache, None).await;
             JSONLD_CACHE.set(cache);
 
             ParseResult {
