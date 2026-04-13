@@ -47,6 +47,13 @@ impl<T: TokenTrait> FatToken<T> {
             depth: current_depth,
         }
     }
+
+    /// Extend this token's span and text to cover up to `end`.
+    /// Used to merge consecutive lexer error tokens into one.
+    pub fn extend_to(&mut self, end: usize, text: String) {
+        self.range = self.range.start..end;
+        self.text = text;
+    }
 }
 
 /// Collapse rule nodes that consumed no tokens into a single `Expected(RuleName)` error.

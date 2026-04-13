@@ -179,14 +179,20 @@ where
     <K as Logos<'a>>::Extras: Default,
 {
     let mut lexer: Lexer<'a, K> = Lexer::new(text);
-    let mut tokens = Vec::new();
+    let mut tokens: Vec<FatToken<K>> = Vec::new();
     while let Some(t) = lexer.next() {
         let kind = t.unwrap_or(K::ERROR);
-        tokens.push(FatToken::new(
-            kind,
-            lexer.span(),
-            text[lexer.span()].to_string(),
-        ));
+        let span = lexer.span();
+        if kind == K::ERROR {
+            if let Some(last) = tokens.last_mut() {
+                if last.kind == K::ERROR {
+                    let start = last.range.start;
+                    last.extend_to(span.end, text[start..span.end].to_string());
+                    continue;
+                }
+            }
+        }
+        tokens.push(FatToken::new(kind, span.clone(), text[span].to_string()));
     }
     tokens
 }
