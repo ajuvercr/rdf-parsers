@@ -41,6 +41,7 @@ pub enum JsonLdVal {
     Number(String),
     Bool(bool),
     Null,
+    Invalid,
 }
 
 // ── Context types ─────────────────────────────────────────────────────────────
@@ -133,7 +134,13 @@ impl ConvertState {
         }
     }
 
-    fn register_prefix(&mut self, term: &str, iri: &str, term_span: Range<usize>, val_span: Range<usize>) {
+    fn register_prefix(
+        &mut self,
+        term: &str,
+        iri: &str,
+        term_span: Range<usize>,
+        val_span: Range<usize>,
+    ) {
         // Overwrite any existing definition for this prefix (last definition wins,
         // matching JSON-LD context-array merging semantics).
         self.prefixes.retain(|p| p.value().prefix.value() != term);
@@ -335,9 +342,7 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
                     continue;
                 };
                 let val_span = text_range(&val_node);
-                let Some(val) = cst_to_value(&val_node) else {
-                    continue;
-                };
+                let val = cst_to_value(&val_node).unwrap_or(JsonLdVal::Invalid);
                 members.push((key, key_span, val_span, val));
             }
             Some(JsonLdVal::Object(members, span))
@@ -425,9 +430,17 @@ fn process_context<'a>(
                         k if !k.starts_with('@') => {
                             if let Some(def) = process_term_definition(&active, k, &val) {
                                 if let (Some(iri), false) = (&def.iri, def.reverse) {
-                                    state.register_prefix(k, iri, key_span.clone(), val_span.clone());
+                                    state.register_prefix(
+                                        k,
+                                        iri,
+                                        key_span.clone(),
+                                        val_span.clone(),
+                                    );
                                 }
-                                state.accumulated_context.terms.insert(k.to_string(), def.clone());
+                                state
+                                    .accumulated_context
+                                    .terms
+                                    .insert(k.to_string(), def.clone());
                                 active.terms.insert(k.to_string(), def);
                             } else {
                                 active.terms.remove(k);
@@ -1017,6 +1030,7 @@ async fn value_to_rdf<'a>(
             len: span.len(),
         }))),
 
+        JsonLdVal::Invalid => Some(Term::Invalid),
         JsonLdVal::Null => None,
 
         // Arrays must be handled by collect_objects, not here
@@ -1197,6 +1211,7 @@ fn json_serialize(val: &JsonLdVal) -> String {
                 "false".to_string()
             }
         }
+        JsonLdVal::Invalid => "invalid".to_string(),
         JsonLdVal::Null => "null".to_string(),
     }
 }
@@ -1252,9 +1267,16 @@ pub fn convert(root: &Node, base_iri: Option<String>) -> (Turtle, ActiveContext)
 ///
 /// Returns `(turtle, context)` where `context` is the accumulated
 /// [`ActiveContext`] built from all `@context` entries in the document.
-pub async fn convert_with_loader(root: &Node, loader: &mut dyn ContextLoader, base_iri: Option<String>) -> (Turtle, ActiveContext) {
+pub async fn convert_with_loader(
+    root: &Node,
+    loader: &mut dyn ContextLoader,
+    base_iri: Option<String>,
+) -> (Turtle, ActiveContext) {
     let mut state = ConvertState::new(base_iri.clone());
-    let active = ActiveContext { base: base_iri, ..Default::default() };
+    let active = ActiveContext {
+        base: base_iri,
+        ..Default::default()
+    };
 
     // jsonldDoc ::= jsonValue — the JsonValue is a direct child of ROOT.
     if let Some(json_val_node) = root.children().find(|c| c.kind() == SyntaxKind::JsonValue) {
@@ -2013,48 +2035,81 @@ mod tests {
 
     #[test]
     fn test_prefix_map_populated_from_context() {
-        let t = parse_jsonld(r#"{
+        let t = parse_jsonld(
+            r#"{
             "@context": {
                 "foaf": "http://xmlns.com/foaf/0.1/",
                 "schema": "http://schema.org/"
             },
             "@id": "http://example.org/bob",
             "foaf:name": "Bob"
-        }"#);
+        }"#,
+        );
 
         let prefix_map: std::collections::HashMap<&str, &str> = t
             .prefixes
             .iter()
-            .map(|p| (p.value().prefix.value().as_str(), match p.value().value.value() { NamedNode::Full(s, _) => s.as_str(), _ => "" }))
+            .map(|p| {
+                (
+                    p.value().prefix.value().as_str(),
+                    match p.value().value.value() {
+                        NamedNode::Full(s, _) => s.as_str(),
+                        _ => "",
+                    },
+                )
+            })
             .collect();
 
-        assert_eq!(prefix_map.get("foaf"), Some(&"http://xmlns.com/foaf/0.1/"), "foaf prefix missing");
-        assert_eq!(prefix_map.get("schema"), Some(&"http://schema.org/"), "schema prefix missing");
+        assert_eq!(
+            prefix_map.get("foaf"),
+            Some(&"http://xmlns.com/foaf/0.1/"),
+            "foaf prefix missing"
+        );
+        assert_eq!(
+            prefix_map.get("schema"),
+            Some(&"http://schema.org/"),
+            "schema prefix missing"
+        );
     }
 
     #[test]
     fn test_prefix_map_object_term_definition() {
         // Terms defined with @id objects should also populate the prefix map
-        let t = parse_jsonld(r#"{
+        let t = parse_jsonld(
+            r#"{
             "@context": {
                 "name": { "@id": "http://xmlns.com/foaf/0.1/name" }
             },
             "@id": "http://example.org/bob",
             "name": "Bob"
-        }"#);
+        }"#,
+        );
 
         let prefix_map: std::collections::HashMap<&str, &str> = t
             .prefixes
             .iter()
-            .map(|p| (p.value().prefix.value().as_str(), match p.value().value.value() { NamedNode::Full(s, _) => s.as_str(), _ => "" }))
+            .map(|p| {
+                (
+                    p.value().prefix.value().as_str(),
+                    match p.value().value.value() {
+                        NamedNode::Full(s, _) => s.as_str(),
+                        _ => "",
+                    },
+                )
+            })
             .collect();
 
-        assert_eq!(prefix_map.get("name"), Some(&"http://xmlns.com/foaf/0.1/name"), "name term missing");
+        assert_eq!(
+            prefix_map.get("name"),
+            Some(&"http://xmlns.com/foaf/0.1/name"),
+            "name term missing"
+        );
     }
 
     #[test]
     fn test_active_context_returned() {
-        let (_turtle, ctx) = parse_jsonld_with_context(r#"{
+        let (_turtle, ctx) = parse_jsonld_with_context(
+            r#"{
             "@context": {
                 "@vocab": "http://schema.org/",
                 "@base": "http://example.org/",
@@ -2064,13 +2119,20 @@ mod tests {
             },
             "@id": "bob",
             "name": "Bob"
-        }"#);
+        }"#,
+        );
 
         assert_eq!(ctx.vocab.as_deref(), Some("http://schema.org/"));
         assert_eq!(ctx.base.as_deref(), Some("http://example.org/"));
         assert_eq!(ctx.language.as_deref(), Some("en"));
-        assert_eq!(ctx.terms["foaf"].iri.as_deref(), Some("http://xmlns.com/foaf/0.1/"));
-        assert_eq!(ctx.terms["name"].iri.as_deref(), Some("http://xmlns.com/foaf/0.1/name"));
+        assert_eq!(
+            ctx.terms["foaf"].iri.as_deref(),
+            Some("http://xmlns.com/foaf/0.1/")
+        );
+        assert_eq!(
+            ctx.terms["name"].iri.as_deref(),
+            Some("http://xmlns.com/foaf/0.1/name")
+        );
     }
 
     // ── 23. base_iri parameter resolves relative IRIs ─────────────────────────
@@ -2151,11 +2213,13 @@ mod tests {
     #[test]
     fn test_document_at_base_without_base_iri_parameter() {
         // @base in the document populates Turtle.base even when no base_iri is passed.
-        let (t, ctx) = parse_jsonld_with_context(r#"{
+        let (t, ctx) = parse_jsonld_with_context(
+            r#"{
             "@context": { "@base": "http://doc.example/" },
             "@id": "thing",
             "http://schema.org/name": "Thing"
-        }"#);
+        }"#,
+        );
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(subject_iri(&triples[0]), Some("http://doc.example/thing"));
@@ -2192,7 +2256,10 @@ mod tests {
         }
     }
 
-    fn parse_with_local_loader(input: &str, loader: &mut dyn ContextLoader) -> (Turtle, ActiveContext) {
+    fn parse_with_local_loader(
+        input: &str,
+        loader: &mut dyn ContextLoader,
+    ) -> (Turtle, ActiveContext) {
         let rule = Rule::new(SK::JsonldDoc);
         let (result, _) = crate::parse(rule, input);
         let root = result.syntax::<Lang>();
@@ -2224,7 +2291,9 @@ mod tests {
             "missing rdf:type triple"
         );
         assert!(
-            triples.iter().any(|t| predicate_iri(t) == Some("http://schema.org/name")),
+            triples
+                .iter()
+                .any(|t| predicate_iri(t) == Some("http://schema.org/name")),
             "missing schema:name triple"
         );
     }
@@ -2252,15 +2321,21 @@ mod tests {
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
         // Both the imported prefix and the inline term should be in the context.
-        assert_eq!(ctx.terms["schema"].iri.as_deref(), Some("http://schema.org/"));
-        assert_eq!(ctx.terms["name"].iri.as_deref(), Some("http://schema.org/name"));
+        assert_eq!(
+            ctx.terms["schema"].iri.as_deref(),
+            Some("http://schema.org/")
+        );
+        assert_eq!(
+            ctx.terms["name"].iri.as_deref(),
+            Some("http://schema.org/name")
+        );
     }
 
     #[test]
     fn test_local_context_unknown_url_is_skipped() {
         // If the loader returns None for a URL, processing continues without that
         // context — no panic, no partial expansion.
-        let mut loader = LocalLoader::new(vec![]);  // serves nothing
+        let mut loader = LocalLoader::new(vec![]); // serves nothing
 
         let (turtle, _) = parse_with_local_loader(
             r#"{
@@ -2302,7 +2377,10 @@ mod tests {
         let triples = triples_of(&turtle);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
-        assert_eq!(ctx.terms["schema"].iri.as_deref(), Some("http://schema.org/"));
+        assert_eq!(
+            ctx.terms["schema"].iri.as_deref(),
+            Some("http://schema.org/")
+        );
     }
 
     #[test]
@@ -2354,11 +2432,7 @@ mod tests {
             r#"{ "@context": { "label": "http://schema.org/name" } }"#,
         )]);
 
-        let (turtle, _) = block_on_ready(convert_with_loader(
-            &root,
-            &mut loader,
-            None,
-        ));
+        let (turtle, _) = block_on_ready(convert_with_loader(&root, &mut loader, None));
         let triples = triples_of(&turtle);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
@@ -2390,7 +2464,62 @@ mod tests {
 
         let triples = triples_of(&turtle);
         assert_eq!(triples.len(), 1);
-        assert_eq!(subject_iri(&triples[0]), Some("http://example.org/people/dave"));
+        assert_eq!(
+            subject_iri(&triples[0]),
+            Some("http://example.org/people/dave")
+        );
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+    }
+
+    // ── Formatter tests ──────────────────────────────────────────────────────
+
+    fn format_jsonld(input: &str, width: usize) -> String {
+        use super::super::parser::format;
+        use crate::parse as crate_parse;
+        let rule = Rule::new(SK::JsonldDoc);
+        let (result, _) = crate_parse(rule, input);
+        let root = result.syntax::<Lang>();
+        format::format(&root, width)
+    }
+
+    #[test]
+    fn format_small_object_fits_on_one_line() {
+        // A small object that fits in 80 columns stays flat.
+        // Prettier-style: spaces inside braces in flat mode (Line → " ").
+        let input = r#"{"a": 1, "b": 2}"#;
+        let out = format_jsonld(input, 80);
+        assert_eq!(out, r#"{ "a": 1, "b": 2 }"#);
+    }
+
+    #[test]
+    fn format_large_object_breaks() {
+        // An object too wide for the column limit expands to one member per line.
+        let input = r#"{"key": "value"}"#;
+        let out = format_jsonld(input, 10);
+        assert_eq!(out, "{\n  \"key\": \"value\"\n}");
+    }
+
+    #[test]
+    fn format_multiple_members_break() {
+        let input = r#"{"a":1,"b":2,"c":3}"#;
+        let out = format_jsonld(input, 10);
+        assert_eq!(out, "{\n  \"a\": 1,\n  \"b\": 2,\n  \"c\": 3\n}");
+    }
+
+    #[test]
+    fn format_nested_objects() {
+        // Both inner and outer fit at wide width — both stay flat.
+        let input = r#"{"outer":{"inner":1}}"#;
+        let out = format_jsonld(input, 80);
+        assert_eq!(out, r#"{ "outer": { "inner": 1 } }"#);
+    }
+
+    #[test]
+    fn format_is_idempotent() {
+        // Formatting already-formatted output produces the same result.
+        let input = r#"{"key": "value", "num": 42}"#;
+        let first = format_jsonld(input, 80);
+        let second = format_jsonld(&first, 80);
+        assert_eq!(first, second);
     }
 }

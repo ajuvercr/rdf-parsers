@@ -1,5 +1,5 @@
 mod context;
-pub use context::{Context, context_parser};
+pub use context::{Context, FormatEntry, FormatHint, FormatPosition, context_parser};
 mod expr;
 use expr::parse_rules;
 pub use expr::{Expr, LiteralType, Mark, Rule, Rules};

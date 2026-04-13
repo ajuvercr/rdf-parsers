@@ -28,8 +28,8 @@ false -> false_lit
 === error_value ===
 curly_open -> 2
 curly_close -> 2
-sq_open -> 2
-sq_close -> 2
+sq_open -> 4
+sq_close -> 4
 comma -> 2
 colon -> 3
 === bracket_open ===
@@ -38,3 +38,12 @@ sq_open
 === bracket_close ===
 curly_close
 sq_close
+=== format ===
+group jsonObject
+group jsonArray
+curly_open -> after: indent line
+curly_close -> before: dedent line
+sq_open -> after: indent line
+sq_close -> before: dedent line
+comma -> after: line
+colon -> after: space

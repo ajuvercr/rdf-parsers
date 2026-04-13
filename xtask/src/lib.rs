@@ -8,7 +8,7 @@ use std::io::Cursor;
 use std::ops::Range;
 use syn::LitStr;
 
-use crate::parser::{Config, Expr, LiteralType, Mark, Rule};
+use crate::parser::{Config, Expr, FormatEntry, FormatHint, FormatPosition, LiteralType, Mark, Rule};
 use crate::regex::{order_rules_by_references, to_regex};
 
 mod parser;
@@ -1467,6 +1467,186 @@ pub fn generate(path: &str, contents: &str) -> String {
         arms
     };
 
+    // ── Format module codegen ────────────────────────────────────────────────
+
+    let format_mod = if config.context.format_groups.is_empty()
+        && config.context.format_hints.is_empty()
+    {
+        quote! {}
+    } else {
+        // Build format_hints() arms.
+        // Scoped arms (ruleName.token) come first so they take precedence.
+        let scoped: Vec<_> = config
+            .context
+            .format_hints
+            .iter()
+            .filter(|e| e.scope.is_some())
+            .map(|e| format_hint_arm(e, &config))
+            .collect();
+        let global: Vec<_> = config
+            .context
+            .format_hints
+            .iter()
+            .filter(|e| e.scope.is_none())
+            .map(|e| format_hint_arm(e, &config))
+            .collect();
+
+        // Build is_group() arms.
+        let group_idents: Vec<_> = config
+            .context
+            .format_groups
+            .iter()
+            .map(|name| config.context.ident_for(name))
+            .collect();
+
+        let is_group_body = if group_idents.is_empty() {
+            quote! { false }
+        } else {
+            quote! { matches!(kind, #( SyntaxKind::#group_idents )|*) }
+        };
+
+        quote! {
+            pub mod format {
+                use super::{SyntaxKind, SyntaxNode};
+                use rowan::NodeOrToken;
+                use crate::TokenTrait;
+                use crate::format::Doc;
+
+                #[derive(Default)]
+                struct Hints {
+                    space: bool,
+                    line: bool,
+                    hardline: bool,
+                    indent: bool,
+                    dedent: bool,
+                }
+
+                impl Hints {
+                    fn to_docs(&self) -> Vec<Doc> {
+                        let mut v = Vec::new();
+                        if self.indent { v.push(Doc::nil()); } // handled by caller
+                        if self.dedent { v.push(Doc::nil()); } // handled by caller
+                        if self.hardline { v.push(Doc::HardLine); }
+                        else if self.line { v.push(Doc::Line); }
+                        else if self.space { v.push(Doc::text(" ")); }
+                        v
+                    }
+                }
+
+                fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
+                    match (parent, token) {
+                        #( #scoped )*
+                        #( #global )*
+                        _ => (Hints::default(), Hints::default()),
+                    }
+                }
+
+                fn is_group(kind: SyntaxKind) -> bool {
+                    #is_group_body
+                }
+
+                pub fn to_doc(node: &SyntaxNode) -> Doc {
+                    let mut parts: Vec<Vec<Doc>> = vec![vec![]];
+
+                    for child in node.children_with_tokens() {
+                        match child {
+                            NodeOrToken::Token(t) => {
+                                if t.kind() == SyntaxKind::WhiteSpace {
+                                    continue;
+                                }
+                                if t.kind() == SyntaxKind::Comment {
+                                    // Preserve comments verbatim.
+                                    parts.last_mut().unwrap().push(Doc::text(t.text().to_string()));
+                                    continue;
+                                }
+                                let (before, after) = format_hints(node.kind(), t.kind());
+
+                                // Before hints: dedent first, then line/space.
+                                if before.dedent && parts.len() > 1 {
+                                    let nested = parts.pop().unwrap_or_default();
+                                    let indent_doc = Doc::nest(2, Doc::concat(nested));
+                                    parts.last_mut().unwrap().push(indent_doc);
+                                }
+                                parts.last_mut().unwrap().extend(before.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)));
+
+                                parts.last_mut().unwrap().push(Doc::text(t.text().to_string()));
+
+                                // After hints: if indent, the line break goes
+                                // INSIDE the new nest level (as its first item),
+                                // so it is indented in break mode.
+                                let after_line: Vec<Doc> = after.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)).collect();
+                                if after.indent {
+                                    parts.push(after_line); // line is first item inside the nest
+                                } else {
+                                    parts.last_mut().unwrap().extend(after_line);
+                                }
+                            }
+                            NodeOrToken::Node(n) => {
+                                if n.kind() == SyntaxKind::ERROR {
+                                    // Preserve error nodes verbatim.
+                                    parts.last_mut().unwrap().push(Doc::text(n.text().to_string()));
+                                    continue;
+                                }
+                                // Detect terminal wrapper nodes (a single non-whitespace
+                                // token child, no sub-nodes). For these we apply format
+                                // hints in the *parent's* context so that indent/dedent
+                                // correctly share the same `parts` stack.
+                                let is_terminal_wrapper = {
+                                    let mut it = n.children_with_tokens().filter(|c| match c {
+                                        NodeOrToken::Token(t) => t.kind() != SyntaxKind::WhiteSpace,
+                                        NodeOrToken::Node(_) => true,
+                                    });
+                                    matches!(it.next(), Some(NodeOrToken::Token(_))) && it.next().is_none()
+                                };
+                                if is_terminal_wrapper {
+                                    let token_text = n.text().to_string();
+                                    let (before, after) = format_hints(node.kind(), n.kind());
+
+                                    if before.dedent && parts.len() > 1 {
+                                        let nested = parts.pop().unwrap_or_default();
+                                        let indent_doc = Doc::nest(2, Doc::concat(nested));
+                                        parts.last_mut().unwrap().push(indent_doc);
+                                    }
+                                    parts.last_mut().unwrap().extend(before.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)));
+
+                                    parts.last_mut().unwrap().push(Doc::text(token_text));
+
+                                    let after_line: Vec<Doc> = after.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)).collect();
+                                    if after.indent {
+                                        parts.push(after_line);
+                                    } else {
+                                        parts.last_mut().unwrap().extend(after_line);
+                                    }
+                                } else {
+                                    let child_doc = to_doc(&n);
+                                    let child_doc = if is_group(n.kind()) {
+                                        Doc::group(child_doc)
+                                    } else {
+                                        child_doc
+                                    };
+                                    parts.last_mut().unwrap().push(child_doc);
+                                }
+                            }
+                        }
+                    }
+
+                    // Drain any unclosed indent levels.
+                    while parts.len() > 1 {
+                        let nested = parts.pop().unwrap();
+                        parts.last_mut().unwrap().push(Doc::nest(2, Doc::concat(nested)));
+                    }
+
+                    Doc::concat(parts.pop().unwrap_or_default())
+                }
+
+                pub fn format(node: &SyntaxNode, width: usize) -> String {
+                    let doc = to_doc(node);
+                    crate::format::render(&doc, width)
+                }
+            }
+        }
+    };
+
     let enum_definition = quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, logos::Logos)]
         #(#sub_pattersn)*
@@ -1651,10 +1831,55 @@ pub fn generate(path: &str, contents: &str) -> String {
         }
     }
 
+    #format_mod
 
         };
 
     out.to_string()
+}
+
+/// Build one match arm for the generated `format_hints()` function.
+fn format_hint_arm(entry: &FormatEntry, config: &Config) -> proc_macro2::TokenStream {
+    let tok_ident = config.context.ident_for(&entry.token);
+
+    let parent_pat: proc_macro2::TokenStream = match &entry.scope {
+        Some(scope) => {
+            let s = config.context.ident_for(scope);
+            quote! { SyntaxKind::#s }
+        }
+        None => quote! { _ },
+    };
+
+    let mut before = quote! {
+        Hints { space: false, line: false, hardline: false, indent: false, dedent: false }
+    };
+    let mut after = quote! {
+        Hints { space: false, line: false, hardline: false, indent: false, dedent: false }
+    };
+
+    let hints_to_struct = |hints: &[FormatHint]| -> proc_macro2::TokenStream {
+        let space = hints.contains(&FormatHint::Space);
+        let line = hints.contains(&FormatHint::Line);
+        let hardline = hints.contains(&FormatHint::HardLine);
+        let indent = hints.contains(&FormatHint::Indent);
+        let dedent = hints.contains(&FormatHint::Dedent);
+        quote! {
+            Hints { space: #space, line: #line, hardline: #hardline, indent: #indent, dedent: #dedent }
+        }
+    };
+
+    match entry.position {
+        FormatPosition::Before => {
+            before = hints_to_struct(&entry.hints);
+        }
+        FormatPosition::After => {
+            after = hints_to_struct(&entry.hints);
+        }
+    }
+
+    quote! {
+        (#parent_pat, SyntaxKind::#tok_ident) => (#before, #after),
+    }
 }
 
 fn get_sub_patterns(rules: &[Rule]) -> Vec<proc_macro2::TokenStream> {
