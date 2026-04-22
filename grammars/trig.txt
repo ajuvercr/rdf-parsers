@@ -1,36 +1,34 @@
 == rules ==
 === producing ===
-[1g]	trigDoc	::=	(directive | block)*
-[2g]	block	::=	graphBlock | triples2 | "GRAPH" labelOrSubject wrappedGraph | triplesOrGraph
-[2ag]	graphBlock	::=	labelOrSubject? wrappedGraph
-[3g]	triplesOrGraph	::=	labelOrSubject predicateObjectList '.'
-[4g]	triples2	::=	blankNodePropertyList predicateObjectList? '.' | collection predicateObjectList '.'
-[5g]	wrappedGraph	::=	'{' triplesBlock? '}'
-[6g]	triplesBlock	::=	triples ('.' triplesBlock?)?
-[7g]	labelOrSubject	::=	iri | BlankNode
-[3]	directive	::=	prefixID | base | sparqlPrefix | sparqlBase
-[4]	prefixID	::=	'@prefix' PNAME_NS IRIREF '.'
-[5]	base	::=	'@base' IRIREF '.'
-[5s]	sparqlPrefix	::=	"PREFIX" PNAME_NS IRIREF
-[6s]	sparqlBase	::=	"BASE" IRIREF
-[6]	triples	::=	subject predicateObjectList | blankNodePropertyList predicateObjectList?
-[7]	predicateObjectList	::=	verb objectList (';' (verb objectList)?)*
-[8]	objectList	::=	object (',' object)*
-[9]	verb	::=	predicate | 'a'
-[10]	subject	::=	iri | blank
-[11]	predicate	::=	iri
-[12]	object	::=	iri | blank | blankNodePropertyList | literal
-[13]	literal	::=	RDFLiteral | NumericLiteral | BooleanLiteral
-[14]	blank	::=	BlankNode | collection
-[15]	blankNodePropertyList	::=	'[' predicateObjectList ']'
-[16]	collection	::=	'(' object* ')'
-[17]	NumericLiteral	::=	INTEGER | DECIMAL | DOUBLE
+[1] trigDoc	::=	(directive | block)*
+[2]	directive	::=	prefixID | base | sparqlPrefix | sparqlBase
+[3]	prefixID	::=	'@prefix' PNAME_NS IRIREF '.'
+[4]	base	::=	'@base' IRIREF '.'
+[5]	sparqlPrefix	::=	"PREFIX" PNAME_NS IRIREF
+[6]	sparqlBase	::=	"BASE" IRIREF
+[7]	block	::=	graphBlock | triples '.'
+[8] graphBlock ::= (( "GRAPH" graphTerm ) | graphTerm? ) wrappedGraph
+[9]	wrappedGraph	::=	'{' triplesBlock? '}'
+[10]	triplesBlock	::=	triples ('.' triplesBlock?)?
+[11]	triples	::=	subject predicateObjectList | blankNodePropertyList predicateObjectList?
+[12]	predicateObjectList	::=	verb objectList (';' (verb objectList)?)*
+[13]	objectList	::=	object (',' object)*
+[14]	verb	::=	predicate | 'a'
+[15]    graphTerm ::= iri | BlankNode
+[16]	subject	::=	iri | BlankNode | collection
+[17]	predicate	::=	iri
+[18]	object	::=	iri | BlankNode | collection | blankNodePropertyList2 | literal
+[19]	literal	::=	RDFLiteral | NumericLiteral | BooleanLiteral
+[14]	blankNodePropertyList2	::=	'[' predicateObjectList?  ']'
+[20]	blankNodePropertyList	::=	'[' predicateObjectList ']'
+[21]	collection	::=	'(' object* ')'
+[22]	NumericLiteral	::=	INTEGER | DECIMAL | DOUBLE
 [128s]	RDFLiteral	::=	String (LANGTAG | '^^' iri)?
 [133s]	BooleanLiteral	::=	'true' | 'false'
-[18]	String	::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
+[23]	String	::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
 [135s]	iri	::=	IRIREF | PrefixedName
 [136s]	PrefixedName	::=	PNAME_LN | PNAME_NS
-[137s]	BlankNode	::=	BLANK_NODE_LABEL | ANON
+[137s]	BlankNode	::=	BLANK_NODE_LABEL | '[' ']'
 === terminals ===
 [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>'
 [139s]	PNAME_NS	::=	PN_PREFIX? ':'
@@ -48,7 +46,6 @@
 [26]	UCHAR	::=	'\u' HEX HEX HEX HEX | '\U' HEX HEX HEX HEX HEX HEX HEX HEX
 [159s]	ECHAR	::=	'\' [tbnrf"'\]
 [161s]	WS	::=	#x20 | #x9 | #xD | #xA
-[162s]	ANON	::=	'[' WS* ']'
 [163s]	PN_CHARS_BASE	::=	[A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
 [164s]	PN_CHARS_U	::=	PN_CHARS_BASE | '_'
 [166s]	PN_CHARS	::=	PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] | [#x203F-#x2040]
@@ -101,15 +98,27 @@ cl_close
 curly_close
 === format ===
 group predicateObjectList
-group blankNodePropertyList
 group wrappedGraph
 group collection
+group blankNodePropertyList
+group blankNodePropertyList2
+triples.predicateObjectList -> before: space
+subject -> after: indent
+colon -> after: line
 stop -> after: hardline
-colon -> before: space, after: line
-comma -> after: space
+block -> before: hardline
+object -> before: space
 sq_open -> after: indent line
 sq_close -> before: dedent line
 cl_open -> after: indent line
 cl_close -> before: dedent line
-curly_open -> after: indent hardline
-curly_close -> before: dedent hardline
+triplesBlock -> before: line, after: line
+wrappedGraph -> before: space
+curly_open -> after: indent
+curly_close -> before: dedent, after: hardline
+prefixId.pname_ns -> after: space
+graph_token -> after: space
+prefix_token -> after: space
+sparql_prefix_token -> after: space
+base_token -> after: space
+sparql_base_token -> after: space

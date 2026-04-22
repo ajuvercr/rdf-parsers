@@ -45,6 +45,23 @@ mod format_tests {
     }
 
     #[test]
+    fn format_multiple_predicate_objects_with_newlines_bn_subject() {
+        let input = r#"[ ] <b> <c>; <d> <e>; <f> <g> ."#;
+        let out = format_turtle(input, 16);
+        assert_eq!(out, "[ ] <b> <c>;\n  <d> <e>;\n  <f> <g>.\n");
+    }
+
+    #[test]
+    fn format_multiple_triples_with_newlines() {
+        let input = r#"<a> <b> <c>; <d> <e>; <f> <g> . <a> <b> <c>; <d> <e>; <f> <g> ."#;
+        let out = format_turtle(input, 16);
+        assert_eq!(
+            out,
+            "<a> <b> <c>;\n  <d> <e>;\n  <f> <g>.\n\n<a> <b> <c>;\n  <d> <e>;\n  <f> <g>.\n"
+        );
+    }
+
+    #[test]
     fn format_directies() {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"@prefix foaf: <> ."#;

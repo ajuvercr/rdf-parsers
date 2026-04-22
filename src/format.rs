@@ -118,10 +118,19 @@ pub fn render(doc: &Doc, width: usize) -> String {
     // Work list: (doc, indent, mode). Processed front-to-back.
     let mut work: Vec<(&Doc, i32, Mode)> = vec![(doc, 0, Mode::Break)];
 
+    let mut should_ident = false;
+
     while let Some((doc, indent, mode)) = work.pop() {
         match doc {
             Doc::Nil => {}
             Doc::Text(s) => {
+                if should_ident {
+                    for _ in 0..indent {
+                        out.push(' ');
+                        // col += 1;
+                    }
+                    should_ident = false;
+                }
                 out.push_str(s);
                 col += s.len() as i32;
             }
@@ -131,18 +140,14 @@ pub fn render(doc: &Doc, width: usize) -> String {
                     col += 1;
                 } else {
                     out.push('\n');
-                    for _ in 0..indent {
-                        out.push(' ');
-                    }
-                    col = indent;
+                    col = 0;
+                    should_ident = true;
                 }
             }
             Doc::HardLine => {
                 out.push('\n');
-                for _ in 0..indent {
-                    out.push(' ');
-                }
-                col = indent;
+                col = 0;
+                should_ident = true;
             }
             Doc::Concat(ds) => {
                 // Push in reverse so the first element is processed first.
@@ -155,7 +160,11 @@ pub fn render(doc: &Doc, width: usize) -> String {
             }
             Doc::Group(inner) => {
                 // Build a temporary slice to pass to `fits`.
-                let remaining = width as isize - col as isize;
+                let remaining = if should_ident {
+                    width as isize - (indent + col) as isize
+                } else {
+                    width as isize - col as isize
+                };
                 // Collect current work list plus the inner doc so fits() can
                 // measure the whole upcoming context.
                 let mut probe: Vec<(&Doc, i32, Mode)> = work.clone();

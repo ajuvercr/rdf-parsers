@@ -1,17 +1,22 @@
 fn main() {
-    let cmd = std::env::args().nth(1);
+    let mut args = std::env::args().skip(1); // skip binary name
+    let cmd = args.next();
+
     match cmd.as_deref() {
-        Some("codegen") => codegen(),
+        Some("codegen") => {
+            let filter = args.next(); // optional second argument
+            codegen(filter.as_ref().map(|x| x.as_str()))
+        }
         _ => {
-            eprintln!("Usage: cargo xtask <command>");
+            eprintln!("Usage: cargo xtask <command> [filter]");
             eprintln!("Commands:");
-            eprintln!("  codegen   Generate Rust source from grammar files");
+            eprintln!("  codegen [filter]   Generate Rust source from grammar files");
             std::process::exit(1);
         }
     }
 }
 
-fn codegen() {
+fn codegen(filter: Option<&str>) {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| {
         std::env::current_dir()
             .unwrap()
@@ -30,7 +35,22 @@ fn codegen() {
     let entries = std::fs::read_dir(&grammars_dir)
         .unwrap_or_else(|e| panic!("could not read {}: {}", grammars_dir.display(), e))
         .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().map_or(false, |ext| ext == "txt"));
+        .filter(|e| {
+            let path = e.path();
+
+            // Only .txt files
+            if !path.extension().map_or(false, |ext| ext == "txt") {
+                return false;
+            }
+
+            // Apply optional filter
+            if let Some(ref filter) = filter {
+                let name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                return name.to_lowercase().contains(filter);
+            }
+
+            true
+        });
 
     for entry in entries {
         let path = entry.path();

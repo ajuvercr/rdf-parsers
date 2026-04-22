@@ -57,59 +57,24 @@ pub fn convert(root: &Node) -> Turtle {
 fn convert_block(block: &Node, triples: &mut Vec<Spanned<Triple>>) {
     // block ::= graphBlock | triples2 | "GRAPH" labelOrSubject wrappedGraph | triplesOrGraph
     // Check GraphToken first: the "GRAPH" variant also has a WrappedGraph child.
-    if child(block, SyntaxKind::GraphToken).is_some() {
-        // "GRAPH" labelOrSubject wrappedGraph
-        let graph_term = child(block, SyntaxKind::LabelOrSubject).map(|los| {
-            let range = text_range(&los);
-            Spanned(convert_label_or_subject(&los), range)
-        });
-        if let Some(wg) = child(block, SyntaxKind::WrappedGraph) {
-            convert_wrapped_graph(&wg, graph_term, triples);
-        }
-    } else if let Some(gb) = child(block, SyntaxKind::GraphBlock) {
+    if let Some(gb) = child(block, SyntaxKind::GraphBlock) {
         convert_graph_block(&gb, triples);
-    } else if let Some(tog) = child(block, SyntaxKind::TriplesOrGraph) {
-        convert_triples_or_graph(&tog, triples);
-    } else if let Some(t2) = child(block, SyntaxKind::Triples2) {
+    } else if let Some(t2) = child(block, SyntaxKind::Triples) {
         let range = text_range(block);
-        triples.push(Spanned(convert_triples2(&t2), range));
+        triples.push(Spanned(convert_triples(&t2), range));
     }
 }
 
 fn convert_graph_block(node: &Node, triples: &mut Vec<Spanned<Triple>>) {
     // graphBlock ::= labelOrSubject? wrappedGraph
     // The optional labelOrSubject is the named-graph IRI; absent means default graph.
-    let graph_term = child(node, SyntaxKind::LabelOrSubject).map(|los| {
+    let graph_term = child(node, SyntaxKind::GraphTerm).map(|los| {
         let range = text_range(&los);
         Spanned(convert_label_or_subject(&los), range)
     });
     if let Some(wg) = child(node, SyntaxKind::WrappedGraph) {
         convert_wrapped_graph(&wg, graph_term, triples);
     }
-}
-
-fn convert_triples_or_graph(node: &Node, triples: &mut Vec<Spanned<Triple>>) {
-    // triplesOrGraph ::= labelOrSubject predicateObjectList '.'
-    let subject = child(node, SyntaxKind::LabelOrSubject)
-        .map(|l| {
-            let range = text_range(&l);
-            Spanned(convert_label_or_subject(&l), range)
-        })
-        .unwrap_or_else(|| Spanned(Term::Invalid, text_range(node)));
-
-    let po = child(node, SyntaxKind::PredicateObjectList)
-        .map(|n| convert_predicate_object_list(&n))
-        .unwrap_or_default();
-
-    let range = text_range(node);
-    triples.push(Spanned(
-        Triple {
-            subject,
-            po,
-            graph: None,
-        },
-        range,
-    ));
 }
 
 fn convert_wrapped_graph(
@@ -138,36 +103,6 @@ fn convert_triples_block(
     // Recurse into nested triplesBlock
     if let Some(tb) = child(node, SyntaxKind::TriplesBlock) {
         convert_triples_block(&tb, graph, triples);
-    }
-}
-
-fn convert_triples2(node: &Node) -> Triple {
-    // triples2 ::= blankNodePropertyList predicateObjectList? '.' | collection predicateObjectList '.'
-    let (subject, po_node) = if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
-        let range = text_range(&bpl);
-        let subject = convert_blank_node_property_list(&bpl);
-        (
-            Spanned(subject, range),
-            child(node, SyntaxKind::PredicateObjectList),
-        )
-    } else if let Some(coll) = child(node, SyntaxKind::Collection) {
-        let range = text_range(&coll);
-        (
-            Spanned(Term::Collection(convert_collection(&coll)), range),
-            child(node, SyntaxKind::PredicateObjectList),
-        )
-    } else {
-        (Spanned(Term::Invalid, text_range(node)), None)
-    };
-
-    let po = po_node
-        .map(|n| convert_predicate_object_list(&n))
-        .unwrap_or_default();
-
-    Triple {
-        subject,
-        po,
-        graph: None,
     }
 }
 
@@ -249,6 +184,8 @@ fn convert_triples(node: &Node) -> Triple {
         (Spanned(Term::Invalid, text_range(node)), None)
     };
 
+    println!("predicate_object list {:#?}", po_node);
+
     let po = po_node
         .map(|n| convert_predicate_object_list(&n))
         .unwrap_or_default();
@@ -311,10 +248,8 @@ fn convert_subject(node: &Node) -> Term {
     // blank ::= BlankNode | collection
     if let Some(iri) = child(node, SyntaxKind::Iri) {
         Term::NamedNode(convert_iri(&iri))
-    } else if let Some(blank) = child(node, SyntaxKind::Blank) {
-        convert_blank(&blank)
     } else {
-        Term::Invalid
+        convert_blank(node)
     }
 }
 
@@ -333,14 +268,12 @@ fn convert_object(node: &Node) -> Term {
     // In trig: object ::= iri | blank | blankNodePropertyList | literal
     if let Some(iri) = child(node, SyntaxKind::Iri) {
         Term::NamedNode(convert_iri(&iri))
-    } else if let Some(blank) = child(node, SyntaxKind::Blank) {
-        convert_blank(&blank)
     } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
         convert_blank_node_property_list(&bpl)
     } else if let Some(lit) = child(node, SyntaxKind::Literal) {
         Term::Literal(convert_literal(&lit))
     } else {
-        Term::Invalid
+        convert_blank(&node)
     }
 }
 
@@ -488,6 +421,7 @@ mod tests {
     fn parse(input: &str) -> Turtle {
         let (result, _) = crate_parse(lang::Rule::new(lang::SyntaxKind::TrigDoc), input);
         let root = result.syntax::<lang::Lang>();
+        println!("{:#?}", root);
         convert(&root)
     }
 
@@ -686,6 +620,7 @@ mod tests {
     #[test]
     fn test_boolean_literal() {
         let doc = parse("@prefix ex: <http://example.org/> . ex:alice ex:active true .");
+        println!("{:?}", doc);
         let t = doc.triples[0].value();
         assert_eq!(*term_lit(t.po[0].object[0].value()), Literal::Boolean(true));
     }
