@@ -5664,6 +5664,7 @@ pub mod format {
     }
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         let doc = to_doc(node);
-        crate::format::render(&doc, width)
+        let s = crate::format::render(&doc, width);
+        s.trim_start_matches('\n').to_string()
     }
 }

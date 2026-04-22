@@ -3552,6 +3552,42 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
+            (SyntaxKind::Triples, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::Statement, SyntaxKind::Triples) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
             (SyntaxKind::PrefixId, SyntaxKind::PrefixToken) => (
                 Hints {
                     space: false,
@@ -3660,24 +3696,6 @@ pub mod format {
                     dedent: false,
                 },
             ),
-            (_, SyntaxKind::PredicateObjectList) => (
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-            ),
             (_, SyntaxKind::Subject) => (
                 Hints {
                     space: false,
@@ -3726,10 +3744,10 @@ pub mod format {
                 Hints {
                     space: false,
                     line: false,
-                    hardline: false,
-                    blankline: true,
+                    hardline: true,
+                    blankline: false,
                     indent: false,
-                    dedent: true,
+                    dedent: false,
                 },
             ),
             (_, SyntaxKind::Object) => (
@@ -3961,6 +3979,7 @@ pub mod format {
     }
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         let doc = to_doc(node);
-        crate::format::render(&doc, width)
+        let s = crate::format::render(&doc, width);
+        s.trim_start_matches('\n').to_string()
     }
 }

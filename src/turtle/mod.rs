@@ -22,14 +22,14 @@ mod format_tests {
         // Both inner and outer fit at wide width — both stay flat.
         let input = r#"<a> <b> <c>,<d>  ."#;
         let out = format_turtle(input, 80);
-        assert_eq!(out, "<a> <b> <c>, <d>.\n\n");
+        assert_eq!(out, "<a> <b> <c>, <d>.\n");
     }
     #[test]
     fn format_multiple_predicate_objects() {
         // Both inner and outer fit at wide width — both stay flat.
         let input = r#"<a> <b> <c>; <d> <e> ."#;
         let out = format_turtle(input, 80);
-        assert_eq!(out, "<a> <b> <c>; <d> <e>.\n\n");
+        assert_eq!(out, "<a> <b> <c>; <d> <e>.\n");
     }
 
     #[test]
@@ -37,11 +37,11 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"<a> <b> <c>; <d> <e> ."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "<a> <b> <c>;\n  <d> <e>.\n\n");
+        assert_eq!(out, "<a> <b> <c>;\n  <d> <e>.\n");
 
         let input = r#"<a> <b> <c>; <d> <e>; <f> <g> ."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "<a> <b> <c>;\n  <d> <e>;\n  <f> <g>.\n\n");
+        assert_eq!(out, "<a> <b> <c>;\n  <d> <e>;\n  <f> <g>.\n");
     }
 
     #[test]
@@ -49,7 +49,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"@prefix foaf: <> ."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "@prefix foaf: <>.\n\n");
+        assert_eq!(out, "@prefix foaf: <>.\n");
     }
 
     #[test]
@@ -57,14 +57,14 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"<a> <b> <c>. <d> <e> <f> ."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "<a> <b> <c>.\n\n<d> <e> <f>.\n\n");
+        assert_eq!(out, "<a> <b> <c>.\n\n<d> <e> <f>.\n");
     }
     #[test]
     fn format_multiple_directives() {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"@prefix foaf: <> . @prefix foaf2: <> . "#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "@prefix foaf: <>.\n@prefix foaf2: <>.\n\n");
+        assert_eq!(out, "@prefix foaf: <>.\n@prefix foaf2: <>.\n");
     }
 
     #[test]
@@ -72,7 +72,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"@prefix foaf: <> . <a> <b> <c>. "#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "@prefix foaf: <>.\n\n<a> <b> <c>.\n\n");
+        assert_eq!(out, "@prefix foaf: <>.\n\n<a> <b> <c>.\n");
     }
 
     #[test]
@@ -80,7 +80,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"[ <a> <b> ]."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "[ <a> <b> ].\n\n");
+        assert_eq!(out, "[ <a> <b> ].\n");
     }
 
     #[test]
@@ -88,7 +88,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"[ <a> <b>; <c> <d> ]."#;
         let out = format_turtle(input, 24);
-        assert_eq!(out, "[ <a> <b>; <c> <d> ].\n\n");
+        assert_eq!(out, "[ <a> <b>; <c> <d> ].\n");
     }
 
     #[test]
@@ -96,6 +96,6 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"[ <a> <b>; <c> <d>; <e> <f> ]."#;
         let out = format_turtle(input, 16);
-        assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n  <e> <f>\n].\n\n");
+        assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n  <e> <f>\n].\n");
     }
 }

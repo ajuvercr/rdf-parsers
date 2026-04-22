@@ -91,10 +91,11 @@ group predicateObjectList
 group blankNodePropertyList
 group blankNodePropertyList2
 group collection
-predicateObjectList -> before: space
+triples.predicateObjectList -> before: space
 subject -> after: indent
 colon -> after: line
-stop -> after: blankline dedent
+stop -> after: hardline
+statement.triples -> before: hardline
 object -> before: space
 sq_open -> after: indent line
 sq_close -> before: dedent line
