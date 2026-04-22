@@ -86,3 +86,23 @@ cl_open
 === bracket_close ===
 sq_close
 cl_close
+=== format ===
+group predicateObjectList
+group blankNodePropertyList
+group blankNodePropertyList2
+group collection
+predicateObjectList -> before: space
+subject -> after: indent
+colon -> after: line
+stop -> after: blankline dedent
+object -> before: space
+sq_open -> after: indent line
+sq_close -> before: dedent line
+cl_open -> after: indent line
+cl_close -> before: dedent line
+prefixId.prefix_token -> after: space
+prefixId.pname_ns -> after: space
+base.base_token -> after: space
+sparqlBase.sparql_base_token -> after: space
+sparqlPrefix.sparql_prefix_token -> after: space
+sparqlPrefix.pname_ns -> after: space

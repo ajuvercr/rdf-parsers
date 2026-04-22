@@ -53,6 +53,8 @@ pub enum FormatHint {
     Space,
     Line,
     HardLine,
+    /// Two consecutive hard newlines — produces a blank line between nodes.
+    BlankLine,
     Indent,
     Dedent,
 }
@@ -65,8 +67,7 @@ pub struct FormatEntry {
     pub scope: Option<String>,
     /// Token name (must match a key in `=== with ===` or a terminal name).
     pub token: String,
-    pub position: FormatPosition,
-    pub hints: Vec<FormatHint>,
+    pub items: Vec<(FormatPosition, Vec<FormatHint>)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -122,8 +123,7 @@ enum CtxBlock {
     Format(Vec<String>, Vec<FormatEntry>),
 }
 
-fn format_section_parser<'src>(
-) -> impl Parser<'src, &'src str, CtxBlock, Err<Rich<'src, char>>> {
+fn format_section_parser<'src>() -> impl Parser<'src, &'src str, CtxBlock, Err<Rich<'src, char>>> {
     // Parses the `=== format ===` subsection.
     //
     // Each line is one of:
@@ -133,6 +133,7 @@ fn format_section_parser<'src>(
     // Hints: space | line | hardline | indent | dedent
 
     let hint = choice((
+        just("blankline").to(FormatHint::BlankLine),
         just("hardline").to(FormatHint::HardLine),
         just("space").to(FormatHint::Space),
         just("line").to(FormatHint::Line),
@@ -155,19 +156,22 @@ fn format_section_parser<'src>(
         })
         .padded_by(one_of(" \t").repeated());
 
+    let item = position
+        .then_ignore(just(':'))
+        .padded_by(one_of(" \t").repeated())
+        .then(hint.repeated().at_least(1).collect::<Vec<_>>())
+        .padded_by(one_of(" \t").repeated());
+
     let hint_line = scoped_token
         .then_ignore(just("->").padded_by(one_of(" \t").repeated()))
-        .then(position.padded_by(one_of(" \t").repeated()))
-        .then_ignore(just(':').padded_by(one_of(" \t").repeated()))
-        .then(hint.repeated().at_least(1).collect::<Vec<_>>())
+        .then(item.separated_by(just(',')).at_least(1).collect::<Vec<_>>())
         .then_ignore(none_of("\n").repeated()) // ignore rest of line
         .then_ignore(just('\n').or_not())
-        .map(|(((scope, token), pos), hints)| {
+        .map(|((scope, token), items)| {
             CtxLine::Hint(FormatEntry {
                 scope,
                 token,
-                position: pos,
-                hints,
+                items,
             })
         });
 
@@ -321,13 +325,15 @@ colon -> after: space
         let h = &res.format_hints[0];
         assert_eq!(h.scope, None);
         assert_eq!(h.token, "curly_open");
-        assert_eq!(h.position, FormatPosition::After);
-        assert_eq!(h.hints, vec![FormatHint::Indent, FormatHint::Line]);
+        assert_eq!(h.items.len(), 1);
+        assert_eq!(h.items[0].0, FormatPosition::After);
+        assert_eq!(h.items[0].1, vec![FormatHint::Indent, FormatHint::Line]);
 
         let h = &res.format_hints[1];
         assert_eq!(h.token, "curly_close");
-        assert_eq!(h.position, FormatPosition::Before);
-        assert_eq!(h.hints, vec![FormatHint::Dedent, FormatHint::Line]);
+        assert_eq!(h.items.len(), 1);
+        assert_eq!(h.items[0].0, FormatPosition::Before);
+        assert_eq!(h.items[0].1, vec![FormatHint::Dedent, FormatHint::Line]);
     }
 
     #[test]
@@ -343,7 +349,8 @@ jsonObject.curly_open -> after: indent line
         let h = &res.format_hints[0];
         assert_eq!(h.scope, Some("jsonObject".to_string()));
         assert_eq!(h.token, "curly_open");
-        assert_eq!(h.position, FormatPosition::After);
+        assert_eq!(h.items.len(), 1);
+        assert_eq!(h.items[0].0, FormatPosition::After);
     }
 
     #[test]

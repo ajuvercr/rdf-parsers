@@ -8,7 +8,9 @@ use std::io::Cursor;
 use std::ops::Range;
 use syn::LitStr;
 
-use crate::parser::{Config, Expr, FormatEntry, FormatHint, FormatPosition, LiteralType, Mark, Rule};
+use crate::parser::{
+    Config, Expr, FormatEntry, FormatHint, FormatPosition, LiteralType, Mark, Rule,
+};
 use crate::regex::{order_rules_by_references, to_regex};
 
 mod parser;
@@ -327,7 +329,11 @@ enum Transition {
     Expect { ident: String, next: usize },
     /// State pushes sub-rule `rule` (at its `entry` state), then continues
     /// at `next` after the rule completes.
-    Push { rule: String, entry: usize, next: usize },
+    Push {
+        rule: String,
+        entry: usize,
+        next: usize,
+    },
     /// State can pop (return to parent).  Terminates the rule.
     Pop,
     /// State branches to one of several alternative states.
@@ -347,15 +353,20 @@ fn build_transitions(
         Expr::Seq(exprs) => {
             let mut target = next;
             for e in exprs.iter().rev() {
-                target = build_transitions(e, ctx, initial_states, state_count, target, transitions);
+                target =
+                    build_transitions(e, ctx, initial_states, state_count, target, transitions);
             }
             target
         }
         Expr::Marked(inner, Mark::Option) => {
             let id = *state_count;
             *state_count += 1;
-            let thing = build_transitions(inner, ctx, initial_states, state_count, next, transitions);
-            transitions.entry(id).or_default().push(Transition::Goto(vec![thing, next]));
+            let thing =
+                build_transitions(inner, ctx, initial_states, state_count, next, transitions);
+            transitions
+                .entry(id)
+                .or_default()
+                .push(Transition::Goto(vec![thing, next]));
             id
         }
         Expr::Marked(inner, Mark::Plus) => {
@@ -363,16 +374,32 @@ fn build_transitions(
             *state_count += 1;
             let done_once = *state_count;
             *state_count += 1;
-            let thing = build_transitions(inner, ctx, initial_states, state_count, done_once, transitions);
-            transitions.entry(done_once).or_default().push(Transition::Goto(vec![thing, next]));
-            transitions.entry(id).or_default().push(Transition::Goto(vec![thing]));
+            let thing = build_transitions(
+                inner,
+                ctx,
+                initial_states,
+                state_count,
+                done_once,
+                transitions,
+            );
+            transitions
+                .entry(done_once)
+                .or_default()
+                .push(Transition::Goto(vec![thing, next]));
+            transitions
+                .entry(id)
+                .or_default()
+                .push(Transition::Goto(vec![thing]));
             id
         }
         Expr::Marked(inner, Mark::Star) => {
             let id = *state_count;
             *state_count += 1;
             let thing = build_transitions(inner, ctx, initial_states, state_count, id, transitions);
-            transitions.entry(id).or_default().push(Transition::Goto(vec![thing, next]));
+            transitions
+                .entry(id)
+                .or_default()
+                .push(Transition::Goto(vec![thing, next]));
             id
         }
         Expr::Either(exprs) => {
@@ -382,7 +409,10 @@ fn build_transitions(
                 .iter()
                 .map(|e| build_transitions(e, ctx, initial_states, state_count, next, transitions))
                 .collect();
-            transitions.entry(id).or_default().push(Transition::Goto(targets));
+            transitions
+                .entry(id)
+                .or_default()
+                .push(Transition::Goto(targets));
             id
         }
         Expr::Literal(lt, f) => {
@@ -394,7 +424,10 @@ fn build_transitions(
                 IgnoreCase::False
             };
             let ident = Terminal::Literal(f.clone(), ignore_case).ident(ctx);
-            transitions.entry(id).or_default().push(Transition::Expect { ident, next });
+            transitions
+                .entry(id)
+                .or_default()
+                .push(Transition::Expect { ident, next });
             id
         }
         Expr::Reference(re) => {
@@ -403,7 +436,10 @@ fn build_transitions(
             let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == re);
             if is_terminal {
                 let ident = Terminal::Ref(re.clone()).ident(ctx);
-                transitions.entry(id).or_default().push(Transition::Expect { ident, next });
+                transitions
+                    .entry(id)
+                    .or_default()
+                    .push(Transition::Expect { ident, next });
             } else {
                 let entry = *initial_states.get(re.as_str()).unwrap_or(&0);
                 transitions.entry(id).or_default().push(Transition::Push {
@@ -453,7 +489,9 @@ fn compute_dist_for_rule(
             }
 
             for terminal in terminal_idents {
-                let ev = *error_values.get(terminal.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT);
+                let ev = *error_values
+                    .get(terminal.as_str())
+                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT);
                 let key = (state_id, terminal.clone());
 
                 let mut best = dist.get(&key).copied().unwrap_or(isize::MAX);
@@ -465,8 +503,11 @@ fn compute_dist_for_rule(
                             if ident == terminal {
                                 0
                             } else {
-                                let expect_ev = *error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT);
-                                let next_dist = dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
+                                let expect_ev = *error_values
+                                    .get(ident.as_str())
+                                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT);
+                                let next_dist =
+                                    dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
                                 expect_ev.saturating_add(next_dist)
                             }
                         }
@@ -485,13 +526,11 @@ fn compute_dist_for_rule(
 
                             inside.min(outside)
                         }
-                        Transition::Goto(targets) => {
-                            targets
-                                .iter()
-                                .map(|t| dist.get(&(*t, terminal.clone())).copied().unwrap_or(0))
-                                .min()
-                                .unwrap_or(0)
-                        }
+                        Transition::Goto(targets) => targets
+                            .iter()
+                            .map(|t| dist.get(&(*t, terminal.clone())).copied().unwrap_or(0))
+                            .min()
+                            .unwrap_or(0),
                     };
 
                     best = best.min(cost);
@@ -702,7 +741,8 @@ impl<'a> RuleCodegen<'a> {
                     IgnoreCase::False
                 };
                 let id = self.alloc();
-                self.terminals.insert(Terminal::Literal(f.clone(), ignore_case));
+                self.terminals
+                    .insert(Terminal::Literal(f.clone(), ignore_case));
                 let name = self.ctx.context.with(f);
                 let n = self.ctx.context.ident_for(&name);
                 self.reachable.insert(next);
@@ -930,11 +970,7 @@ fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>)
 
 /// Compute the minimum insertion cost to complete `expr` along its cheapest path.
 /// Returns `None` for recursive references not yet resolved (treated as 0).
-fn expr_min_completion_cost(
-    expr: &Expr,
-    ctx: &Config,
-    known: &HashMap<String, isize>,
-) -> isize {
+fn expr_min_completion_cost(expr: &Expr, ctx: &Config, known: &HashMap<String, isize>) -> isize {
     match expr {
         Expr::Literal(lt, f) => {
             let ignore_case = if lt == &LiteralType::Double {
@@ -943,19 +979,28 @@ fn expr_min_completion_cost(
                 IgnoreCase::False
             };
             let ident = Terminal::Literal(f.clone(), ignore_case).ident(ctx);
-            *ctx.context.error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+            *ctx.context
+                .error_values
+                .get(ident.as_str())
+                .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
         }
         Expr::Reference(name) => {
             let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == name);
             if is_terminal {
                 let ident = Terminal::Ref(name.clone()).ident(ctx);
-                *ctx.context.error_values.get(ident.as_str()).unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+                *ctx.context
+                    .error_values
+                    .get(ident.as_str())
+                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
             } else {
                 // Non-terminal: use previously computed value, or 0 for cycles.
                 known.get(name).copied().unwrap_or(0)
             }
         }
-        Expr::Seq(exprs) => exprs.iter().map(|e| expr_min_completion_cost(e, ctx, known)).sum(),
+        Expr::Seq(exprs) => exprs
+            .iter()
+            .map(|e| expr_min_completion_cost(e, ctx, known))
+            .sum(),
         Expr::Either(exprs) => exprs
             .iter()
             .map(|e| expr_min_completion_cost(e, ctx, known))
@@ -1055,9 +1100,7 @@ fn expr_reachable_terminals(
 /// Compute the set of all terminal names that can be consumed *anywhere* in a
 /// parse of each producing rule.  Uses fixed-point iteration to handle mutual
 /// recursion.
-fn compute_reachable_terminals(
-    config: &Config,
-) -> HashMap<String, HashSet<String>> {
+fn compute_reachable_terminals(config: &Config) -> HashMap<String, HashSet<String>> {
     let mut result: HashMap<String, HashSet<String>> = HashMap::new();
 
     let mut changed = true;
@@ -1194,13 +1237,8 @@ pub fn generate(path: &str, contents: &str) -> String {
         .iter()
         .zip(compacted.iter())
         .map(|(rule, expr)| {
-            let (_entry, step_arms, new_arm) = RuleCodegen::generate(
-                &rule.name,
-                expr,
-                &config,
-                &mut terminals,
-                &initial_states,
-            );
+            let (_entry, step_arms, new_arm) =
+                RuleCodegen::generate(&rule.name, expr, &config, &mut terminals, &initial_states);
             (step_arms, new_arm)
         })
         .unzip();
@@ -1279,10 +1317,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         .filter(|(name, _)| !can_be_empty.get(*name).copied().unwrap_or(false))
         .map(|(name, toks)| {
             let n = config.context.ident_for(name);
-            let mut tok_idents: Vec<_> = toks
-                .iter()
-                .map(|t| config.context.ident_for(t))
-                .collect();
+            let mut tok_idents: Vec<_> = toks.iter().map(|t| config.context.ident_for(t)).collect();
             tok_idents.sort_by_key(|id| id.to_string());
             tok_idents.dedup_by_key(|id| id.to_string());
             quote! {
@@ -1405,7 +1440,10 @@ pub fn generate(path: &str, contents: &str) -> String {
                 let mut by_state: HashMap<usize, Vec<(&String, &isize)>> = HashMap::new();
                 for ((state_id, terminal), cost) in dist_map {
                     if *cost > 0 {
-                        by_state.entry(*state_id).or_default().push((terminal, cost));
+                        by_state
+                            .entry(*state_id)
+                            .or_default()
+                            .push((terminal, cost));
                     }
                 }
 
@@ -1480,16 +1518,25 @@ pub fn generate(path: &str, contents: &str) -> String {
             .context
             .format_hints
             .iter()
-            .filter(|e| e.scope.is_some())
+            .filter(|e| e.scope.is_some() && e.token != "default")
             .map(|e| format_hint_arm(e, &config))
             .collect();
         let global: Vec<_> = config
             .context
             .format_hints
             .iter()
-            .filter(|e| e.scope.is_none())
+            .filter(|e| e.scope.is_none() && e.token != "default")
             .map(|e| format_hint_arm(e, &config))
             .collect();
+        // The `default` entry (if any) provides hints for unmatched *terminals*.
+        // Non-terminals always fall through to (Hints::default(), Hints::default()).
+        let default_after_hints: proc_macro2::TokenStream = config
+            .context
+            .format_hints
+            .iter()
+            .find(|e| e.token == "default")
+            .map(|e| format_hint_arm_default_tuple(e))
+            .unwrap_or_else(|| quote! { (Hints::default(), Hints::default()) });
 
         // Build is_group() arms.
         let group_idents: Vec<_> = config
@@ -1517,6 +1564,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                     space: bool,
                     line: bool,
                     hardline: bool,
+                    blankline: bool,
                     indent: bool,
                     dedent: bool,
                 }
@@ -1526,7 +1574,8 @@ pub fn generate(path: &str, contents: &str) -> String {
                         let mut v = Vec::new();
                         if self.indent { v.push(Doc::nil()); } // handled by caller
                         if self.dedent { v.push(Doc::nil()); } // handled by caller
-                        if self.hardline { v.push(Doc::HardLine); }
+                        if self.blankline { v.push(Doc::HardLine); v.push(Doc::HardLine); }
+                        else if self.hardline { v.push(Doc::HardLine); }
                         else if self.line { v.push(Doc::Line); }
                         else if self.space { v.push(Doc::text(" ")); }
                         v
@@ -1537,7 +1586,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                     match (parent, token) {
                         #( #scoped )*
                         #( #global )*
-                        _ => (Hints::default(), Hints::default()),
+                        _ => #default_after_hints,
                     }
                 }
 
@@ -1618,6 +1667,17 @@ pub fn generate(path: &str, contents: &str) -> String {
                                         parts.last_mut().unwrap().extend(after_line);
                                     }
                                 } else {
+                                    // Non-terminal node: apply before/after hints
+                                    // from the parent's perspective, then recurse.
+                                    let (before, after) = format_hints(node.kind(), n.kind());
+
+                                    if before.dedent && parts.len() > 1 {
+                                        let nested = parts.pop().unwrap_or_default();
+                                        let indent_doc = Doc::nest(2, Doc::concat(nested));
+                                        parts.last_mut().unwrap().push(indent_doc);
+                                    }
+                                    parts.last_mut().unwrap().extend(before.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)));
+
                                     let child_doc = to_doc(&n);
                                     let child_doc = if is_group(n.kind()) {
                                         Doc::group(child_doc)
@@ -1625,6 +1685,13 @@ pub fn generate(path: &str, contents: &str) -> String {
                                         child_doc
                                     };
                                     parts.last_mut().unwrap().push(child_doc);
+
+                                    let after_line: Vec<Doc> = after.to_docs().into_iter().filter(|d| !matches!(d, Doc::Nil)).collect();
+                                    if after.indent {
+                                        parts.push(after_line);
+                                    } else {
+                                        parts.last_mut().unwrap().extend(after_line);
+                                    }
                                 }
                             }
                         }
@@ -1851,29 +1918,32 @@ fn format_hint_arm(entry: &FormatEntry, config: &Config) -> proc_macro2::TokenSt
     };
 
     let mut before = quote! {
-        Hints { space: false, line: false, hardline: false, indent: false, dedent: false }
+        Hints { space: false, line: false, hardline: false, blankline: false, indent: false, dedent: false }
     };
     let mut after = quote! {
-        Hints { space: false, line: false, hardline: false, indent: false, dedent: false }
+        Hints { space: false, line: false, hardline: false, blankline: false, indent: false, dedent: false }
     };
 
     let hints_to_struct = |hints: &[FormatHint]| -> proc_macro2::TokenStream {
         let space = hints.contains(&FormatHint::Space);
         let line = hints.contains(&FormatHint::Line);
         let hardline = hints.contains(&FormatHint::HardLine);
+        let blankline = hints.contains(&FormatHint::BlankLine);
         let indent = hints.contains(&FormatHint::Indent);
         let dedent = hints.contains(&FormatHint::Dedent);
         quote! {
-            Hints { space: #space, line: #line, hardline: #hardline, indent: #indent, dedent: #dedent }
+            Hints { space: #space, line: #line, hardline: #hardline, blankline: #blankline, indent: #indent, dedent: #dedent }
         }
     };
 
-    match entry.position {
-        FormatPosition::Before => {
-            before = hints_to_struct(&entry.hints);
-        }
-        FormatPosition::After => {
-            after = hints_to_struct(&entry.hints);
+    for (p, hints) in &entry.items {
+        match p {
+            FormatPosition::Before => {
+                before = hints_to_struct(&hints);
+            }
+            FormatPosition::After => {
+                after = hints_to_struct(&hints);
+            }
         }
     }
 
@@ -1881,6 +1951,44 @@ fn format_hint_arm(entry: &FormatEntry, config: &Config) -> proc_macro2::TokenSt
         (#parent_pat, SyntaxKind::#tok_ident) => (#before, #after),
     }
 }
+
+/// Build just the hints tuple `(before, after)` from a `default` format entry,
+/// for use in the `_ => if is_terminal { ... } else { ... }` fallback arm.
+fn format_hint_arm_default_tuple(entry: &FormatEntry) -> proc_macro2::TokenStream {
+    let hints_to_struct = |hints: &[FormatHint]| -> proc_macro2::TokenStream {
+        let space = hints.contains(&FormatHint::Space);
+        let line = hints.contains(&FormatHint::Line);
+        let hardline = hints.contains(&FormatHint::HardLine);
+        let blankline = hints.contains(&FormatHint::BlankLine);
+        let indent = hints.contains(&FormatHint::Indent);
+        let dedent = hints.contains(&FormatHint::Dedent);
+        quote! {
+            Hints { space: #space, line: #line, hardline: #hardline, blankline: #blankline, indent: #indent, dedent: #dedent }
+        }
+    };
+
+    let mut before = quote! {
+        Hints { space: false, line: false, hardline: false, blankline: false, indent: false, dedent: false }
+    };
+    let mut after = quote! {
+        Hints { space: false, line: false, hardline: false, blankline: false, indent: false, dedent: false }
+    };
+
+    for (p, hints) in &entry.items {
+        match p {
+            FormatPosition::Before => {
+                before = hints_to_struct(&hints);
+            }
+            FormatPosition::After => {
+                after = hints_to_struct(&hints);
+            }
+        }
+    }
+
+    quote! { (#before, #after) }
+}
+
+
 
 fn get_sub_patterns(rules: &[Rule]) -> Vec<proc_macro2::TokenStream> {
     let ordered_rules = order_rules_by_references(rules).unwrap();

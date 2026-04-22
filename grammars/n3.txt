@@ -99,3 +99,16 @@ cl_open
 sq_close
 br_close
 cl_close
+=== format ===
+group predicateObjectList
+group blankNodePropertyList
+group collection
+stop -> after: hardline
+colon -> before: space, after: line
+comma -> after: space
+sq_open -> after: indent line
+sq_close -> before: dedent line
+br_open -> after: indent line
+br_close -> before: dedent line
+cl_open -> after: indent line
+cl_close -> before: dedent line

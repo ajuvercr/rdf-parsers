@@ -36,12 +36,64 @@ pub enum JsonLdVal {
         Vec<(String, Range<usize>, Range<usize>, JsonLdVal)>,
         Range<usize>,
     ),
-    Array(Vec<JsonLdVal>),
+    Array(Vec<(JsonLdVal, Range<usize>)>),
     Str(String),
     Number(String),
     Bool(bool),
     Null,
     Invalid,
+}
+
+impl JsonLdVal {
+    /// Look up a key inside an `Object`, returning the value or `None`.
+    pub fn get(&self, key: &str) -> Option<&JsonLdVal> {
+        if let JsonLdVal::Object(members, _) = self {
+            members
+                .iter()
+                .find(|(k, _, _, _)| k == key)
+                .map(|(_, _, _, v)| v)
+        } else {
+            None
+        }
+    }
+
+    /// Return the contained string if this is a `Str` variant.
+    pub fn as_str(&self) -> Option<&str> {
+        if let JsonLdVal::Str(s) = self {
+            Some(s.as_str())
+        } else {
+            None
+        }
+    }
+
+    /// Return the contained bool if this is a `Bool` variant.
+    pub fn as_bool(&self) -> Option<bool> {
+        if let JsonLdVal::Bool(b) = self {
+            Some(*b)
+        } else {
+            None
+        }
+    }
+
+    /// Return the member slice if this is an `Object`.
+    /// Each element is `(key, key_span, val_span, value)`.
+    pub fn as_object(&self) -> Option<&[(String, Range<usize>, Range<usize>, JsonLdVal)]> {
+        if let JsonLdVal::Object(members, _) = self {
+            Some(members.as_slice())
+        } else {
+            None
+        }
+    }
+
+    /// Return the item slice if this is an `Array`.
+    /// Each element is `(value, span)`.
+    pub fn as_array(&self) -> Option<&[(JsonLdVal, Range<usize>)]> {
+        if let JsonLdVal::Array(items) = self {
+            Some(items.as_slice())
+        } else {
+            None
+        }
+    }
 }
 
 // ── Context types ─────────────────────────────────────────────────────────────
@@ -163,25 +215,24 @@ impl ConvertState {
 
     fn add_triple(
         &mut self,
-        subject: Term,
-        subject_span: Range<usize>,
-        predicate: Term,
-        object: Term,
-        graph: Option<Term>,
+        subject: (Term, Range<usize>),
+        predicate: (Term, Range<usize>),
+        object: (Term, Range<usize>),
+        graph: Option<(Term, Range<usize>)>,
         span: Range<usize>,
     ) {
         let s = span.clone();
         self.triples.push(Spanned(
             Triple {
-                subject: Spanned(subject, subject_span),
+                subject: Spanned(subject.0, subject.1),
                 po: vec![Spanned(
                     PO {
-                        predicate: Spanned(predicate, s.clone()),
-                        object: vec![Spanned(object, s.clone())],
+                        predicate: Spanned(predicate.0, predicate.1),
+                        object: vec![Spanned(object.0, object.1)],
                     },
                     s.clone(),
                 )],
-                graph: graph.map(|g| Spanned(g, s.clone())),
+                graph: graph.map(|g| Spanned(g.0, g.1)),
             },
             s,
         ));
@@ -350,7 +401,10 @@ fn cst_to_value(node: &Node) -> Option<JsonLdVal> {
         SyntaxKind::JsonArray => {
             let items = if let Some(vl) = child(node, SyntaxKind::ValueList) {
                 children(&vl, SyntaxKind::JsonValue)
-                    .filter_map(|v| cst_to_value(&v))
+                    .filter_map(|v| {
+                        let span = text_range(&v);
+                        cst_to_value(&v).map(|val| (val, span))
+                    })
                     .collect()
             } else {
                 Vec::new()
@@ -393,7 +447,7 @@ fn process_context<'a>(
                 }
             }
             JsonLdVal::Array(items) => {
-                for item in items {
+                for (item, _) in items {
                     active = process_context(active, item, loader, state).await;
                 }
             }
@@ -428,6 +482,16 @@ fn process_context<'a>(
                         },
                         // TODO: @version, @import, @propagate, @protected, @direction
                         k if !k.starts_with('@') => {
+                            // Extract inner type-scoped @context before borrowing val.
+                            let scoped_ctx = if let JsonLdVal::Object(ref members, _) = val {
+                                members
+                                    .iter()
+                                    .find(|(k, _, _, _)| k == "@context")
+                                    .map(|(_, _, _, v)| v.clone())
+                            } else {
+                                None
+                            };
+
                             if let Some(def) = process_term_definition(&active, k, &val) {
                                 if let (Some(iri), false) = (&def.iri, def.reverse) {
                                     state.register_prefix(
@@ -444,6 +508,13 @@ fn process_context<'a>(
                                 active.terms.insert(k.to_string(), def);
                             } else {
                                 active.terms.remove(k);
+                            }
+
+                            // Flatten type-scoped context into the active context so
+                            // that parameter names like `originalUrlExtractor` resolve
+                            // to their full IRIs for completion and hover.
+                            if let Some(scoped) = scoped_ctx {
+                                active = process_context(active, scoped, loader, state).await;
                             }
                         }
                         _ => {}
@@ -514,6 +585,20 @@ fn process_term_definition(
     }
 }
 
+/// Parse a JSON string and return the full `JsonLdVal` tree with source spans.
+///
+/// Unlike [`parse_jsonld_for_context`], this returns the entire document — including
+/// the `@context` entry — making it suitable for span extraction over component and
+/// config files where caller code needs the precise byte ranges of `@id` values.
+pub fn parse_json(content: &str) -> Option<JsonLdVal> {
+    use super::parser::{Rule, SyntaxKind as SK};
+    let rule = Rule::new(SK::JsonldDoc);
+    let (parse, _) = crate::parse(rule, content);
+    let root = parse.syntax::<Lang>();
+    let json_val_node = root.children().find(|c| c.kind() == SK::JsonValue)?;
+    cst_to_value(&json_val_node)
+}
+
 /// Parse a JSON-LD string (fetched from a remote URL) and return the value
 /// that should be used as a context.  If the document has a top-level
 /// `@context`, return that; otherwise return the whole document.
@@ -558,7 +643,13 @@ fn expand_iri(
     if vocab {
         if let Some(def) = active.terms.get(value) {
             if let Some(iri) = &def.iri {
-                return Some(iri.clone());
+                // Recursively expand the stored IRI in case it was stored unexpanded
+                // (e.g., the prefix term was defined later in the same context object).
+                // Use vocab=false to avoid re-entering term lookup and causing cycles.
+                if iri == value {
+                    return Some(iri.clone());
+                }
+                return expand_iri(active, iri, false, false);
             }
         }
     }
@@ -577,7 +668,12 @@ fn expand_iri(
             // Look up prefix in the active context
             if let Some(def) = active.terms.get(prefix) {
                 if let Some(iri) = &def.iri {
-                    return Some(format!("{}{}", iri, suffix));
+                    return expand_iri(
+                        active,
+                        &format!("{}{}", iri, suffix),
+                        vocab,
+                        document_relative,
+                    );
                 }
             }
 
@@ -633,7 +729,7 @@ fn process_document<'a>(
                 process_node(state, active, loader, members, span, None).await;
             }
             JsonLdVal::Array(items) => {
-                for item in items {
+                for (item, _) in items {
                     process_document(state, active, loader, item).await;
                 }
             }
@@ -651,7 +747,7 @@ fn process_document_with_graph<'a>(
     active: &'a ActiveContext,
     loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
-    graph: Option<&'a Term>,
+    graph: Option<(&'a Term, &'a Range<usize>)>,
 ) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
     Box::pin(async move {
         match val {
@@ -659,7 +755,7 @@ fn process_document_with_graph<'a>(
                 process_node(state, active, loader, members, span, graph).await;
             }
             JsonLdVal::Array(items) => {
-                for item in items {
+                for (item, _) in items {
                     process_document_with_graph(state, active, loader, item, graph).await;
                 }
             }
@@ -668,6 +764,7 @@ fn process_document_with_graph<'a>(
     })
 }
 
+type MemberMap<'a> = HashMap<&'a str, (&'a Range<usize>, &'a JsonLdVal, &'a Range<usize>)>;
 /// Process a JSON-LD node object.  Returns the subject term if the node can
 /// serve as an object in another triple (e.g., a nested node).
 ///
@@ -679,11 +776,13 @@ fn process_node<'a>(
     loader: &'a mut dyn ContextLoader,
     members: &'a [(String, Range<usize>, Range<usize>, JsonLdVal)],
     span: &'a Range<usize>,
-    graph: Option<&'a Term>,
+    graph: Option<(&'a Term, &'a Range<usize>)>,
 ) -> Pin<Box<dyn Future<Output = Option<Term>> + 'a>> {
     Box::pin(async move {
-        let map: HashMap<&str, &JsonLdVal> =
-            members.iter().map(|(k, _, _, v)| (k.as_str(), v)).collect();
+        let map: MemberMap<'_> = members
+            .iter()
+            .map(|(k, k_span, v_span, v)| (k.as_str(), (k_span, v, v_span)))
+            .collect();
 
         // Value object — return as a literal, generate no subject-based triples
         if map.contains_key("@value") {
@@ -692,17 +791,21 @@ fn process_node<'a>(
 
         // List object
         if let Some(list_val) = map.get("@list") {
-            let items = match list_val {
+            let owned;
+            let items: &[(JsonLdVal, Range<usize>)] = match list_val.1 {
                 JsonLdVal::Array(items) => items.as_slice(),
-                other => std::slice::from_ref(*other),
+                other => {
+                    owned = [((*other).clone(), span.clone())];
+                    &owned
+                }
             };
             return Some(process_list(state, active, loader, items, span, graph).await);
         }
 
         // Set object — process contents but return nothing as a subject
         if let Some(set_val) = map.get("@set") {
-            if let JsonLdVal::Array(items) = set_val {
-                for item in items {
+            if let JsonLdVal::Array(items) = set_val.1 {
+                for (item, _) in items {
                     process_document_with_graph(state, active, loader, item, graph).await;
                 }
             }
@@ -712,7 +815,7 @@ fn process_node<'a>(
         // Update active context if @context present in this node
         let updated;
         let active: &ActiveContext = if let Some(ctx_val) = map.get("@context") {
-            updated = process_context(active.clone(), (*ctx_val).clone(), loader, state).await;
+            updated = process_context(active.clone(), ctx_val.1.clone(), loader, state).await;
             &updated
         } else {
             active
@@ -725,7 +828,7 @@ fn process_node<'a>(
             .map(|(_, _, vs, _)| vs.clone())
             .unwrap_or_else(|| span.start..span.start);
         let subject: Term = if let Some(id_val) = map.get("@id") {
-            match id_val {
+            match id_val.1 {
                 JsonLdVal::Str(s) => match expand_iri(active, s, false, true) {
                     Some(iri) if iri.starts_with("_:") => {
                         Term::BlankNode(BlankNode::Named(iri[2..].to_string(), id_val_span.start))
@@ -741,15 +844,15 @@ fn process_node<'a>(
 
         // @type → rdf:type triples
         if let Some(type_val) = map.get("@type") {
-            for type_str in collect_strings(type_val) {
+            for type_str in collect_strings(type_val.1) {
                 if let Some(iri) = expand_iri(active, &type_str, true, true) {
                     let obj = iri_or_blank(iri, span.start);
                     state.add_triple(
-                        subject.clone(),
-                        id_val_span.clone(),
-                        ConvertState::named(RDF_TYPE),
-                        obj,
-                        graph.cloned(),
+                        (subject.clone(), id_val_span.clone()),
+                        (ConvertState::named(RDF_TYPE), type_val.0.clone()), // TODO, why doesn't the map have the
+                        // spans?
+                        (obj, type_val.2.clone()),
+                        graph.map(|(a, b)| (a.clone(), b.clone())),
                         span.clone(),
                     );
                 }
@@ -759,21 +862,29 @@ fn process_node<'a>(
         // @graph → named graph containing nested nodes
         if let Some(graph_val) = map.get("@graph") {
             let named_graph = subject.clone();
-            match graph_val {
+            match graph_val.1 {
                 JsonLdVal::Array(items) => {
-                    for item in items {
+                    for (item, _) in items {
                         process_document_with_graph(
                             state,
                             active,
                             loader,
                             item,
-                            Some(&named_graph),
+                            Some((&named_graph, graph_val.2)),
                         )
                         .await;
                     }
                 }
                 JsonLdVal::Object(m, s) => {
-                    process_node(state, active, loader, m, s, Some(&named_graph)).await;
+                    process_node(
+                        state,
+                        active,
+                        loader,
+                        m,
+                        s,
+                        Some((&named_graph, graph_val.2)),
+                    )
+                    .await;
                 }
                 _ => {}
             }
@@ -781,8 +892,8 @@ fn process_node<'a>(
 
         // @reverse → reverse-property triples (object becomes subject)
         if let Some(rev_val) = map.get("@reverse") {
-            if let JsonLdVal::Object(rev_members, _) = rev_val {
-                for (prop, _, val_span, val) in rev_members {
+            if let JsonLdVal::Object(rev_members, _) = rev_val.1 {
+                for (prop, prop_span, val_span, val) in rev_members {
                     if prop.starts_with('@') {
                         continue;
                     }
@@ -791,14 +902,13 @@ fn process_node<'a>(
                         let objects =
                             collect_objects(state, active, loader, val, val_span, graph, None)
                                 .await;
-                        for obj in objects {
+                        for (obj, obj_span) in objects {
                             // Subject and object are swapped for reverse properties
                             state.add_triple(
-                                obj,
-                                val_span.clone(),
-                                pred.clone(),
-                                subject.clone(),
-                                graph.cloned(),
+                                (obj, obj_span.clone()),
+                                (pred.clone(), prop_span.clone()),
+                                (subject.clone(), id_val_span.clone()),
+                                graph.map(|(a, b)| (a.clone(), b.clone())),
                                 span.clone(),
                             );
                         }
@@ -809,9 +919,9 @@ fn process_node<'a>(
 
         // @included → additional node objects (processed in default graph)
         if let Some(included_val) = map.get("@included") {
-            match included_val {
+            match included_val.1 {
                 JsonLdVal::Array(items) => {
-                    for item in items {
+                    for (item, _) in items {
                         process_document(state, active, loader, item).await;
                     }
                 }
@@ -855,12 +965,12 @@ fn process_node<'a>(
                             predicate: Spanned(ConvertState::named(&pred_iri), key_span.clone()),
                             object: objects
                                 .into_iter()
-                                .map(|o| Spanned(o, val_span.clone()))
+                                .map(|(o, o_span)| Spanned(o, o_span))
                                 .collect(),
                         },
                         key_span.clone(),
                     )],
-                    graph: graph.map(|g| Spanned(g.clone(), s.clone())),
+                    graph: graph.map(|g| Spanned(g.0.clone(), g.1.clone())),
                 },
                 s,
             ));
@@ -877,7 +987,7 @@ fn collect_strings(val: &JsonLdVal) -> Vec<String> {
         JsonLdVal::Str(s) => vec![s.clone()],
         JsonLdVal::Array(items) => items
             .iter()
-            .filter_map(|i| {
+            .filter_map(|(i, _)| {
                 if let JsonLdVal::Str(s) = i {
                     Some(s.clone())
                 } else {
@@ -898,16 +1008,17 @@ fn collect_objects<'a>(
     loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
     span: &'a Range<usize>,
-    graph: Option<&'a Term>,
+    graph: Option<(&'a Term, &'a Range<usize>)>,
     term_def: Option<&'a TermDefinition>,
-) -> Pin<Box<dyn Future<Output = Vec<Term>> + 'a>> {
+) -> Pin<Box<dyn Future<Output = Vec<(Term, Range<usize>)>> + 'a>> {
     Box::pin(async move {
         match val {
             JsonLdVal::Array(items) => {
                 let mut result = Vec::new();
-                for item in items {
+                for (item, item_span) in items {
                     let mut sub =
-                        collect_objects(state, active, loader, item, span, graph, term_def).await;
+                        collect_objects(state, active, loader, item, item_span, graph, term_def)
+                            .await;
                     result.append(&mut sub);
                 }
                 result
@@ -915,6 +1026,7 @@ fn collect_objects<'a>(
             _ => value_to_rdf(state, active, loader, val, span, graph, term_def)
                 .await
                 .into_iter()
+                .map(|t| (t, span.clone()))
                 .collect(),
         }
     })
@@ -931,20 +1043,26 @@ async fn value_to_rdf<'a>(
     loader: &'a mut dyn ContextLoader,
     val: &'a JsonLdVal,
     span: &'a Range<usize>,
-    graph: Option<&'a Term>,
+    graph: Option<(&'a Term, &'a Range<usize>)>,
     term_def: Option<&'a TermDefinition>,
 ) -> Option<Term> {
     match val {
         JsonLdVal::Object(members, obj_span) => {
-            let map: HashMap<&str, &JsonLdVal> =
-                members.iter().map(|(k, _, _, v)| (k.as_str(), v)).collect();
+            let map: MemberMap<'_> = members
+                .iter()
+                .map(|(k, k_span, v_span, v)| (k.as_str(), (k_span, v, v_span)))
+                .collect();
             if map.contains_key("@value") {
                 return process_value_object(active, &map, obj_span);
             }
             if let Some(list_val) = map.get("@list") {
-                let items = match list_val {
+                let owned;
+                let items: &[(JsonLdVal, Range<usize>)] = match list_val.1 {
                     JsonLdVal::Array(items) => items.as_slice(),
-                    other => std::slice::from_ref(*other),
+                    other => {
+                        owned = [((*other).clone(), obj_span.clone())];
+                        &owned
+                    }
                 };
                 return Some(process_list(state, active, loader, items, obj_span, graph).await);
             }
@@ -1040,14 +1158,14 @@ async fn value_to_rdf<'a>(
 
 fn process_value_object(
     active: &ActiveContext,
-    map: &HashMap<&str, &JsonLdVal>,
+    map: &MemberMap<'_>,
     span: &Range<usize>,
 ) -> Option<Term> {
     let value = map.get("@value")?;
     let lang_val = map.get("@language");
     let type_val = map.get("@type");
 
-    let (value_str, is_complex) = match value {
+    let (value_str, is_complex) = match value.1 {
         JsonLdVal::Str(s) => (s.clone(), false),
         JsonLdVal::Bool(b) => (if *b { "true" } else { "false" }.to_string(), false),
         JsonLdVal::Number(n) => (n.clone(), false),
@@ -1055,7 +1173,7 @@ fn process_value_object(
     };
 
     let type_str = type_val.and_then(|t| {
-        if let JsonLdVal::Str(s) = t {
+        if let JsonLdVal::Str(s) = t.1 {
             Some(s.as_str())
         } else {
             None
@@ -1076,7 +1194,7 @@ fn process_value_object(
 
     // Language-tagged string
     let lang_tag = lang_val.and_then(|l| {
-        if let JsonLdVal::Str(s) = l {
+        if let JsonLdVal::Str(s) = l.1 {
             Some(s.as_str())
         } else {
             None
@@ -1108,7 +1226,7 @@ fn process_value_object(
     }
 
     // Infer type from the JSON value kind
-    let (inferred_ty, inferred_lang) = match value {
+    let (inferred_ty, inferred_lang) = match value.1 {
         JsonLdVal::Bool(_) => (Some(XSD_BOOLEAN), None),
         JsonLdVal::Number(n) => {
             if n.contains('.') || n.to_lowercase().contains('e') {
@@ -1144,9 +1262,9 @@ fn process_list<'a>(
     state: &'a mut ConvertState,
     active: &'a ActiveContext,
     loader: &'a mut dyn ContextLoader,
-    items: &'a [JsonLdVal],
+    items: &'a [(JsonLdVal, Range<usize>)],
     span: &'a Range<usize>,
-    graph: Option<&'a Term>,
+    graph: Option<(&'a Term, &'a Range<usize>)>,
 ) -> Pin<Box<dyn Future<Output = Term> + 'a>> {
     Box::pin(async move {
         if items.is_empty() {
@@ -1154,31 +1272,33 @@ fn process_list<'a>(
         }
         // Build the linked list in reverse
         let mut rest = ConvertState::named(RDF_NIL);
-        for item in items.iter().rev() {
-            let first_term = value_to_rdf(state, active, loader, item, span, graph, None)
+        for (item, item_span) in items.iter().rev() {
+            let first_term = value_to_rdf(state, active, loader, item, item_span, graph, None)
                 .await
                 .unwrap_or(Term::Invalid);
-            let node = state.fresh_blank(span.start);
+            let node = state.fresh_blank(item_span.start);
             state.add_triple(
-                node.clone(),
-                span.start..span.start,
-                ConvertState::named(RDF_FIRST),
-                first_term,
-                graph.cloned(),
-                span.clone(),
+                (node.clone(), item_span.start..item_span.start),
+                (ConvertState::named(RDF_FIRST), 0..0),
+                (first_term, item_span.clone()),
+                clone_graph(graph),
+                item_span.clone(),
             );
             state.add_triple(
-                node.clone(),
-                span.start..span.start,
-                ConvertState::named(RDF_REST),
-                rest,
-                graph.cloned(),
+                (node.clone(), item_span.start..item_span.start),
+                (ConvertState::named(RDF_REST), 0..0),
+                (rest, item_span.start..item_span.start),
+                clone_graph(graph),
                 span.clone(),
             );
             rest = node;
         }
         rest
     })
+}
+
+fn clone_graph(g: Option<(&'_ Term, &'_ Range<usize>)>) -> Option<(Term, Range<usize>)> {
+    g.map(|g| (g.0.clone(), g.1.clone()))
 }
 
 fn iri_or_blank(iri: String, offset: usize) -> Term {
@@ -1199,7 +1319,7 @@ fn json_serialize(val: &JsonLdVal) -> String {
             format!("{{{}}}", pairs.join(","))
         }
         JsonLdVal::Array(items) => {
-            let elems: Vec<String> = items.iter().map(json_serialize).collect();
+            let elems: Vec<String> = items.iter().map(|(item, _)| json_serialize(item)).collect();
             format!("[{}]", elems.join(","))
         }
         JsonLdVal::Str(s) => format!("\"{}\"", json_escape(s)),

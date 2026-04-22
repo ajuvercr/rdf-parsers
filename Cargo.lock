@@ -2539,6 +2539,7 @@ dependencies = [
 name = "rdf-parsers"
 version = "0.1.8"
 dependencies = [
+ "async-trait",
  "logos 0.16.1",
  "oxiri",
  "rowan",

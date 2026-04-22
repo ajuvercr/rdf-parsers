@@ -286,3 +286,14 @@ cl_open
 sq_close
 br_close
 cl_close
+=== format ===
+group GroupGraphPattern
+group PropertyListNotEmpty
+group ObjectList
+stop -> after: line
+colon -> before: space, after: line
+comma -> after: space
+sq_open -> after: indent line
+sq_close -> before: dedent line
+cl_open -> after: indent hardline
+cl_close -> before: dedent hardline

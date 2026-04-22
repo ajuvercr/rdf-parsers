@@ -99,3 +99,17 @@ curly_open
 sq_close
 cl_close
 curly_close
+=== format ===
+group predicateObjectList
+group blankNodePropertyList
+group wrappedGraph
+group collection
+stop -> after: hardline
+colon -> before: space, after: line
+comma -> after: space
+sq_open -> after: indent line
+sq_close -> before: dedent line
+cl_open -> after: indent line
+cl_close -> before: dedent line
+curly_open -> after: indent hardline
+curly_close -> before: dedent hardline

@@ -70234,3 +70234,308 @@ impl TokenTrait for SyntaxKind {
         }
     }
 }
+pub mod format {
+    use super::{SyntaxKind, SyntaxNode};
+    use crate::format::Doc;
+    use crate::TokenTrait;
+    use rowan::NodeOrToken;
+    #[derive(Default)]
+    struct Hints {
+        space: bool,
+        line: bool,
+        hardline: bool,
+        blankline: bool,
+        indent: bool,
+        dedent: bool,
+    }
+    impl Hints {
+        fn to_docs(&self) -> Vec<Doc> {
+            let mut v = Vec::new();
+            if self.indent {
+                v.push(Doc::nil());
+            }
+            if self.dedent {
+                v.push(Doc::nil());
+            }
+            if self.blankline {
+                v.push(Doc::HardLine);
+                v.push(Doc::HardLine);
+            } else if self.hardline {
+                v.push(Doc::HardLine);
+            } else if self.line {
+                v.push(Doc::Line);
+            } else if self.space {
+                v.push(Doc::text(" "));
+            }
+            v
+        }
+    }
+    fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
+        match (parent, token) {
+            (_, SyntaxKind::Stop) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::Colon) => (
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::Comma) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::ClOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (_, SyntaxKind::ClClose) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            _ => (Hints::default(), Hints::default()),
+        }
+    }
+    fn is_group(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::GroupGraphPattern
+                | SyntaxKind::PropertyListNotEmpty
+                | SyntaxKind::ObjectList
+        )
+    }
+    pub fn to_doc(node: &SyntaxNode) -> Doc {
+        let mut parts: Vec<Vec<Doc>> = vec![vec![]];
+        for child in node.children_with_tokens() {
+            match child {
+                NodeOrToken::Token(t) => {
+                    if t.kind() == SyntaxKind::WhiteSpace {
+                        continue;
+                    }
+                    if t.kind() == SyntaxKind::Comment {
+                        parts
+                            .last_mut()
+                            .unwrap()
+                            .push(Doc::text(t.text().to_string()));
+                        continue;
+                    }
+                    let (before, after) = format_hints(node.kind(), t.kind());
+                    if before.dedent && parts.len() > 1 {
+                        let nested = parts.pop().unwrap_or_default();
+                        let indent_doc = Doc::nest(2, Doc::concat(nested));
+                        parts.last_mut().unwrap().push(indent_doc);
+                    }
+                    parts.last_mut().unwrap().extend(
+                        before
+                            .to_docs()
+                            .into_iter()
+                            .filter(|d| !matches!(d, Doc::Nil)),
+                    );
+                    parts
+                        .last_mut()
+                        .unwrap()
+                        .push(Doc::text(t.text().to_string()));
+                    let after_line: Vec<Doc> = after
+                        .to_docs()
+                        .into_iter()
+                        .filter(|d| !matches!(d, Doc::Nil))
+                        .collect();
+                    if after.indent {
+                        parts.push(after_line);
+                    } else {
+                        parts.last_mut().unwrap().extend(after_line);
+                    }
+                }
+                NodeOrToken::Node(n) => {
+                    if n.kind() == SyntaxKind::ERROR {
+                        parts
+                            .last_mut()
+                            .unwrap()
+                            .push(Doc::text(n.text().to_string()));
+                        continue;
+                    }
+                    let is_terminal_wrapper = {
+                        let mut it = n.children_with_tokens().filter(|c| match c {
+                            NodeOrToken::Token(t) => t.kind() != SyntaxKind::WhiteSpace,
+                            NodeOrToken::Node(_) => true,
+                        });
+                        matches!(it.next(), Some(NodeOrToken::Token(_))) && it.next().is_none()
+                    };
+                    if is_terminal_wrapper {
+                        let token_text = n.text().to_string();
+                        let (before, after) = format_hints(node.kind(), n.kind());
+                        if before.dedent && parts.len() > 1 {
+                            let nested = parts.pop().unwrap_or_default();
+                            let indent_doc = Doc::nest(2, Doc::concat(nested));
+                            parts.last_mut().unwrap().push(indent_doc);
+                        }
+                        parts.last_mut().unwrap().extend(
+                            before
+                                .to_docs()
+                                .into_iter()
+                                .filter(|d| !matches!(d, Doc::Nil)),
+                        );
+                        parts.last_mut().unwrap().push(Doc::text(token_text));
+                        let after_line: Vec<Doc> = after
+                            .to_docs()
+                            .into_iter()
+                            .filter(|d| !matches!(d, Doc::Nil))
+                            .collect();
+                        if after.indent {
+                            parts.push(after_line);
+                        } else {
+                            parts.last_mut().unwrap().extend(after_line);
+                        }
+                    } else {
+                        let (before, after) = format_hints(node.kind(), n.kind());
+                        if before.dedent && parts.len() > 1 {
+                            let nested = parts.pop().unwrap_or_default();
+                            let indent_doc = Doc::nest(2, Doc::concat(nested));
+                            parts.last_mut().unwrap().push(indent_doc);
+                        }
+                        parts.last_mut().unwrap().extend(
+                            before
+                                .to_docs()
+                                .into_iter()
+                                .filter(|d| !matches!(d, Doc::Nil)),
+                        );
+                        let child_doc = to_doc(&n);
+                        let child_doc = if is_group(n.kind()) {
+                            Doc::group(child_doc)
+                        } else {
+                            child_doc
+                        };
+                        parts.last_mut().unwrap().push(child_doc);
+                        let after_line: Vec<Doc> = after
+                            .to_docs()
+                            .into_iter()
+                            .filter(|d| !matches!(d, Doc::Nil))
+                            .collect();
+                        if after.indent {
+                            parts.push(after_line);
+                        } else {
+                            parts.last_mut().unwrap().extend(after_line);
+                        }
+                    }
+                }
+            }
+        }
+        while parts.len() > 1 {
+            let nested = parts.pop().unwrap();
+            parts
+                .last_mut()
+                .unwrap()
+                .push(Doc::nest(2, Doc::concat(nested)));
+        }
+        Doc::concat(parts.pop().unwrap_or_default())
+    }
+    pub fn format(node: &SyntaxNode, width: usize) -> String {
+        let doc = to_doc(node);
+        crate::format::render(&doc, width)
+    }
+}

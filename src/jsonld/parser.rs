@@ -1087,6 +1087,7 @@ pub mod format {
         space: bool,
         line: bool,
         hardline: bool,
+        blankline: bool,
         indent: bool,
         dedent: bool,
     }
@@ -1099,7 +1100,10 @@ pub mod format {
             if self.dedent {
                 v.push(Doc::nil());
             }
-            if self.hardline {
+            if self.blankline {
+                v.push(Doc::HardLine);
+                v.push(Doc::HardLine);
+            } else if self.hardline {
                 v.push(Doc::HardLine);
             } else if self.line {
                 v.push(Doc::Line);
@@ -1116,6 +1120,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1123,6 +1128,7 @@ pub mod format {
                     space: false,
                     line: true,
                     hardline: false,
+                    blankline: false,
                     indent: true,
                     dedent: false,
                 },
@@ -1132,6 +1138,7 @@ pub mod format {
                     space: false,
                     line: true,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: true,
                 },
@@ -1139,6 +1146,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1148,6 +1156,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1155,6 +1164,7 @@ pub mod format {
                     space: false,
                     line: true,
                     hardline: false,
+                    blankline: false,
                     indent: true,
                     dedent: false,
                 },
@@ -1164,6 +1174,7 @@ pub mod format {
                     space: false,
                     line: true,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: true,
                 },
@@ -1171,6 +1182,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1180,6 +1192,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1187,6 +1200,7 @@ pub mod format {
                     space: false,
                     line: true,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1196,6 +1210,7 @@ pub mod format {
                     space: false,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1203,6 +1218,7 @@ pub mod format {
                     space: true,
                     line: false,
                     hardline: false,
+                    blankline: false,
                     indent: false,
                     dedent: false,
                 },
@@ -1296,6 +1312,18 @@ pub mod format {
                             parts.last_mut().unwrap().extend(after_line);
                         }
                     } else {
+                        let (before, after) = format_hints(node.kind(), n.kind());
+                        if before.dedent && parts.len() > 1 {
+                            let nested = parts.pop().unwrap_or_default();
+                            let indent_doc = Doc::nest(2, Doc::concat(nested));
+                            parts.last_mut().unwrap().push(indent_doc);
+                        }
+                        parts.last_mut().unwrap().extend(
+                            before
+                                .to_docs()
+                                .into_iter()
+                                .filter(|d| !matches!(d, Doc::Nil)),
+                        );
                         let child_doc = to_doc(&n);
                         let child_doc = if is_group(n.kind()) {
                             Doc::group(child_doc)
@@ -1303,6 +1331,16 @@ pub mod format {
                             child_doc
                         };
                         parts.last_mut().unwrap().push(child_doc);
+                        let after_line: Vec<Doc> = after
+                            .to_docs()
+                            .into_iter()
+                            .filter(|d| !matches!(d, Doc::Nil))
+                            .collect();
+                        if after.indent {
+                            parts.push(after_line);
+                        } else {
+                            parts.last_mut().unwrap().extend(after_line);
+                        }
                     }
                 }
             }
