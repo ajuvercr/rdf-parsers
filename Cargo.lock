@@ -2537,7 +2537,7 @@ dependencies = [
 
 [[package]]
 name = "rdf-parsers"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "async-trait",
  "logos 0.16.1",
