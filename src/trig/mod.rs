@@ -38,8 +38,8 @@ mod format_tests {
     fn format_triple_long_bn_subject() {
         let input =
             r#"[ ] a foaf:Agent; foaf:account "test"; rml:constant 5; rml:template "Testing". "#;
-        let output = "[ ] a foaf:Agent;\n  foaf:account \"test\";\n  rml:constant 5;\n  rml:template \"Testing\".";
-        assert_eq!(&format_trig(input, 80), output);
+        let output = "[ ] a foaf:Agent;\n  foaf:account \"test\";\n  rml:constant 5;\n  rml:template \"Testing\".\n";
+        assert_eq!(&format_trig(input, 70), output);
     }
 
     #[test]
@@ -141,7 +141,7 @@ mod format_tests {
         let out = format_trig(input, 16);
         assert_eq!(
             out,
-            "GRAPH <b> {\n  [\n    <a> <b>; <a> <b>\n  ] a foaf:Friend\n}\n"
+            "GRAPH <b> {\n  [\n    <a> <b>;\n    <a> <b>\n  ] a foaf:Friend\n}\n"
         );
     }
 }

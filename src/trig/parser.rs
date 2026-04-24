@@ -4209,6 +4209,96 @@ pub mod format {
                     dedent: false,
                 },
             ),
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNode, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
             (SyntaxKind::PrefixId, SyntaxKind::PnameNs) => (
                 Hints {
                     space: false,
@@ -4301,48 +4391,12 @@ pub mod format {
             ),
             (_, SyntaxKind::Object) => (
                 Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-            ),
-            (_, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                },
-            ),
-            (_, SyntaxKind::SqClose) => (
-                Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
+                    dedent: false,
                 },
                 Hints {
                     space: false,
@@ -4558,6 +4612,7 @@ pub mod format {
         matches!(
             kind,
             SyntaxKind::PredicateObjectList
+                | SyntaxKind::ObjectList
                 | SyntaxKind::WrappedGraph
                 | SyntaxKind::Collection
                 | SyntaxKind::BlankNodePropertyList
@@ -4692,6 +4747,7 @@ pub mod format {
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         let doc = to_doc(node);
         let s = crate::format::render(&doc, width);
-        s.trim_start_matches('\n').to_string()
+        let s = s.trim_start_matches('\n').trim_end_matches('\n');
+        format!("{s}\n")
     }
 }

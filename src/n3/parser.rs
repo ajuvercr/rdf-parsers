@@ -5364,6 +5364,24 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
+            (SyntaxKind::ObjectList, SyntaxKind::Comma) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
             (_, SyntaxKind::Stop) => (
                 Hints {
                     space: false,
@@ -5533,6 +5551,7 @@ pub mod format {
         matches!(
             kind,
             SyntaxKind::PredicateObjectList
+                | SyntaxKind::ObjectList
                 | SyntaxKind::BlankNodePropertyList
                 | SyntaxKind::Collection
         )
@@ -5665,6 +5684,7 @@ pub mod format {
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         let doc = to_doc(node);
         let s = crate::format::render(&doc, width);
-        s.trim_start_matches('\n').to_string()
+        let s = s.trim_start_matches('\n').trim_end_matches('\n');
+        format!("{s}\n")
     }
 }

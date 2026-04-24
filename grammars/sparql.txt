@@ -289,11 +289,65 @@ cl_close
 === format ===
 group GroupGraphPattern
 group PropertyListNotEmpty
+group PropertyListPathNotEmpty
 group ObjectList
-stop -> after: line
-colon -> before: space, after: line
-comma -> after: space
-sq_open -> after: indent line
-sq_close -> before: dedent line
+group ObjectListPath
+blankNodePropertyList.sq_open -> after: indent line
+blankNodePropertyList.sq_close -> before: dedent line
+blankNodePropertyListPath.sq_open -> after: indent line
+blankNodePropertyListPath.sq_close -> before: dedent line
 cl_open -> after: indent hardline
-cl_close -> before: dedent hardline
+cl_close -> before: dedent hardline, after: hardline
+stop -> after: hardline
+colon -> after: line
+comma -> after: space
+TriplesSameSubject -> before: indent, after: dedent
+triplesSameSubject.propertyListNotEmpty -> before: space
+triplesSameSubjectPath.propertyListPathNotEmpty -> before: space
+objectList -> before: space
+objectListPath -> before: space
+objectList.comma -> after: line
+objectListPath.comma -> after: line
+query.selectQuery -> before: blankline
+query.constructQuery -> before: blankline
+query.describeQuery -> before: blankline
+query.askQuery -> before: blankline
+prefixDecl -> before: hardline
+prefixDecl.sparql_prefix_token -> after: space
+prefixDecl.pname_ns -> after: space
+baseDecl -> before: hardline
+baseDecl.sparql_base_token -> after: space
+whereClause -> before: hardline
+where_lit -> after: space
+selectClause.var -> before: space
+selectClause.distinct_lit -> before: space
+selectClause.reduced_lit -> before: space
+selectClause.star -> before: space
+orderClause -> after: hardline
+orderClause.order_lit -> after: space
+groupClause -> after: hardline
+groupClause.group_lit -> after: space
+havingClause -> after: hardline
+havingClause.having_lit -> after: space
+limitClause -> after: hardline
+limitClause.limit_lit -> after: space
+offsetClause -> after: hardline
+offsetClause.offset_lit -> after: space
+by_lit -> after: space
+as_lit -> before: space, after: space
+selectClause.br_open -> before: space
+optional_lit -> after: space
+graph_lit -> after: space
+service_lit -> after: space
+filter_lit -> after: space
+bind_lit -> after: space
+minus_lit -> after: space
+values_lit -> after: space
+groupOrUnionGraphPattern.union_lit -> before: hardline, after: hardline
+datasetClause -> before: space
+from_lit -> after: space
+named_lit -> after: space
+construct_lit -> after: space
+describe_lit -> after: space
+graphGraphPattern.groupGraphPattern -> before: space
+serviceGraphPattern.groupGraphPattern -> before: space

@@ -98,6 +98,7 @@ cl_close
 curly_close
 === format ===
 group predicateObjectList
+group objectList
 group wrappedGraph
 group collection
 group blankNodePropertyList
@@ -107,9 +108,12 @@ subject -> after: indent
 colon -> after: line
 stop -> after: hardline
 block -> before: hardline
-object -> before: space
-sq_open -> after: indent line
-sq_close -> before: dedent line
+object -> before: line
+blankNodePropertyList.sq_open -> after: indent line
+blankNodePropertyList.sq_close -> before: dedent line
+blankNodePropertyList2.sq_open -> after: indent line
+blankNodePropertyList2.sq_close -> before: dedent line
+BlankNode.sq_open -> after: space
 cl_open -> after: indent line
 cl_close -> before: dedent line
 triplesBlock -> before: line, after: line

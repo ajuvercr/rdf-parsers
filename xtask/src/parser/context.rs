@@ -182,7 +182,7 @@ fn format_section_parser<'src>() -> impl Parser<'src, &'src str, CtxBlock, Err<R
         .then_ignore(just('\n').or_not())
         .map(CtxLine::Group);
 
-    let line = group_line.or(hint_line);
+    let line = hint_line.or(group_line);
 
     section_header("format", "===")
         .ignore_then(line.repeated().collect::<Vec<_>>())

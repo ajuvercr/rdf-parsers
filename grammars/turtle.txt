@@ -88,6 +88,7 @@ sq_close
 cl_close
 === format ===
 group predicateObjectList
+group objectList
 group blankNodePropertyList
 group blankNodePropertyList2
 group collection
@@ -96,9 +97,13 @@ subject -> after: indent
 colon -> after: line
 stop -> after: hardline
 statement.triples -> before: hardline
-object -> before: space
-sq_open -> after: indent line
-sq_close -> before: dedent line
+objectList -> before: space
+objectList.comma -> after: line
+blankNodePropertyList.sq_open -> after: indent line
+blankNodePropertyList.sq_close -> before: dedent line
+blankNodePropertyList2.sq_open -> after: indent line
+blankNodePropertyList2.sq_close -> before: dedent line
+BlankNode.sq_open -> after: space
 cl_open -> after: indent line
 cl_close -> before: dedent line
 prefixId.prefix_token -> after: space

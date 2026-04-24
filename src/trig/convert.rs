@@ -265,9 +265,11 @@ fn convert_blank(node: &Node) -> Term {
 }
 
 fn convert_object(node: &Node) -> Term {
-    // In trig: object ::= iri | blank | blankNodePropertyList | literal
+    // In trig: object ::= iri | blank | blankNodePropertyList2 | blankNodePropertyList | literal
     if let Some(iri) = child(node, SyntaxKind::Iri) {
         Term::NamedNode(convert_iri(&iri))
+    } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList2) {
+        convert_blank_node_property_list(&bpl)
     } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
         convert_blank_node_property_list(&bpl)
     } else if let Some(lit) = child(node, SyntaxKind::Literal) {

@@ -2608,7 +2608,7 @@ mod tests {
         // Prettier-style: spaces inside braces in flat mode (Line → " ").
         let input = r#"{"a": 1, "b": 2}"#;
         let out = format_jsonld(input, 80);
-        assert_eq!(out, r#"{ "a": 1, "b": 2 }"#);
+        assert_eq!(out, "{ \"a\": 1, \"b\": 2 }\n");
     }
 
     #[test]
@@ -2616,14 +2616,14 @@ mod tests {
         // An object too wide for the column limit expands to one member per line.
         let input = r#"{"key": "value"}"#;
         let out = format_jsonld(input, 10);
-        assert_eq!(out, "{\n  \"key\": \"value\"\n}");
+        assert_eq!(out, "{\n  \"key\": \"value\"\n}\n");
     }
 
     #[test]
     fn format_multiple_members_break() {
         let input = r#"{"a":1,"b":2,"c":3}"#;
         let out = format_jsonld(input, 10);
-        assert_eq!(out, "{\n  \"a\": 1,\n  \"b\": 2,\n  \"c\": 3\n}");
+        assert_eq!(out, "{\n  \"a\": 1,\n  \"b\": 2,\n  \"c\": 3\n}\n");
     }
 
     #[test]
@@ -2631,7 +2631,7 @@ mod tests {
         // Both inner and outer fit at wide width — both stay flat.
         let input = r#"{"outer":{"inner":1}}"#;
         let out = format_jsonld(input, 80);
-        assert_eq!(out, r#"{ "outer": { "inner": 1 } }"#);
+        assert_eq!(out, "{ \"outer\": { \"inner\": 1 } }\n");
     }
 
     #[test]

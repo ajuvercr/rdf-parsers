@@ -3588,6 +3588,114 @@ pub mod format {
                     dedent: false,
                 },
             ),
+            (SyntaxKind::ObjectList, SyntaxKind::Comma) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: true,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: true,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
+            (SyntaxKind::BlankNode, SyntaxKind::SqOpen) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                },
+            ),
             (SyntaxKind::PrefixId, SyntaxKind::PrefixToken) => (
                 Hints {
                     space: false,
@@ -3750,7 +3858,7 @@ pub mod format {
                     dedent: false,
                 },
             ),
-            (_, SyntaxKind::Object) => (
+            (_, SyntaxKind::ObjectList) => (
                 Hints {
                     space: true,
                     line: false,
@@ -3758,42 +3866,6 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-            ),
-            (_, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                },
-            ),
-            (_, SyntaxKind::SqClose) => (
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: true,
                 },
                 Hints {
                     space: false,
@@ -3847,6 +3919,7 @@ pub mod format {
         matches!(
             kind,
             SyntaxKind::PredicateObjectList
+                | SyntaxKind::ObjectList
                 | SyntaxKind::BlankNodePropertyList
                 | SyntaxKind::BlankNodePropertyList2
                 | SyntaxKind::Collection
@@ -3980,6 +4053,7 @@ pub mod format {
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         let doc = to_doc(node);
         let s = crate::format::render(&doc, width);
-        s.trim_start_matches('\n').to_string()
+        let s = s.trim_start_matches('\n').trim_end_matches('\n');
+        format!("{s}\n")
     }
 }

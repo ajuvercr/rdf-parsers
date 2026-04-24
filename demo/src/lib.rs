@@ -231,6 +231,7 @@ pub struct ParseResult {
     ariadne: String,
     ast: String,
     triples: String,
+    formatted: String,
 }
 
 #[wasm_bindgen]
@@ -249,16 +250,21 @@ impl ParseResult {
     pub fn triples(&self) -> String {
         self.triples.clone()
     }
+
+    #[wasm_bindgen(getter)]
+    pub fn formatted(&self) -> String {
+        self.formatted.clone()
+    }
 }
 
-/// Parse `text` incrementally against `prev`, render both the ariadne error
-/// report and the AST string, and optionally write the new token stream back
-/// into `prev` for the next incremental parse.
+/// Parse `text` incrementally against `prev`, render the ariadne error report,
+/// AST, triples, and formatted output.
 fn parse_language<T, L>(
     root: T,
     text: &str,
     prev: &RefCell<Option<PrevParseInfo>>,
-    convert_fn: impl FnOnce(&Parse) -> Turtle,
+    convert_fn: impl FnOnce(&rowan::SyntaxNode<L>) -> Turtle,
+    format_fn: impl FnOnce(&rowan::SyntaxNode<L>) -> String,
 ) -> ParseResult
 where
     T: ParserTrait + 'static + Clone,
@@ -272,12 +278,15 @@ where
         parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
     };
     let pairs = get_error_range_pairs::<L>(&parse);
-    let turtle = convert_fn(&parse);
+    let syntax_root = parse.syntax::<L>();
+    let turtle = convert_fn(&syntax_root);
+    let formatted = format_fn(&syntax_root);
     *prev.borrow_mut() = Some(new_prev);
     ParseResult {
         ariadne: render_ariadne(&pairs, text, "input"),
         ast: render_ast::<L>(&parse, &pairs),
         triples: render_triples(&turtle),
+        formatted,
     }
 }
 
@@ -331,35 +340,49 @@ impl rdf_parsers::jsonld::convert::ContextLoader for WasmFetchLoader {
 pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
     Ok(match language {
         "turtle" => PREV_TURTLE.with(|prev| {
-            parse_language::<_, Lang>(Rule::new(SyntaxKind::TurtleDoc), text, prev, |p| {
-                rdf_parsers::turtle::convert::convert(&p.syntax::<Lang>())
-            })
+            parse_language::<_, Lang>(
+                Rule::new(SyntaxKind::TurtleDoc),
+                text,
+                prev,
+                |n| rdf_parsers::turtle::convert::convert(n),
+                |n| rdf_parsers::turtle::parser::format::format(n, 40),
+            )
         }),
         "sparql" => PREV_SPARQL.with(|prev| {
             parse_language::<_, SparqlLang>(
                 SparqlRule::new(SparqlSyntaxKind::QueryUnit),
                 text,
                 prev,
-                |p| rdf_parsers::sparql::convert::convert(&p.syntax::<SparqlLang>()),
+                |n| rdf_parsers::sparql::convert::convert(n),
+                |n| rdf_parsers::sparql::parser::format::format(n, 80),
             )
         }),
         "trig" => PREV_TRIG.with(|prev| {
-            parse_language::<_, TrigLang>(TrigRule::new(TrigSyntaxKind::TrigDoc), text, prev, |p| {
-                rdf_parsers::trig::convert::convert(&p.syntax::<TrigLang>())
-            })
+            parse_language::<_, TrigLang>(
+                TrigRule::new(TrigSyntaxKind::TrigDoc),
+                text,
+                prev,
+                |n| rdf_parsers::trig::convert::convert(n),
+                |n| rdf_parsers::trig::parser::format::format(n, 80),
+            )
         }),
         "ntriples" => PREV_NTRIPLES.with(|prev| {
             parse_language::<_, NTriplesLang>(
                 NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc),
                 text,
                 prev,
-                |p| rdf_parsers::ntriples::convert::convert(&p.syntax::<NTriplesLang>()),
+                |n| rdf_parsers::ntriples::convert::convert(n),
+                |n| rdf_parsers::ntriples::parser::format::format(n, 80),
             )
         }),
         "n3" => PREV_N3.with(|prev| {
-            parse_language::<_, N3Lang>(N3Rule::new(N3SyntaxKind::N3Doc), text, prev, |p| {
-                rdf_parsers::n3::convert::convert(&p.syntax::<N3Lang>())
-            })
+            parse_language::<_, N3Lang>(
+                N3Rule::new(N3SyntaxKind::N3Doc),
+                text,
+                prev,
+                |n| rdf_parsers::n3::convert::convert(n),
+                |n| rdf_parsers::n3::parser::format::format(n, 80),
+            )
         }),
         "jsonld" => {
             // Parse the CST synchronously (updates the incremental cache),
@@ -386,10 +409,12 @@ pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 rdf_parsers::jsonld::convert::convert_with_loader(&root, &mut cache, None).await;
             JSONLD_CACHE.set(cache);
 
+            let formatted = rdf_parsers::jsonld::parser::format::format(&root, 80);
             ParseResult {
                 ariadne: render_ariadne(&pairs, text, "input"),
                 ast: render_ast::<JsonLdLang>(&parse, &pairs),
                 triples: render_triples(&turtle),
+                formatted,
             }
         }
         _ => return Err("Unknown language".into()),

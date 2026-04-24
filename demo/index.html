@@ -477,11 +477,15 @@
                 <div class="pane-label" style="display:flex;align-items:center;gap:0;">
                     <button class="ast-tab active" data-tab="triples">Derived Triples</button>
                     <button class="ast-tab" data-tab="ast">AST</button>
+                    <button class="ast-tab" data-tab="format">Format</button>
                 </div>
                 <div class="editor-wrap" id="triples-wrap">
                     <textarea id="triples-output"></textarea>
                 </div>
                 <pre id="ast-output" class="output-panel loading" style="display:none;">Initializing…</pre>
+                <div class="editor-wrap" id="format-wrap" style="display:none;">
+                    <textarea id="format-output"></textarea>
+                </div>
             </div>
         </div>
     </div>
@@ -582,6 +586,7 @@ GRAPH ex:metadata {
         const status = document.getElementById('status');
         const tabs = document.querySelectorAll('.lang-tab');
         const astTabs = document.querySelectorAll('.ast-tab');
+        const formatWrap = document.getElementById('format-wrap');
         const ansiUp = new AnsiUp();
 
         // Draggable vertical split
@@ -643,6 +648,14 @@ GRAPH ex:metadata {
             tabSize: 2,
         });
 
+        const formatCm = CodeMirror.fromTextArea(document.getElementById('format-output'), {
+            mode: MODES.turtle,
+            theme: 'dracula',
+            lineNumbers: true,
+            readOnly: true,
+            tabSize: 2,
+        });
+
         // Per-language saved content — starts from samples, preserves edits.
         const savedContent = {...SAMPLES};
 
@@ -650,14 +663,16 @@ GRAPH ex:metadata {
         let wasmReady = false;
         let debounceTimer = null;
 
-        // AST/Triples tab switching
+        // AST/Triples/Format tab switching
         let currentAstTab = 'triples';
         function switchAstTab(tab) {
             currentAstTab = tab;
             astTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
             astOutput.style.display = tab === 'ast' ? '' : 'none';
             triplesWrap.style.display = tab === 'triples' ? '' : 'none';
+            formatWrap.style.display = tab === 'format' ? '' : 'none';
             if (tab === 'triples') triplesCm.refresh();
+            if (tab === 'format') formatCm.refresh();
         }
         astTabs.forEach(tab => tab.addEventListener('click', () => switchAstTab(tab.dataset.tab)));
 
@@ -665,7 +680,7 @@ GRAPH ex:metadata {
             if (!wasmReady) return;
             const text = cm.getValue();
             const t0 = performance.now();
-            const {ariadne, ast, triples} = await parse(currentLang, text);
+            const {ariadne, ast, triples, formatted} = await parse(currentLang, text);
             const elapsed = (performance.now() - t0).toFixed(1);
 
             const noErrors = ariadne.startsWith('No errors');
@@ -673,6 +688,7 @@ GRAPH ex:metadata {
             output.className = 'output-panel' + (noErrors ? ' no-errors' : '');
             astOutput.textContent = ast;
             triplesCm.setValue(triples);
+            formatCm.setValue(formatted);
             status.textContent = (noErrors ? 'No errors' : 'Errors found') + ` · ${elapsed} ms`;
             status.className = 'status ' + (noErrors ? 'ok' : 'err');
         }
@@ -687,6 +703,7 @@ GRAPH ex:metadata {
             currentLang = lang;
             tabs.forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
             cm.setOption('mode', MODES[lang]);
+            formatCm.setOption('mode', MODES[lang]);
             cm.setValue(savedContent[lang]);              // restore saved content
             runParse();
         }
