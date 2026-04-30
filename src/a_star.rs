@@ -286,13 +286,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
                     pos += 1;
                 }
-                if let Some(tok) = self.tokens.get(pos) {
-                    let d = head.state_dist(&tok.kind);
-                    if d > 0 {
-                        // was element.h += d;
-                        element.h = element.h.max(d);
-                    }
-                }
+                let new_d = self
+                    .tokens
+                    .get(pos)
+                    .map(|tok| head.state_dist(&tok.kind).max(0))
+                    .unwrap_or(0);
+                element.h = element.h - element.dist + new_d;
+                element.dist = new_d;
             }
         }
 
@@ -414,6 +414,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                         .consecutive_errors
                                         .saturating_add(1),
                                     shifts_since_pop: element.shifts_since_pop,
+                                    dist: element.dist,
                                 });
                                 (insert_error, 50)
                             } else {
@@ -435,6 +436,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                         .consecutive_errors
                                         .saturating_add(1),
                                     shifts_since_pop: element.shifts_since_pop,
+                                    dist: element.dist,
                                 });
                                 // One-time delta-adoption cost: proportional to how much
                                 // the assumed delta changes.  When depth info is unavailable
@@ -478,6 +480,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     current_depth: new_depth,
                     consecutive_errors: 0, // successful match resets counter
                     shifts_since_pop: element.shifts_since_pop.saturating_add(1),
+                    dist: 0, // h is a fresh suffix-sum; no dist folded in yet
                 };
 
                 return (matched, fallback);
@@ -502,6 +505,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             current_depth: element.current_depth,
             consecutive_errors: element.consecutive_errors.saturating_add(1),
             shifts_since_pop: element.shifts_since_pop,
+            dist: 0, // h is a fresh suffix-sum
         };
 
         (error, None)
@@ -564,6 +568,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             current_depth: element.current_depth,
             consecutive_errors: element.consecutive_errors.saturating_add(1),
             shifts_since_pop: element.shifts_since_pop,
+            dist: 0, // h is a fresh suffix-sum
         };
         self.add_element(del_element);
     }
@@ -629,6 +634,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         current_depth: element.current_depth,
                         consecutive_errors: 0,
                         shifts_since_pop: 0, // sync resets — we popped to ancestor
+                        dist: 0, // h is a fresh suffix-sum
                     };
 
                     let f = candidate.cost + candidate.h;
@@ -689,6 +695,12 @@ pub struct Element<R: ParserTrait> {
     /// `dist(q, a)` is exact (not diluted by the conservative pop = 0 fallback).
     /// This enables hard pruning of unreachable branches.
     shifts_since_pop: u16,
+    /// The `state_dist(next_token)` value already folded into `h`.  Maintained
+    /// so that `add_element` can replace it exactly (`h = h - dist + new_d`)
+    /// rather than accumulating it across push/pop expansions at the same token
+    /// position.  Invariant: `h = h_suffix + dist`.  Reset to 0 whenever `h`
+    /// is assigned a fresh suffix-sum value.
+    dist: isize,
 }
 impl<R: ParserTrait> PartialEq for Element<R> {
     fn eq(&self, other: &Self) -> bool {
@@ -711,6 +723,7 @@ impl<R: ParserTrait> Element<R> {
             current_depth: 0,
             consecutive_errors: 0,
             shifts_since_pop: 0,
+            dist: 0,
         }
     }
 
@@ -728,6 +741,7 @@ impl<R: ParserTrait> Element<R> {
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
             shifts_since_pop: self.shifts_since_pop,
+            dist: self.dist,
         }
     }
 
@@ -748,6 +762,7 @@ impl<R: ParserTrait> Element<R> {
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
             shifts_since_pop: self.shifts_since_pop,
+            dist: self.dist,
         }
     }
 
@@ -766,6 +781,7 @@ impl<R: ParserTrait> Element<R> {
             current_depth: self.current_depth,
             consecutive_errors: self.consecutive_errors,
             shifts_since_pop: 0, // reduction resets t counter
+            dist: self.dist,
         })
     }
 }
