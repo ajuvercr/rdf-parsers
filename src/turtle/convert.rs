@@ -685,6 +685,16 @@ mod tests {
     }
 
     #[test]
+    fn test_verb_is_verb() {
+        let p = parse("<a> <b>.");
+        let predicate = p.triples[0].po[0].predicate.value();
+        assert!(nn_eq(
+            term_nn(predicate),
+            &NamedNode::Full("b".to_string(), 0)
+        ))
+    }
+
+    #[test]
     fn test_missing_trailing_dot_reports_error() {
         let p = parse_raw("@prefix ex: <http://example.org/> . ex:alice ex:age 30");
         assert!(
