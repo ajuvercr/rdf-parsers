@@ -285,7 +285,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 if let Some(tok) = self.tokens.get(pos) {
                     let d = head.state_dist(&tok.kind);
                     if d > 0 {
-                        element.h += d;
+                        // was element.h += d;
+                        element.h = element.h.max(d);
                     }
                 }
             }
