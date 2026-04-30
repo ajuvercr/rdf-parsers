@@ -1722,7 +1722,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         #[repr(u16)]
         pub enum SyntaxKind {
             Eof = 0,
-            #[regex(r"[ \t\n]+")]
+            #[regex(r"[ \t\n\r]+")]
             WhiteSpace,
             #[regex(r"#[^\n]+", allow_greedy=true)]
             Comment,
@@ -1989,8 +1989,6 @@ fn format_hint_arm_default_tuple(entry: &FormatEntry) -> proc_macro2::TokenStrea
 
     quote! { (#before, #after) }
 }
-
-
 
 fn get_sub_patterns(rules: &[Rule]) -> Vec<proc_macro2::TokenStream> {
     let ordered_rules = order_rules_by_references(rules).unwrap();

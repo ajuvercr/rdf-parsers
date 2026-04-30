@@ -7,7 +7,7 @@ pub type SyntaxNode = rowan::SyntaxNode<Lang>;
 #[repr(u16)]
 pub enum SyntaxKind {
     Eof = 0,
-    #[regex(r"[ \t\n]+")]
+    #[regex(r"[ \t\n\r]+")]
     WhiteSpace,
     #[regex(r"#[^\n]+", allow_greedy = true)]
     Comment,
