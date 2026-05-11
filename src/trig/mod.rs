@@ -14,7 +14,6 @@ mod format_tests {
         let rule = Rule::new(SyntaxKind::TrigDoc);
         let (result, _) = parse(rule, input);
         let root = result.syntax::<Lang>();
-        println!("{:#?}", root);
         crate::trig::parser::format::format(&root, width)
     }
 

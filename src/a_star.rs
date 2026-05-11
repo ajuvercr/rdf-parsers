@@ -192,7 +192,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // Enforce the iteration budget before expanding this element.
                 // In Fast mode max_iterations is usize::MAX, so this never fires.
                 if self.iterations >= self.max_iterations {
-                    println!("Max iterations reached");
+                    eprintln!("Max iterations reached");
                     break;
                 }
 
@@ -634,7 +634,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                         current_depth: element.current_depth,
                         consecutive_errors: 0,
                         shifts_since_pop: 0, // sync resets — we popped to ancestor
-                        dist: 0, // h is a fresh suffix-sum
+                        dist: 0,             // h is a fresh suffix-sum
                     };
 
                     let f = candidate.cost + candidate.h;

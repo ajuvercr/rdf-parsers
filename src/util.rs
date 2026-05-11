@@ -16,7 +16,6 @@ where
         .filter(|x| x.text_range().end() == at)
         .next()
     {
-        println!("end {:?}", end);
         out.extend(end.kind().ending_tokens().iter());
     }
 
@@ -25,13 +24,10 @@ where
         .filter(|x| x.text_range().start() == at)
         .next()
     {
-        println!("start {:?}", end);
-
         out.extend(end.kind().starting_tokens().iter());
     }
 
     if let Some(end) = n.token_at_offset(at).left_biased() {
-        println!("self {:?}", end);
         out.extend(end.kind().ending_tokens().iter());
     }
 

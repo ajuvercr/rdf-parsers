@@ -184,8 +184,6 @@ fn convert_triples(node: &Node) -> Triple {
         (Spanned(Term::Invalid, text_range(node)), None)
     };
 
-    println!("predicate_object list {:#?}", po_node);
-
     let po = po_node
         .map(|n| convert_predicate_object_list(&n))
         .unwrap_or_default();
