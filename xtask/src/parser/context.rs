@@ -75,6 +75,11 @@ pub struct Context {
     pub rename: HashMap<String, String>,
     with: HashMap<String, String>,
     pub error_values: HashMap<String, isize>,
+    /// Per-token deletion cost overrides.  When present, `deletion_cost()`
+    /// returns this value instead of the default `5 × max_error_value()`.
+    /// Use this to make keywords cheap to delete (skip over) even when their
+    /// `error_value` is high (expensive to insert).
+    pub deletion_values: HashMap<String, isize>,
     /// Tokens whose `bracket_delta()` is +1 (openers: `{`, `[`, `(`).
     pub bracket_openers: Vec<String>,
     /// Tokens whose `bracket_delta()` is -1 (closers: `}`, `]`, `)`).
@@ -118,6 +123,7 @@ enum CtxBlock {
     Rename(Vec<(String, String)>),
     With(Vec<(String, String)>),
     ErrorValues(Vec<(String, isize)>),
+    DeletionValues(Vec<(String, isize)>),
     BracketOpeners(Vec<String>),
     BracketClosers(Vec<String>),
     Format(Vec<String>, Vec<FormatEntry>),
@@ -238,13 +244,22 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .map(CtxBlock::With);
 
     let error_values = section_header("error_value", "===")
-        .ignore_then(mapping)
+        .ignore_then(mapping.clone())
         .map(|vs| {
             vs.into_iter()
                 .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
                 .collect::<Vec<_>>()
         })
         .map(CtxBlock::ErrorValues);
+
+    let deletion_values = section_header("deletion_value", "===")
+        .ignore_then(mapping)
+        .map(|vs| {
+            vs.into_iter()
+                .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
+                .collect::<Vec<_>>()
+        })
+        .map(CtxBlock::DeletionValues);
 
     let bracket_openers = section_header("bracket_open", "===")
         .ignore_then(name_list.clone())
@@ -257,6 +272,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
     let block = rename
         .or(with)
         .or(error_values)
+        .or(deletion_values)
         .or(bracket_openers)
         .or(bracket_closers)
         .or(format_section_parser());
@@ -271,6 +287,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                     CtxBlock::Rename(entries) => ctx.rename.extend(entries),
                     CtxBlock::With(entries) => ctx.with.extend(entries),
                     CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
+                    CtxBlock::DeletionValues(items) => ctx.deletion_values.extend(items),
                     CtxBlock::BracketOpeners(names) => ctx.bracket_openers.extend(names),
                     CtxBlock::BracketClosers(names) => ctx.bracket_closers.extend(names),
                     CtxBlock::Format(groups, hints) => {

@@ -1397,6 +1397,23 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .collect();
 
+    // Build deletion_cost arms: for each terminal with a deletion_value
+    // override, emit a direct cost instead of the default 5×max_error_value.
+    let deletion_cost_arms: Vec<_> = sorted_terminals
+        .iter()
+        .filter_map(|x| {
+            let ident_str = x.ident(&config);
+            let dv = config
+                .context
+                .deletion_values
+                .get(ident_str.as_str())
+                .copied()?;
+
+            let n = config.context.ident_for(&ident_str);
+            Some(quote! { SyntaxKind::#n => #dv, })
+        })
+        .collect();
+
     // Build bracket_delta arms for openers (+1) and closers (-1).
     let bracket_delta_arms: Vec<_> = {
         let openers = config.context.bracket_openers.iter().map(|name| {
@@ -1896,6 +1913,13 @@ pub fn generate(path: &str, contents: &str) -> String {
             match self {
                 #( #min_completion_cost_arms )*
                 _ => Self::max_error_value(self),
+            }
+        }
+
+        fn deletion_cost(&self) -> isize {
+            match self {
+                #( #deletion_cost_arms )*
+                _ => Self::max_error_value(self) * 5,
             }
         }
     }

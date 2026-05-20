@@ -71180,6 +71180,27 @@ impl TokenTrait for SyntaxKind {
             _ => Self::max_error_value(self),
         }
     }
+    fn deletion_cost(&self) -> isize {
+        match self {
+            SyntaxKind::AddLit => 20isize,
+            SyntaxKind::AskLit => 20isize,
+            SyntaxKind::ClearLit => 20isize,
+            SyntaxKind::ConstructLit => 20isize,
+            SyntaxKind::CopyLit => 20isize,
+            SyntaxKind::CreateLit => 20isize,
+            SyntaxKind::DeleteLit => 20isize,
+            SyntaxKind::DeleteDataLit => 20isize,
+            SyntaxKind::DeleteWhereLit => 20isize,
+            SyntaxKind::DescribeLit => 50isize,
+            SyntaxKind::DropLit => 20isize,
+            SyntaxKind::InsertLit => 20isize,
+            SyntaxKind::InsertDataLit => 20isize,
+            SyntaxKind::LoadLit => 20isize,
+            SyntaxKind::MoveLit => 20isize,
+            SyntaxKind::SelectLit => 20isize,
+            _ => Self::max_error_value(self) * 5,
+        }
+    }
 }
 pub mod format {
     use super::{SyntaxKind, SyntaxNode};

@@ -5325,6 +5325,11 @@ impl TokenTrait for SyntaxKind {
             _ => Self::max_error_value(self),
         }
     }
+    fn deletion_cost(&self) -> isize {
+        match self {
+            _ => Self::max_error_value(self) * 5,
+        }
+    }
 }
 pub mod format {
     use super::{SyntaxKind, SyntaxNode};
