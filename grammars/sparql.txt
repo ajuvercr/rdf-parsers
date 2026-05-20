@@ -317,6 +317,23 @@ AddLit -> 50
 MoveLit -> 50
 CopyLit -> 50
 FromLit -> 10
+=== deletion_value ===
+SelectLit -> 20
+ConstructLit -> 20
+DescribeLit -> 50
+AskLit -> 20
+LoadLit -> 20
+ClearLit -> 20
+DropLit -> 20
+CreateLit -> 20
+InsertLit -> 20
+InsertDataLit -> 20
+DeleteLit -> 20
+DeleteDataLit -> 20
+DeleteWhereLit -> 20
+AddLit -> 20
+MoveLit -> 20
+CopyLit -> 20
 === bracket_open ===
 sq_open
 br_open
