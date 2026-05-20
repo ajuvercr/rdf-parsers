@@ -63,7 +63,7 @@ pub const DEFAULT_MAX_REPAIR_SPAN: u16 = 15;
 /// The paper's (R3S-n) is always available; we gate it at 2 to avoid
 /// scanning overhead on isolated single-token errors while still activating
 /// early enough to prevent dead-end branch accumulation.
-const SYNC_THRESHOLD: u16 = 10;
+const SYNC_THRESHOLD: u16 = 5;
 
 /// Maximum number of tokens to scan ahead when looking for a sync point.
 const MAX_SYNC_SCAN: usize = 50;
