@@ -1,5 +1,5 @@
 [workspace]
-members = ["xtask", "demo", "benchmark"]
+members = ["xtask", "demo", "benchmark", "conformance"]
 
 [package]
 name = "rdf-parsers"
