@@ -844,14 +844,14 @@ fn process_node<'a>(
 
         // @type → rdf:type triples
         if let Some(type_val) = map.get("@type") {
-            for type_str in collect_strings(type_val.1) {
+            for (type_str, type_span) in collect_strings_spanned(type_val.1, type_val.2) {
                 if let Some(iri) = expand_iri(active, &type_str, true, true) {
-                    let obj = iri_or_blank(iri, span.start);
+                    let obj = iri_or_blank(iri, type_span.start);
                     state.add_triple(
                         (subject.clone(), id_val_span.clone()),
                         (ConvertState::named(RDF_TYPE), type_val.0.clone()), // TODO, why doesn't the map have the
                         // spans?
-                        (obj, type_val.2.clone()),
+                        (obj, type_span),
                         graph.map(|(a, b)| (a.clone(), b.clone())),
                         span.clone(),
                     );
@@ -990,6 +990,32 @@ fn collect_strings(val: &JsonLdVal) -> Vec<String> {
             .filter_map(|(i, _)| {
                 if let JsonLdVal::Str(s) = i {
                     Some(s.clone())
+                } else {
+                    None
+                }
+            })
+            .collect(),
+        _ => vec![],
+    }
+}
+
+/// Like [`collect_strings`], but keeps each string's own source span.
+///
+/// For a single scalar the `fallback` span (the whole value) is used; for an
+/// array each element carries its own span.  This matters for highlighting:
+/// using the whole-array span for every `@type` entry makes the entire `[...]`
+/// render as one token, wiping the per-element coloring.
+fn collect_strings_spanned(
+    val: &JsonLdVal,
+    fallback: &Range<usize>,
+) -> Vec<(String, Range<usize>)> {
+    match val {
+        JsonLdVal::Str(s) => vec![(s.clone(), fallback.clone())],
+        JsonLdVal::Array(items) => items
+            .iter()
+            .filter_map(|(i, span)| {
+                if let JsonLdVal::Str(s) = i {
+                    Some((s.clone(), span.clone()))
                 } else {
                     None
                 }
@@ -1650,6 +1676,38 @@ mod tests {
         assert_eq!(
             object_literal(&triples[0]),
             Some(("hello", Some("en"), None))
+        );
+    }
+
+    #[test]
+    fn test_type_array_per_element_spans() {
+        let input = r#"{
+  "@id": "http://example.org/s",
+  "@type": ["http://example.org/A", "http://example.org/B"]
+}"#;
+        let t = parse_jsonld(input);
+        let mut type_spans: Vec<&str> = Vec::new();
+        for tr in triples_of(&t) {
+            for po in &tr.po {
+                let is_type = matches!(
+                    &po.predicate.0,
+                    Term::NamedNode(NamedNode::Full(s, _)) if s == RDF_TYPE
+                );
+                if !is_type {
+                    continue;
+                }
+                for o in &po.object {
+                    type_spans.push(&input[o.1.clone()]);
+                }
+            }
+        }
+        // Each @type entry must cover only its own string token, not the whole array.
+        assert_eq!(
+            type_spans,
+            vec![
+                "\"http://example.org/A\"",
+                "\"http://example.org/B\"",
+            ]
         );
     }
 
