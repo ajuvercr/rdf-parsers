@@ -16,7 +16,7 @@ pub enum SyntaxKind {
     Eof = 0,
     #[regex(r"[ \t\n\r]+")]
     WhiteSpace,
-    #[regex(r"#[^\n]+", allow_greedy = true)]
+    #[regex(r"#[^\n]*", allow_greedy = true)]
     Comment,
     #[doc = r" producings"]
     Literal,
