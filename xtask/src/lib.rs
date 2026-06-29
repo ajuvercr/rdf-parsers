@@ -1741,7 +1741,7 @@ pub fn generate(path: &str, contents: &str) -> String {
             Eof = 0,
             #[regex(r"[ \t\n\r]+")]
             WhiteSpace,
-            #[regex(r"#[^\n]+", allow_greedy=true)]
+            #[regex(r"#[^\n]*", allow_greedy=true)]
             Comment,
             /// producings
             #( #producing ,)*
