@@ -132,11 +132,14 @@ fn convert_literal(node: &Node) -> Literal {
     };
 
     let lang = child(node, SyntaxKind::Langtag).map(|n| {
+        let span = text_range(&n);
         let text = terminal_text(&n);
-        text.strip_prefix('@').unwrap_or(&text).to_string()
+        let value = text.strip_prefix('@').unwrap_or(&text).to_string();
+        Spanned(value, span)
     });
 
-    let ty = child(node, SyntaxKind::Iriref).map(|n| iri_from_iriref_node(&n));
+    let ty =
+        child(node, SyntaxKind::Iriref).map(|n| Spanned(iri_from_iriref_node(&n), text_range(&n)));
 
     Literal::RDF(RDFLiteral {
         value,
@@ -256,7 +259,7 @@ mod tests {
         match lit {
             Literal::RDF(rdf) => {
                 assert_eq!(rdf.value, "Alice");
-                assert_eq!(rdf.lang.as_deref(), Some("en"));
+                assert_eq!(rdf.lang.as_ref().map(|l| l.as_str()), Some("en"));
                 assert!(rdf.ty.is_none());
             }
             other => panic!("expected RDF literal, got {:?}", other),

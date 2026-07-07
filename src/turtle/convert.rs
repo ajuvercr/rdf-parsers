@@ -243,6 +243,7 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
             prefix: prefix.to_string(),
             value: value.to_string(),
             idx: offset,
+            computed: None,
         }
     } else if let Some(pname_ns) = child(node, SyntaxKind::PnameNs) {
         let text = terminal_text(&pname_ns);
@@ -252,6 +253,7 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
             prefix: prefix.to_string(),
             value: String::new(),
             idx: offset,
+            computed: None,
         }
     } else {
         NamedNode::Invalid
@@ -323,11 +325,13 @@ fn convert_rdf_literal(node: &Node) -> RDFLiteral {
     };
 
     let lang = child(node, SyntaxKind::Langtag).map(|n| {
+        let span = text_range(&n);
         let text = terminal_text(&n);
-        text.strip_prefix('@').unwrap_or(&text).to_string()
+        let value = text.strip_prefix('@').unwrap_or(&text).to_string();
+        Spanned(value, span)
     });
 
-    let ty = child(node, SyntaxKind::Iri).map(|n| convert_iri(&n));
+    let ty = child(node, SyntaxKind::Iri).map(|n| Spanned(convert_iri(&n), text_range(&n)));
 
     RDFLiteral {
         value,
@@ -376,6 +380,7 @@ mod tests {
             prefix: prefix.to_string(),
             value: value.to_string(),
             idx: 0, // ignored in PartialEq? No — but we only care about the string parts.
+            computed: None,
         }
     }
 
@@ -561,12 +566,15 @@ mod tests {
 
     #[test]
     fn test_string_literal_with_lang() {
-        let doc = parse("@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\"@en .");
+        let src = "@prefix ex: <http://example.org/> . ex:alice ex:name \"Alice\"@en .";
+        let doc = parse(src);
         let t = doc.triples[0].value();
         match term_lit(t.po[0].object[0].value()) {
             Literal::RDF(r) => {
                 assert_eq!(r.value, "Alice");
-                assert_eq!(r.lang.as_deref(), Some("en"));
+                let lang = r.lang.as_ref().expect("lang tag should be present");
+                assert_eq!(lang.as_str(), "en");
+                assert_eq!(&src[lang.span().clone()], "@en");
             }
             other => panic!("expected RDF literal, got {:?}", other),
         }
@@ -574,15 +582,15 @@ mod tests {
 
     #[test]
     fn test_string_literal_with_datatype() {
-        let doc = parse(
-            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . @prefix ex: <http://example.org/> . ex:alice ex:age \"30\"^^xsd:integer .",
-        );
+        let src = "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . @prefix ex: <http://example.org/> . ex:alice ex:age \"30\"^^xsd:integer .";
+        let doc = parse(src);
         let t = doc.triples[0].value();
         match term_lit(t.po[0].object[0].value()) {
             Literal::RDF(r) => {
                 assert_eq!(r.value, "30");
-                assert!(r.ty.is_some());
-                assert!(nn_eq(r.ty.as_ref().unwrap(), &prefixed("xsd", "integer")));
+                let ty = r.ty.as_ref().expect("datatype should be present");
+                assert!(nn_eq(ty, &prefixed("xsd", "integer")));
+                assert_eq!(&src[ty.span().clone()], "xsd:integer");
             }
             other => panic!("expected RDF literal, got {:?}", other),
         }

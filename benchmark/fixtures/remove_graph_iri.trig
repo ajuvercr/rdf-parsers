@@ -1,0 +1,25 @@
+PREFIX ex: <http://example.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<<<<<<< before
+<http://example.org/graph1>
+=======
+>>>>>>> after
+{
+    ex:alice a foaf:Person ;
+             foaf:name "Alice"@en ;
+             foaf:age 30 ;
+             foaf:knows ex:bob , ex:carol .
+
+    ex:bob a foaf:Person ;
+           foaf:name "Bob"@en ;
+           foaf:age 25 ;
+           rdfs:label "Bob Smith"^^xsd:string .
+
+    ex:carol a foaf:Person ;
+             foaf:name "Carol"@en ;
+             foaf:mbox <mailto:carol@example.org> ;
+             foaf:knows ex:alice .
+}

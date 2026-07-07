@@ -57,13 +57,13 @@ pub const DEFAULT_MAX_ITERATIONS: usize = 1_000_000;
 /// Maximum number of consecutive error operations (insertions + deletions)
 /// before an element is dropped.  Prevents unbounded error cascades on
 /// deeply broken input.
-pub const DEFAULT_MAX_REPAIR_SPAN: u16 = 15;
+pub const DEFAULT_MAX_REPAIR_SPAN: u16 = 10;
 
 /// Number of consecutive error operations that triggers sync-point scanning.
 /// The paper's (R3S-n) is always available; we gate it at 2 to avoid
 /// scanning overhead on isolated single-token errors while still activating
 /// early enough to prevent dead-end branch accumulation.
-const SYNC_THRESHOLD: u16 = 5;
+const SYNC_THRESHOLD: u16 = 2;
 
 /// Maximum number of tokens to scan ahead when looking for a sync point.
 const MAX_SYNC_SCAN: usize = 50;

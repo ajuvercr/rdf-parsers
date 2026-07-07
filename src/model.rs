@@ -42,8 +42,10 @@ impl Display for Literal {
 pub struct RDFLiteral {
     pub value: String,
     pub quote_style: StringStyle,
-    pub lang: Option<String>,
-    pub ty: Option<NamedNode>,
+    /// Language tag (without the leading `@`), spanned over the `@lang` token.
+    pub lang: Option<Spanned<String>>,
+    /// Datatype IRI, spanned over the `^^<iri>` datatype term.
+    pub ty: Option<Spanned<NamedNode>>,
     // Span of tokens
     pub idx: usize,
     pub len: usize,
@@ -65,9 +67,19 @@ impl Display for RDFLiteral {
         };
         match (&self.lang, &self.ty) {
             (None, None) => write!(f, "{}{}{}", quote, self.value, quote),
-            (None, Some(t)) => write!(f, "{}{}{}^^{}", quote, self.value, quote, t),
-            (Some(l), None) => write!(f, "{}{}{}@{}", quote, self.value, quote, l),
-            (Some(l), Some(t)) => write!(f, "{}{}{}@{}^^{}", quote, self.value, quote, l, t),
+            (None, Some(t)) => write!(f, "{}{}{}^^{}", quote, self.value, quote, t.value()),
+            (Some(l), None) => write!(f, "{}{}{}@{}", quote, self.value, quote, l.value()),
+            (Some(l), Some(t)) => {
+                write!(
+                    f,
+                    "{}{}{}@{}^^{}",
+                    quote,
+                    self.value,
+                    quote,
+                    l.value(),
+                    t.value()
+                )
+            }
         }
     }
 }
@@ -79,6 +91,14 @@ pub enum NamedNode {
         prefix: String,
         value: String,
         idx: usize,
+        /// Pre-resolved absolute IRI, set by parsers (currently JSON-LD) that
+        /// expand IRIs against a context whose semantics are *not* equivalent to
+        /// plain prefix substitution (whole-term precedence, scoped contexts,
+        /// `@vocab`). When present, downstream consumers should use this value
+        /// instead of re-expanding `prefix`/`value` against the prefix map.
+        /// `None` for the syntactic parsers (Turtle/TriG/SPARQL/N3), which leave
+        /// expansion to the consumer.
+        computed: Option<String>,
     },
     A(usize),
     Invalid,
@@ -88,11 +108,16 @@ impl Display for NamedNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             NamedNode::Full(x, _) => write!(f, "<{}>", x),
-            NamedNode::Prefixed {
-                prefix,
-                value,
-                idx: _,
-            } => write!(f, "{}:{}", prefix, value),
+            NamedNode::Prefixed { prefix, value, .. } => {
+                // A JSON-LD whole-term compact IRI is stored as `Prefixed(term, "")`
+                // where `term` already contains the ':'; render it verbatim rather
+                // than appending a spurious trailing colon.
+                if value.is_empty() && prefix.contains(':') {
+                    write!(f, "{}", prefix)
+                } else {
+                    write!(f, "{}:{}", prefix, value)
+                }
+            }
             NamedNode::A(_) => write!(f, "a"),
             NamedNode::Invalid => write!(f, "invalid"),
         }

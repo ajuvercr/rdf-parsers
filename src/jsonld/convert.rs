@@ -833,7 +833,9 @@ fn process_node<'a>(
                     Some(iri) if iri.starts_with("_:") => {
                         Term::BlankNode(BlankNode::Named(iri[2..].to_string(), id_val_span.start))
                     }
-                    Some(iri) => Term::NamedNode(NamedNode::Full(iri, id_val_span.start)),
+                    Some(iri) => {
+                        Term::NamedNode(named_from_source(active, s, iri, id_val_span.start, false))
+                    }
                     None => state.fresh_blank(id_val_span.start),
                 },
                 _ => state.fresh_blank(id_val_span.start),
@@ -846,7 +848,8 @@ fn process_node<'a>(
         if let Some(type_val) = map.get("@type") {
             for (type_str, type_span) in collect_strings_spanned(type_val.1, type_val.2) {
                 if let Some(iri) = expand_iri(active, &type_str, true, true) {
-                    let obj = iri_or_blank(iri, type_span.start);
+                    let obj =
+                        term_or_blank_from_source(active, &type_str, iri, type_span.start, true);
                     state.add_triple(
                         (subject.clone(), id_val_span.clone()),
                         (ConvertState::named(RDF_TYPE), type_val.0.clone()), // TODO, why doesn't the map have the
@@ -898,7 +901,13 @@ fn process_node<'a>(
                         continue;
                     }
                     if let Some(pred_iri) = expand_iri(active, prop, true, false) {
-                        let pred = ConvertState::named(&pred_iri);
+                        let pred = Term::NamedNode(named_from_source(
+                            active,
+                            prop,
+                            pred_iri,
+                            prop_span.start,
+                            true,
+                        ));
                         let objects =
                             collect_objects(state, active, loader, val, val_span, graph, None)
                                 .await;
@@ -962,7 +971,16 @@ fn process_node<'a>(
                     subject: Spanned(subject.clone(), id_val_span.clone()),
                     po: vec![Spanned(
                         PO {
-                            predicate: Spanned(ConvertState::named(&pred_iri), key_span.clone()),
+                            predicate: Spanned(
+                                Term::NamedNode(named_from_source(
+                                    active,
+                                    key,
+                                    pred_iri,
+                                    key_span.start,
+                                    true,
+                                )),
+                                key_span.clone(),
+                            ),
                             object: objects
                                 .into_iter()
                                 .map(|(o, o_span)| Spanned(o, o_span))
@@ -1099,12 +1117,14 @@ async fn value_to_rdf<'a>(
             if let Some(def) = term_def {
                 match def.type_mapping.as_deref() {
                     Some("@id") => {
-                        return expand_iri(active, s, false, true)
-                            .map(|iri| iri_or_blank(iri, span.start));
+                        return expand_iri(active, s, false, true).map(|iri| {
+                            term_or_blank_from_source(active, s, iri, span.start, false)
+                        });
                     }
                     Some("@vocab") => {
-                        return expand_iri(active, s, true, false)
-                            .map(|iri| Term::NamedNode(NamedNode::Full(iri, span.start)));
+                        return expand_iri(active, s, true, false).map(|iri| {
+                            Term::NamedNode(named_from_source(active, s, iri, span.start, true))
+                        });
                     }
                     Some(ty) if !ty.starts_with('@') => {
                         let ty_owned = ty.to_string();
@@ -1113,7 +1133,10 @@ async fn value_to_rdf<'a>(
                                 value: s.clone(),
                                 quote_style: StringStyle::Double,
                                 lang: None,
-                                ty: Some(NamedNode::Full(ty_iri, 0)),
+                                ty: Some(Spanned(
+                                    named_from_source(active, ty, ty_iri, 0, true),
+                                    0..0,
+                                )),
                                 idx: span.start,
                                 len: span.len(),
                             })));
@@ -1125,7 +1148,7 @@ async fn value_to_rdf<'a>(
                     return Some(Term::Literal(Literal::RDF(RDFLiteral {
                         value: s.clone(),
                         quote_style: StringStyle::Double,
-                        lang: Some(lang.clone()),
+                        lang: Some(Spanned(lang.clone(), 0..0)),
                         ty: None,
                         idx: span.start,
                         len: span.len(),
@@ -1133,9 +1156,9 @@ async fn value_to_rdf<'a>(
                 }
             }
             // Default: plain string, inheriting the context default language if set
-            let lang = active.language.clone();
+            let lang = active.language.clone().map(|l| Spanned(l, 0..0));
             let ty = if lang.is_none() {
-                Some(NamedNode::Full(XSD_STRING.to_string(), 0))
+                Some(Spanned(NamedNode::Full(XSD_STRING.to_string(), 0), 0..0))
             } else {
                 None
             };
@@ -1159,7 +1182,7 @@ async fn value_to_rdf<'a>(
                 value: n.clone(),
                 quote_style: StringStyle::Double,
                 lang: None,
-                ty: Some(NamedNode::Full(type_iri.to_string(), 0)),
+                ty: Some(Spanned(NamedNode::Full(type_iri.to_string(), 0), 0..0)),
                 idx: span.start,
                 len: span.len(),
             })))
@@ -1169,7 +1192,7 @@ async fn value_to_rdf<'a>(
             value: if *b { "true" } else { "false" }.to_string(),
             quote_style: StringStyle::Double,
             lang: None,
-            ty: Some(NamedNode::Full(XSD_BOOLEAN.to_string(), 0)),
+            ty: Some(Spanned(NamedNode::Full(XSD_BOOLEAN.to_string(), 0), 0..0)),
             idx: span.start,
             len: span.len(),
         }))),
@@ -1212,7 +1235,7 @@ fn process_value_object(
             value: value_str,
             quote_style: StringStyle::Double,
             lang: None,
-            ty: Some(NamedNode::Full(RDF_JSON.to_string(), 0)),
+            ty: Some(Spanned(NamedNode::Full(RDF_JSON.to_string(), 0), 0..0)),
             idx: span.start,
             len: span.len(),
         })));
@@ -1221,16 +1244,16 @@ fn process_value_object(
     // Language-tagged string
     let lang_tag = lang_val.and_then(|l| {
         if let JsonLdVal::Str(s) = l.1 {
-            Some(s.as_str())
+            Some((s.as_str(), l.2.clone()))
         } else {
             None
         }
     });
-    if let Some(lt) = lang_tag {
+    if let Some((lt, lt_span)) = lang_tag {
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
             value: value_str,
             quote_style: StringStyle::Double,
-            lang: Some(lt.to_string()),
+            lang: Some(Spanned(lt.to_string(), lt_span)),
             ty: None,
             idx: span.start,
             len: span.len(),
@@ -1240,7 +1263,11 @@ fn process_value_object(
     // Explicit @type
     if let Some(ty) = type_str {
         let ty_owned = ty.to_string();
-        let ty_node = expand_iri(active, &ty_owned, true, false).map(|iri| NamedNode::Full(iri, 0));
+        let ty_span = type_val.map(|t| t.2.clone()).unwrap_or(0..0);
+        let ty_node = expand_iri(active, &ty_owned, true, false).map(|iri| {
+            let start = ty_span.start;
+            Spanned(named_from_source(active, ty, iri, start, true), ty_span)
+        });
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
             value: value_str,
             quote_style: StringStyle::Double,
@@ -1273,8 +1300,8 @@ fn process_value_object(
     Some(Term::Literal(Literal::RDF(RDFLiteral {
         value: value_str,
         quote_style: StringStyle::Double,
-        lang: inferred_lang,
-        ty: inferred_ty.map(|s| NamedNode::Full(s.to_string(), 0)),
+        lang: inferred_lang.map(|l| Spanned(l, 0..0)),
+        ty: inferred_ty.map(|s| Spanned(NamedNode::Full(s.to_string(), 0), 0..0)),
         idx: span.start,
         len: span.len(),
     })))
@@ -1327,11 +1354,78 @@ fn clone_graph(g: Option<(&'_ Term, &'_ Range<usize>)>) -> Option<(Term, Range<u
     g.map(|g| (g.0.clone(), g.1.clone()))
 }
 
-fn iri_or_blank(iri: String, offset: usize) -> Term {
-    if iri.starts_with("_:") {
-        Term::BlankNode(BlankNode::Named(iri[2..].to_string(), offset))
+/// Build a `NamedNode` for an IRI that appears in the source as `source` and
+/// expands (via the active context) to `expanded`.
+///
+/// Compact IRIs (`prefix:local`) and terms that look like compact IRIs are kept
+/// in `Prefixed` form so JSON-LD output stays faithful to the source and
+/// consistent with the syntactic parsers (Turtle/TriG/SPARQL/N3). The
+/// context-computed absolute IRI is carried in `computed` so downstream
+/// consumers use it directly rather than re-expanding `prefix`/`value` — JSON-LD
+/// expansion (whole-term precedence, scoped contexts, `@vocab`) is not
+/// equivalent to plain prefix substitution. Absolute IRIs, blank-node-style
+/// values, unknown prefixes, and bare/`@vocab` terms have no prefix form and
+/// stay `Full`.
+///
+/// `vocab` mirrors the flag used for the corresponding `expand_iri` call so the
+/// prefix/value split matches how the value was actually resolved.
+fn named_from_source(
+    active: &ActiveContext,
+    source: &str,
+    expanded: String,
+    offset: usize,
+    vocab: bool,
+) -> NamedNode {
+    // A registered term that itself looks like a compact IRI (`foaf:name`) takes
+    // whole-term precedence under `@vocab` resolution: keep the whole source as
+    // the lookup key so it re-resolves the same way JSON-LD did.
+    if vocab && source.contains(':') && active.terms.contains_key(source) {
+        return NamedNode::Prefixed {
+            prefix: source.to_string(),
+            value: String::new(),
+            idx: offset,
+            computed: Some(expanded),
+        };
+    }
+
+    // Genuine compact IRI: `prefix:local` where `prefix` maps to a namespace.
+    if let Some(pos) = source.find(':') {
+        if pos > 0 {
+            let prefix = &source[..pos];
+            let suffix = &source[pos + 1..];
+            let known_prefix = active
+                .terms
+                .get(prefix)
+                .and_then(|d| d.iri.as_ref())
+                .is_some();
+            if !suffix.starts_with("//") && prefix != "_" && known_prefix {
+                return NamedNode::Prefixed {
+                    prefix: prefix.to_string(),
+                    value: suffix.to_string(),
+                    idx: offset,
+                    computed: Some(expanded),
+                };
+            }
+        }
+    }
+
+    NamedNode::Full(expanded, offset)
+}
+
+/// Resolve an expanded IRI to a blank node (`_:…`) or a named node, preserving
+/// compact/prefixed source form for the latter via [`named_from_source`].
+/// `source` is the pre-expansion text, `expanded` its context expansion.
+fn term_or_blank_from_source(
+    active: &ActiveContext,
+    source: &str,
+    expanded: String,
+    offset: usize,
+    vocab: bool,
+) -> Term {
+    if expanded.starts_with("_:") {
+        Term::BlankNode(BlankNode::Named(expanded[2..].to_string(), offset))
     } else {
-        Term::NamedNode(NamedNode::Full(iri, offset))
+        Term::NamedNode(named_from_source(active, source, expanded, offset, vocab))
     }
 }
 
@@ -1469,21 +1563,29 @@ mod tests {
         &t.triples
     }
 
-    fn subject_iri(triple: &Triple) -> Option<&str> {
-        match &triple.subject.0 {
-            Term::NamedNode(NamedNode::Full(s, _)) => Some(s),
+    /// Resolved absolute IRI of a named node: `Full`'s string, or a `Prefixed`
+    /// node's context-`computed` IRI (compact JSON-LD IRIs are stored prefixed).
+    fn nn_iri(nn: &NamedNode) -> Option<&str> {
+        match nn {
+            NamedNode::Full(s, _) => Some(s.as_str()),
+            NamedNode::Prefixed { computed, .. } => computed.as_deref(),
             _ => None,
         }
     }
 
+    fn term_iri(term: &Term) -> Option<&str> {
+        match term {
+            Term::NamedNode(nn) => nn_iri(nn),
+            _ => None,
+        }
+    }
+
+    fn subject_iri(triple: &Triple) -> Option<&str> {
+        term_iri(&triple.subject.0)
+    }
+
     fn predicate_iri(triple: &Triple) -> Option<&str> {
-        triple.po.first().and_then(|po| {
-            if let Term::NamedNode(NamedNode::Full(s, _)) = &po.predicate.0 {
-                Some(s.as_str())
-            } else {
-                None
-            }
-        })
+        triple.po.first().and_then(|po| term_iri(&po.predicate.0))
     }
 
     fn object_iri(triple: &Triple) -> Option<&str> {
@@ -1491,13 +1593,7 @@ mod tests {
             .po
             .first()
             .and_then(|po| po.object.first())
-            .and_then(|o| {
-                if let Term::NamedNode(NamedNode::Full(s, _)) = &o.0 {
-                    Some(s.as_str())
-                } else {
-                    None
-                }
-            })
+            .and_then(|o| term_iri(&o.0))
     }
 
     fn object_literal(triple: &Triple) -> Option<(&str, Option<&str>, Option<&str>)> {
@@ -1507,12 +1603,8 @@ mod tests {
             .and_then(|po| po.object.first())
             .and_then(|o| {
                 if let Term::Literal(Literal::RDF(lit)) = &o.0 {
-                    let lang = lit.lang.as_deref();
-                    let ty = if let Some(NamedNode::Full(s, _)) = &lit.ty {
-                        Some(s.as_str())
-                    } else {
-                        None
-                    };
+                    let lang = lit.lang.as_ref().map(|l| l.as_str());
+                    let ty = lit.ty.as_ref().and_then(|sp| nn_iri(sp.value()));
                     Some((lit.value.as_str(), lang, ty))
                 } else {
                     None
@@ -1704,10 +1796,7 @@ mod tests {
         // Each @type entry must cover only its own string token, not the whole array.
         assert_eq!(
             type_spans,
-            vec![
-                "\"http://example.org/A\"",
-                "\"http://example.org/B\"",
-            ]
+            vec!["\"http://example.org/A\"", "\"http://example.org/B\"",]
         );
     }
 
@@ -1916,6 +2005,70 @@ mod tests {
         let triples = triples_of(&t);
         assert_eq!(triples.len(), 1);
         assert_eq!(predicate_iri(&triples[0]), Some("http://schema.org/name"));
+    }
+
+    #[test]
+    fn test_compact_predicate_kept_prefixed_with_computed() {
+        // A `prefix:local` predicate keeps its source-faithful prefixed form
+        // (consistent with the Turtle parser), while the context-computed
+        // absolute IRI is carried in `computed` for downstream consumers.
+        let input = r#"{"@context":{"foaf":"http://xmlns.com/foaf/0.1/"},"@id":"http://example.org/alice","foaf:name":"Alice"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        match &triples[0].po[0].predicate.0 {
+            Term::NamedNode(NamedNode::Prefixed {
+                prefix,
+                value,
+                computed,
+                ..
+            }) => {
+                assert_eq!(prefix, "foaf");
+                assert_eq!(value, "name");
+                assert_eq!(
+                    computed.as_deref(),
+                    Some("http://xmlns.com/foaf/0.1/name"),
+                    "computed should hold the context-resolved absolute IRI"
+                );
+            }
+            other => panic!("expected a prefixed predicate, got {:?}", other),
+        }
+        // Downstream helpers resolve to the full IRI via `computed`.
+        assert_eq!(
+            predicate_iri(&triples[0]),
+            Some("http://xmlns.com/foaf/0.1/name")
+        );
+    }
+
+    #[test]
+    fn test_whole_term_compact_iri_takes_precedence() {
+        // When a term literally named `foaf:name` is defined, JSON-LD whole-term
+        // precedence resolves it to that term's IRI — not `foaf:` + `name`. The
+        // node keeps the whole compact source as the lookup key, and `computed`
+        // reflects the term's IRI so a Turtle-style re-expansion can't diverge.
+        let input = r#"{"@context":{"foaf":"http://xmlns.com/foaf/0.1/","foaf:name":"http://example.org/fullName"},"@id":"http://example.org/alice","foaf:name":"Alice"}"#;
+        let t = parse_jsonld(input);
+        let triples = triples_of(&t);
+        assert_eq!(triples.len(), 1);
+        match &triples[0].po[0].predicate.0 {
+            Term::NamedNode(NamedNode::Prefixed {
+                prefix,
+                value,
+                computed,
+                ..
+            }) => {
+                assert_eq!(prefix, "foaf:name");
+                assert_eq!(value, "");
+                assert_eq!(computed.as_deref(), Some("http://example.org/fullName"));
+            }
+            other => panic!("expected a prefixed predicate, got {:?}", other),
+        }
+        assert_eq!(
+            predicate_iri(&triples[0]),
+            Some("http://example.org/fullName")
+        );
+        // Display renders the whole-term compact IRI without a spurious colon.
+        assert_eq!(format!("{}", triples[0].po[0].predicate.0), "foaf:name");
     }
 
     // ── 19. @type coercion to @id ─────────────────────────────────────────────

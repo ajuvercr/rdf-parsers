@@ -328,6 +328,7 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
             prefix: prefix.to_string(),
             value: value.to_string(),
             idx: offset,
+            computed: None,
         }
     } else if let Some(pname_ns) = child(node, SyntaxKind::PnameNs) {
         let text = terminal_text(&pname_ns);
@@ -337,6 +338,7 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
             prefix: prefix.to_string(),
             value: String::new(),
             idx: offset,
+            computed: None,
         }
     } else {
         NamedNode::Invalid
@@ -421,11 +423,13 @@ fn convert_rdf_literal(node: &Node) -> RDFLiteral {
     };
 
     let lang = child(node, SyntaxKind::Langtag).map(|n| {
+        let span = text_range(&n);
         let text = terminal_text(&n);
-        text.strip_prefix('@').unwrap_or(&text).to_string()
+        let value = text.strip_prefix('@').unwrap_or(&text).to_string();
+        Spanned(value, span)
     });
 
-    let ty = child(node, SyntaxKind::Iri).map(|n| convert_iri(&n));
+    let ty = child(node, SyntaxKind::Iri).map(|n| Spanned(convert_iri(&n), text_range(&n)));
 
     RDFLiteral {
         value,
@@ -472,6 +476,7 @@ mod tests {
             prefix: prefix.to_string(),
             value: value.to_string(),
             idx: 0,
+            computed: None,
         }
     }
 
@@ -734,7 +739,7 @@ mod tests {
         match term_lit(t.po[0].object[0].value()) {
             Literal::RDF(r) => {
                 assert_eq!(r.value, "Alice");
-                assert_eq!(r.lang.as_deref(), Some("en"));
+                assert_eq!(r.lang.as_ref().map(|l| l.as_str()), Some("en"));
             }
             other => panic!("expected RDF literal, got {:?}", other),
         }

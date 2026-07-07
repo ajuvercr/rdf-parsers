@@ -262,7 +262,17 @@ impl Normalizer {
     fn expand_named_node(&self, nn: &NamedNode) -> Option<String> {
         match nn {
             NamedNode::Full(iri, _) => Some(resolve_iri(&unescape_iri(iri), &self.base)),
-            NamedNode::Prefixed { prefix, value, .. } => {
+            NamedNode::Prefixed {
+                prefix,
+                value,
+                computed,
+                ..
+            } => {
+                // A parser-supplied absolute IRI (e.g. JSON-LD context expansion)
+                // takes precedence over re-expanding against the prefix map.
+                if let Some(iri) = computed {
+                    return Some(resolve_iri(&unescape_iri(iri), &self.base));
+                }
                 let base_iri = self.prefixes.get(prefix)?;
                 Some(format!("{}{}", base_iri, unescape_local_name(value)))
             }
@@ -460,7 +470,7 @@ fn nt_term_to_nterm(term: &Term) -> Option<NTerm> {
         Term::Literal(Literal::RDF(rdf)) => {
             let val = unescape(&rdf.value);
             let lang = rdf.lang.as_ref().map(|l| l.to_lowercase());
-            let dt = if let Some(NamedNode::Full(iri, _)) = &rdf.ty {
+            let dt = if let Some(NamedNode::Full(iri, _)) = rdf.ty.as_ref().map(|s| s.value()) {
                 Some(iri.clone())
             } else if lang.is_some() {
                 Some(
