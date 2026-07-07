@@ -5,7 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.16 (2026-07-07)
+
+### New Features
+
+ - <csr-id-7b29b4d72e75f1fc8e49cfdb07e20859d149da3c/> span literal lang/datatype and carry computed IRIs for JSON-LD
+   - RDFLiteral.lang / .ty now carry source spans (Spanned<_>) across every
+     parser (Turtle, TriG, N3, N-Triples, SPARQL, JSON-LD).
+   - NamedNode::Prefixed gains a `computed` field so JSON-LD keeps the compact
+     source form while carrying the context-resolved absolute IRI (whole-term
+     precedence, scoped contexts, @vocab). The conformance normalizer prefers
+     it, and Display renders whole-term compact IRIs without a spurious colon.
+   - Tune A* recovery: SYNC_THRESHOLD 5->2 (matches its comment),
+     DEFAULT_MAX_REPAIR_SPAN 15->10.
+   - Add remove_graph_iri.trig incremental-parse benchmark fixture.
+   - Bump to 0.1.16.
+ - <csr-id-408f577ce2ba8f15251c49a9b66da11875e0b01e/> allow empty comment string
+ - <csr-id-160b93d1a1e3fe4846df0f42a0494dedaae87ca5/> change deletion cost from find power, so we can control it better. Deleteing SELECT should be quite cheap but finding it should point to parser to parsring the correct subtree
+ - <csr-id-db5093a8eafbab8b4a0d98df38541525cba70ab3/> improve sparql behaviour
+
+### Other
+
+ - <csr-id-6e1c60fbb2c1787d7eb53ee385009825ef4abdf6/> fix wrong json-ld spans
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 5 commits contributed to the release over the course of 8 calendar days.
+ - 56 days passed between releases.
+ - 5 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Span literal lang/datatype and carry computed IRIs for JSON-LD ([`7b29b4d`](https://github.com/ajuvercr/rdf-parsers/commit/7b29b4d72e75f1fc8e49cfdb07e20859d149da3c))
+    - Allow empty comment string ([`408f577`](https://github.com/ajuvercr/rdf-parsers/commit/408f577ce2ba8f15251c49a9b66da11875e0b01e))
+    - Fix wrong json-ld spans ([`6e1c60f`](https://github.com/ajuvercr/rdf-parsers/commit/6e1c60fbb2c1787d7eb53ee385009825ef4abdf6))
+    - Change deletion cost from find power, so we can control it better. Deleteing SELECT should be quite cheap but finding it should point to parser to parsring the correct subtree ([`160b93d`](https://github.com/ajuvercr/rdf-parsers/commit/160b93d1a1e3fe4846df0f42a0494dedaae87ca5))
+    - Improve sparql behaviour ([`db5093a`](https://github.com/ajuvercr/rdf-parsers/commit/db5093a8eafbab8b4a0d98df38541525cba70ab3))
+</details>
+
 ## v0.1.15 (2026-06-29)
+
+<csr-id-7be406b2850a8cfc26ed89e81616ccfae2e7927a/>
 
 ### New Features
 
@@ -17,29 +65,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - <csr-id-7be406b2850a8cfc26ed89e81616ccfae2e7927a/> fix wrong json-ld spans
 
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 4 commits contributed to the release over the course of 39 calendar days.
- - 48 days passed between releases.
- - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
-
-### Commit Details
-
-<csr-read-only-do-not-edit/>
-
-<details><summary>view details</summary>
-
- * **Uncategorized**
-    - Allow empty comment string ([`799d44d`](https://github.com/ajuvercr/rdf-parsers/commit/799d44d48f0dadaf4c0c404b6fb47fa4bf180e47))
-    - Fix wrong json-ld spans ([`7be406b`](https://github.com/ajuvercr/rdf-parsers/commit/7be406b2850a8cfc26ed89e81616ccfae2e7927a))
-    - Change deletion cost from find power, so we can control it better. Deleteing SELECT should be quite cheap but finding it should point to parser to parsring the correct subtree ([`e3e9e2c`](https://github.com/ajuvercr/rdf-parsers/commit/e3e9e2c5414258cdd74ac4487f8bb114d5e2c80f))
-    - Improve sparql behaviour ([`e3ab85d`](https://github.com/ajuvercr/rdf-parsers/commit/e3ab85da22257e424e7c09c4f755076edbba38f6))
-</details>
-
 ## v0.1.12 (2026-05-11)
+
+<csr-id-f0267ddd995ec2706f9ffdd4ff3020a6df2da9c3/>
+<csr-id-4516878063e9f923b6c4218f62dcf89cd51d0256/>
+<csr-id-4966dd3c251b0a1e15727d8baed20564ccbbdae9/>
+<csr-id-2fd00eed48b5b01ba4c6f32ef1a506e69441ed24/>
+<csr-id-5f470c00cb6c20ba20ce9e6f280fdb248173605f/>
+<csr-id-e9a54c86b8e814abaa84d77fd9a763db1db1b4e1/>
+<csr-id-6075177965a174b2ab6b8cc7782d82458c760483/>
+<csr-id-277cf8e382b71179c580b39335930c606ed16400/>
+<csr-id-4f83ba0bac5b9523cd6e70e07d54c458c98be669/>
+<csr-id-a39452b9c883e509d1859e1bda48338402ea1018/>
+<csr-id-1c92db0ca8f8bd20c9bbca3575de6790cdad292a/>
+<csr-id-7f9dcc4b50e7625262b2c3102c4282ace8f2b63c/>
 
 ### Chore
 
