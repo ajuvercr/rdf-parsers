@@ -57,6 +57,10 @@ pub enum FormatHint {
     BlankLine,
     Indent,
     Dedent,
+    /// Wrap the node (and its `before` hints) in one indentation level.
+    Nest,
+    /// Text emitted only when the enclosing group is broken, e.g. `ifbreak(;)`.
+    IfBreak(String),
 }
 
 /// One entry from the `=== format ===` section.
@@ -136,9 +140,16 @@ fn format_section_parser<'src>() -> impl Parser<'src, &'src str, CtxBlock, Err<R
     //   group <ident>
     //   [<scope>.]<token> -> before|after: <hint>+
     //
-    // Hints: space | line | hardline | indent | dedent
+    // Hints: space | line | hardline | blankline | indent | dedent | nest | ifbreak(<text>)
+
+    let if_break = just("ifbreak(")
+        .ignore_then(none_of(")\n").repeated().at_least(1).collect::<String>())
+        .then_ignore(just(')'))
+        .map(FormatHint::IfBreak);
 
     let hint = choice((
+        if_break,
+        just("nest").to(FormatHint::Nest),
         just("blankline").to(FormatHint::BlankLine),
         just("hardline").to(FormatHint::HardLine),
         just("space").to(FormatHint::Space),
@@ -351,6 +362,20 @@ colon -> after: space
         assert_eq!(h.items.len(), 1);
         assert_eq!(h.items[0].0, FormatPosition::Before);
         assert_eq!(h.items[0].1, vec![FormatHint::Dedent, FormatHint::Line]);
+    }
+
+    #[test]
+    fn parses_nest_and_ifbreak() {
+        let input = r#"== context ==
+=== format ===
+bnode.list -> before: nest line, after: ifbreak(;)
+"#;
+
+        let res = context_parser().parse(input).into_result();
+        assert!(res.is_ok(), "{:?}", res.unwrap_err());
+        let h = &res.unwrap().format_hints[0];
+        assert_eq!(h.items[0].1, vec![FormatHint::Nest, FormatHint::Line]);
+        assert_eq!(h.items[1].1, vec![FormatHint::IfBreak(";".to_string())]);
     }
 
     #[test]

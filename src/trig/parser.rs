@@ -4159,8 +4159,8 @@ impl TokenTrait for SyntaxKind {
     }
 }
 pub mod format {
-    use super::{SyntaxKind, SyntaxNode};
-    use crate::format::Doc;
+    use super::{Lang, SyntaxKind, SyntaxNode};
+    use crate::format::{Doc, FormatHook, NoHook};
     use crate::TokenTrait;
     use rowan::NodeOrToken;
     #[derive(Default)]
@@ -4171,15 +4171,14 @@ pub mod format {
         blankline: bool,
         indent: bool,
         dedent: bool,
+        nest: bool,
+        if_break: Option<&'static str>,
     }
     impl Hints {
         fn to_docs(&self) -> Vec<Doc> {
             let mut v = Vec::new();
-            if self.indent {
-                v.push(Doc::nil());
-            }
-            if self.dedent {
-                v.push(Doc::nil());
+            if let Some(s) = self.if_break {
+                v.push(Doc::if_break(s));
             }
             if self.blankline {
                 v.push(Doc::HardLine);
@@ -4204,6 +4203,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4212,6 +4213,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqOpen) => (
@@ -4222,6 +4225,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4230,6 +4235,8 @@ pub mod format {
                     blankline: false,
                     indent: true,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
@@ -4240,6 +4247,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: true,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4248,6 +4257,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqOpen) => (
@@ -4258,6 +4269,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4266,6 +4279,8 @@ pub mod format {
                     blankline: false,
                     indent: true,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqClose) => (
@@ -4276,6 +4291,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: true,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4284,6 +4301,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::BlankNode, SyntaxKind::SqOpen) => (
@@ -4294,6 +4313,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4302,6 +4323,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (SyntaxKind::PrefixId, SyntaxKind::PnameNs) => (
@@ -4312,6 +4335,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4320,6 +4345,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::Subject) => (
@@ -4330,6 +4357,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4338,6 +4367,8 @@ pub mod format {
                     blankline: false,
                     indent: true,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::Colon) => (
@@ -4348,6 +4379,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4356,6 +4389,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::Stop) => (
@@ -4366,6 +4401,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4374,6 +4411,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::Block) => (
@@ -4384,6 +4423,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4392,6 +4433,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::Object) => (
@@ -4402,6 +4445,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4410,6 +4455,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::ClOpen) => (
@@ -4420,6 +4467,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4428,6 +4477,8 @@ pub mod format {
                     blankline: false,
                     indent: true,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::ClClose) => (
@@ -4438,6 +4489,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: true,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4446,6 +4499,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::TriplesBlock) => (
@@ -4456,6 +4511,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4464,6 +4521,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::WrappedGraph) => (
@@ -4474,6 +4533,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4482,6 +4543,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::CurlyOpen) => (
@@ -4492,6 +4555,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4500,6 +4565,8 @@ pub mod format {
                     blankline: false,
                     indent: true,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::CurlyClose) => (
@@ -4510,6 +4577,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: true,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: false,
@@ -4518,6 +4587,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::GraphToken) => (
@@ -4528,6 +4599,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4536,6 +4609,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::PrefixToken) => (
@@ -4546,6 +4621,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4554,6 +4631,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::SparqlPrefixToken) => (
@@ -4564,6 +4643,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4572,6 +4653,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::BaseToken) => (
@@ -4582,6 +4665,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4590,6 +4675,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             (_, SyntaxKind::SparqlBaseToken) => (
@@ -4600,6 +4687,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
                 Hints {
                     space: true,
@@ -4608,6 +4697,8 @@ pub mod format {
                     blankline: false,
                     indent: false,
                     dedent: false,
+                    nest: false,
+                    if_break: None,
                 },
             ),
             _ => (Hints::default(), Hints::default()),
@@ -4624,48 +4715,61 @@ pub mod format {
                 | SyntaxKind::BlankNodePropertyList2
         )
     }
-    pub fn to_doc(node: &SyntaxNode) -> Doc {
+    fn is_break(doc: &Doc) -> bool {
+        matches!(doc, Doc::Line | Doc::HardLine) || matches ! (doc , Doc :: Text (s) if s == " ")
+    }
+    #[doc = r" Append `docs`. A comment already ended its line, so the first"]
+    #[doc = r" line break or space after it is dropped."]
+    fn push_all(part: &mut Vec<Doc>, docs: Vec<Doc>, after_comment: &mut bool) {
+        for doc in docs {
+            if *after_comment {
+                *after_comment = false;
+                if is_break(&doc) {
+                    continue;
+                }
+            }
+            part.push(doc);
+        }
+    }
+    #[doc = r" A node wrapping exactly one token (e.g. `Colon` around `;`)."]
+    fn is_terminal_wrapper(n: &SyntaxNode) -> bool {
+        let mut it = n.children_with_tokens().filter(|c| match c {
+            NodeOrToken::Token(t) => t.kind() != SyntaxKind::WhiteSpace,
+            NodeOrToken::Node(_) => true,
+        });
+        matches!(it.next(), Some(NodeOrToken::Token(_))) && it.next().is_none()
+    }
+    #[doc = r" Format a child node: hook override or hint-driven default,"]
+    #[doc = r" wrapped in a group when the grammar says so."]
+    fn format_child(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
+        let doc = hook
+            .node(node, &|n| format_child(n, hook))
+            .unwrap_or_else(|| node_doc(node, hook));
+        if is_group(node.kind()) {
+            Doc::group(doc)
+        } else {
+            doc
+        }
+    }
+    fn node_doc(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
         let mut parts: Vec<Vec<Doc>> = vec![vec![]];
+        let mut after_comment = false;
         for child in node.children_with_tokens() {
-            match child {
+            let (kind, doc) = match &child {
                 NodeOrToken::Token(t) => {
                     if t.kind() == SyntaxKind::WhiteSpace {
                         continue;
                     }
                     if t.kind() == SyntaxKind::Comment {
-                        parts
-                            .last_mut()
-                            .unwrap()
-                            .push(Doc::text(t.text().to_string()));
-                        parts.last_mut().unwrap().push(Doc::HardLine);
+                        let part = parts.last_mut().unwrap();
+                        part.push(Doc::comment(t.text().to_string()));
+                        after_comment = true;
                         continue;
                     }
-                    let (before, after) = format_hints(node.kind(), t.kind());
-                    if before.dedent && parts.len() > 1 {
-                        let nested = parts.pop().unwrap_or_default();
-                        let indent_doc = Doc::nest(2, Doc::concat(nested));
-                        parts.last_mut().unwrap().push(indent_doc);
+                    if !hook.keep(&child) {
+                        continue;
                     }
-                    parts.last_mut().unwrap().extend(
-                        before
-                            .to_docs()
-                            .into_iter()
-                            .filter(|d| !matches!(d, Doc::Nil)),
-                    );
-                    parts
-                        .last_mut()
-                        .unwrap()
-                        .push(Doc::text(t.text().to_string()));
-                    let after_line: Vec<Doc> = after
-                        .to_docs()
-                        .into_iter()
-                        .filter(|d| !matches!(d, Doc::Nil))
-                        .collect();
-                    if after.indent {
-                        parts.push(after_line);
-                    } else {
-                        parts.last_mut().unwrap().extend(after_line);
-                    }
+                    (t.kind(), Doc::text(t.text().to_string()))
                 }
                 NodeOrToken::Node(n) => {
                     if n.kind() == SyntaxKind::ERROR {
@@ -4675,70 +4779,37 @@ pub mod format {
                             .push(Doc::text(n.text().to_string()));
                         continue;
                     }
-                    let is_terminal_wrapper = {
-                        let mut it = n.children_with_tokens().filter(|c| match c {
-                            NodeOrToken::Token(t) => t.kind() != SyntaxKind::WhiteSpace,
-                            NodeOrToken::Node(_) => true,
-                        });
-                        matches!(it.next(), Some(NodeOrToken::Token(_))) && it.next().is_none()
-                    };
-                    if is_terminal_wrapper {
-                        let token_text = n.text().to_string();
-                        let (before, after) = format_hints(node.kind(), n.kind());
-                        if before.dedent && parts.len() > 1 {
-                            let nested = parts.pop().unwrap_or_default();
-                            let indent_doc = Doc::nest(2, Doc::concat(nested));
-                            parts.last_mut().unwrap().push(indent_doc);
-                        }
-                        parts.last_mut().unwrap().extend(
-                            before
-                                .to_docs()
-                                .into_iter()
-                                .filter(|d| !matches!(d, Doc::Nil)),
-                        );
-                        parts.last_mut().unwrap().push(Doc::text(token_text));
-                        let after_line: Vec<Doc> = after
-                            .to_docs()
-                            .into_iter()
-                            .filter(|d| !matches!(d, Doc::Nil))
-                            .collect();
-                        if after.indent {
-                            parts.push(after_line);
-                        } else {
-                            parts.last_mut().unwrap().extend(after_line);
-                        }
+                    if !hook.keep(&child) {
+                        continue;
+                    }
+                    if is_terminal_wrapper(n) {
+                        (n.kind(), Doc::text(n.text().to_string()))
                     } else {
-                        let (before, after) = format_hints(node.kind(), n.kind());
-                        if before.dedent && parts.len() > 1 {
-                            let nested = parts.pop().unwrap_or_default();
-                            let indent_doc = Doc::nest(2, Doc::concat(nested));
-                            parts.last_mut().unwrap().push(indent_doc);
-                        }
-                        parts.last_mut().unwrap().extend(
-                            before
-                                .to_docs()
-                                .into_iter()
-                                .filter(|d| !matches!(d, Doc::Nil)),
-                        );
-                        let child_doc = to_doc(&n);
-                        let child_doc = if is_group(n.kind()) {
-                            Doc::group(child_doc)
-                        } else {
-                            child_doc
-                        };
-                        parts.last_mut().unwrap().push(child_doc);
-                        let after_line: Vec<Doc> = after
-                            .to_docs()
-                            .into_iter()
-                            .filter(|d| !matches!(d, Doc::Nil))
-                            .collect();
-                        if after.indent {
-                            parts.push(after_line);
-                        } else {
-                            parts.last_mut().unwrap().extend(after_line);
-                        }
+                        (n.kind(), format_child(n, hook))
                     }
                 }
+            };
+            let (before, after) = format_hints(node.kind(), kind);
+            if before.dedent && parts.len() > 1 {
+                let nested = parts.pop().unwrap_or_default();
+                parts
+                    .last_mut()
+                    .unwrap()
+                    .push(Doc::nest(2, Doc::concat(nested)));
+            }
+            let mut seq = before.to_docs();
+            seq.push(doc);
+            if before.nest || after.nest {
+                let mut nested = Vec::new();
+                push_all(&mut nested, seq, &mut after_comment);
+                seq = vec![Doc::nest(2, Doc::concat(nested))];
+            }
+            push_all(parts.last_mut().unwrap(), seq, &mut after_comment);
+            let after_docs = after.to_docs();
+            if after.indent {
+                parts.push(after_docs);
+            } else {
+                push_all(parts.last_mut().unwrap(), after_docs, &mut after_comment);
             }
         }
         while parts.len() > 1 {
@@ -4750,8 +4821,18 @@ pub mod format {
         }
         Doc::concat(parts.pop().unwrap_or_default())
     }
+    pub fn to_doc(node: &SyntaxNode) -> Doc {
+        to_doc_with(node, &NoHook)
+    }
+    pub fn to_doc_with(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
+        hook.node(node, &|n| format_child(n, hook))
+            .unwrap_or_else(|| node_doc(node, hook))
+    }
     pub fn format(node: &SyntaxNode, width: usize) -> String {
-        let doc = to_doc(node);
+        format_with(node, width, &NoHook)
+    }
+    pub fn format_with(node: &SyntaxNode, width: usize, hook: &dyn FormatHook<Lang>) -> String {
+        let doc = to_doc_with(node, hook);
         let s = crate::format::render(&doc, width);
         let s = s.trim_start_matches('\n').trim_end_matches('\n');
         format!("{s}\n")

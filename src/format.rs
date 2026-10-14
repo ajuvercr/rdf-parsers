@@ -18,6 +18,8 @@ pub enum Doc {
     Nest(i32, Box<Doc>),
     /// Try to render the inner document flat; break if it exceeds the width.
     Group(Box<Doc>),
+    /// Text that is only emitted when the enclosing group is broken.
+    IfBreak(String),
 }
 
 impl Doc {
@@ -52,7 +54,44 @@ impl Doc {
     pub fn group(doc: Doc) -> Self {
         Doc::Group(Box::new(doc))
     }
+
+    pub fn if_break(s: impl Into<String>) -> Self {
+        Doc::IfBreak(s.into())
+    }
+
+    /// A comment runs to the end of the line, so it is followed by a hard
+    /// line. This also forces all enclosing groups to break.
+    pub fn comment(s: impl Into<String>) -> Self {
+        Doc::Concat(vec![Doc::Text(s.into()), Doc::HardLine])
+    }
 }
+
+/// Language-specific escape hatch for the generated formatters.
+///
+/// The grammar's `=== format ===` hints cover layout that only depends on a
+/// node's kind and its parent's kind. Rules that depend on a node's content
+/// (how many children it has, which tokens are redundant) go here.
+pub trait FormatHook<L: rowan::Language> {
+    /// Return `false` to leave this element out of the output.
+    fn keep(&self, _element: &rowan::SyntaxElement<L>) -> bool {
+        true
+    }
+
+    /// Replace the document for `node`. `child` formats a child node the
+    /// default way (including this hook and group wrapping).
+    fn node(
+        &self,
+        _node: &rowan::SyntaxNode<L>,
+        _child: &dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
+    ) -> Option<Doc> {
+        None
+    }
+}
+
+/// Hook that keeps the grammar-driven defaults.
+pub struct NoHook;
+
+impl<L: rowan::Language> FormatHook<L> for NoHook {}
 
 impl Doc {
     fn to_pretty(&self) -> pretty::RcDoc<'static, ()> {
@@ -65,6 +104,7 @@ impl Doc {
             Doc::Concat(ds) => RcDoc::concat(ds.iter().map(Doc::to_pretty)),
             Doc::Nest(n, inner) => inner.to_pretty().nest(*n as isize),
             Doc::Group(inner) => inner.to_pretty().group(),
+            Doc::IfBreak(s) => RcDoc::text(s.clone()).flat_alt(RcDoc::nil()),
         }
     }
 }
@@ -148,6 +188,18 @@ mod tests {
             ]),
         );
         assert_eq!(render(&doc, 80), "a\n\n  b");
+    }
+
+    #[test]
+    fn if_break_only_renders_when_broken() {
+        let doc = Doc::group(Doc::concat(vec![
+            Doc::text("["),
+            Doc::nest(2, Doc::concat(vec![Doc::Line, Doc::text("p o"), Doc::if_break(";")])),
+            Doc::Line,
+            Doc::text("]"),
+        ]));
+        assert_eq!(render(&doc, 80), "[ p o ]");
+        assert_eq!(render(&doc, 5), "[\n  p o;\n]");
     }
 
     #[test]
