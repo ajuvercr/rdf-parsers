@@ -2133,6 +2133,8 @@ fn format_hint_arm(entry: &FormatEntry, config: &Config) -> proc_macro2::TokenSt
     let tok_ident = config.context.ident_for(&entry.token);
 
     let parent_pat: proc_macro2::TokenStream = match &entry.scope {
+        // The document node, e.g. `ROOT.n3Statement` for top-level statements.
+        Some(scope) if scope == "ROOT" => quote! { SyntaxKind::ROOT },
         Some(scope) => {
             let s = config.context.ident_for(scope);
             quote! { SyntaxKind::#s }
