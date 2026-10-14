@@ -2059,6 +2059,10 @@ pub fn generate(path: &str, contents: &str) -> String {
                 self.kind
             }
 
+            fn from_parts(kind: SyntaxKind, at: usize) -> Self {
+                Rule { kind, state: at }
+            }
+
             fn state_dist(&self, terminal: &SyntaxKind) -> isize {
                 state_dist(self.kind, self.state, *terminal)
             }

@@ -32001,7 +32001,7 @@ mod definitions {
             },
             (SyntaxKind::ConstructTriples, 4usize, _) => match terminal {
                 SyntaxKind::Stop => 0,
-                _ => 5isize,
+                _ => 3isize,
             },
             (SyntaxKind::ConstructTriples, 5usize, _) => match terminal {
                 SyntaxKind::Anon
@@ -38005,7 +38005,7 @@ mod definitions {
             },
             (SyntaxKind::GroupGraphPatternSub, 5usize, _) => match terminal {
                 SyntaxKind::Stop => 0,
-                _ => 5isize,
+                _ => 3isize,
             },
             (SyntaxKind::GroupGraphPatternSub, 6usize, _) => match terminal {
                 SyntaxKind::BindLit
@@ -48840,7 +48840,7 @@ mod definitions {
             },
             (SyntaxKind::Quads, 5usize, _) => match terminal {
                 SyntaxKind::Stop => 0,
-                _ => 5isize,
+                _ => 3isize,
             },
             (SyntaxKind::Quads, 6usize, _) => match terminal {
                 SyntaxKind::Alit => 11isize,
@@ -55912,7 +55912,7 @@ mod definitions {
             },
             (SyntaxKind::TriplesBlock, 4usize, _) => match terminal {
                 SyntaxKind::Stop => 0,
-                _ => 5isize,
+                _ => 3isize,
             },
             (SyntaxKind::TriplesBlock, 5usize, _) => match terminal {
                 SyntaxKind::Anon
@@ -56453,7 +56453,7 @@ mod definitions {
             },
             (SyntaxKind::TriplesTemplate, 4usize, _) => match terminal {
                 SyntaxKind::Stop => 0,
-                _ => 5isize,
+                _ => 3isize,
             },
             (SyntaxKind::TriplesTemplate, 5usize, _) => match terminal {
                 SyntaxKind::Anon
@@ -71009,6 +71009,9 @@ mod definitions {
         fn element_kind(&self) -> SyntaxKind {
             self.kind
         }
+        fn from_parts(kind: SyntaxKind, at: usize) -> Self {
+            Rule { kind, state: at }
+        }
         fn state_dist(&self, terminal: &SyntaxKind) -> isize {
             state_dist(self.kind, self.state, *terminal)
         }
@@ -71043,7 +71046,7 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::BrOpen => 2isize,
             SyntaxKind::BrClose => 2isize,
             SyntaxKind::Comma => 3isize,
-            SyntaxKind::Stop => 5isize,
+            SyntaxKind::Stop => 3isize,
             SyntaxKind::Colon => 4isize,
             SyntaxKind::AddLit => 50isize,
             SyntaxKind::AskLit => 50isize,
