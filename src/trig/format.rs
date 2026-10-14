@@ -60,7 +60,7 @@ fn top_level(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
         &doc,
         is_directive(node),
     )
-    .then(|| Doc::concat(vec![Doc::HardLine, doc]))
+    .then(|| after_blank_line(doc))
 }
 
 /// `triplesBlock ::= triples ('.' triplesBlock?)?` — the nested block holds
@@ -78,5 +78,5 @@ fn triples_block(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
     }
     let doc = fmt.default(node);
     needs_blank_line(&fmt.child(&prev), false, &fmt.child(&triples), false)
-        .then(|| Doc::concat(vec![Doc::HardLine, doc]))
+        .then(|| after_blank_line(doc))
 }
