@@ -5,26 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.1 (2026-10-14)
+
+### Bug Fixes
+
+ - <csr-id-0f7f51f3edf972abfa978bdbaed3523a891a07c1/> indent wrapped objects past their predicate
+   When an object list breaks, its objects now go one level deeper than
+   the predicates instead of lining up with them, so they no longer read
+   as new predicates.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Indent wrapped objects past their predicate ([`0f7f51f`](https://github.com/ajuvercr/rdf-parsers/commit/0f7f51f3edf972abfa978bdbaed3523a891a07c1))
+</details>
+
 ## v0.2.0 (2026-10-14)
 
 ### New Features
 
  - <csr-id-eed8071fd9f22600f11c58b119f70e2d4b0ce9af/> format SPARQL updates; add `glue` hint
    - New `glue` format hint attaches a token to the previous one, dropping
-     the line breaks before it (never after a comment).
+   the line breaks before it (never after a comment).
    - SPARQL updates start after a blank line, like queries, and `;` between
-     updates is glued to the closing brace: `};`.
+   updates is glued to the closing brace: `};`.
    - Drop a dead assignment in the generated comment handling.
  - <csr-id-2e4c12c462869bcefc80b48005ceaf9c28cb3187/> tuned formatters for N3 and JSON-LD
    - N3 uses the shared Turtle rules (now parameterised by blank-node and
-     block kinds, looking through expression wrappers) plus formulas laid
-     out like TriG graphs, staying on one line when they fit.
+   block kinds, looking through expression wrappers) plus formulas laid
+   out like TriG graphs, staying on one line when they fit.
    - JSON-LD moves from indent/dedent to `nest`, so empty containers render
-     as `{ }` / `[ ]` instead of `{  }`.
+   as `{ }` / `[ ]` instead of `{  }`.
    - Format hints can be scoped to the document with `ROOT.<rule>`.
    - Statement separation skips trailing comments of the previous statement,
-     so `@prefix ... . # note` still gets a blank line before the triples
-     (Turtle, TriG, N3).
+   so `@prefix ... . # note` still gets a blank line before the triples
+   (Turtle, TriG, N3).
  - <csr-id-ad13100d9d7a79d1bed52bc959076069bc93c528/> never glue words together; drop keyword spacing hints
    Generated formatters insert a space wherever a word character (keyword,
    prefixed name, number) would run into another word, IRI, string, variable
@@ -33,43 +60,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    grammars. Punctuation (`(`, `.`, `@en`) is never separated.
  - <csr-id-cd9f411b0843238491b446b6fccb59f8e8e6f485/> generated formatter with the Turtle rules; comments follow their element
    - trig grammar uses `nest` hints; `trig::format` hooks in the rules shared
-     with Turtle (moved to `rdf_format`), plus statement separation for
-     top-level blocks and the triples inside a graph. `GRAPH`, bare labels,
-     default-graph braces and empty graphs are kept as written.
+   with Turtle (moved to `rdf_format`), plus statement separation for
+   top-level blocks and the triples inside a graph. `GRAPH`, bare labels,
+   default-graph braces and empty graphs are kept as written.
    - Generated formatters emit a comment on its own line together with the
-     next element, so it gets that element's indentation (e.g. the first
-     line inside a graph).
+   next element, so it gets that element's indentation (e.g. the first
+   line inside a graph).
    - Update trig tests to the new policy; add graph-form and comment tests.
  - <csr-id-0d834cf8fea506159a5907ae029256c6da39fa39/> generated formatter on par with the swls one
    - turtle grammar uses `nest` instead of indent/dedent pairs; every
-     predicate after the first goes on its own line.
+   predicate after the first goes on its own line.
    - `turtle::format` is a hand-written FormatHook for content-dependent
-     rules: drop redundant `;`, trailing `;` in multi-predicate blank nodes,
-     all-or-nothing breaking for simple object lists, hanging first object
-     list, and blank lines around multi-line statements and after directives.
+   rules: drop redundant `;`, trailing `;` in multi-predicate blank nodes,
+   all-or-nothing breaking for simple object lists, hanging first object
+   list, and blank lines around multi-line statements and after directives.
    - Generated formatters keep at most one blank line from the source and
-     keep trailing comments on their line. The newline after a comment is
-     emitted inside the following nest so the next line is indented.
+   keep trailing comments on their line. The newline after a comment is
+   emitted inside the following nest so the next line is indented.
    - Port the swls turtle formatter tests and add an idempotence test.
  - <csr-id-2b97a81b22544d2b7f2a2d4c2ba836d8c12781b6/> `nest`/`ifbreak` hints and a FormatHook escape hatch
    - New format hints: `nest` wraps a child (and its `before` hints) in one
-     indentation level; `ifbreak(<text>)` emits text only when the enclosing
-     group is broken. Legacy `indent`/`dedent` keep working.
+   indentation level; `ifbreak(<text>)` emits text only when the enclosing
+   group is broken. Legacy `indent`/`dedent` keep working.
    - Generated formatters gain `format_with`/`to_doc_with` taking a
-     `FormatHook`, which can drop elements or replace a node's doc for rules
-     that depend on content rather than node kinds.
+   `FormatHook`, which can drop elements or replace a node's doc for rules
+   that depend on content rather than node kinds.
    - The first line break after a comment is dropped, since the comment
-     already ended the line.
+   already ended the line.
    - The generated `to_doc` handles tokens, terminal wrappers and nodes in a
-     single path instead of three copies.
+   single path instead of three copies.
  - <csr-id-53beaaaedcc4dd0e831f8da2da313fe54a060d05/> render docs with `pretty`, end comments with a hard line
    - Render `Doc` through the `pretty` crate. A hard line inside a group now
-     makes the group break, so multi-line children break their parents, and
-     widths are counted correctly. Blank lines keep no indentation.
+   makes the group break, so multi-line children break their parents, and
+   widths are counted correctly. Blank lines keep no indentation.
    - Generated formatters emit a hard line after each comment. Previously
-     `<c>; # x\n<d> <e>.` became `# x<d> <e>.`, commenting out code.
+   `<c>; # x\n<d> <e>.` became `# x<d> <e>.`, commenting out code.
    - trig grammar: drop `after: hardline` on `}`, which kept every wrapped
-     graph from rendering flat; `block -> before: hardline` covers it.
+   graph from rendering flat; `block -> before: hardline` covers it.
    - trig test: use a width where the expected output is actually valid.
 
 ### Bug Fixes
@@ -79,25 +106,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    TriG, N3, JSON-LD, SPARQL Update) turned up:
    
    - Stack overflow on large documents: the conversion to `pretty` built an
-     append chain as deep as the document; build a balanced tree instead.
+   append chain as deep as the document; build a balanced tree instead.
    - Tokens merging when printed side by side (`"x"@en--ltr .` became
-     `"x"@en--ltr.`): the generated lexer now checks every pair of touching
-     tokens and a space is kept where they would lex differently.
+   `"x"@en--ltr.`): the generated lexer now checks every pair of touching
+   tokens and a space is kept where they would lex differently.
    - Unlexable error tokens keep their source spacing, like error nodes.
    - Line breaks combine across node boundaries too, so blank lines no
-     longer grow on every run; statement hooks ask for the total they want.
+   longer grow on every run; statement hooks ask for the total they want.
    
    After these, valid files format without errors and stably, and no
    invalid file gets more errors. The SPARQL query suite was not fully run.
  - <csr-id-6989b4ac20044a02496e32c36facf21b5ce9336b/> stable output and safe error regions; tidy SPARQL layout
    Generator (all languages):
    - Line breaks from neighbouring hints combine instead of adding up, so
-     output no longer grows blank lines on every run (`}\n\nWHERE`).
+   output no longer grows blank lines on every run (`}\n\nWHERE`).
    - Error regions keep the source's separation; when the parser gives up,
-     tokens were glued together (`?s ex:p` -> `?sex:p`).
+   tokens were glued together (`?s ex:p` -> `?sex:p`).
    - Trailing comments go before queued line breaks and stay on their line;
-     own-line comments sit after all leading breaks, directly above their
-     element.
+   own-line comments sit after all leading breaks, directly above their
+   element.
    - No double spaces, no spaces at line ends.
    
    SPARQL grammar: nest property lists under their subject, space binary
@@ -112,26 +139,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
    Search (a_star.rs):
    - Frontier-dominance pruning: drop a path once a strictly cheaper path is
-     12 tokens ahead and parsed them cleanly. Repairs only happen near where
-     the cheaper parse got stuck, instead of everywhere before the error.
+   12 tokens ahead and parsed them cleanly. Repairs only happen near where
+   the cheaper parse got stuck, instead of everywhere before the error.
    - Per-token-position budget of 4096 expansions, popped cheapest-first.
    - Pruned paths are parked, not dropped, and resumed if all live paths
-     dead-end; an empty queue returns the best partial parse.
+   dead-end; an empty queue returns the best partial parse.
    - Zero-cost moves at the same token skip the heap (eager stack), and the
-     state map uses an Fx-style hasher.
+   state map uses an Fx-style hasher.
    
    Incremental parsing (incremental.rs, parse_incremental):
    - A parse records its steps and parser checkpoints every ~32 tokens as
-     plain data in PrevParseInfo (still Send + Sync, no language types).
+   plain data in PrevParseInfo (still Send + Sync, no language types).
    - The next parse resumes from a checkpoint before the edit and splices in
-     the old steps once it reaches the old parser state after the edit.
+   the old steps once it reaches the old parser state after the edit.
    - ParserTrait gains from_parts (generated); PrevParseInfo gains a private
-     field, Default and PrevParseInfo::new.
+   field, Default and PrevParseInfo::new.
    
    Role bias:
    - Tokens remember a role fingerprint that collapses rule cycles (SPARQL's
-     right-recursive TriplesBlock no longer changes every later token's role),
-     and agreement also requires the same bracket depth.
+   right-recursive TriplesBlock no longer changes every later token's role),
+   and agreement also requires the same bracket depth.
    - Inserted (missing) brackets count toward bracket depth.
 
 ### Commit Statistics
