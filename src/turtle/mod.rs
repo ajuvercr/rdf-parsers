@@ -122,4 +122,24 @@ mod format_tests {
         let out = format_turtle(input, 16);
         assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n  <e> <f>\n].\n");
     }
+
+    #[test]
+    fn format_comments_end_their_line() {
+        // Code after a comment on the same line would become part of the
+        // comment, changing the data.
+        let input = "# header\n<a> <b> <c>; # trailing\n  <d> <e>.\n<f> <g> [ # in bnode\n <h> <i> ].\n";
+        let out = format_turtle(input, 80);
+        for comment in ["# header", "# trailing", "# in bnode"] {
+            assert!(
+                out.lines().any(|l| l.trim() == comment),
+                "comment {comment:?} not on its own line in:\n{out}"
+            );
+        }
+        for code in ["<d> <e>.", "<h> <i>"] {
+            assert!(
+                out.lines().any(|l| l.trim() == code),
+                "{code:?} missing in:\n{out}"
+            );
+        }
+    }
 }

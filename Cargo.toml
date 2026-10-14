@@ -19,4 +19,5 @@ rowan = "0.16.1"
 similar = "2.7.0"
 oxiri = "0.2"
 async-trait = "0.1.89"
+pretty = "0.12.5"
 

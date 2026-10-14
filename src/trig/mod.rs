@@ -137,7 +137,9 @@ mod format_tests {
     #[test]
     fn format_triples_inside_graph_bn() {
         let input = r#"GRAPH <b> { [ <a> <b> ; <a> <b> ] a foaf:Friend }"#;
-        let out = format_trig(input, 16);
+        // `    <a> <b>; <a> <b>` (20 cols) must break, `  ] a foaf:Friend`
+        // (17 cols) must not.
+        let out = format_trig(input, 18);
         assert_eq!(
             out,
             "GRAPH <b> {\n  [\n    <a> <b>;\n    <a> <b>\n  ] a foaf:Friend\n}\n"

@@ -1247,6 +1247,7 @@ pub mod format {
                             .last_mut()
                             .unwrap()
                             .push(Doc::text(t.text().to_string()));
+                        parts.last_mut().unwrap().push(Doc::HardLine);
                         continue;
                     }
                     let (before, after) = format_hints(node.kind(), t.kind());
