@@ -59,6 +59,16 @@ impl Doc {
         Doc::IfBreak(s.into())
     }
 
+    /// Whether rendering this doc always spans multiple lines.
+    pub fn has_hardline(&self) -> bool {
+        match self {
+            Doc::HardLine => true,
+            Doc::Concat(ds) => ds.iter().any(Doc::has_hardline),
+            Doc::Nest(_, d) | Doc::Group(d) => d.has_hardline(),
+            Doc::Nil | Doc::Text(_) | Doc::Line | Doc::IfBreak(_) => false,
+        }
+    }
+
     /// A comment runs to the end of the line, so it is followed by a hard
     /// line. This also forces all enclosing groups to break.
     pub fn comment(s: impl Into<String>) -> Self {
@@ -77,14 +87,35 @@ pub trait FormatHook<L: rowan::Language> {
         true
     }
 
-    /// Replace the document for `node`. `child` formats a child node the
-    /// default way (including this hook and group wrapping).
-    fn node(
-        &self,
-        _node: &rowan::SyntaxNode<L>,
-        _child: &dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
-    ) -> Option<Doc> {
+    /// Replace the document for `node`.
+    fn node(&self, _node: &rowan::SyntaxNode<L>, _fmt: &Formatter<'_, L>) -> Option<Doc> {
         None
+    }
+}
+
+/// Gives a [`FormatHook`] access to the generated formatter.
+pub struct Formatter<'a, L: rowan::Language> {
+    child: &'a dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
+    default: &'a dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
+}
+
+impl<'a, L: rowan::Language> Formatter<'a, L> {
+    pub fn new(
+        child: &'a dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
+        default: &'a dyn Fn(&rowan::SyntaxNode<L>) -> Doc,
+    ) -> Self {
+        Self { child, default }
+    }
+
+    /// Format a child node as its parent would: hook, hints and grouping.
+    pub fn child(&self, node: &rowan::SyntaxNode<L>) -> Doc {
+        (self.child)(node)
+    }
+
+    /// The hint-driven doc for `node` itself, without its own hook override
+    /// or group wrapping. Its children still go through the hook.
+    pub fn default(&self, node: &rowan::SyntaxNode<L>) -> Doc {
+        (self.default)(node)
     }
 }
 
