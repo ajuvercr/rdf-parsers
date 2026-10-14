@@ -135,6 +135,42 @@ pub fn trailing_hardlines(docs: &[Doc]) -> usize {
     n
 }
 
+/// Remove the line breaks and spaces `docs` ends with (looking through nested
+/// docs), so the next token attaches to the previous one. Breaks that end a
+/// comment are kept: anything glued to a comment would become part of it.
+pub fn strip_trailing_breaks(docs: &mut Vec<Doc>) {
+    fn last_text(docs: &[Doc]) -> Option<&str> {
+        docs.iter().rev().find_map(|d| match d {
+            Doc::Text(t) if t != " " => Some(t.as_str()),
+            Doc::Concat(ds) => last_text(ds),
+            Doc::Nest(_, d) | Doc::Group(d) => last_text(std::slice::from_ref(d.as_ref())),
+            _ => None,
+        })
+    }
+    // Returns whether `doc` was a break that should be removed entirely.
+    fn strip(doc: &mut Doc) -> bool {
+        match doc {
+            Doc::HardLine | Doc::Line | Doc::Nil => true,
+            Doc::Text(t) => t == " ",
+            Doc::Concat(ds) => {
+                strip_trailing_breaks(ds);
+                ds.is_empty()
+            }
+            Doc::Nest(_, d) | Doc::Group(d) => strip(d),
+            Doc::IfBreak(_) => false,
+        }
+    }
+    if last_text(docs).is_some_and(|t| t.starts_with('#')) {
+        return;
+    }
+    while let Some(last) = docs.last_mut() {
+        if !strip(last) {
+            break;
+        }
+        docs.pop();
+    }
+}
+
 /// Language-specific escape hatch for the generated formatters.
 ///
 /// The grammar's `=== format ===` hints cover layout that only depends on a
@@ -268,6 +304,17 @@ mod tests {
             Doc::text(")"),
         ]));
         assert_eq!(render(&doc, 80), "(\n  a\n  b\n)");
+    }
+
+    #[test]
+    fn strip_trailing_breaks_glues_but_keeps_comment_ends() {
+        let mut docs = vec![Doc::concat(vec![Doc::text("}"), Doc::HardLine]), Doc::Line];
+        strip_trailing_breaks(&mut docs);
+        assert_eq!(render(&Doc::concat(docs), 80), "}");
+
+        let mut docs = vec![Doc::text("# note"), Doc::HardLine];
+        strip_trailing_breaks(&mut docs);
+        assert_eq!(render(&Doc::concat(docs), 80), "# note\n");
     }
 
     #[test]

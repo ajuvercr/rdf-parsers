@@ -367,6 +367,8 @@ query.selectQuery -> before: blankline
 query.constructQuery -> before: blankline
 query.describeQuery -> before: blankline
 query.askQuery -> before: blankline
+update.update1 -> before: blankline
+update.colon -> before: glue
 prefixDecl -> before: hardline
 baseDecl -> before: hardline
 whereClause -> before: hardline

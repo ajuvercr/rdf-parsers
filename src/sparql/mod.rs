@@ -270,4 +270,33 @@ LIMIT 10
         let out = format_sparql(input, 80);
         assert_eq!(out, "SELECT ?s\nWHERE {\n  ?s ex:p ?o.\n  FILTER ?s ex:q\n}\n");
     }
+
+    #[test]
+    fn format_update() {
+        let rule = Rule::new(SyntaxKind::UpdateUnit);
+        let input = "PREFIX ex: <http://ex/> INSERT DATA { ex:a ex:b ex:c } ; DELETE { ?s ex:p ?o } WHERE { ?s ex:p ?o . FILTER(?o>1) }";
+        let fmt = |input: &str| {
+            let (result, _) = parse(rule.clone(), input);
+            crate::sparql::parser::format::format(&result.syntax::<Lang>(), 80)
+        };
+        let out = fmt(input);
+        assert_eq!(
+            out,
+            "PREFIX ex: <http://ex/>
+
+INSERT DATA {
+  ex:a ex:b ex:c
+};
+
+DELETE {
+  ?s ex:p ?o
+}
+WHERE {
+  ?s ex:p ?o.
+  FILTER (?o > 1)
+}
+"
+        );
+        assert_eq!(fmt(&out), out);
+    }
 }
