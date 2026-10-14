@@ -97,32 +97,32 @@ sq_close
 cl_close
 curly_close
 === format ===
-group predicateObjectList
 group objectList
-group wrappedGraph
-group collection
 group blankNodePropertyList
 group blankNodePropertyList2
-triples.predicateObjectList -> before: space
-subject -> after: indent
-colon -> after: line
-stop -> after: hardline
+group collection
+group wrappedGraph
+directive -> before: hardline
 block -> before: hardline
-object -> before: line
-blankNodePropertyList.sq_open -> after: indent line
-blankNodePropertyList.sq_close -> before: dedent line
-blankNodePropertyList2.sq_open -> after: indent line
-blankNodePropertyList2.sq_close -> before: dedent line
-BlankNode.sq_open -> after: space
-cl_open -> after: indent line
-cl_close -> before: dedent line
-triplesBlock -> before: line, after: line
-wrappedGraph -> before: space
-curly_open -> after: indent
-curly_close -> before: dedent
+prefixId.prefix_token -> after: space
 prefixId.pname_ns -> after: space
+base.base_token -> after: space
+sparqlBase.sparql_base_token -> after: space
+sparqlPrefix.sparql_prefix_token -> after: space
+sparqlPrefix.pname_ns -> after: space
 graph_token -> after: space
-prefix_token -> after: space
-sparql_prefix_token -> after: space
-base_token -> after: space
-sparql_base_token -> after: space
+graphBlock.graphTerm -> after: space
+wrappedGraph.triplesBlock -> before: nest line
+wrappedGraph.curly_close -> before: line
+triplesBlock.triplesBlock -> before: hardline
+triples.predicateObjectList -> before: nest space
+predicateObjectList.colon -> after: hardline
+objectList -> before: space
+objectList.comma -> after: line
+blankNodePropertyList.predicateObjectList -> before: nest line
+blankNodePropertyList.sq_close -> before: line
+blankNodePropertyList2.predicateObjectList -> before: nest line
+blankNodePropertyList2.sq_close -> before: line
+BlankNode.sq_open -> after: space
+collection.object -> before: nest line
+collection.cl_close -> before: line

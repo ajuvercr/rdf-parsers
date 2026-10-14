@@ -72603,6 +72603,7 @@ pub mod format {
         let mut parts: Vec<Vec<Doc>> = vec![vec![]];
         let mut after_comment = false;
         let mut newlines = 0;
+        let mut own_line: Vec<(String, bool)> = Vec::new();
         for child in node.children_with_tokens() {
             let newlines_before = std::mem::take(&mut newlines);
             let (kind, doc) = match &child {
@@ -72613,23 +72614,20 @@ pub mod format {
                     }
                     if t.kind() == SyntaxKind::Comment {
                         let part = parts.last_mut().unwrap();
-                        let at_line_start = std::mem::take(&mut after_comment)
-                            || part.is_empty()
-                            || ends_line(part.last());
-                        if !at_line_start {
-                            part.push(if newlines_before > 0 {
-                                Doc::HardLine
-                            } else {
-                                Doc::text(" ")
-                            });
-                        } else if !part.is_empty() && !ends_line(part.last()) {
-                            part.push(Doc::HardLine);
+                        let trailing = newlines_before == 0
+                            && own_line.is_empty()
+                            && !after_comment
+                            && !part.is_empty()
+                            && !ends_line(part.last());
+                        if trailing {
+                            part.push(Doc::text(" "));
+                            part.push(Doc::text(t.text().to_string()));
+                            after_comment = true;
+                        } else {
+                            let blank =
+                                newlines_before > 1 && (!part.is_empty() || !own_line.is_empty());
+                            own_line.push((t.text().to_string(), blank));
                         }
-                        if newlines_before > 1 && !part.is_empty() {
-                            part.push(Doc::HardLine);
-                        }
-                        part.push(Doc::text(t.text().to_string()));
-                        after_comment = true;
                         continue;
                     }
                     if !hook.keep(&child) {
@@ -72664,10 +72662,38 @@ pub mod format {
                     .push(Doc::nest(2, Doc::concat(nested)));
             }
             let mut seq = before.to_docs();
-            if newlines_before > 1 && !before.blankline {
+            let blank = match own_line.first() {
+                Some((_, blank)) => *blank,
+                None => newlines_before > 1,
+            };
+            if blank && !before.blankline {
                 if let Some(i) = seq.iter().position(|d| matches!(d, Doc::HardLine)) {
                     seq.insert(i, Doc::HardLine);
                 }
+            }
+            if !own_line.is_empty() {
+                let part = parts.last().unwrap();
+                let at_line_start = part.is_empty() || ends_line(part.last());
+                let at = match seq.iter().position(is_break) {
+                    Some(i) => {
+                        seq[i] = Doc::HardLine;
+                        i + 1
+                    }
+                    None if at_line_start => 0,
+                    None => {
+                        seq.insert(0, Doc::HardLine);
+                        1
+                    }
+                };
+                let mut comments = Vec::new();
+                for (i, (text, blank)) in std::mem::take(&mut own_line).into_iter().enumerate() {
+                    if blank && i > 0 {
+                        comments.push(Doc::HardLine);
+                    }
+                    comments.push(Doc::text(text));
+                    comments.push(Doc::HardLine);
+                }
+                seq.splice(at..at, comments);
             }
             seq.push(doc);
             if before.nest || after.nest {
@@ -72683,8 +72709,21 @@ pub mod format {
                 push_all(parts.last_mut().unwrap(), after_docs, &mut after_comment);
             }
         }
+        let part = parts.last_mut().unwrap();
+        for (text, blank) in own_line {
+            if !after_comment && !part.is_empty() && !ends_line(part.last()) {
+                part.push(Doc::HardLine);
+            }
+            if blank {
+                part.push(Doc::HardLine);
+            }
+            part.push(Doc::text(text));
+            after_comment = true;
+            part.push(Doc::HardLine);
+            after_comment = false;
+        }
         if after_comment {
-            parts.last_mut().unwrap().push(Doc::HardLine);
+            part.push(Doc::HardLine);
         }
         while parts.len() > 1 {
             let nested = parts.pop().unwrap();
