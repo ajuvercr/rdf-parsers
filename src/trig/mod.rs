@@ -182,4 +182,17 @@ GRAPH ex:h { }
         assert_eq!(out, expected);
         assert_eq!(format_trig(&out, 80), out);
     }
+
+    #[test]
+    fn format_keywords_are_separated() {
+        let input = "@base <http://ex/>. BASE <http://ex/> @prefix ex: <http://ex/>. PREFIX ex2: <http://ex2/>";
+        let expected = "@base <http://ex/>.\nBASE <http://ex/>\n@prefix ex: <http://ex/>.\nPREFIX ex2: <http://ex2/>\n";
+        assert_eq!(format_trig(input, 80), expected);
+    }
+    #[test]
+    fn format_graph_keyword_is_separated() {
+        let input = "GRAPH<g>{<a> <b> <c>} <h>{<a> <b> <c>}";
+        let expected = "GRAPH <g> { <a> <b> <c> }\n<h> { <a> <b> <c> }\n";
+        assert_eq!(format_trig(input, 80), expected);
+    }
 }

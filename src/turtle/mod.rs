@@ -319,4 +319,11 @@ mod format_tests {
         let once = format_turtle(input, 40);
         assert_eq!(format_turtle(&once, 40), once);
     }
+
+    #[test]
+    fn format_keywords_are_separated() {
+        let input = "@base <http://ex/>. BASE <http://ex/> @prefix ex: <http://ex/>. PREFIX ex2: <http://ex2/>";
+        let expected = "@base <http://ex/>.\nBASE <http://ex/>\n@prefix ex: <http://ex/>.\nPREFIX ex2: <http://ex2/>\n";
+        assert_eq!(format_turtle(input, 80), expected);
+    }
 }

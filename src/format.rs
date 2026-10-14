@@ -69,11 +69,46 @@ impl Doc {
         }
     }
 
+    /// The first character this doc renders, if any. Line breaks count as
+    /// `'\n'`; `IfBreak` text is ignored since it may not be rendered.
+    pub fn first_char(&self) -> Option<char> {
+        match self {
+            Doc::Text(s) => s.chars().next(),
+            Doc::Line | Doc::HardLine => Some('\n'),
+            Doc::Concat(ds) => ds.iter().find_map(Doc::first_char),
+            Doc::Nest(_, d) | Doc::Group(d) => d.first_char(),
+            Doc::Nil | Doc::IfBreak(_) => None,
+        }
+    }
+
+    /// The last character this doc renders, if any. See [`Doc::first_char`].
+    pub fn last_char(&self) -> Option<char> {
+        match self {
+            Doc::Text(s) => s.chars().last(),
+            Doc::Line | Doc::HardLine => Some('\n'),
+            Doc::Concat(ds) => ds.iter().rev().find_map(Doc::last_char),
+            Doc::Nest(_, d) | Doc::Group(d) => d.last_char(),
+            Doc::Nil | Doc::IfBreak(_) => None,
+        }
+    }
+
     /// A comment runs to the end of the line, so it is followed by a hard
     /// line. This also forces all enclosing groups to break.
     pub fn comment(s: impl Into<String>) -> Self {
         Doc::Concat(vec![Doc::Text(s.into()), Doc::HardLine])
     }
+}
+
+/// Whether two tokens rendered as `left` directly followed by `right` must
+/// be separated by a space: a word (keyword, prefixed name, number) would
+/// otherwise run into the next word, IRI, string, variable or bracket, as in
+/// `PREFIXex:` or `ex:<x>`. Punctuation like `(`, `.` or `@en` never gets one.
+pub fn needs_space(left: Option<char>, right: Option<char>) -> bool {
+    let (Some(l), Some(r)) = (left, right) else {
+        return false;
+    };
+    let word = |c: char| c.is_alphanumeric() || c == '_' || c == ':';
+    word(l) && (word(r) || matches!(r, '<' | '"' | '\'' | '?' | '$' | '[' | '{'))
 }
 
 /// Language-specific escape hatch for the generated formatters.
@@ -225,12 +260,27 @@ mod tests {
     fn if_break_only_renders_when_broken() {
         let doc = Doc::group(Doc::concat(vec![
             Doc::text("["),
-            Doc::nest(2, Doc::concat(vec![Doc::Line, Doc::text("p o"), Doc::if_break(";")])),
+            Doc::nest(
+                2,
+                Doc::concat(vec![Doc::Line, Doc::text("p o"), Doc::if_break(";")]),
+            ),
             Doc::Line,
             Doc::text("]"),
         ]));
         assert_eq!(render(&doc, 80), "[ p o ]");
         assert_eq!(render(&doc, 5), "[\n  p o;\n]");
+    }
+
+    #[test]
+    fn needs_space_between_words_only() {
+        assert!(needs_space(Some('X'), Some('e'))); // PREFIX ex:
+        assert!(needs_space(Some(':'), Some('<'))); // ex: <x>
+        assert!(needs_space(Some('E'), Some('<'))); // BASE <x>
+        assert!(!needs_space(Some('"'), Some('@'))); // "x"@en
+        assert!(!needs_space(Some('D'), Some('('))); // BOUND(
+        assert!(!needs_space(Some('a'), Some('.'))); // ex:a.
+        assert!(!needs_space(Some(' '), Some('e')));
+        assert!(!needs_space(None, Some('e')));
     }
 
     #[test]

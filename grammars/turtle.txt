@@ -92,12 +92,6 @@ group blankNodePropertyList
 group blankNodePropertyList2
 group collection
 statement -> before: hardline
-prefixId.prefix_token -> after: space
-prefixId.pname_ns -> after: space
-base.base_token -> after: space
-sparqlBase.sparql_base_token -> after: space
-sparqlPrefix.sparql_prefix_token -> after: space
-sparqlPrefix.pname_ns -> after: space
 triples.predicateObjectList -> before: nest space
 predicateObjectList.colon -> after: hardline
 objectList -> before: space
