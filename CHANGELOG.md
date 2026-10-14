@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.2 (2026-10-14)
+
+### Bug Fixes
+
+ - <csr-id-dc9b09d4ce8be9609f3dca43efa4ce12d3f11324/> format blank nodes and collections like Turtle
+   - Collections and blank nodes are groups: when a collection does not fit,
+     each item goes on its own line, like Turtle.
+   - New `sparql::format` hook with Turtle's content rules: redundant `;` in
+     property lists is dropped (the `;` between updates and next to parse
+     errors is kept), blank nodes with several predicates put one per line
+     and end with `;`, and object lists holding blocks stay together
+     (`], [ ], "x"`) with blocks closing at the indentation they open on.
+   - `sparql::format::format` now goes through the hook.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Format blank nodes and collections like Turtle ([`dc9b09d`](https://github.com/ajuvercr/rdf-parsers/commit/dc9b09d4ce8be9609f3dca43efa4ce12d3f11324))
+</details>
+
 ## v0.2.1 (2026-10-14)
 
 ### Bug Fixes
