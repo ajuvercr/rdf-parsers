@@ -359,8 +359,8 @@ colon -> after: line
 comma -> after: space
 triplesSameSubject.propertyListNotEmpty -> before: nest space
 triplesSameSubjectPath.propertyListPathNotEmpty -> before: nest space
-objectList -> before: space
-objectListPath -> before: space
+objectList -> before: nest space
+objectListPath -> before: nest space
 objectList.comma -> after: line
 objectListPath.comma -> after: line
 query.selectQuery -> before: blankline

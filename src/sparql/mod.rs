@@ -207,7 +207,28 @@ mod format_tests {
         let out = format_sparql(input, 20);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  ?s <a> <b>,\n    <c>,\n    <d>,\n    <e>,\n    <f>\n}\n"
+            "SELECT ?s\nWHERE {\n  ?s <a> <b>,\n      <c>,\n      <d>,\n      <e>,\n      <f>\n}\n"
+        );
+    }
+
+    #[test]
+    fn format_wrapped_objects_indent_past_predicates() {
+        let input = r#"SELECT * { ?s a <Image>; <focus> <me>; <name> [ a <Person>; <friend> [ a <Person> ] ], [], "long name", "and another very long name". }"#;
+        let out = format_sparql(input, 80);
+        assert_eq!(
+            out,
+            r#"SELECT *
+{
+  ?s a <Image>;
+    <focus> <me>;
+    <name> [
+        a <Person>; <friend> [ a <Person> ]
+      ],
+      [],
+      "long name",
+      "and another very long name".
+}
+"#
         );
     }
 
