@@ -1119,37 +1119,15 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
-            (_, SyntaxKind::CurlyOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::CurlyClose) => (
+            (SyntaxKind::JsonObject, SyntaxKind::MemberList) => (
                 Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
-                    nest: false,
+                    dedent: false,
+                    nest: true,
                     if_break: None,
                 },
                 Hints {
@@ -1163,7 +1141,17 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::SqOpen) => (
+            (SyntaxKind::JsonObject, SyntaxKind::CurlyClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
                 Hints {
                     space: false,
                     line: false,
@@ -1174,25 +1162,37 @@ pub mod format {
                     nest: false,
                     if_break: None,
                 },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
             ),
-            (_, SyntaxKind::SqClose) => (
+            (SyntaxKind::JsonArray, SyntaxKind::ValueList) => (
                 Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::JsonArray, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
                     nest: false,
                     if_break: None,
                 },

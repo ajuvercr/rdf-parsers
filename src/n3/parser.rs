@@ -5368,6 +5368,94 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
+            (SyntaxKind::ROOT, SyntaxKind::N3Statement) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::ROOT, SyntaxKind::SparqlDirective) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Triples, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::PredicateObjectList, SyntaxKind::Colon) => (
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
             (SyntaxKind::ObjectList, SyntaxKind::Comma) => (
                 Hints {
                     space: false,
@@ -5390,51 +5478,7 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::Stop) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: true,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::Colon) => (
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::Comma) => (
+            (SyntaxKind::Predicate, SyntaxKind::ArrowLeft) => (
                 Hints {
                     space: false,
                     line: false,
@@ -5456,37 +5500,15 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::SqClose) => (
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::PredicateObjectList) => (
                 Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
-                    nest: false,
+                    dedent: false,
+                    nest: true,
                     if_break: None,
                 },
                 Hints {
@@ -5500,36 +5522,14 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::BrOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::BrClose) => (
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
                 Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
+                    dedent: false,
                     nest: false,
                     if_break: None,
                 },
@@ -5544,7 +5544,17 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::ClOpen) => (
+            (SyntaxKind::IriPropertyList, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
                 Hints {
                     space: false,
                     line: false,
@@ -5555,25 +5565,147 @@ pub mod format {
                     nest: false,
                     if_break: None,
                 },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
             ),
-            (_, SyntaxKind::ClClose) => (
+            (SyntaxKind::IriPropertyList, SyntaxKind::SqClose) => (
                 Hints {
                     space: false,
                     line: true,
                     hardline: false,
                     blankline: false,
                     indent: false,
-                    dedent: true,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Collection, SyntaxKind::Object) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Collection, SyntaxKind::BrClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Formula, SyntaxKind::FormulaContent) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Formula, SyntaxKind::ClClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::FormulaContent, SyntaxKind::FormulaContent) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (_, SyntaxKind::ObjectList) => (
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
                     nest: false,
                     if_break: None,
                 },
@@ -5594,10 +5726,11 @@ pub mod format {
     fn is_group(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SyntaxKind::PredicateObjectList
-                | SyntaxKind::ObjectList
+            SyntaxKind::ObjectList
                 | SyntaxKind::BlankNodePropertyList
+                | SyntaxKind::IriPropertyList
                 | SyntaxKind::Collection
+                | SyntaxKind::Formula
         )
     }
     fn is_break(doc: &Doc) -> bool {

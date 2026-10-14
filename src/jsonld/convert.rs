@@ -2814,6 +2814,14 @@ mod tests {
     }
 
     #[test]
+    fn format_empty_containers_are_padded() {
+        let input = r#"{"a": {}, "b": [], "c": ["x", "y"]}"#;
+        let out = format_jsonld(input, 80);
+        assert_eq!(out, "{ \"a\": { }, \"b\": [ ], \"c\": [ \"x\", \"y\" ] }\n");
+        assert_eq!(format_jsonld(&out, 80), out);
+    }
+
+    #[test]
     fn format_small_object_fits_on_one_line() {
         // A small object that fits in 80 columns stays flat.
         // Prettier-style: spaces inside braces in flat mode (Line → " ").

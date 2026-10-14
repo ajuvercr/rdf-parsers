@@ -39,20 +39,9 @@ impl FormatHook<Lang> for TurtleHook {
     }
 }
 
-turtle_like_format_rules!();
-
-/// The statement directly before `node`, unless a comment sits in between.
-fn prev_statement(node: &SyntaxNode) -> Option<SyntaxNode> {
-    let mut prev = node.prev_sibling_or_token();
-    while let Some(e) = prev {
-        match e {
-            NodeOrToken::Token(ref t) if t.kind() == SyntaxKind::WhiteSpace => {}
-            NodeOrToken::Node(n) if n.kind() == SyntaxKind::Statement => return Some(n),
-            _ => return None,
-        }
-        prev = e.prev_sibling_or_token();
-    }
-    None
+turtle_like_format_rules! {
+    bnode_lists: [BlankNodePropertyList, BlankNodePropertyList2],
+    blocks: [BlankNodePropertyList2, Collection],
 }
 
 fn is_directive(statement: &SyntaxNode) -> bool {
@@ -63,7 +52,7 @@ fn is_directive(statement: &SyntaxNode) -> bool {
 
 /// Blank lines from the source are kept by the generated formatter already.
 fn statement(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
-    let prev = prev_statement(node)?;
+    let prev = prev_statement(node, |k| k == SyntaxKind::Statement, |_| false)?;
     if newlines_before(node) > 1 {
         return None;
     }

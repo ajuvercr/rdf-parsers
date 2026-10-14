@@ -100,17 +100,24 @@ sq_close
 br_close
 cl_close
 === format ===
-group predicateObjectList
 group objectList
 group blankNodePropertyList
+group iriPropertyList
 group collection
-stop -> after: hardline
-colon -> before: space, after: line
-comma -> after: space
+group formula
+ROOT.n3Statement -> before: hardline
+ROOT.sparqlDirective -> before: hardline
+triples.predicateObjectList -> before: nest space
+predicateObjectList.colon -> after: hardline
+objectList -> before: space
 objectList.comma -> after: line
-sq_open -> after: indent line
-sq_close -> before: dedent line
-br_open -> after: indent line
-br_close -> before: dedent line
-cl_open -> after: indent line
-cl_close -> before: dedent line
+predicate.arrow_left -> after: space
+blankNodePropertyList.predicateObjectList -> before: nest line
+blankNodePropertyList.sq_close -> before: line
+iriPropertyList.predicateObjectList -> before: nest line
+iriPropertyList.sq_close -> before: line
+collection.object -> before: nest line
+collection.br_close -> before: line
+formula.formulaContent -> before: nest line
+formula.cl_close -> before: line
+formulaContent.formulaContent -> before: line

@@ -41,29 +41,14 @@ impl FormatHook<Lang> for TrigHook {
     }
 }
 
-turtle_like_format_rules!();
-
-/// The directive or block directly before `node`, unless a comment sits in
-/// between.
-fn prev_top_level(node: &SyntaxNode) -> Option<SyntaxNode> {
-    let mut prev = node.prev_sibling_or_token();
-    while let Some(e) = prev {
-        match e {
-            NodeOrToken::Token(ref t) if t.kind() == SyntaxKind::WhiteSpace => {}
-            NodeOrToken::Node(n)
-                if matches!(n.kind(), SyntaxKind::Directive | SyntaxKind::Block) =>
-            {
-                return Some(n);
-            }
-            _ => return None,
-        }
-        prev = e.prev_sibling_or_token();
-    }
-    None
+turtle_like_format_rules! {
+    bnode_lists: [BlankNodePropertyList, BlankNodePropertyList2],
+    blocks: [BlankNodePropertyList2, Collection],
 }
 
 fn top_level(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
-    let prev = prev_top_level(node)?;
+    let is_top_level = |k| matches!(k, SyntaxKind::Directive | SyntaxKind::Block);
+    let prev = prev_statement(node, is_top_level, |_| false)?;
     if newlines_before(node) > 1 {
         return None;
     }
