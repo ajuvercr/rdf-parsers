@@ -7,9 +7,12 @@ use logos::{Lexer, Logos};
 pub use parser::*;
 
 mod a_star;
+mod incremental;
 pub use a_star::Fingerprint;
 pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
+#[doc(hidden)]
+pub use a_star::last_iterations;
 pub mod list;
 pub mod model;
 pub mod format;
@@ -252,6 +255,7 @@ pub struct PrevToken {
 }
 
 /// Information from a previous parse needed for incremental re-parsing.
+#[derive(Default)]
 pub struct PrevParseInfo {
     pub tokens: Vec<PrevToken>,
     /// Whether the previous parse produced any errors.  When true, stored
@@ -260,6 +264,21 @@ pub struct PrevParseInfo {
     /// fingerprint conflicts are treated as free-pass rather than +50 role
     /// conflicts.
     pub had_errors: bool,
+    /// The previous parse's steps and parser checkpoints, so the next parse
+    /// can reuse the parts before and after an edit.
+    memo: incremental::Memo,
+}
+
+impl PrevParseInfo {
+    /// Previous-parse info carrying only token roles, without the steps and
+    /// checkpoints `parse_incremental` records for reusing unchanged parts.
+    pub fn new(tokens: Vec<PrevToken>, had_errors: bool) -> Self {
+        Self {
+            tokens,
+            had_errors,
+            memo: Default::default(),
+        }
+    }
 }
 
 /// Role-preservation bias applied in the A* search during incremental
@@ -281,18 +300,18 @@ impl Default for IncrementalBias {
     }
 }
 
-/// Like `parse_t_2` but, when `prev` is provided, diffs the token stream
-/// against the previous one and copies each old token's parse-time fingerprint
-/// onto the matching new token via `FatToken::set_old_kind`.  The A* scorer
-/// then uses `bias` to adjust scores for parses that agree or disagree with
-/// the previous token positions in the grammar rule stack.
+/// Re-parses `text`, reusing what it can of the previous parse `prev`.
 ///
-/// Fast path: if the document is currently valid (fast parse succeeds), the
-/// fault-tolerant search and incremental diffing are skipped entirely.  The
-/// fast result is returned with a `PrevParseInfo` marked `had_errors = false`,
-/// so subsequent edits receive full incremental guidance.  This avoids the
-/// case where fingerprints from an error-recovery parse mislead the A* when
-/// the document later becomes valid again.
+/// The parts of the document before and after the edit are not parsed again:
+/// the search resumes from a parser checkpoint shortly before the first
+/// changed token, and once it reaches the state the previous parse was in at
+/// a token after the last change, it completes with the previous parse's
+/// steps.  So the work scales with the size of the edit, not the document.
+///
+/// The edited region is first parsed in fast (non-fault-tolerant) mode; only
+/// if that fails does the fault-tolerant search run.  In that case unchanged
+/// tokens carry their fingerprint from `prev`, and `bias` steers the search
+/// towards parses where they keep their previous role.
 pub fn parse_incremental<'a, T: a_star::ParserTrait + Clone + 'static>(
     root: T,
     text: &'a str,
@@ -303,60 +322,47 @@ where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
-    // Fast path: document is currently valid — no error recovery needed.
-    if let Some((parse, tokens)) = parse_fast(root.clone(), text) {
-        let mut depth = 0i32;
-        let prev_info = PrevParseInfo {
-            tokens: tokens.iter().map(|t| {
-                let d = depth.clamp(0, 255) as u8;
-                depth += t.kind.bracket_delta() as i32;
-                t.to_prev_token(d)
-            }).collect(),
-            had_errors: false,
-        };
-        return (parse, prev_info);
-    }
-
     let mut tokens = tokenize::<T::Kind>(text);
+    let old_texts: Vec<&str> = prev
+        .map(|p| p.tokens.iter().map(|t| t.text.as_str()).collect())
+        .unwrap_or_default();
+    let new_texts: Vec<&str> = tokens.iter().map(|t| t.text()).collect();
+    let reuse =
+        prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts));
 
-    if let Some(prev) = prev {
-        // Build text slices for the differ.
-        let old_texts: Vec<&str> = prev.tokens.iter().map(|t| t.text.as_str()).collect();
-        let new_texts: Vec<&str> = tokens.iter().map(|t| t.text()).collect();
-
-        // Map new token index → old token index for Equal (unchanged) regions.
-        use similar::{Algorithm, DiffOp, capture_diff_slices};
-        let ops = capture_diff_slices(Algorithm::Myers, &old_texts, &new_texts);
-        let mut new_to_old = std::collections::HashMap::<usize, usize>::new();
-        for op in &ops {
-            if let DiffOp::Equal {
-                old_index,
-                new_index,
-                len,
-            } = op
-            {
-                for i in 0..*len {
-                    new_to_old.insert(new_index + i, old_index + i);
+    let found = a_star::search(
+        root.clone(),
+        &tokens,
+        ParseMode::Fast,
+        IncrementalBias { strength: 0 },
+        usize::MAX,
+        reuse.as_ref(),
+    );
+    let (list, memo) = match found {
+        Some(found) => found.finish(reuse.as_ref()),
+        None => {
+            if let Some(prev) = prev {
+                let unchanged = unchanged_tokens(&old_texts, &new_texts);
+                for (old, new) in unchanged {
+                    let prev_tok = &prev.tokens[old];
+                    tokens[new].set_old_kind(prev_tok.fingerprint);
+                    tokens[new].set_old_depth(Some(prev_tok.depth));
                 }
             }
+            a_star::search(
+                root,
+                &tokens,
+                ParseMode::FaultTolerant,
+                bias,
+                a_star::DEFAULT_MAX_ITERATIONS,
+                reuse.as_ref(),
+            )
+            .map(|found| found.finish(reuse.as_ref()))
+            .unwrap_or_default()
         }
+    };
+    drop(reuse);
 
-        // Copy the old fingerprint and depth onto each unchanged new token.
-        // Depth is always copied: valid documents are handled by the fast
-        // path above, so fault-tolerant parses only reach this point for
-        // invalid documents.  In that case the previous depth information
-        // is still the best available guide for role-conflict detection.
-        for (new_idx, tok) in tokens.iter_mut().enumerate() {
-            if let Some(&old_idx) = new_to_old.get(&new_idx) {
-                if let Some(prev_tok) = prev.tokens.get(old_idx) {
-                    tok.set_old_kind(prev_tok.fingerprint);
-                    tok.set_old_depth(Some(prev_tok.depth));
-                }
-            }
-        }
-    }
-
-    let list = a_star::a_star(root, &tokens, bias, a_star::DEFAULT_MAX_ITERATIONS);
     let parse = Parse::from_steps(&mut tokens, list);
     let had_errors = parse.errors.len() > 0;
     // Compute bracket depths for the new token sequence to populate PrevParseInfo.
@@ -371,6 +377,27 @@ where
             })
             .collect(),
         had_errors,
+        memo,
     };
     (parse, prev)
+}
+
+/// `(old index, new index)` of each token that is unchanged between the
+/// previous and the new token list.  Unchanged tokens carry their old
+/// fingerprint and depth into the fault-tolerant search, which then prefers
+/// parses where they keep their previous role.
+fn unchanged_tokens(old_texts: &[&str], new_texts: &[&str]) -> Vec<(usize, usize)> {
+    use similar::{Algorithm, DiffOp, capture_diff_slices};
+    let mut out = Vec::new();
+    for op in capture_diff_slices(Algorithm::Myers, old_texts, new_texts) {
+        if let DiffOp::Equal {
+            old_index,
+            new_index,
+            len,
+        } = op
+        {
+            out.extend((0..len).map(|i| (old_index + i, new_index + i)));
+        }
+    }
+    out
 }

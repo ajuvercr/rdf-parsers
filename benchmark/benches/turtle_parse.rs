@@ -35,8 +35,8 @@ fn build_prev_info(text: &str) -> PrevParseInfo {
     let (parse, tokens) = parse(Rule::new(SyntaxKind::TurtleDoc), text);
     let had_errors = parse.errors.len() > 0;
     let mut depth: i32 = 0;
-    PrevParseInfo {
-        tokens: tokens
+    PrevParseInfo::new(
+        tokens
             .iter()
             .map(|t| {
                 let d = depth.clamp(0, 255) as u8;
@@ -45,7 +45,7 @@ fn build_prev_info(text: &str) -> PrevParseInfo {
             })
             .collect(),
         had_errors,
-    }
+    )
 }
 
 // ── benchmark groups ──────────────────────────────────────────────────────────

@@ -951,6 +951,7 @@ mod tests {
                 })
                 .collect(),
             had_errors: false,
+            ..Default::default()
         }
     }
 
