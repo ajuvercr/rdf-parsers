@@ -89,6 +89,12 @@ macro_rules! turtle_like_format_rules {
             None
         }
 
+        /// `doc` preceded by a blank line. Line breaks combine rather than add
+        /// up, so this asks for two, whatever the hints before already gave.
+        fn after_blank_line(doc: Doc) -> Doc {
+            Doc::concat(vec![Doc::HardLine, Doc::HardLine, doc])
+        }
+
         fn verb_count(node: &SyntaxNode) -> usize {
             node.children()
                 .filter(|c| c.kind() == SyntaxKind::Verb)

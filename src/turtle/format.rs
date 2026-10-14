@@ -63,5 +63,5 @@ fn statement(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
         &doc,
         is_directive(node),
     )
-    .then(|| Doc::concat(vec![Doc::HardLine, doc]))
+    .then(|| after_blank_line(doc))
 }

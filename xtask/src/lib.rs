@@ -1638,6 +1638,13 @@ pub fn generate(path: &str, contents: &str) -> String {
                             }
                             continue;
                         }
+                        // Line breaks the doc starts with replace those we end with
+                        // (they carry the right indentation), up to its count.
+                        let trailing = crate::format::trailing_hardlines(part);
+                        if trailing > 0 && !is_break(&doc) {
+                            let lead = crate::format::leading_hardlines(&doc);
+                            crate::format::remove_trailing_hardlines(part, trailing.min(lead));
+                        }
                         have = 0;
                         let left = part.iter().rev().find_map(Doc::last_char);
                         match doc {
@@ -1648,11 +1655,25 @@ pub fn generate(path: &str, contents: &str) -> String {
                             }
                             _ => {}
                         }
-                        // Never glue two words together, whatever the hints say.
-                        if crate::format::needs_space(left, doc.first_char()) {
+                        // Never glue two words together, whatever the hints say, nor
+                        // two tokens that would lex differently when joined.
+                        if crate::format::needs_space(left, doc.first_char()) || lexes_joined(part, &doc) {
                             part.push(Doc::text(" "));
                         }
                         part.push(doc);
+                    }
+                }
+
+                /// Whether the tokens where `part` ends and `doc` starts would lex
+                /// differently when printed without anything in between.
+                fn lexes_joined(part: &[Doc], doc: &Doc) -> bool {
+                    let left = crate::format::edge_text(part, true);
+                    let right = crate::format::edge_text(std::slice::from_ref(doc), false);
+                    match (left, right) {
+                        (Some(left), Some(right)) => crate::format::glues(left, right, |text| {
+                            crate::tokenize::<SyntaxKind>(text).into_iter().map(|t| t.range).collect()
+                        }),
+                        _ => false,
                     }
                 }
 
@@ -1738,10 +1759,23 @@ pub fn generate(path: &str, contents: &str) -> String {
                                     }
                                     continue;
                                 }
-                                if !hook.keep(&child) {
-                                    continue;
+                                if t.kind() == SyntaxKind::ERROR {
+                                    // Keep unlexable text as written, separated from its
+                                    // neighbours like in the source.
+                                    let sep = if newlines_before > 0 {
+                                        Doc::HardLine
+                                    } else if spaced_before {
+                                        Doc::text(" ")
+                                    } else {
+                                        Doc::nil()
+                                    };
+                                    (t.kind(), Doc::concat(vec![sep, Doc::text(t.text().to_string())]))
+                                } else {
+                                    if !hook.keep(&child) {
+                                        continue;
+                                    }
+                                    (t.kind(), Doc::text(t.text().to_string()))
                                 }
-                                (t.kind(), Doc::text(t.text().to_string()))
                             }
                             NodeOrToken::Node(n) => {
                                 if n.kind() == SyntaxKind::ERROR {

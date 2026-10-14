@@ -111,6 +111,58 @@ pub fn needs_space(left: Option<char>, right: Option<char>) -> bool {
     word(l) && (word(r) || matches!(r, '<' | '"' | '\'' | '?' | '$' | '[' | '{'))
 }
 
+/// The text a doc starts (or ends) with, if no line break or space comes
+/// first: the token that would touch a neighbouring doc.
+pub fn edge_text(docs: &[Doc], from_end: bool) -> Option<&str> {
+    enum Edge<'a> {
+        Text(&'a str),
+        Break,
+        Empty,
+    }
+    fn walk(doc: &Doc, from_end: bool) -> Edge<'_> {
+        match doc {
+            Doc::Text(t) if t.is_empty() => Edge::Empty,
+            Doc::Text(t) if t.trim().is_empty() => Edge::Break,
+            Doc::Text(t) => Edge::Text(t),
+            Doc::Line | Doc::HardLine => Edge::Break,
+            Doc::Nil | Doc::IfBreak(_) => Edge::Empty,
+            Doc::Nest(_, d) | Doc::Group(d) => walk(d, from_end),
+            Doc::Concat(ds) => walk_all(ds, from_end),
+        }
+    }
+    fn walk_all(docs: &[Doc], from_end: bool) -> Edge<'_> {
+        let mut iter: Box<dyn Iterator<Item = &Doc>> = if from_end {
+            Box::new(docs.iter().rev())
+        } else {
+            Box::new(docs.iter())
+        };
+        iter.find_map(|d| match walk(d, from_end) {
+            Edge::Empty => None,
+            edge => Some(edge),
+        })
+        .unwrap_or(Edge::Empty)
+    }
+    match walk_all(docs, from_end) {
+        Edge::Text(t) => Some(t),
+        Edge::Break | Edge::Empty => None,
+    }
+}
+
+/// Whether `left` directly followed by `right` lexes differently from the
+/// two separately: `tokens` yields the token spans of a text. Then a space
+/// must separate them, e.g. `"x"@en--ltr` followed by `.`.
+pub fn glues(
+    left: &str,
+    right: &str,
+    tokens: impl Fn(&str) -> Vec<std::ops::Range<usize>>,
+) -> bool {
+    let joined = format!("{left}{right}");
+    let at = left.len();
+    tokens(&joined)
+        .iter()
+        .any(|span| span.start < at && span.end > at)
+}
+
 /// Number of hard lines that `docs` ends with (looking through nested docs).
 pub fn trailing_hardlines(docs: &[Doc]) -> usize {
     // Returns whether `doc` consists only of hard lines (and empty docs).
@@ -133,6 +185,64 @@ pub fn trailing_hardlines(docs: &[Doc]) -> usize {
         }
     }
     n
+}
+
+/// Number of hard lines `doc` starts with (looking through nested docs).
+pub fn leading_hardlines(doc: &Doc) -> usize {
+    // Returns whether `doc` consists only of hard lines (and empty docs).
+    fn walk(doc: &Doc, n: &mut usize) -> bool {
+        match doc {
+            Doc::HardLine => {
+                *n += 1;
+                true
+            }
+            Doc::Nil | Doc::IfBreak(_) => true,
+            Doc::Concat(ds) => ds.iter().all(|d| walk(d, n)),
+            Doc::Nest(_, d) | Doc::Group(d) => walk(d, n),
+            Doc::Text(_) | Doc::Line => false,
+        }
+    }
+    let mut n = 0;
+    walk(doc, &mut n);
+    n
+}
+
+/// Remove up to `n` hard lines that `docs` ends with (looking through nested
+/// docs) and return how many went. Used when the next doc starts with line
+/// breaks of its own: those carry the right indentation for what follows.
+pub fn remove_trailing_hardlines(docs: &mut Vec<Doc>, n: usize) -> usize {
+    let mut removed = 0;
+    while removed < n {
+        let Some(last) = docs.last_mut() else { break };
+        match last {
+            Doc::HardLine => {
+                docs.pop();
+                removed += 1;
+            }
+            Doc::Nil => {
+                docs.pop();
+            }
+            Doc::Concat(ds) => {
+                removed += remove_trailing_hardlines(ds, n - removed);
+                if !ds.is_empty() {
+                    break;
+                }
+                docs.pop();
+            }
+            Doc::Nest(_, d) | Doc::Group(d) => {
+                let mut inner = vec![std::mem::replace(&mut **d, Doc::Nil)];
+                removed += remove_trailing_hardlines(&mut inner, n - removed);
+                let empty = inner.is_empty();
+                **d = Doc::concat(inner);
+                if !empty {
+                    break;
+                }
+                docs.pop();
+            }
+            Doc::Text(_) | Doc::Line | Doc::IfBreak(_) => break,
+        }
+    }
+    removed
 }
 
 /// Remove the line breaks and spaces `docs` ends with (looking through nested
@@ -227,10 +337,25 @@ impl Doc {
             Doc::Text(s) => RcDoc::text(s.clone()),
             Doc::Line => RcDoc::line(),
             Doc::HardLine => RcDoc::hardline(),
-            Doc::Concat(ds) => RcDoc::concat(ds.iter().map(Doc::to_pretty)),
+            Doc::Concat(ds) => concat_balanced(ds),
             Doc::Nest(n, inner) => inner.to_pretty().nest(*n as isize),
             Doc::Group(inner) => inner.to_pretty().group(),
             Doc::IfBreak(s) => RcDoc::text(s.clone()).flat_alt(RcDoc::nil()),
+        }
+    }
+}
+
+/// `RcDoc::concat` builds a chain of appends as deep as the list is long,
+/// which `pretty` renders and drops recursively: a document with tens of
+/// thousands of statements overflows the stack. Splitting in halves keeps
+/// the depth logarithmic.
+fn concat_balanced(docs: &[Doc]) -> pretty::RcDoc<'static, ()> {
+    match docs {
+        [] => pretty::RcDoc::nil(),
+        [doc] => doc.to_pretty(),
+        _ => {
+            let (left, right) = docs.split_at(docs.len() / 2);
+            concat_balanced(left).append(concat_balanced(right))
         }
     }
 }
@@ -315,6 +440,31 @@ mod tests {
         let mut docs = vec![Doc::text("# note"), Doc::HardLine];
         strip_trailing_breaks(&mut docs);
         assert_eq!(render(&Doc::concat(docs), 80), "# note\n");
+    }
+
+    #[test]
+    fn long_documents_do_not_overflow_the_stack() {
+        // One part per statement, as the generated formatters produce.
+        let parts: Vec<Doc> = (0..200_000)
+            .flat_map(|i| [Doc::text(format!("<s{i}> <p> <o>.")), Doc::HardLine])
+            .collect();
+        let out = render(&Doc::concat(parts), 80);
+        assert_eq!(out.lines().count(), 200_000);
+    }
+
+    #[test]
+    fn hard_lines_combine_across_docs() {
+        let mut part = vec![Doc::concat(vec![Doc::text("# c"), Doc::HardLine])];
+        let next = Doc::nest(
+            2,
+            Doc::concat(vec![Doc::HardLine, Doc::HardLine, Doc::text("x")]),
+        );
+        let lead = leading_hardlines(&next);
+        assert_eq!(lead, 2);
+        assert_eq!(remove_trailing_hardlines(&mut part, lead), 1);
+        part.push(next);
+        // One blank line between, as `next` asked; `x` keeps its indentation.
+        assert_eq!(render(&Doc::concat(part), 80), "# c\n\n  x");
     }
 
     #[test]

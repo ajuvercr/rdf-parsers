@@ -3877,6 +3877,11 @@ pub mod format {
                 }
                 continue;
             }
+            let trailing = crate::format::trailing_hardlines(part);
+            if trailing > 0 && !is_break(&doc) {
+                let lead = crate::format::leading_hardlines(&doc);
+                crate::format::remove_trailing_hardlines(part, trailing.min(lead));
+            }
             have = 0;
             let left = part.iter().rev().find_map(Doc::last_char);
             match doc {
@@ -3886,10 +3891,25 @@ pub mod format {
                 }
                 _ => {}
             }
-            if crate::format::needs_space(left, doc.first_char()) {
+            if crate::format::needs_space(left, doc.first_char()) || lexes_joined(part, &doc) {
                 part.push(Doc::text(" "));
             }
             part.push(doc);
+        }
+    }
+    #[doc = r" Whether the tokens where `part` ends and `doc` starts would lex"]
+    #[doc = r" differently when printed without anything in between."]
+    fn lexes_joined(part: &[Doc], doc: &Doc) -> bool {
+        let left = crate::format::edge_text(part, true);
+        let right = crate::format::edge_text(std::slice::from_ref(doc), false);
+        match (left, right) {
+            (Some(left), Some(right)) => crate::format::glues(left, right, |text| {
+                crate::tokenize::<SyntaxKind>(text)
+                    .into_iter()
+                    .map(|t| t.range)
+                    .collect()
+            }),
+            _ => false,
         }
     }
     #[doc = r" A node wrapping exactly one token (e.g. `Colon` around `;`)."]
@@ -3965,10 +3985,24 @@ pub mod format {
                         }
                         continue;
                     }
-                    if !hook.keep(&child) {
-                        continue;
+                    if t.kind() == SyntaxKind::ERROR {
+                        let sep = if newlines_before > 0 {
+                            Doc::HardLine
+                        } else if spaced_before {
+                            Doc::text(" ")
+                        } else {
+                            Doc::nil()
+                        };
+                        (
+                            t.kind(),
+                            Doc::concat(vec![sep, Doc::text(t.text().to_string())]),
+                        )
+                    } else {
+                        if !hook.keep(&child) {
+                            continue;
+                        }
+                        (t.kind(), Doc::text(t.text().to_string()))
                     }
-                    (t.kind(), Doc::text(t.text().to_string()))
                 }
                 NodeOrToken::Node(n) => {
                     if n.kind() == SyntaxKind::ERROR {
