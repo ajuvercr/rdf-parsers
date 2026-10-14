@@ -4590,14 +4590,27 @@ pub mod format {
     #[doc = r" rather than with the comment places it inside the next nest, so"]
     #[doc = r" the following line gets that nest's indentation."]
     fn push_all(part: &mut Vec<Doc>, docs: Vec<Doc>, after_comment: &mut bool) {
+        let mut have = crate::format::trailing_hardlines(part);
         for doc in docs {
-            if std::mem::take(after_comment) {
+            if std::mem::take(after_comment) && have == 0 {
                 part.push(Doc::HardLine);
-                if is_break(&doc) {
-                    continue;
-                }
+                have = 1;
             }
+            if have > 0 && is_break(&doc) {
+                if matches!(doc, Doc::HardLine) {
+                    have -= 1;
+                }
+                continue;
+            }
+            have = 0;
             let left = part.iter().rev().find_map(Doc::last_char);
+            match doc {
+                Doc::Text(ref t) if t == " " && matches!(left, Some(' ' | '\n')) => continue,
+                Doc::Line if matches ! (part . last () , Some (Doc :: Text (t)) if t == " ") => {
+                    part.pop();
+                }
+                _ => {}
+            }
             if crate::format::needs_space(left, doc.first_char()) {
                 part.push(Doc::text(" "));
             }
@@ -4639,26 +4652,37 @@ pub mod format {
         let mut parts: Vec<Vec<Doc>> = vec![vec![]];
         let mut after_comment = false;
         let mut newlines = 0;
+        let mut spaced = false;
         let mut own_line: Vec<(String, bool)> = Vec::new();
         for child in node.children_with_tokens() {
             let newlines_before = std::mem::take(&mut newlines);
+            let spaced_before = std::mem::take(&mut spaced);
             let (kind, doc) = match &child {
                 NodeOrToken::Token(t) => {
                     if t.kind() == SyntaxKind::WhiteSpace {
                         newlines = t.text().matches('\n').count();
+                        spaced = true;
                         continue;
                     }
                     if t.kind() == SyntaxKind::Comment {
                         let part = parts.last_mut().unwrap();
+                        let mut at = part.len();
+                        while at > 0 && is_break(&part[at - 1]) {
+                            at -= 1;
+                        }
                         let trailing = newlines_before == 0
                             && own_line.is_empty()
                             && !after_comment
-                            && !part.is_empty()
-                            && !ends_line(part.last());
+                            && at > 0
+                            && crate::format::trailing_hardlines(&part[..at]) == 0;
                         if trailing {
-                            part.push(Doc::text(" "));
-                            part.push(Doc::text(t.text().to_string()));
-                            after_comment = true;
+                            part.insert(at, Doc::text(t.text().to_string()));
+                            part.insert(at, Doc::text(" "));
+                            match part.get(at + 2) {
+                                None => after_comment = true,
+                                Some(Doc::HardLine) => {}
+                                Some(_) => part[at + 2] = Doc::HardLine,
+                            }
                         } else {
                             let blank =
                                 newlines_before > 1 && (!part.is_empty() || !own_line.is_empty());
@@ -4673,19 +4697,24 @@ pub mod format {
                 }
                 NodeOrToken::Node(n) => {
                     if n.kind() == SyntaxKind::ERROR {
-                        parts
-                            .last_mut()
-                            .unwrap()
-                            .push(Doc::text(n.text().to_string()));
-                        continue;
-                    }
-                    if !hook.keep(&child) {
-                        continue;
-                    }
-                    if is_terminal_wrapper(n) {
-                        (n.kind(), Doc::text(n.text().to_string()))
+                        let sep = if newlines_before > 0 {
+                            Doc::HardLine
+                        } else if spaced_before {
+                            Doc::text(" ")
+                        } else {
+                            Doc::nil()
+                        };
+                        let text = Doc::text(n.text().to_string());
+                        (n.kind(), Doc::concat(vec![sep, text]))
                     } else {
-                        (n.kind(), format_child(n, hook))
+                        if !hook.keep(&child) {
+                            continue;
+                        }
+                        if is_terminal_wrapper(n) {
+                            (n.kind(), Doc::text(n.text().to_string()))
+                        } else {
+                            (n.kind(), format_child(n, hook))
+                        }
                     }
                 }
             };
@@ -4711,9 +4740,13 @@ pub mod format {
                 let part = parts.last().unwrap();
                 let at_line_start = part.is_empty() || ends_line(part.last());
                 let at = match seq.iter().position(is_break) {
-                    Some(i) => {
-                        seq[i] = Doc::HardLine;
-                        i + 1
+                    Some(first) => {
+                        let mut end = first;
+                        while end < seq.len() && is_break(&seq[end]) {
+                            seq[end] = Doc::HardLine;
+                            end += 1;
+                        }
+                        end
                     }
                     None if at_line_start => 0,
                     None => {
@@ -4727,6 +4760,9 @@ pub mod format {
                         comments.push(Doc::HardLine);
                     }
                     comments.push(Doc::text(text));
+                    comments.push(Doc::HardLine);
+                }
+                if newlines_before > 1 {
                     comments.push(Doc::HardLine);
                 }
                 seq.splice(at..at, comments);

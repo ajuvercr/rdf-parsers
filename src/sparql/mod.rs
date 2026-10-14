@@ -47,7 +47,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  ?s <a> ?o.\n  FILTER (?o>5)\n}\n"
+            "SELECT ?s\nWHERE {\n  ?s <a> ?o.\n  FILTER (?o > 5)\n}\n"
         );
     }
 
@@ -57,7 +57,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s ?o\nWHERE {\n  ?s <a> <b>.\n  OPTIONAL {\n    ?s <c> ?o\n  }\n\n}\n"
+            "SELECT ?s ?o\nWHERE {\n  ?s <a> <b>.\n  OPTIONAL {\n    ?s <c> ?o\n  }\n}\n"
         );
     }
 
@@ -77,7 +77,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s (COUNT(?o) AS  ?c)\nWHERE {\n  ?s <a> ?o\n}\nGROUP BY ?s\nHAVING (?c>1)\n"
+            "SELECT ?s (COUNT(?o) AS ?c)\nWHERE {\n  ?s <a> ?o\n}\nGROUP BY ?s\nHAVING (?c > 1)\n"
         );
     }
 
@@ -87,7 +87,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  {\n    ?s <a> <b>\n  }\n\n  UNION\n  {\n    ?s <c> <d>\n  }\n\n}\n"
+            "SELECT ?s\nWHERE {\n  {\n    ?s <a> <b>\n  }\n  UNION\n  {\n    ?s <c> <d>\n  }\n}\n"
         );
     }
 
@@ -97,7 +97,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "CONSTRUCT {\n  ?s <a> ?o\n}\n\nWHERE {\n  ?s <b> ?o\n}\n"
+            "CONSTRUCT {\n  ?s <a> ?o\n}\nWHERE {\n  ?s <b> ?o\n}\n"
         );
     }
 
@@ -169,7 +169,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  ?s <a> <b>.\n  MINUS {\n    ?s <c> <d>\n  }\n\n}\n"
+            "SELECT ?s\nWHERE {\n  ?s <a> <b>.\n  MINUS {\n    ?s <c> <d>\n  }\n}\n"
         );
     }
 
@@ -179,7 +179,7 @@ mod format_tests {
         let out = format_sparql(input, 80);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  GRAPH <http://example.org/g> {\n    ?s <a> <b>\n  }\n\n}\n"
+            "SELECT ?s\nWHERE {\n  GRAPH <http://example.org/g> {\n    ?s <a> <b>\n  }\n}\n"
         );
     }
 
@@ -190,7 +190,7 @@ mod format_tests {
         let out = format_sparql(input, 40);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  ?s <very-long-predicate-one> <object-one>;\n  <very-long-predicate-two> <object-two>\n}\n"
+            "SELECT ?s\nWHERE {\n  ?s <very-long-predicate-one> <object-one>;\n    <very-long-predicate-two> <object-two>\n}\n"
         );
     }
 
@@ -207,7 +207,67 @@ mod format_tests {
         let out = format_sparql(input, 20);
         assert_eq!(
             out,
-            "SELECT ?s\nWHERE {\n  ?s <a> <b>,\n  <c>,\n  <d>,\n  <e>,\n  <f>\n}\n"
+            "SELECT ?s\nWHERE {\n  ?s <a> <b>,\n    <c>,\n    <d>,\n    <e>,\n    <f>\n}\n"
         );
+    }
+
+    #[test]
+    fn format_realistic_query() {
+        let input = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ex: <http://ex/>
+# find people
+SELECT DISTINCT ?person ?name (COUNT(?friend) AS ?friends)
+WHERE {
+  ?person a foaf:Person ; # a person
+          foaf:name ?name ;
+          foaf:knows ?friend .
+  OPTIONAL { ?person foaf:mbox ?mbox . FILTER(STRSTARTS(STR(?mbox), \"mailto:\")) }
+  FILTER(?name != \"Bob\" && LANG(?name) = \"en\")
+}
+GROUP BY ?person ?name
+ORDER BY DESC(?friends)
+LIMIT 10";
+        let expected = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ex: <http://ex/>
+
+# find people
+SELECT DISTINCT ?person ?name (COUNT(?friend) AS ?friends)
+WHERE {
+  ?person a foaf:Person; # a person
+    foaf:name ?name;
+    foaf:knows ?friend.
+  OPTIONAL {
+    ?person foaf:mbox ?mbox.
+    FILTER (STRSTARTS(STR(?mbox), \"mailto:\"))
+  }
+  FILTER (?name != \"Bob\" && LANG(?name) = \"en\")
+}
+GROUP BY ?person ?name
+ORDER BY DESC(?friends)
+LIMIT 10
+";
+        let out = format_sparql(input, 80);
+        assert_eq!(out, expected);
+        assert_eq!(format_sparql(&out, 80), out);
+    }
+
+    #[test]
+    fn format_construct_is_stable() {
+        let input = "CONSTRUCT { ?s ex:p ?o . ?o ex:q [ ex:r ?s ] } WHERE { ?s ex:p ?o . MINUS { ?s ex:z ?o } }";
+        let out = format_sparql(input, 80);
+        assert_eq!(
+            out,
+            "CONSTRUCT {\n  ?s ex:p ?o.\n  ?o ex:q [ ex:r ?s ]\n}\nWHERE {\n  ?s ex:p ?o.\n  MINUS {\n    ?s ex:z ?o\n  }\n}\n"
+        );
+        assert_eq!(format_sparql(&out, 80), out);
+    }
+
+    #[test]
+    fn format_keeps_error_regions_separated() {
+        // Unparsable regions are kept as written; gluing `?s ex:q` into
+        // `?sex:q` would change the query.
+        let input = "SELECT ?s WHERE { ?s ex:p ?o . FILTER ?s ex:q }";
+        let out = format_sparql(input, 80);
+        assert_eq!(out, "SELECT ?s\nWHERE {\n  ?s ex:p ?o.\n  FILTER ?s ex:q\n}\n");
     }
 }

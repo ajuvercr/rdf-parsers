@@ -111,6 +111,30 @@ pub fn needs_space(left: Option<char>, right: Option<char>) -> bool {
     word(l) && (word(r) || matches!(r, '<' | '"' | '\'' | '?' | '$' | '[' | '{'))
 }
 
+/// Number of hard lines that `docs` ends with (looking through nested docs).
+pub fn trailing_hardlines(docs: &[Doc]) -> usize {
+    // Returns whether `doc` consists only of hard lines (and empty docs).
+    fn walk(doc: &Doc, n: &mut usize) -> bool {
+        match doc {
+            Doc::HardLine => {
+                *n += 1;
+                true
+            }
+            Doc::Nil | Doc::IfBreak(_) => true,
+            Doc::Concat(ds) => ds.iter().rev().all(|d| walk(d, n)),
+            Doc::Nest(_, d) | Doc::Group(d) => walk(d, n),
+            Doc::Text(_) | Doc::Line => false,
+        }
+    }
+    let mut n = 0;
+    for doc in docs.iter().rev() {
+        if !walk(doc, &mut n) {
+            break;
+        }
+    }
+    n
+}
+
 /// Language-specific escape hatch for the generated formatters.
 ///
 /// The grammar's `=== format ===` hints cover layout that only depends on a
@@ -175,7 +199,8 @@ impl Doc {
     }
 }
 
-/// Output sink that drops indentation on lines that stay empty.
+/// Output sink that drops indentation on lines that stay empty and spaces at
+/// the end of a line.
 ///
 /// `pretty` writes the indentation directly after a newline; it is held back
 /// here until text follows, so blank lines carry no trailing whitespace.
@@ -189,6 +214,9 @@ impl std::fmt::Write for TrimBlankLines {
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
         if s == "\n" {
             self.pending_indent.clear();
+            // No token ends in a space, so trailing spaces are layout only.
+            let trimmed = self.out.trim_end_matches(' ').len();
+            self.out.truncate(trimmed);
             self.out.push('\n');
             self.after_newline = true;
         } else if self.after_newline && s.bytes().all(|b| b == b' ') {
@@ -240,6 +268,12 @@ mod tests {
             Doc::text(")"),
         ]));
         assert_eq!(render(&doc, 80), "(\n  a\n  b\n)");
+    }
+
+    #[test]
+    fn lines_have_no_trailing_spaces() {
+        let doc = Doc::concat(vec![Doc::text("a "), Doc::HardLine, Doc::text("b")]);
+        assert_eq!(render(&doc, 80), "a\nb");
     }
 
     #[test]

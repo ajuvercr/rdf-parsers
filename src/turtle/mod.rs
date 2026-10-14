@@ -139,7 +139,7 @@ mod format_tests {
         }
         assert_eq!(
             out,
-            "# header\n<a> <b> <c>;\n  # trailing\n  <d> <e>.\n\n<f> <g> [ # in bnode\n  <h> <i>\n].\n"
+            "# header\n<a> <b> <c>; # trailing\n  <d> <e>.\n\n<f> <g> [ # in bnode\n  <h> <i>\n].\n"
         );
     }
 
@@ -240,10 +240,9 @@ mod format_tests {
 
    #trailing comments
 ";
-        let expected = "[ ] a foaf:Name;
-  # Nested comment
-  foaf:knows <abc>;
-  # Another comment!
+        // Trailing comments stay on their line (swls moved them to the next).
+        let expected = "[ ] a foaf:Name; # Nested comment
+  foaf:knows <abc>; # Another comment!
   foaf:knows2 <abc>.
 
 #trailing comments
