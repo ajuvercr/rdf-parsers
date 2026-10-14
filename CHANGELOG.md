@@ -5,19 +5,178 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.0 (2026-10-14)
+
+### New Features
+
+ - <csr-id-eed8071fd9f22600f11c58b119f70e2d4b0ce9af/> format SPARQL updates; add `glue` hint
+   - New `glue` format hint attaches a token to the previous one, dropping
+     the line breaks before it (never after a comment).
+   - SPARQL updates start after a blank line, like queries, and `;` between
+     updates is glued to the closing brace: `};`.
+   - Drop a dead assignment in the generated comment handling.
+ - <csr-id-2e4c12c462869bcefc80b48005ceaf9c28cb3187/> tuned formatters for N3 and JSON-LD
+   - N3 uses the shared Turtle rules (now parameterised by blank-node and
+     block kinds, looking through expression wrappers) plus formulas laid
+     out like TriG graphs, staying on one line when they fit.
+   - JSON-LD moves from indent/dedent to `nest`, so empty containers render
+     as `{ }` / `[ ]` instead of `{  }`.
+   - Format hints can be scoped to the document with `ROOT.<rule>`.
+   - Statement separation skips trailing comments of the previous statement,
+     so `@prefix ... . # note` still gets a blank line before the triples
+     (Turtle, TriG, N3).
+ - <csr-id-ad13100d9d7a79d1bed52bc959076069bc93c528/> never glue words together; drop keyword spacing hints
+   Generated formatters insert a space wherever a word character (keyword,
+   prefixed name, number) would run into another word, IRI, string, variable
+   or bracket. This guarantees the output lexes the same as the input and
+   replaces the per-keyword `after: space` hints in the turtle and trig
+   grammars. Punctuation (`(`, `.`, `@en`) is never separated.
+ - <csr-id-cd9f411b0843238491b446b6fccb59f8e8e6f485/> generated formatter with the Turtle rules; comments follow their element
+   - trig grammar uses `nest` hints; `trig::format` hooks in the rules shared
+     with Turtle (moved to `rdf_format`), plus statement separation for
+     top-level blocks and the triples inside a graph. `GRAPH`, bare labels,
+     default-graph braces and empty graphs are kept as written.
+   - Generated formatters emit a comment on its own line together with the
+     next element, so it gets that element's indentation (e.g. the first
+     line inside a graph).
+   - Update trig tests to the new policy; add graph-form and comment tests.
+ - <csr-id-0d834cf8fea506159a5907ae029256c6da39fa39/> generated formatter on par with the swls one
+   - turtle grammar uses `nest` instead of indent/dedent pairs; every
+     predicate after the first goes on its own line.
+   - `turtle::format` is a hand-written FormatHook for content-dependent
+     rules: drop redundant `;`, trailing `;` in multi-predicate blank nodes,
+     all-or-nothing breaking for simple object lists, hanging first object
+     list, and blank lines around multi-line statements and after directives.
+   - Generated formatters keep at most one blank line from the source and
+     keep trailing comments on their line. The newline after a comment is
+     emitted inside the following nest so the next line is indented.
+   - Port the swls turtle formatter tests and add an idempotence test.
+ - <csr-id-2b97a81b22544d2b7f2a2d4c2ba836d8c12781b6/> `nest`/`ifbreak` hints and a FormatHook escape hatch
+   - New format hints: `nest` wraps a child (and its `before` hints) in one
+     indentation level; `ifbreak(<text>)` emits text only when the enclosing
+     group is broken. Legacy `indent`/`dedent` keep working.
+   - Generated formatters gain `format_with`/`to_doc_with` taking a
+     `FormatHook`, which can drop elements or replace a node's doc for rules
+     that depend on content rather than node kinds.
+   - The first line break after a comment is dropped, since the comment
+     already ended the line.
+   - The generated `to_doc` handles tokens, terminal wrappers and nodes in a
+     single path instead of three copies.
+ - <csr-id-53beaaaedcc4dd0e831f8da2da313fe54a060d05/> render docs with `pretty`, end comments with a hard line
+   - Render `Doc` through the `pretty` crate. A hard line inside a group now
+     makes the group break, so multi-line children break their parents, and
+     widths are counted correctly. Blank lines keep no indentation.
+   - Generated formatters emit a hard line after each comment. Previously
+     `<c>; # x\n<d> <e>.` became `# x<d> <e>.`, commenting out code.
+   - trig grammar: drop `after: hardline` on `}`, which kept every wrapped
+     graph from rendering flat; `block -> before: hardline` covers it.
+   - trig test: use a width where the expected output is actually valid.
+
+### Bug Fixes
+
+ - <csr-id-5dfd9a013cb2ef9a1b939d175835d6d5ffcbc6a7/> robustness fixes found by running the W3C test suites
+   Running every formatter over the rdf-tests corpus (Turtle, N-Triples,
+   TriG, N3, JSON-LD, SPARQL Update) turned up:
+   
+   - Stack overflow on large documents: the conversion to `pretty` built an
+     append chain as deep as the document; build a balanced tree instead.
+   - Tokens merging when printed side by side (`"x"@en--ltr .` became
+     `"x"@en--ltr.`): the generated lexer now checks every pair of touching
+     tokens and a space is kept where they would lex differently.
+   - Unlexable error tokens keep their source spacing, like error nodes.
+   - Line breaks combine across node boundaries too, so blank lines no
+     longer grow on every run; statement hooks ask for the total they want.
+   
+   After these, valid files format without errors and stably, and no
+   invalid file gets more errors. The SPARQL query suite was not fully run.
+ - <csr-id-6989b4ac20044a02496e32c36facf21b5ce9336b/> stable output and safe error regions; tidy SPARQL layout
+   Generator (all languages):
+   - Line breaks from neighbouring hints combine instead of adding up, so
+     output no longer grows blank lines on every run (`}\n\nWHERE`).
+   - Error regions keep the source's separation; when the parser gives up,
+     tokens were glued together (`?s ex:p` -> `?sex:p`).
+   - Trailing comments go before queued line breaks and stay on their line;
+     own-line comments sit after all leading breaks, directly above their
+     element.
+   - No double spaces, no spaces at line ends.
+   
+   SPARQL grammar: nest property lists under their subject, space binary
+   operators, drop 19 keyword hints now covered by automatic word spacing.
+
+### Performance
+
+ - <csr-id-b1e34e0b7050b03c7d9e2345ca53f17ba137f954/> bounded error recovery and incremental reuse
+   Error recovery no longer explodes on SPARQL: one typo in a 5k-token query
+   went from hitting the 1M-step budget (whole document unparsed) to ~100ms,
+   and incremental re-parses take a few ms regardless of document size.
+   
+   Search (a_star.rs):
+   - Frontier-dominance pruning: drop a path once a strictly cheaper path is
+     12 tokens ahead and parsed them cleanly. Repairs only happen near where
+     the cheaper parse got stuck, instead of everywhere before the error.
+   - Per-token-position budget of 4096 expansions, popped cheapest-first.
+   - Pruned paths are parked, not dropped, and resumed if all live paths
+     dead-end; an empty queue returns the best partial parse.
+   - Zero-cost moves at the same token skip the heap (eager stack), and the
+     state map uses an Fx-style hasher.
+   
+   Incremental parsing (incremental.rs, parse_incremental):
+   - A parse records its steps and parser checkpoints every ~32 tokens as
+     plain data in PrevParseInfo (still Send + Sync, no language types).
+   - The next parse resumes from a checkpoint before the edit and splices in
+     the old steps once it reaches the old parser state after the edit.
+   - ParserTrait gains from_parts (generated); PrevParseInfo gains a private
+     field, Default and PrevParseInfo::new.
+   
+   Role bias:
+   - Tokens remember a role fingerprint that collapses rule cycles (SPARQL's
+     right-recursive TriplesBlock no longer changes every later token's role),
+     and agreement also requires the same bracket depth.
+   - Inserted (missing) brackets count toward bracket depth.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 10 commits contributed to the release.
+ - 99 days passed between releases.
+ - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bounded error recovery and incremental reuse ([`b1e34e0`](https://github.com/ajuvercr/rdf-parsers/commit/b1e34e0b7050b03c7d9e2345ca53f17ba137f954))
+    - Robustness fixes found by running the W3C test suites ([`5dfd9a0`](https://github.com/ajuvercr/rdf-parsers/commit/5dfd9a013cb2ef9a1b939d175835d6d5ffcbc6a7))
+    - Format SPARQL updates; add `glue` hint ([`eed8071`](https://github.com/ajuvercr/rdf-parsers/commit/eed8071fd9f22600f11c58b119f70e2d4b0ce9af))
+    - Tuned formatters for N3 and JSON-LD ([`2e4c12c`](https://github.com/ajuvercr/rdf-parsers/commit/2e4c12c462869bcefc80b48005ceaf9c28cb3187))
+    - Stable output and safe error regions; tidy SPARQL layout ([`6989b4a`](https://github.com/ajuvercr/rdf-parsers/commit/6989b4ac20044a02496e32c36facf21b5ce9336b))
+    - Never glue words together; drop keyword spacing hints ([`ad13100`](https://github.com/ajuvercr/rdf-parsers/commit/ad13100d9d7a79d1bed52bc959076069bc93c528))
+    - Generated formatter with the Turtle rules; comments follow their element ([`cd9f411`](https://github.com/ajuvercr/rdf-parsers/commit/cd9f411b0843238491b446b6fccb59f8e8e6f485))
+    - Generated formatter on par with the swls one ([`0d834cf`](https://github.com/ajuvercr/rdf-parsers/commit/0d834cf8fea506159a5907ae029256c6da39fa39))
+    - `nest`/`ifbreak` hints and a FormatHook escape hatch ([`2b97a81`](https://github.com/ajuvercr/rdf-parsers/commit/2b97a81b22544d2b7f2a2d4c2ba836d8c12781b6))
+    - Render docs with `pretty`, end comments with a hard line ([`53beaaa`](https://github.com/ajuvercr/rdf-parsers/commit/53beaaaedcc4dd0e831f8da2da313fe54a060d05))
+</details>
+
 ## v0.1.16 (2026-07-07)
+
+<csr-id-6e1c60fbb2c1787d7eb53ee385009825ef4abdf6/>
 
 ### New Features
 
  - <csr-id-7b29b4d72e75f1fc8e49cfdb07e20859d149da3c/> span literal lang/datatype and carry computed IRIs for JSON-LD
    - RDFLiteral.lang / .ty now carry source spans (Spanned<_>) across every
-     parser (Turtle, TriG, N3, N-Triples, SPARQL, JSON-LD).
+   parser (Turtle, TriG, N3, N-Triples, SPARQL, JSON-LD).
    - NamedNode::Prefixed gains a `computed` field so JSON-LD keeps the compact
-     source form while carrying the context-resolved absolute IRI (whole-term
-     precedence, scoped contexts, @vocab). The conformance normalizer prefers
-     it, and Display renders whole-term compact IRIs without a spurious colon.
+   source form while carrying the context-resolved absolute IRI (whole-term
+   precedence, scoped contexts, @vocab). The conformance normalizer prefers
+   it, and Display renders whole-term compact IRIs without a spurious colon.
    - Tune A* recovery: SYNC_THRESHOLD 5->2 (matches its comment),
-     DEFAULT_MAX_REPAIR_SPAN 15->10.
+   DEFAULT_MAX_REPAIR_SPAN 15->10.
    - Add remove_graph_iri.trig incremental-parse benchmark fixture.
    - Bump to 0.1.16.
  - <csr-id-408f577ce2ba8f15251c49a9b66da11875e0b01e/> allow empty comment string
