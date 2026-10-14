@@ -3556,138 +3556,6 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
-            (SyntaxKind::PrefixId, SyntaxKind::PrefixToken) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::PrefixId, SyntaxKind::PnameNs) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::Base, SyntaxKind::BaseToken) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::SparqlBase, SyntaxKind::SparqlBaseToken) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::SparqlPrefix, SyntaxKind::SparqlPrefixToken) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::SparqlPrefix, SyntaxKind::PnameNs) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
             (SyntaxKind::Triples, SyntaxKind::PredicateObjectList) => (
                 Hints {
                     space: true,
@@ -3978,6 +3846,10 @@ pub mod format {
                 if is_break(&doc) {
                     continue;
                 }
+            }
+            let left = part.iter().rev().find_map(Doc::last_char);
+            if crate::format::needs_space(left, doc.first_char()) {
+                part.push(Doc::text(" "));
             }
             part.push(doc);
         }

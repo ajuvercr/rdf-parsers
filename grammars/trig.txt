@@ -104,13 +104,6 @@ group collection
 group wrappedGraph
 directive -> before: hardline
 block -> before: hardline
-prefixId.prefix_token -> after: space
-prefixId.pname_ns -> after: space
-base.base_token -> after: space
-sparqlBase.sparql_base_token -> after: space
-sparqlPrefix.sparql_prefix_token -> after: space
-sparqlPrefix.pname_ns -> after: space
-graph_token -> after: space
 graphBlock.graphTerm -> after: space
 wrappedGraph.triplesBlock -> before: nest line
 wrappedGraph.curly_close -> before: line

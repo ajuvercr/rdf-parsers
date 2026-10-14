@@ -764,6 +764,10 @@ pub mod format {
                     continue;
                 }
             }
+            let left = part.iter().rev().find_map(Doc::last_char);
+            if crate::format::needs_space(left, doc.first_char()) {
+                part.push(Doc::text(" "));
+            }
             part.push(doc);
         }
     }
