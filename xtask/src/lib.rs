@@ -1621,8 +1621,11 @@ pub fn generate(path: &str, contents: &str) -> String {
                                     continue;
                                 }
                                 if t.kind() == SyntaxKind::Comment {
-                                    // Preserve comments verbatim.
+                                    // Preserve comments verbatim. A comment runs to the end
+                                    // of the line, so it must be followed by a hard line;
+                                    // this also forces the enclosing groups to break.
                                     parts.last_mut().unwrap().push(Doc::text(t.text().to_string()));
+                                    parts.last_mut().unwrap().push(Doc::HardLine);
                                     continue;
                                 }
                                 let (before, after) = format_hints(node.kind(), t.kind());

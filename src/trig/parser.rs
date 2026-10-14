@@ -4514,7 +4514,7 @@ pub mod format {
                 Hints {
                     space: false,
                     line: false,
-                    hardline: true,
+                    hardline: false,
                     blankline: false,
                     indent: false,
                     dedent: false,
@@ -4637,6 +4637,7 @@ pub mod format {
                             .last_mut()
                             .unwrap()
                             .push(Doc::text(t.text().to_string()));
+                        parts.last_mut().unwrap().push(Doc::HardLine);
                         continue;
                     }
                     let (before, after) = format_hints(node.kind(), t.kind());

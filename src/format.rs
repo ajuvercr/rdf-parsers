@@ -54,132 +54,62 @@ impl Doc {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Mode {
-    Flat,
-    Break,
+impl Doc {
+    fn to_pretty(&self) -> pretty::RcDoc<'static, ()> {
+        use pretty::RcDoc;
+        match self {
+            Doc::Nil => RcDoc::nil(),
+            Doc::Text(s) => RcDoc::text(s.clone()),
+            Doc::Line => RcDoc::line(),
+            Doc::HardLine => RcDoc::hardline(),
+            Doc::Concat(ds) => RcDoc::concat(ds.iter().map(Doc::to_pretty)),
+            Doc::Nest(n, inner) => inner.to_pretty().nest(*n as isize),
+            Doc::Group(inner) => inner.to_pretty().group(),
+        }
+    }
 }
 
-/// Returns `true` if `docs` (in the current work list) fit within `width`
-/// remaining characters when rendered flat.
-fn fits(mut width: isize, docs: &[(&Doc, i32, Mode)]) -> bool {
-    let mut i = docs.len();
-    loop {
-        if width < 0 {
-            return false;
+/// Output sink that drops indentation on lines that stay empty.
+///
+/// `pretty` writes the indentation directly after a newline; it is held back
+/// here until text follows, so blank lines carry no trailing whitespace.
+struct TrimBlankLines {
+    out: String,
+    after_newline: bool,
+    pending_indent: String,
+}
+
+impl std::fmt::Write for TrimBlankLines {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        if s == "\n" {
+            self.pending_indent.clear();
+            self.out.push('\n');
+            self.after_newline = true;
+        } else if self.after_newline && s.bytes().all(|b| b == b' ') {
+            self.pending_indent.push_str(s);
+        } else {
+            self.out.push_str(&self.pending_indent);
+            self.pending_indent.clear();
+            self.out.push_str(s);
+            self.after_newline = false;
         }
-        if i == 0 {
-            return true;
-        }
-        i -= 1;
-        let (doc, indent, mode) = docs[i];
-        match doc {
-            Doc::Nil => {}
-            Doc::Text(s) => width -= s.len() as isize,
-            Doc::Line => {
-                if mode == Mode::Flat {
-                    width -= 1; // space
-                } else {
-                    return true; // a break always fits "the rest"
-                }
-            }
-            Doc::HardLine => return true,
-            Doc::Concat(ds) => {
-                // Push children in reverse so we process them in order
-                // We need a local copy to extend the slice view — handled
-                // by the iterative approach below via a local vec.
-                //
-                // Instead, recurse with an extended slice.
-                let mut extended: Vec<(&Doc, i32, Mode)> = docs[..i].to_vec();
-                for d in ds.iter().rev() {
-                    extended.push((d, indent, mode));
-                }
-                return fits(width, &extended);
-            }
-            Doc::Nest(n, inner) => {
-                let mut extended: Vec<(&Doc, i32, Mode)> = docs[..i].to_vec();
-                extended.push((inner, indent + n, mode));
-                return fits(width, &extended);
-            }
-            Doc::Group(inner) => {
-                let mut extended: Vec<(&Doc, i32, Mode)> = docs[..i].to_vec();
-                extended.push((inner, indent, Mode::Flat));
-                return fits(width, &extended);
-            }
-        }
+        Ok(())
     }
 }
 
 /// Render a `Doc` to a `String` within the given line `width`.
+///
+/// Rendering is delegated to the `pretty` crate. A `HardLine` inside a group
+/// makes that group break, so multi-line children break their parents.
 pub fn render(doc: &Doc, width: usize) -> String {
-    let mut out = String::new();
-    let mut col: i32 = 0;
-
-    // Work list: (doc, indent, mode). Processed front-to-back.
-    let mut work: Vec<(&Doc, i32, Mode)> = vec![(doc, 0, Mode::Break)];
-
-    let mut should_ident = false;
-
-    while let Some((doc, indent, mode)) = work.pop() {
-        match doc {
-            Doc::Nil => {}
-            Doc::Text(s) => {
-                if should_ident {
-                    for _ in 0..indent {
-                        out.push(' ');
-                        // col += 1;
-                    }
-                    should_ident = false;
-                }
-                out.push_str(s);
-                col += s.len() as i32;
-            }
-            Doc::Line => {
-                if mode == Mode::Flat {
-                    out.push(' ');
-                    col += 1;
-                } else {
-                    out.push('\n');
-                    col = 0;
-                    should_ident = true;
-                }
-            }
-            Doc::HardLine => {
-                out.push('\n');
-                col = 0;
-                should_ident = true;
-            }
-            Doc::Concat(ds) => {
-                // Push in reverse so the first element is processed first.
-                for d in ds.iter().rev() {
-                    work.push((d, indent, mode));
-                }
-            }
-            Doc::Nest(n, inner) => {
-                work.push((inner, indent + n, mode));
-            }
-            Doc::Group(inner) => {
-                // Build a temporary slice to pass to `fits`.
-                let remaining = if should_ident {
-                    width as isize - (indent + col) as isize
-                } else {
-                    width as isize - col as isize
-                };
-                // Collect current work list plus the inner doc so fits() can
-                // measure the whole upcoming context.
-                let mut probe: Vec<(&Doc, i32, Mode)> = work.clone();
-                probe.push((inner, indent, Mode::Flat));
-                let chosen = if fits(remaining, &probe) {
-                    Mode::Flat
-                } else {
-                    Mode::Break
-                };
-                work.push((inner, indent, chosen));
-            }
-        }
-    }
-
-    out
+    let mut out = TrimBlankLines {
+        out: String::new(),
+        after_newline: false,
+        pending_indent: String::new(),
+    };
+    // Writing to a String cannot fail.
+    let _ = doc.to_pretty().render_fmt(width, &mut out);
+    out.out
 }
 
 #[cfg(test)]
@@ -190,6 +120,34 @@ mod tests {
     fn text_renders_literally() {
         let doc = Doc::text("hello");
         assert_eq!(render(&doc, 80), "hello");
+    }
+
+    #[test]
+    fn hardline_breaks_enclosing_groups() {
+        // A multi-line child forces its parent group to break, even though
+        // the flat text would fit.
+        let inner = Doc::concat(vec![Doc::text("a"), Doc::HardLine, Doc::text("b")]);
+        let doc = Doc::group(Doc::concat(vec![
+            Doc::text("("),
+            Doc::nest(2, Doc::concat(vec![Doc::Line, inner])),
+            Doc::Line,
+            Doc::text(")"),
+        ]));
+        assert_eq!(render(&doc, 80), "(\n  a\n  b\n)");
+    }
+
+    #[test]
+    fn blank_lines_have_no_indentation() {
+        let doc = Doc::nest(
+            2,
+            Doc::concat(vec![
+                Doc::text("a"),
+                Doc::HardLine,
+                Doc::HardLine,
+                Doc::text("b"),
+            ]),
+        );
+        assert_eq!(render(&doc, 80), "a\n\n  b");
     }
 
     #[test]

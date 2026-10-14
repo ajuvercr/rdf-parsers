@@ -119,7 +119,7 @@ cl_close -> before: dedent line
 triplesBlock -> before: line, after: line
 wrappedGraph -> before: space
 curly_open -> after: indent
-curly_close -> before: dedent, after: hardline
+curly_close -> before: dedent
 prefixId.pname_ns -> after: space
 graph_token -> after: space
 prefix_token -> after: space
