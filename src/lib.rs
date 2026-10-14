@@ -13,6 +13,8 @@ pub use a_star::ParserTrait;
 pub mod list;
 pub mod model;
 pub mod format;
+#[macro_use]
+mod rdf_format;
 pub mod jsonld;
 pub mod n3;
 pub mod ntriples;

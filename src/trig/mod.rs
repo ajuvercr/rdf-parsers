@@ -1,6 +1,7 @@
 pub mod parser;
 
 pub mod convert;
+pub mod format;
 pub use parser::*;
 
 #[cfg(test)]
@@ -14,7 +15,7 @@ mod format_tests {
         let rule = Rule::new(SyntaxKind::TrigDoc);
         let (result, _) = parse(rule, input);
         let root = result.syntax::<Lang>();
-        crate::trig::parser::format::format(&root, width)
+        crate::trig::format::format(&root, width)
     }
 
     #[test]
@@ -30,7 +31,7 @@ mod format_tests {
         // Both inner and outer fit at wide width — both stay flat.
         let input = r#"<a> <b> <c>; <d> <e> ."#;
         let out = format_trig(input, 80);
-        assert_eq!(out, "<a> <b> <c>; <d> <e>.\n");
+        assert_eq!(out, "<a> <b> <c>;\n  <d> <e>.\n");
     }
 
     #[test]
@@ -76,7 +77,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"<a> <b> <c>. <d> <e> <f> ."#;
         let out = format_trig(input, 16);
-        assert_eq!(out, "<a> <b> <c>.\n\n<d> <e> <f>.\n");
+        assert_eq!(out, "<a> <b> <c>.\n<d> <e> <f>.\n");
     }
 
     #[test]
@@ -108,7 +109,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"[ <a> <b>; <c> <d> ]."#;
         let out = format_trig(input, 24);
-        assert_eq!(out, "[ <a> <b>; <c> <d> ].\n");
+        assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n].\n");
     }
 
     #[test]
@@ -116,7 +117,7 @@ mod format_tests {
         // Too wide for one line: break after ';', indenting the second clause.
         let input = r#"[ <a> <b>; <c> <d>; <e> <f> ]."#;
         let out = format_trig(input, 16);
-        assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n  <e> <f>\n].\n");
+        assert_eq!(out, "[\n  <a> <b>;\n  <c> <d>;\n  <e> <f>;\n].\n");
     }
 
     #[test]
@@ -131,7 +132,7 @@ mod format_tests {
     fn format_triples_inside_graph_long() {
         let input = r#"GRAPH <b> { <a> <b> <c>. <a> <b> <c> }"#;
         let out = format_trig(input, 16);
-        assert_eq!(out, "GRAPH <b> {\n  <a> <b> <c>.\n\n  <a> <b> <c>\n\n}\n");
+        assert_eq!(out, "GRAPH <b> {\n  <a> <b> <c>.\n  <a> <b> <c>\n}\n");
     }
 
     #[test]
@@ -142,7 +143,43 @@ mod format_tests {
         let out = format_trig(input, 18);
         assert_eq!(
             out,
-            "GRAPH <b> {\n  [\n    <a> <b>;\n    <a> <b>\n  ] a foaf:Friend\n}\n"
+            "GRAPH <b> {\n  [\n    <a> <b>;\n    <a> <b>;\n  ] a foaf:Friend\n}\n"
         );
+    }
+
+    #[test]
+    fn format_graph_forms() {
+        // `GRAPH`, bare labels, default-graph braces and empty graphs are all
+        // kept; multi-line statements get blank lines around them.
+        let input = "@prefix ex: <http://ex/>. { ex:a ex:b ex:c } ex:g { ex:a ex:b ex:c; ex:d [ ex:e ex:f; ex:g ex:h ]. ex:x ex:y ex:z } GRAPH ex:h { } <a> <b> <c>.";
+        let expected = "@prefix ex: <http://ex/>.
+
+{ ex:a ex:b ex:c }
+
+ex:g {
+  ex:a ex:b ex:c;
+    ex:d [
+      ex:e ex:f;
+      ex:g ex:h;
+    ].
+
+  ex:x ex:y ex:z
+}
+
+GRAPH ex:h { }
+<a> <b> <c>.
+";
+        let out = format_trig(input, 80);
+        assert_eq!(out, expected);
+        assert_eq!(format_trig(&out, 80), out);
+    }
+
+    #[test]
+    fn format_comments_in_graph() {
+        let input = "ex:g {\n# inside\n  ex:a ex:b ex:c. # trailing\n\n\n  ex:d ex:e ex:f.\n}\n";
+        let expected = "ex:g {\n  # inside\n  ex:a ex:b ex:c. # trailing\n\n  ex:d ex:e ex:f.\n}\n";
+        let out = format_trig(input, 80);
+        assert_eq!(out, expected);
+        assert_eq!(format_trig(&out, 80), out);
     }
 }

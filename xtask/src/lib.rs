@@ -1669,6 +1669,9 @@ pub fn generate(path: &str, contents: &str) -> String {
                     let mut after_comment = false;
                     // Newlines in the whitespace directly before the current child.
                     let mut newlines = 0;
+                    // Comments on their own line, emitted with the next element so
+                    // they share its indentation: (text, blank line before).
+                    let mut own_line: Vec<(String, bool)> = Vec::new();
 
                     for child in node.children_with_tokens() {
                         let newlines_before = std::mem::take(&mut newlines);
@@ -1679,24 +1682,22 @@ pub fn generate(path: &str, contents: &str) -> String {
                                     continue;
                                 }
                                 if t.kind() == SyntaxKind::Comment {
-                                    // Preserve comments verbatim; they end the line. A
-                                    // comment on its own line stays there, a trailing one
-                                    // stays after its code. Keep one blank line above.
+                                    // Preserve comments verbatim; they end the line.
                                     let part = parts.last_mut().unwrap();
-                                    let at_line_start = std::mem::take(&mut after_comment)
-                                        || part.is_empty()
-                                        || ends_line(part.last());
-                                    if !at_line_start {
-                                        part.push(if newlines_before > 0 { Doc::HardLine } else { Doc::text(" ") });
-                                    } else if !part.is_empty() && !ends_line(part.last()) {
-                                        // End the previous comment's line.
-                                        part.push(Doc::HardLine);
+                                    let trailing = newlines_before == 0
+                                        && own_line.is_empty()
+                                        && !after_comment
+                                        && !part.is_empty()
+                                        && !ends_line(part.last());
+                                    if trailing {
+                                        // Stays after its code; the newline is pending.
+                                        part.push(Doc::text(" "));
+                                        part.push(Doc::text(t.text().to_string()));
+                                        after_comment = true;
+                                    } else {
+                                        let blank = newlines_before > 1 && (!part.is_empty() || !own_line.is_empty());
+                                        own_line.push((t.text().to_string(), blank));
                                     }
-                                    if newlines_before > 1 && !part.is_empty() {
-                                        part.push(Doc::HardLine);
-                                    }
-                                    part.push(Doc::text(t.text().to_string()));
-                                    after_comment = true;
                                     continue;
                                 }
                                 if !hook.keep(&child) {
@@ -1733,11 +1734,42 @@ pub fn generate(path: &str, contents: &str) -> String {
 
                         let mut seq = before.to_docs();
                         // Keep (at most) one blank line from the source where the
-                        // grammar already breaks the line.
-                        if newlines_before > 1 && !before.blankline {
+                        // grammar already breaks the line. With comments in front,
+                        // the blank line before the first comment counts instead.
+                        let blank = match own_line.first() {
+                            Some((_, blank)) => *blank,
+                            None => newlines_before > 1,
+                        };
+                        if blank && !before.blankline {
                             if let Some(i) = seq.iter().position(|d| matches!(d, Doc::HardLine)) {
                                 seq.insert(i, Doc::HardLine);
                             }
+                        }
+                        if !own_line.is_empty() {
+                            // Put the comments after the first line break, so they are
+                            // indented like this element; without one, start a line.
+                            let part = parts.last().unwrap();
+                            let at_line_start = part.is_empty() || ends_line(part.last());
+                            let at = match seq.iter().position(is_break) {
+                                Some(i) => {
+                                    seq[i] = Doc::HardLine;
+                                    i + 1
+                                }
+                                None if at_line_start => 0,
+                                None => {
+                                    seq.insert(0, Doc::HardLine);
+                                    1
+                                }
+                            };
+                            let mut comments = Vec::new();
+                            for (i, (text, blank)) in std::mem::take(&mut own_line).into_iter().enumerate() {
+                                if blank && i > 0 {
+                                    comments.push(Doc::HardLine);
+                                }
+                                comments.push(Doc::text(text));
+                                comments.push(Doc::HardLine);
+                            }
+                            seq.splice(at..at, comments);
                         }
                         seq.push(doc);
                         if before.nest || after.nest {
@@ -1760,8 +1792,22 @@ pub fn generate(path: &str, contents: &str) -> String {
                         }
                     }
 
+                    // Comments after the last element.
+                    let part = parts.last_mut().unwrap();
+                    for (text, blank) in own_line {
+                        if !after_comment && !part.is_empty() && !ends_line(part.last()) {
+                            part.push(Doc::HardLine);
+                        }
+                        if blank {
+                            part.push(Doc::HardLine);
+                        }
+                        part.push(Doc::text(text));
+                        after_comment = true;
+                        part.push(Doc::HardLine);
+                        after_comment = false;
+                    }
                     if after_comment {
-                        parts.last_mut().unwrap().push(Doc::HardLine);
+                        part.push(Doc::HardLine);
                     }
 
                     // Drain any unclosed indent levels.
