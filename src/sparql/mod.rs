@@ -1,6 +1,7 @@
 pub mod parser;
 
 pub mod convert;
+pub mod format;
 pub use parser::*;
 
 #[cfg(test)]
@@ -14,7 +15,7 @@ mod format_tests {
         let rule = Rule::new(SyntaxKind::QueryUnit);
         let (result, _) = parse(rule, input);
         let root = result.syntax::<Lang>();
-        crate::sparql::parser::format::format(&root, width)
+        crate::sparql::format::format(&root, width)
     }
 
     #[test]
@@ -213,6 +214,26 @@ mod format_tests {
 
     #[test]
     fn format_wrapped_objects_indent_past_predicates() {
+        let input = r#"SELECT * { ?s a <Image>, <Other>, <YetAnotherVeryLongClassName>, <Last>; <name> "x", "a very long name that is long", "another long long name". }"#;
+        let out = format_sparql(input, 60);
+        assert_eq!(
+            out,
+            r#"SELECT *
+{
+  ?s a <Image>,
+      <Other>,
+      <YetAnotherVeryLongClassName>,
+      <Last>;
+    <name> "x",
+      "a very long name that is long",
+      "another long long name".
+}
+"#
+        );
+    }
+
+    #[test]
+    fn format_blank_nodes_like_turtle() {
         let input = r#"SELECT * { ?s a <Image>; <focus> <me>; <name> [ a <Person>; <friend> [ a <Person> ] ], [], "long name", "and another very long name". }"#;
         let out = format_sparql(input, 80);
         assert_eq!(
@@ -222,11 +243,31 @@ mod format_tests {
   ?s a <Image>;
     <focus> <me>;
     <name> [
-        a <Person>; <friend> [ a <Person> ]
-      ],
-      [],
-      "long name",
-      "and another very long name".
+      a <Person>;
+      <friend> [ a <Person> ];
+    ], [], "long name", "and another very long name".
+}
+"#
+        );
+    }
+
+    #[test]
+    fn format_collections_like_turtle() {
+        let input = "SELECT * { ?s sh:or ([ sh:property [ sh:path ex:a; sh:minCount 1; ] ][ sh:property [ sh:path ex:b ] ]). }";
+        let out = format_sparql(input, 80);
+        assert_eq!(
+            out,
+            r#"SELECT *
+{
+  ?s sh:or (
+    [
+      sh:property [
+        sh:path ex:a;
+        sh:minCount 1;
+      ]
+    ]
+    [ sh:property [ sh:path ex:b ] ]
+  ).
 }
 "#
         );
@@ -298,7 +339,7 @@ LIMIT 10
         let input = "PREFIX ex: <http://ex/> INSERT DATA { ex:a ex:b ex:c } ; DELETE { ?s ex:p ?o } WHERE { ?s ex:p ?o . FILTER(?o>1) }";
         let fmt = |input: &str| {
             let (result, _) = parse(rule.clone(), input);
-            crate::sparql::parser::format::format(&result.syntax::<Lang>(), 80)
+            crate::sparql::format::format(&result.syntax::<Lang>(), 80)
         };
         let out = fmt(input);
         assert_eq!(

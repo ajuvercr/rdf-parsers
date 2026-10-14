@@ -348,10 +348,18 @@ group PropertyListNotEmpty
 group PropertyListPathNotEmpty
 group ObjectList
 group ObjectListPath
+group Collection
+group CollectionPath
+group BlankNodePropertyList
+group BlankNodePropertyListPath
 blankNodePropertyList.sq_open -> after: indent line
 blankNodePropertyList.sq_close -> before: dedent line
 blankNodePropertyListPath.sq_open -> after: indent line
 blankNodePropertyListPath.sq_close -> before: dedent line
+collection.graphNode -> before: nest line
+collection.br_close -> before: line
+collectionPath.graphNodePath -> before: nest line
+collectionPath.br_close -> before: line
 cl_open -> after: indent hardline
 cl_close -> before: dedent hardline, after: hardline
 stop -> after: hardline

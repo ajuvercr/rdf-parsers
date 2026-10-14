@@ -71339,6 +71339,102 @@ pub mod format {
                     if_break: None,
                 },
             ),
+            (SyntaxKind::Collection, SyntaxKind::GraphNode) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    glue: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Collection, SyntaxKind::BrClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::CollectionPath, SyntaxKind::GraphNodePath) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    glue: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::CollectionPath, SyntaxKind::BrClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    glue: false,
+                    if_break: None,
+                },
+            ),
             (SyntaxKind::TriplesSameSubject, SyntaxKind::PropertyListNotEmpty) => (
                 Hints {
                     space: true,
@@ -72550,6 +72646,10 @@ pub mod format {
                 | SyntaxKind::PropertyListPathNotEmpty
                 | SyntaxKind::ObjectList
                 | SyntaxKind::ObjectListPath
+                | SyntaxKind::Collection
+                | SyntaxKind::CollectionPath
+                | SyntaxKind::BlankNodePropertyList
+                | SyntaxKind::BlankNodePropertyListPath
         )
     }
     fn is_break(doc: &Doc) -> bool {
