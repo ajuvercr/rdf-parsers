@@ -3533,6 +3533,7 @@ pub mod format {
         indent: bool,
         dedent: bool,
         nest: bool,
+        glue: bool,
         if_break: Option<&'static str>,
     }
     impl Hints {
@@ -3565,6 +3566,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: true,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3575,6 +3577,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3587,6 +3590,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3597,6 +3601,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3609,6 +3614,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3619,6 +3625,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3631,6 +3638,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: true,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3641,6 +3649,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3653,6 +3662,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3663,6 +3673,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3675,6 +3686,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: true,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3685,6 +3697,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3697,6 +3710,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3707,6 +3721,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3719,6 +3734,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3729,6 +3745,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3741,6 +3758,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: true,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3751,6 +3769,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3763,6 +3782,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3773,6 +3793,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3785,6 +3806,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3795,6 +3817,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3807,6 +3830,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
                 Hints {
@@ -3817,6 +3841,7 @@ pub mod format {
                     indent: false,
                     dedent: false,
                     nest: false,
+                    glue: false,
                     if_break: None,
                 },
             ),
@@ -3976,6 +4001,9 @@ pub mod format {
                     .unwrap()
                     .push(Doc::nest(2, Doc::concat(nested)));
             }
+            if before.glue {
+                crate::format::strip_trailing_breaks(parts.last_mut().unwrap());
+            }
             let mut seq = before.to_docs();
             let blank = match own_line.first() {
                 Some((_, blank)) => *blank,
@@ -4040,7 +4068,6 @@ pub mod format {
                 part.push(Doc::HardLine);
             }
             part.push(Doc::text(text));
-            after_comment = true;
             part.push(Doc::HardLine);
             after_comment = false;
         }

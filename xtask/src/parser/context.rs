@@ -59,6 +59,8 @@ pub enum FormatHint {
     Dedent,
     /// Wrap the node (and its `before` hints) in one indentation level.
     Nest,
+    /// Attach to the previous token, removing line breaks before this one.
+    Glue,
     /// Text emitted only when the enclosing group is broken, e.g. `ifbreak(;)`.
     IfBreak(String),
 }
@@ -140,7 +142,7 @@ fn format_section_parser<'src>() -> impl Parser<'src, &'src str, CtxBlock, Err<R
     //   group <ident>
     //   [<scope>.]<token> -> before|after: <hint>+
     //
-    // Hints: space | line | hardline | blankline | indent | dedent | nest | ifbreak(<text>)
+    // Hints: space | line | hardline | blankline | indent | dedent | nest | glue | ifbreak(<text>)
 
     let if_break = just("ifbreak(")
         .ignore_then(none_of(")\n").repeated().at_least(1).collect::<String>())
@@ -150,6 +152,7 @@ fn format_section_parser<'src>() -> impl Parser<'src, &'src str, CtxBlock, Err<R
     let hint = choice((
         if_break,
         just("nest").to(FormatHint::Nest),
+        just("glue").to(FormatHint::Glue),
         just("blankline").to(FormatHint::BlankLine),
         just("hardline").to(FormatHint::HardLine),
         just("space").to(FormatHint::Space),

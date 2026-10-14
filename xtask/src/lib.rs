@@ -1585,6 +1585,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                     indent: bool,
                     dedent: bool,
                     nest: bool,
+                    glue: bool,
                     if_break: Option<&'static str>,
                 }
 
@@ -1778,6 +1779,10 @@ pub fn generate(path: &str, contents: &str) -> String {
                             parts.last_mut().unwrap().push(Doc::nest(2, Doc::concat(nested)));
                         }
 
+                        // `glue`: attach to the previous token, dropping line breaks.
+                        if before.glue {
+                            crate::format::strip_trailing_breaks(parts.last_mut().unwrap());
+                        }
                         let mut seq = before.to_docs();
                         // Keep (at most) one blank line from the source where the
                         // grammar already breaks the line. With comments in front,
@@ -1857,7 +1862,6 @@ pub fn generate(path: &str, contents: &str) -> String {
                             part.push(Doc::HardLine);
                         }
                         part.push(Doc::text(text));
-                        after_comment = true;
                         part.push(Doc::HardLine);
                         after_comment = false;
                     }
@@ -2103,6 +2107,7 @@ fn hints_struct(hints: &[FormatHint]) -> proc_macro2::TokenStream {
     let indent = hints.contains(&FormatHint::Indent);
     let dedent = hints.contains(&FormatHint::Dedent);
     let nest = hints.contains(&FormatHint::Nest);
+    let glue = hints.contains(&FormatHint::Glue);
     let if_break = match hints.iter().find_map(|h| match h {
         FormatHint::IfBreak(s) => Some(s),
         _ => None,
@@ -2111,7 +2116,7 @@ fn hints_struct(hints: &[FormatHint]) -> proc_macro2::TokenStream {
         None => quote! { None },
     };
     quote! {
-        Hints { space: #space, line: #line, hardline: #hardline, blankline: #blankline, indent: #indent, dedent: #dedent, nest: #nest, if_break: #if_break }
+        Hints { space: #space, line: #line, hardline: #hardline, blankline: #blankline, indent: #indent, dedent: #dedent, nest: #nest, glue: #glue, if_break: #if_break }
     }
 }
 
