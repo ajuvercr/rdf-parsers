@@ -1574,7 +1574,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                 use super::{Lang, SyntaxKind, SyntaxNode};
                 use rowan::NodeOrToken;
                 use crate::TokenTrait;
-                use crate::format::{Doc, FormatHook, NoHook};
+                use crate::format::{Doc, FormatHook, Formatter, NoHook};
 
                 #[derive(Default)]
                 struct Hints {
@@ -1617,12 +1617,14 @@ pub fn generate(path: &str, contents: &str) -> String {
                         || matches!(doc, Doc::Text(s) if s == " ")
                 }
 
-                /// Append `docs`. A comment already ended its line, so the first
-                /// line break or space after it is dropped.
+                /// Append `docs`. After a comment the line must end: the first
+                /// break becomes a hard line, or one is inserted. Emitting it here
+                /// rather than with the comment places it inside the next nest, so
+                /// the following line gets that nest's indentation.
                 fn push_all(part: &mut Vec<Doc>, docs: Vec<Doc>, after_comment: &mut bool) {
                     for doc in docs {
-                        if *after_comment {
-                            *after_comment = false;
+                        if std::mem::take(after_comment) {
+                            part.push(Doc::HardLine);
                             if is_break(&doc) {
                                 continue;
                             }
@@ -1643,26 +1645,57 @@ pub fn generate(path: &str, contents: &str) -> String {
                 /// Format a child node: hook override or hint-driven default,
                 /// wrapped in a group when the grammar says so.
                 fn format_child(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
-                    let doc = hook
-                        .node(node, &|n| format_child(n, hook))
-                        .unwrap_or_else(|| node_doc(node, hook));
+                    let doc = hooked(node, hook);
                     if is_group(node.kind()) { Doc::group(doc) } else { doc }
+                }
+
+                fn hooked(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
+                    let child = |n: &SyntaxNode| format_child(n, hook);
+                    let default = |n: &SyntaxNode| node_doc(n, hook);
+                    hook.node(node, &Formatter::new(&child, &default))
+                        .unwrap_or_else(|| node_doc(node, hook))
+                }
+
+                fn ends_line(doc: Option<&Doc>) -> bool {
+                    match doc {
+                        Some(Doc::HardLine) => true,
+                        Some(Doc::Concat(ds)) => ends_line(ds.last()),
+                        _ => false,
+                    }
                 }
 
                 fn node_doc(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
                     let mut parts: Vec<Vec<Doc>> = vec![vec![]];
                     let mut after_comment = false;
+                    // Newlines in the whitespace directly before the current child.
+                    let mut newlines = 0;
 
                     for child in node.children_with_tokens() {
+                        let newlines_before = std::mem::take(&mut newlines);
                         let (kind, doc) = match &child {
                             NodeOrToken::Token(t) => {
                                 if t.kind() == SyntaxKind::WhiteSpace {
+                                    newlines = t.text().matches('\n').count();
                                     continue;
                                 }
                                 if t.kind() == SyntaxKind::Comment {
-                                    // Preserve comments verbatim; they end the line.
+                                    // Preserve comments verbatim; they end the line. A
+                                    // comment on its own line stays there, a trailing one
+                                    // stays after its code. Keep one blank line above.
                                     let part = parts.last_mut().unwrap();
-                                    part.push(Doc::comment(t.text().to_string()));
+                                    let at_line_start = std::mem::take(&mut after_comment)
+                                        || part.is_empty()
+                                        || ends_line(part.last());
+                                    if !at_line_start {
+                                        part.push(if newlines_before > 0 { Doc::HardLine } else { Doc::text(" ") });
+                                    } else if !part.is_empty() && !ends_line(part.last()) {
+                                        // End the previous comment's line.
+                                        part.push(Doc::HardLine);
+                                    }
+                                    if newlines_before > 1 && !part.is_empty() {
+                                        part.push(Doc::HardLine);
+                                    }
+                                    part.push(Doc::text(t.text().to_string()));
                                     after_comment = true;
                                     continue;
                                 }
@@ -1699,6 +1732,13 @@ pub fn generate(path: &str, contents: &str) -> String {
                         }
 
                         let mut seq = before.to_docs();
+                        // Keep (at most) one blank line from the source where the
+                        // grammar already breaks the line.
+                        if newlines_before > 1 && !before.blankline {
+                            if let Some(i) = seq.iter().position(|d| matches!(d, Doc::HardLine)) {
+                                seq.insert(i, Doc::HardLine);
+                            }
+                        }
                         seq.push(doc);
                         if before.nest || after.nest {
                             // Line breaks take the indentation of what follows
@@ -1720,6 +1760,10 @@ pub fn generate(path: &str, contents: &str) -> String {
                         }
                     }
 
+                    if after_comment {
+                        parts.last_mut().unwrap().push(Doc::HardLine);
+                    }
+
                     // Drain any unclosed indent levels.
                     while parts.len() > 1 {
                         let nested = parts.pop().unwrap();
@@ -1734,8 +1778,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                 }
 
                 pub fn to_doc_with(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
-                    hook.node(node, &|n| format_child(n, hook))
-                        .unwrap_or_else(|| node_doc(node, hook))
+                    hooked(node, hook)
                 }
 
                 pub fn format(node: &SyntaxNode, width: usize) -> String {

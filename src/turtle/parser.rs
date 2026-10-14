@@ -3521,7 +3521,7 @@ impl TokenTrait for SyntaxKind {
 }
 pub mod format {
     use super::{Lang, SyntaxKind, SyntaxNode};
-    use crate::format::{Doc, FormatHook, NoHook};
+    use crate::format::{Doc, FormatHook, Formatter, NoHook};
     use crate::TokenTrait;
     use rowan::NodeOrToken;
     #[derive(Default)]
@@ -3556,182 +3556,6 @@ pub mod format {
     }
     fn format_hints(parent: SyntaxKind, token: SyntaxKind) -> (Hints, Hints) {
         match (parent, token) {
-            (SyntaxKind::Triples, SyntaxKind::PredicateObjectList) => (
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::Statement, SyntaxKind::Triples) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: true,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::ObjectList, SyntaxKind::Comma) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: true,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqClose) => (
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: true,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (SyntaxKind::BlankNode, SyntaxKind::SqOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: true,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
             (SyntaxKind::PrefixId, SyntaxKind::PrefixToken) => (
                 Hints {
                     space: false,
@@ -3864,7 +3688,29 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::Subject) => (
+            (SyntaxKind::Triples, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::PredicateObjectList, SyntaxKind::Colon) => (
                 Hints {
                     space: false,
                     line: false,
@@ -3878,15 +3724,15 @@ pub mod format {
                 Hints {
                     space: false,
                     line: false,
-                    hardline: false,
+                    hardline: true,
                     blankline: false,
-                    indent: true,
+                    indent: false,
                     dedent: false,
                     nest: false,
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::Colon) => (
+            (SyntaxKind::ObjectList, SyntaxKind::Comma) => (
                 Hints {
                     space: false,
                     line: false,
@@ -3908,7 +3754,95 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::Stop) => (
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::PredicateObjectList) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::BlankNodePropertyList2, SyntaxKind::SqClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::BlankNode, SyntaxKind::SqOpen) => (
                 Hints {
                     space: false,
                     line: false,
@@ -3920,9 +3854,75 @@ pub mod format {
                     if_break: None,
                 },
                 Hints {
+                    space: true,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Collection, SyntaxKind::Object) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: true,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (SyntaxKind::Collection, SyntaxKind::ClClose) => (
+                Hints {
+                    space: false,
+                    line: true,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+            ),
+            (_, SyntaxKind::Statement) => (
+                Hints {
                     space: false,
                     line: false,
                     hardline: true,
+                    blankline: false,
+                    indent: false,
+                    dedent: false,
+                    nest: false,
+                    if_break: None,
+                },
+                Hints {
+                    space: false,
+                    line: false,
+                    hardline: false,
                     blankline: false,
                     indent: false,
                     dedent: false,
@@ -3952,58 +3952,13 @@ pub mod format {
                     if_break: None,
                 },
             ),
-            (_, SyntaxKind::ClOpen) => (
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: true,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
-            (_, SyntaxKind::ClClose) => (
-                Hints {
-                    space: false,
-                    line: true,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: true,
-                    nest: false,
-                    if_break: None,
-                },
-                Hints {
-                    space: false,
-                    line: false,
-                    hardline: false,
-                    blankline: false,
-                    indent: false,
-                    dedent: false,
-                    nest: false,
-                    if_break: None,
-                },
-            ),
             _ => (Hints::default(), Hints::default()),
         }
     }
     fn is_group(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SyntaxKind::PredicateObjectList
-                | SyntaxKind::ObjectList
+            SyntaxKind::ObjectList
                 | SyntaxKind::BlankNodePropertyList
                 | SyntaxKind::BlankNodePropertyList2
                 | SyntaxKind::Collection
@@ -4012,12 +3967,14 @@ pub mod format {
     fn is_break(doc: &Doc) -> bool {
         matches!(doc, Doc::Line | Doc::HardLine) || matches ! (doc , Doc :: Text (s) if s == " ")
     }
-    #[doc = r" Append `docs`. A comment already ended its line, so the first"]
-    #[doc = r" line break or space after it is dropped."]
+    #[doc = r" Append `docs`. After a comment the line must end: the first"]
+    #[doc = r" break becomes a hard line, or one is inserted. Emitting it here"]
+    #[doc = r" rather than with the comment places it inside the next nest, so"]
+    #[doc = r" the following line gets that nest's indentation."]
     fn push_all(part: &mut Vec<Doc>, docs: Vec<Doc>, after_comment: &mut bool) {
         for doc in docs {
-            if *after_comment {
-                *after_comment = false;
+            if std::mem::take(after_comment) {
+                part.push(Doc::HardLine);
                 if is_break(&doc) {
                     continue;
                 }
@@ -4036,27 +3993,56 @@ pub mod format {
     #[doc = r" Format a child node: hook override or hint-driven default,"]
     #[doc = r" wrapped in a group when the grammar says so."]
     fn format_child(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
-        let doc = hook
-            .node(node, &|n| format_child(n, hook))
-            .unwrap_or_else(|| node_doc(node, hook));
+        let doc = hooked(node, hook);
         if is_group(node.kind()) {
             Doc::group(doc)
         } else {
             doc
         }
     }
+    fn hooked(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
+        let child = |n: &SyntaxNode| format_child(n, hook);
+        let default = |n: &SyntaxNode| node_doc(n, hook);
+        hook.node(node, &Formatter::new(&child, &default))
+            .unwrap_or_else(|| node_doc(node, hook))
+    }
+    fn ends_line(doc: Option<&Doc>) -> bool {
+        match doc {
+            Some(Doc::HardLine) => true,
+            Some(Doc::Concat(ds)) => ends_line(ds.last()),
+            _ => false,
+        }
+    }
     fn node_doc(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
         let mut parts: Vec<Vec<Doc>> = vec![vec![]];
         let mut after_comment = false;
+        let mut newlines = 0;
         for child in node.children_with_tokens() {
+            let newlines_before = std::mem::take(&mut newlines);
             let (kind, doc) = match &child {
                 NodeOrToken::Token(t) => {
                     if t.kind() == SyntaxKind::WhiteSpace {
+                        newlines = t.text().matches('\n').count();
                         continue;
                     }
                     if t.kind() == SyntaxKind::Comment {
                         let part = parts.last_mut().unwrap();
-                        part.push(Doc::comment(t.text().to_string()));
+                        let at_line_start = std::mem::take(&mut after_comment)
+                            || part.is_empty()
+                            || ends_line(part.last());
+                        if !at_line_start {
+                            part.push(if newlines_before > 0 {
+                                Doc::HardLine
+                            } else {
+                                Doc::text(" ")
+                            });
+                        } else if !part.is_empty() && !ends_line(part.last()) {
+                            part.push(Doc::HardLine);
+                        }
+                        if newlines_before > 1 && !part.is_empty() {
+                            part.push(Doc::HardLine);
+                        }
+                        part.push(Doc::text(t.text().to_string()));
                         after_comment = true;
                         continue;
                     }
@@ -4092,6 +4078,11 @@ pub mod format {
                     .push(Doc::nest(2, Doc::concat(nested)));
             }
             let mut seq = before.to_docs();
+            if newlines_before > 1 && !before.blankline {
+                if let Some(i) = seq.iter().position(|d| matches!(d, Doc::HardLine)) {
+                    seq.insert(i, Doc::HardLine);
+                }
+            }
             seq.push(doc);
             if before.nest || after.nest {
                 let mut nested = Vec::new();
@@ -4106,6 +4097,9 @@ pub mod format {
                 push_all(parts.last_mut().unwrap(), after_docs, &mut after_comment);
             }
         }
+        if after_comment {
+            parts.last_mut().unwrap().push(Doc::HardLine);
+        }
         while parts.len() > 1 {
             let nested = parts.pop().unwrap();
             parts
@@ -4119,8 +4113,7 @@ pub mod format {
         to_doc_with(node, &NoHook)
     }
     pub fn to_doc_with(node: &SyntaxNode, hook: &dyn FormatHook<Lang>) -> Doc {
-        hook.node(node, &|n| format_child(n, hook))
-            .unwrap_or_else(|| node_doc(node, hook))
+        hooked(node, hook)
     }
     pub fn format(node: &SyntaxNode, width: usize) -> String {
         format_with(node, width, &NoHook)
