@@ -35,7 +35,9 @@ fn resolved_quads(doc: &Turtle, base: &str) -> Result<Vec<NQuad>, Vec<rdf_parser
     let term = |n: Node| match n {
         Node::Iri(i) => NTerm::Iri(i),
         Node::Blank(b) => NTerm::BlankNode(b),
-        Node::Literal { lexical, datatype, language } => NTerm::Literal(lexical, language, Some(datatype)),
+        Node::Literal { lexical, datatype, language, .. } => NTerm::Literal(lexical, language, Some(datatype)),
+        // the RDF 1.1 suites have no triple terms: never equal to anything expected
+        t @ Node::Triple(_) => NTerm::Iri(format!("unsupported triple term {t}")),
     };
     Ok(r.quads
         .into_iter()

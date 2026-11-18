@@ -40,11 +40,16 @@ pub enum Node {
     Blank(String),
     Literal {
         lexical: String,
-        /// Absolute datatype IRI (`rdf:langString` for language-tagged strings).
+        /// Absolute datatype IRI (`rdf:langString` for language-tagged
+        /// strings, `rdf:dirLangString` when they have a direction).
         datatype: String,
         /// Lowercased language tag.
         language: Option<String>,
+        /// Base direction (RDF 1.2).
+        direction: Option<Direction>,
     },
+    /// An RDF 1.2 triple term: subject, predicate, object.
+    Triple(Box<(Node, Node, Node)>),
 }
 
 /// A triple, in a named graph or (`graph: None`) the default graph.
@@ -68,6 +73,9 @@ pub enum ErrorKind {
     InvalidIri(String),
     /// A term the parser could not recover (an error node in the tree).
     Invalid,
+    /// A triple term whose subject is not an IRI or blank node, or whose
+    /// predicate is not an IRI (RDF 1.2).
+    InvalidTripleTerm,
 }
 
 impl Display for ErrorKind {
@@ -77,6 +85,12 @@ impl Display for ErrorKind {
             ErrorKind::InvalidEscape(e) => write!(f, "'{e}' is not a valid character escape"),
             ErrorKind::InvalidIri(i) => write!(f, "'{i}' is not a valid IRI"),
             ErrorKind::Invalid => write!(f, "invalid term"),
+            ErrorKind::InvalidTripleTerm => {
+                write!(
+                    f,
+                    "a triple term needs an IRI or blank node subject and an IRI predicate"
+                )
+            }
         }
     }
 }
@@ -217,12 +231,78 @@ impl Resolver {
             let Some(p) = self.term(po.predicate.value(), po.predicate.span(), graph) else {
                 continue;
             };
-            for o in &po.object {
-                if let Some(o) = self.term(o.value(), o.span(), graph) {
-                    self.emit(s, &p, o, graph);
+            for (i, o) in po.object.iter().enumerate() {
+                let Some(o) = self.term(o.value(), o.span(), graph) else {
+                    continue;
+                };
+                self.emit(s, &p, o.clone(), graph);
+                let annotations = po.annotations_of(i);
+                if !annotations.is_empty() {
+                    let triple = Node::Triple(Box::new((s.clone(), p.clone(), o)));
+                    self.annotate(triple, annotations, graph);
                 }
             }
         }
+    }
+
+    /// RDF 1.2 annotations of an asserted triple: every reifier states that
+    /// it reifies the triple, and a block describes the reifier right before
+    /// it, or a fresh one when there is none.
+    fn annotate(
+        &mut self,
+        triple: Node,
+        annotations: &[Spanned<Annotation>],
+        graph: &Option<Node>,
+    ) {
+        let reifies = Node::Iri(format!("{RDF}reifies"));
+        let mut pending: Option<Node> = None;
+        for a in annotations {
+            match a.value() {
+                Annotation::Reifier(r) => {
+                    let Some(node) = self.reifier(r, graph) else {
+                        continue;
+                    };
+                    self.emit(&node, &reifies, triple.clone(), graph);
+                    pending = Some(node);
+                }
+                Annotation::Block(pos) => {
+                    let node = match pending.take() {
+                        Some(node) => node,
+                        None => {
+                            let node = self.bnode();
+                            self.emit(&node, &reifies, triple.clone(), graph);
+                            node
+                        }
+                    };
+                    self.predicate_objects(&node, pos, graph);
+                }
+            }
+        }
+    }
+
+    /// The node a reifier names: its IRI or blank node, or a fresh blank node.
+    fn reifier(&mut self, r: &Reifier, graph: &Option<Node>) -> Option<Node> {
+        match &r.id {
+            Some(id) => self.term(id.value(), id.span(), graph),
+            None => Some(self.bnode()),
+        }
+    }
+
+    /// The three nodes of a triple term, checked: an IRI or blank node
+    /// subject, an IRI predicate.
+    fn triple_term(
+        &mut self,
+        t: &TripleTerm,
+        span: &Range<usize>,
+        graph: &Option<Node>,
+    ) -> Option<Node> {
+        let s = self.term(t.subject.value(), t.subject.span(), graph)?;
+        let p = self.term(t.predicate.value(), t.predicate.span(), graph)?;
+        let o = self.term(t.object.value(), t.object.span(), graph)?;
+        if !matches!(s, Node::Iri(_) | Node::Blank(_)) || !matches!(p, Node::Iri(_)) {
+            return self.error(ErrorKind::InvalidTripleTerm, span);
+        }
+        Some(Node::Triple(Box::new((s, p, o))))
     }
 
     fn named(&mut self, nn: &NamedNode, span: &Range<usize>) -> Option<String> {
@@ -282,6 +362,17 @@ impl Resolver {
                 Some(nodes.first().map_or(nil, |n| n.0.clone()))
             }
             Term::Literal(lit) => self.literal(lit, span),
+            Term::TripleTerm(t) => self.triple_term(t, span, graph),
+            Term::Reified(r) => {
+                let triple = self.triple_term(&r.triple, span, graph)?;
+                let node = match &r.reifier {
+                    Some(reifier) => self.reifier(reifier.value(), graph)?,
+                    None => self.bnode(),
+                };
+                let reifies = Node::Iri(format!("{RDF}reifies"));
+                self.emit(&node, &reifies, triple, graph);
+                Some(node)
+            }
             Term::Variable(_) | Term::Invalid | Term::BlankNode(BlankNode::Invalid) => {
                 self.error(ErrorKind::Invalid, span)
             }
@@ -296,21 +387,25 @@ impl Resolver {
                     Err(kind) => return self.error(kind, span),
                 };
                 let language = l.lang.as_ref().map(|x| x.value().to_lowercase());
-                let datatype = match (&l.ty, &language) {
-                    (Some(nn), _) => self.named(nn.value(), nn.span())?,
-                    (None, Some(_)) => format!("{RDF}langString"),
-                    (None, None) => format!("{XSD}string"),
+                let direction = l.direction.filter(|_| language.is_some());
+                let datatype = match (&l.ty, &language, direction) {
+                    (Some(nn), ..) => self.named(nn.value(), nn.span())?,
+                    (None, Some(_), Some(_)) => format!("{RDF}dirLangString"),
+                    (None, Some(_), None) => format!("{RDF}langString"),
+                    (None, None, _) => format!("{XSD}string"),
                 };
                 Node::Literal {
                     lexical,
                     datatype,
                     language,
+                    direction,
                 }
             }
             Literal::Boolean(b) => Node::Literal {
                 lexical: b.to_string(),
                 datatype: format!("{XSD}boolean"),
                 language: None,
+                direction: None,
             },
             Literal::Numeric(n) => {
                 let lexical = n.trim().to_string();
@@ -325,6 +420,7 @@ impl Resolver {
                     lexical,
                     datatype: format!("{XSD}{ty}"),
                     language: None,
+                    direction: None,
                 }
             }
         })
@@ -408,10 +504,12 @@ impl Display for Node {
         match self {
             Node::Iri(i) => write!(f, "<{i}>"),
             Node::Blank(b) => write!(f, "_:{b}"),
+            Node::Triple(t) => write!(f, "<<( {} {} {} )>>", t.0, t.1, t.2),
             Node::Literal {
                 lexical,
                 datatype,
                 language,
+                direction,
             } => {
                 f.write_str("\"")?;
                 for c in lexical.chars() {
@@ -425,7 +523,13 @@ impl Display for Node {
                 }
                 f.write_str("\"")?;
                 match language {
-                    Some(l) => write!(f, "@{l}"),
+                    Some(l) => {
+                        write!(f, "@{l}")?;
+                        match direction {
+                            Some(d) => write!(f, "--{d}"),
+                            None => Ok(()),
+                        }
+                    }
                     None if datatype.strip_prefix(XSD) == Some("string") => Ok(()),
                     None => write!(f, "^^<{datatype}>"),
                 }
@@ -660,5 +764,165 @@ mod tests {
         assert_eq!(l.len(), 6);
         assert!(l.iter().any(|t| t.ends_with("<http://doc/q> _:l1 .")));
         assert!(l[l.len() - 1].starts_with("_:l1 <http://doc/p> _:b"));
+    }
+
+    // ---- RDF 1.2 (no Turtle 1.2 syntax yet: models built by hand) ----------
+
+    fn sp<T>(t: T) -> Spanned<T> {
+        Spanned(t, 0..1)
+    }
+    fn iri(i: &str) -> Spanned<Term> {
+        sp(Term::NamedNode(NamedNode::Full(
+            format!("http://ex/{i}"),
+            0,
+        )))
+    }
+    fn string(v: &str, lang: Option<&str>, direction: Option<Direction>) -> Spanned<Term> {
+        sp(Term::Literal(Literal::RDF(RDFLiteral {
+            value: v.to_string(),
+            quote_style: StringStyle::Double,
+            lang: lang.map(|l| sp(l.to_string())),
+            direction,
+            ty: None,
+            idx: 0,
+            len: 0,
+        })))
+    }
+    fn tt(s: Spanned<Term>, p: &str, o: Spanned<Term>) -> TripleTerm {
+        TripleTerm {
+            subject: s,
+            predicate: iri(p),
+            object: o,
+        }
+    }
+    fn reified(t: TripleTerm, reifier: Option<Option<Spanned<Term>>>) -> Spanned<Term> {
+        let reifier = reifier.map(|id| sp(Reifier { id }));
+        sp(Term::Reified(Box::new(ReifiedTriple {
+            triple: t,
+            reifier,
+        })))
+    }
+    fn triple(
+        s: Spanned<Term>,
+        p: &str,
+        o: Spanned<Term>,
+        annotations: Vec<Annotation>,
+    ) -> Spanned<Triple> {
+        let mut po = PO::new(iri(p), vec![o]);
+        if !annotations.is_empty() {
+            po.annotations = vec![annotations.into_iter().map(sp).collect()];
+        }
+        sp(Triple {
+            subject: s,
+            po: vec![sp(po)],
+            graph: None,
+        })
+    }
+    fn rdf12(triples: Vec<Spanned<Triple>>) -> Vec<String> {
+        let r = resolve(&Turtle::new(None, Vec::new(), triples), None);
+        assert!(r.errors.is_empty(), "{:?}", r.errors);
+        r.quads
+            .iter()
+            .map(|q| q.to_string().trim_end().to_string())
+            .collect()
+    }
+    const REIFIES: &str = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies>";
+
+    #[test]
+    fn triple_term_object() {
+        let t = sp(Term::TripleTerm(Box::new(tt(
+            iri("a"),
+            "b",
+            string("c", None, None),
+        ))));
+        assert_eq!(
+            rdf12(vec![triple(iri("s"), "p", t, vec![])]),
+            [r#"<http://ex/s> <http://ex/p> <<( <http://ex/a> <http://ex/b> "c" )>> ."#]
+        );
+    }
+
+    #[test]
+    fn reified_triples_with_and_without_reifier() {
+        let named = reified(tt(iri("a"), "b", iri("c")), Some(Some(iri("r"))));
+        assert_eq!(
+            rdf12(vec![triple(named, "q", iri("v"), vec![])]),
+            [
+                format!(
+                    "<http://ex/r> {REIFIES} <<( <http://ex/a> <http://ex/b> <http://ex/c> )>> ."
+                ),
+                "<http://ex/r> <http://ex/q> <http://ex/v> .".to_string(),
+            ]
+        );
+        // `<< << :a :b :c >> :p :o >> :q :v`: two fresh reifiers, the outer one
+        // reifying a triple about the inner one
+        let inner = reified(tt(iri("a"), "b", iri("c")), None);
+        let outer = reified(tt(inner, "p", iri("o")), Some(None));
+        assert_eq!(
+            rdf12(vec![triple(outer, "q", iri("v"), vec![])]),
+            [
+                format!("_:b1 {REIFIES} <<( <http://ex/a> <http://ex/b> <http://ex/c> )>> ."),
+                format!("_:b2 {REIFIES} <<( _:b1 <http://ex/p> <http://ex/o> )>> ."),
+                "_:b2 <http://ex/q> <http://ex/v> .".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn annotations_reifier_then_blocks() {
+        // `:s :p :o ~:r {| :q :v |} {| :q2 :v2 |}`: the first block describes
+        // :r, the second a fresh reifier
+        let block = |p: &str, o: &str| Annotation::Block(vec![sp(PO::new(iri(p), vec![iri(o)]))]);
+        let annotations = vec![
+            Annotation::Reifier(Reifier { id: Some(iri("r")) }),
+            block("q", "v"),
+            block("q2", "v2"),
+        ];
+        let t = "<<( <http://ex/s> <http://ex/p> <http://ex/o> )>>";
+        assert_eq!(
+            rdf12(vec![triple(iri("s"), "p", iri("o"), annotations)]),
+            [
+                "<http://ex/s> <http://ex/p> <http://ex/o> .".to_string(),
+                format!("<http://ex/r> {REIFIES} {t} ."),
+                "<http://ex/r> <http://ex/q> <http://ex/v> .".to_string(),
+                format!("_:b1 {REIFIES} {t} ."),
+                "_:b1 <http://ex/q2> <http://ex/v2> .".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn directional_language_strings() {
+        let r = resolve(
+            &Turtle::new(
+                None,
+                Vec::new(),
+                vec![triple(
+                    iri("s"),
+                    "p",
+                    string("x", Some("AR"), Some(Direction::Rtl)),
+                    vec![],
+                )],
+            ),
+            None,
+        );
+        assert_eq!(r.quads[0].object.to_string(), r#""x"@ar--rtl"#);
+        assert!(
+            matches!(&r.quads[0].object, Node::Literal { datatype, .. } if datatype.ends_with("#dirLangString"))
+        );
+    }
+
+    #[test]
+    fn triple_term_with_a_literal_subject_is_an_error() {
+        let bad = sp(Term::TripleTerm(Box::new(tt(
+            string("x", None, None),
+            "b",
+            iri("c"),
+        ))));
+        let r = resolve(
+            &Turtle::new(None, Vec::new(), vec![triple(iri("s"), "p", bad, vec![])]),
+            None,
+        );
+        assert_eq!(r.errors[0].kind, ErrorKind::InvalidTripleTerm);
+        assert!(r.quads.is_empty());
     }
 }

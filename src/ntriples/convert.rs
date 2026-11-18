@@ -60,6 +60,7 @@ fn convert_triple(node: &Node) -> Triple {
     let po_range = predicate.span().start..object.span().end;
     let po = Spanned(
         PO {
+            annotations: Vec::new(),
             predicate,
             object: vec![object],
         },
@@ -142,6 +143,7 @@ fn convert_literal(node: &Node) -> Literal {
         child(node, SyntaxKind::Iriref).map(|n| Spanned(iri_from_iriref_node(&n), text_range(&n)));
 
     Literal::RDF(RDFLiteral {
+        direction: None,
         value,
         quote_style: StringStyle::Double,
         lang,

@@ -227,6 +227,7 @@ impl ConvertState {
                 subject: Spanned(subject.0, subject.1),
                 po: vec![Spanned(
                     PO {
+                        annotations: Vec::new(),
                         predicate: Spanned(predicate.0, predicate.1),
                         object: vec![Spanned(object.0, object.1)],
                     },
@@ -971,6 +972,7 @@ fn process_node<'a>(
                     subject: Spanned(subject.clone(), id_val_span.clone()),
                     po: vec![Spanned(
                         PO {
+                            annotations: Vec::new(),
                             predicate: Spanned(
                                 Term::NamedNode(named_from_source(
                                     active,
@@ -1130,6 +1132,7 @@ async fn value_to_rdf<'a>(
                         let ty_owned = ty.to_string();
                         if let Some(ty_iri) = expand_iri(active, &ty_owned, true, false) {
                             return Some(Term::Literal(Literal::RDF(RDFLiteral {
+                                direction: None,
                                 value: s.clone(),
                                 quote_style: StringStyle::Double,
                                 lang: None,
@@ -1146,6 +1149,7 @@ async fn value_to_rdf<'a>(
                 }
                 if let Some(lang) = &def.language {
                     return Some(Term::Literal(Literal::RDF(RDFLiteral {
+                        direction: None,
                         value: s.clone(),
                         quote_style: StringStyle::Double,
                         lang: Some(Spanned(lang.clone(), 0..0)),
@@ -1163,6 +1167,7 @@ async fn value_to_rdf<'a>(
                 None
             };
             Some(Term::Literal(Literal::RDF(RDFLiteral {
+                direction: None,
                 value: s.clone(),
                 quote_style: StringStyle::Double,
                 lang,
@@ -1179,6 +1184,7 @@ async fn value_to_rdf<'a>(
                 XSD_INTEGER
             };
             Some(Term::Literal(Literal::RDF(RDFLiteral {
+                direction: None,
                 value: n.clone(),
                 quote_style: StringStyle::Double,
                 lang: None,
@@ -1189,6 +1195,7 @@ async fn value_to_rdf<'a>(
         }
 
         JsonLdVal::Bool(b) => Some(Term::Literal(Literal::RDF(RDFLiteral {
+            direction: None,
             value: if *b { "true" } else { "false" }.to_string(),
             quote_style: StringStyle::Double,
             lang: None,
@@ -1232,6 +1239,7 @@ fn process_value_object(
     // @type: @json or complex value → rdf:JSON literal
     if type_str == Some("@json") || is_complex {
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
+            direction: None,
             value: value_str,
             quote_style: StringStyle::Double,
             lang: None,
@@ -1251,6 +1259,7 @@ fn process_value_object(
     });
     if let Some((lt, lt_span)) = lang_tag {
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
+            direction: None,
             value: value_str,
             quote_style: StringStyle::Double,
             lang: Some(Spanned(lt.to_string(), lt_span)),
@@ -1269,6 +1278,7 @@ fn process_value_object(
             Spanned(named_from_source(active, ty, iri, start, true), ty_span)
         });
         return Some(Term::Literal(Literal::RDF(RDFLiteral {
+            direction: None,
             value: value_str,
             quote_style: StringStyle::Double,
             lang: None,
@@ -1298,6 +1308,7 @@ fn process_value_object(
     };
 
     Some(Term::Literal(Literal::RDF(RDFLiteral {
+        direction: None,
         value: value_str,
         quote_style: StringStyle::Double,
         lang: inferred_lang.map(|l| Spanned(l, 0..0)),

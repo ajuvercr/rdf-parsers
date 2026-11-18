@@ -44,6 +44,9 @@ pub struct RDFLiteral {
     pub quote_style: StringStyle,
     /// Language tag (without the leading `@`), spanned over the `@lang` token.
     pub lang: Option<Spanned<String>>,
+    /// Base direction of a directional language-tagged string (RDF 1.2,
+    /// `"..."@en--ltr`).  Only set together with `lang`.
+    pub direction: Option<Direction>,
     /// Datatype IRI, spanned over the `^^<iri>` datatype term.
     pub ty: Option<Spanned<NamedNode>>,
     // Span of tokens
@@ -160,7 +163,99 @@ pub enum Term {
     NamedNode(NamedNode),
     Collection(Vec<Spanned<Term>>),
     Variable(Variable),
+    /// An RDF 1.2 triple term, `<<( s p o )>>`: the triple itself as a
+    /// term.  It does not assert the triple.
+    TripleTerm(Box<TripleTerm>),
+    /// An RDF 1.2 reified triple, `<< s p o ~r >>`: denotes its reifier `r`
+    /// (a fresh blank node when there is none) and states
+    /// `r rdf:reifies <<( s p o )>>`.  It does not assert the triple either.
+    Reified(Box<ReifiedTriple>),
     Invalid,
+}
+
+/// A triple used as a term (see `Term::TripleTerm` and `Term::Reified`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TripleTerm {
+    pub subject: Spanned<Term>,
+    pub predicate: Spanned<Term>,
+    pub object: Spanned<Term>,
+}
+
+/// `<< s p o ~r >>`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ReifiedTriple {
+    pub triple: TripleTerm,
+    pub reifier: Option<Spanned<Reifier>>,
+}
+
+/// `~ r`, or a bare `~` (`id: None`): a fresh blank node.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Reifier {
+    pub id: Option<Spanned<Term>>,
+}
+
+/// What follows an object in RDF 1.2: `:s :p :o ~:r {| :q :v |}`.  A
+/// reifier names a reification of the triple; a block describes the
+/// reifier before it, or a fresh one when there is none.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Annotation {
+    Reifier(Reifier),
+    Block(Vec<Spanned<PO>>),
+}
+
+/// Base direction of a language-tagged string (RDF 1.2).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Direction {
+    Ltr,
+    Rtl,
+}
+
+impl Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Direction::Ltr => "ltr",
+            Direction::Rtl => "rtl",
+        })
+    }
+}
+
+impl Display for TripleTerm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {} {}",
+            self.subject.value(),
+            self.predicate.value(),
+            self.object.value()
+        )
+    }
+}
+
+impl Display for Reifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.id {
+            Some(id) => write!(f, "~ {}", id.value()),
+            None => f.write_str("~"),
+        }
+    }
+}
+
+impl Display for Annotation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Annotation::Reifier(r) => r.fmt(f),
+            Annotation::Block(pos) => {
+                f.write_str("{| ")?;
+                for (i, po) in pos.iter().enumerate() {
+                    if i > 0 {
+                        f.write_str(" ; ")?;
+                    }
+                    po.value().fmt(f)?;
+                }
+                f.write_str(" |}")
+            }
+        }
+    }
 }
 
 impl Term {
@@ -179,6 +274,7 @@ impl Term {
             Term::NamedNode(_) => true,
             Term::Invalid => true,
             Term::Collection(_) => true,
+            Term::Reified(_) => true,
             _ => false,
         }
     }
@@ -215,6 +311,8 @@ impl Term {
             Term::Collection(_) => "collection",
             Term::Invalid => "invalid",
             Term::Variable(_) => "variable",
+            Term::TripleTerm(_) => "triple term",
+            Term::Reified(_) => "reified triple",
         }
     }
 }
@@ -235,6 +333,11 @@ impl Display for Term {
             }
             Term::Invalid => write!(f, "invalid"),
             Term::Variable(x) => write!(f, "?{}", x.0),
+            Term::TripleTerm(t) => write!(f, "<<( {} )>>", t),
+            Term::Reified(r) => match &r.reifier {
+                Some(reifier) => write!(f, "<< {} {} >>", r.triple, reifier.value()),
+                None => write!(f, "<< {} >>", r.triple),
+            },
         }
     }
 }
@@ -279,19 +382,36 @@ impl Display for Triple {
 pub struct PO {
     pub predicate: Spanned<Term>,
     pub object: Vec<Spanned<Term>>,
+    /// RDF 1.2 annotations of each object, in order: `annotations[i]`
+    /// belongs to `object[i]`.  Empty when no object has any.
+    pub annotations: Vec<Vec<Spanned<Annotation>>>,
+}
+
+impl PO {
+    pub fn new(predicate: Spanned<Term>, object: Vec<Spanned<Term>>) -> Self {
+        Self {
+            predicate,
+            object,
+            annotations: Vec::new(),
+        }
+    }
+
+    /// The annotations of object `i` (empty if it has none).
+    pub fn annotations_of(&self, i: usize) -> &[Spanned<Annotation>] {
+        self.annotations.get(i).map_or(&[], |a| &a[..])
+    }
 }
 
 impl Display for PO {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let Some(o) = self.object.first() {
-            write!(f, "{} {}", self.predicate.value(), o.value())?;
-        } else {
-            write!(f, "{} undefined", self.predicate.value())?;
+        write!(f, "{}", self.predicate.value())?;
+        if self.object.is_empty() {
+            write!(f, " undefined")?;
         }
-
-        if self.object.len() > 1 {
-            for po in &self.object[1..] {
-                write!(f, ", {}", po.value())?;
+        for (i, o) in self.object.iter().enumerate() {
+            write!(f, "{} {}", if i == 0 { "" } else { "," }, o.value())?;
+            for a in self.annotations_of(i) {
+                write!(f, " {}", a.value())?;
             }
         }
 
@@ -339,6 +459,8 @@ pub struct Turtle {
     /// to what follows it, so a document that changes its base needs all of
     /// them (see `resolve::resolve`).
     pub bases: Vec<Spanned<Base>>,
+    /// `VERSION` / `@version` directives (RDF 1.2), with the version string.
+    pub versions: Vec<Spanned<String>>,
     pub prefixes: Vec<Spanned<TurtlePrefix>>,
     pub triples: Vec<Spanned<Triple>>,
     /// Document base URL for prefix/IRI resolution. Set by the language server
@@ -361,6 +483,7 @@ impl Turtle {
             base,
             prefixes,
             triples,
+            versions: Vec::new(),
             set_base: None,
         }
     }
@@ -376,6 +499,7 @@ impl Turtle {
             bases,
             prefixes,
             triples,
+            versions: Vec::new(),
             set_base: None,
         }
     }

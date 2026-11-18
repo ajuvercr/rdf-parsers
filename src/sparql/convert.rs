@@ -207,6 +207,7 @@ fn convert_property_list_not_empty(node: &Node) -> Vec<Spanned<PO>> {
             let objects = convert_object_list(&ol);
             Spanned(
                 PO {
+                    annotations: Vec::new(),
                     predicate: Spanned(predicate, pred_range),
                     object: objects,
                 },
@@ -241,6 +242,7 @@ fn convert_property_list_path_not_empty(node: &Node) -> Vec<Spanned<PO>> {
                     let objects = convert_object_list_path(&child_node);
                     result.push(Spanned(
                         PO {
+                            annotations: Vec::new(),
                             predicate: Spanned(pred, pred_range),
                             object: objects,
                         },
@@ -255,6 +257,7 @@ fn convert_property_list_path_not_empty(node: &Node) -> Vec<Spanned<PO>> {
                     let objects = convert_object_list(&child_node);
                     result.push(Spanned(
                         PO {
+                            annotations: Vec::new(),
                             predicate: Spanned(pred, pred_range),
                             object: objects,
                         },
@@ -588,6 +591,7 @@ fn convert_rdf_literal(node: &Node) -> RDFLiteral {
     let ty = child(node, SyntaxKind::Iri).map(|n| Spanned(convert_iri(&n), text_range(&n)));
 
     RDFLiteral {
+        direction: None,
         value,
         quote_style,
         lang,

@@ -175,6 +175,7 @@ fn convert_predicate_object_list(node: &Node) -> Vec<Spanned<PO>> {
             let objects = convert_object_list(&ol);
             Spanned(
                 PO {
+                    annotations: Vec::new(),
                     predicate: Spanned(predicate, pred_range),
                     object: objects,
                 },
@@ -432,6 +433,7 @@ fn convert_rdf_literal(node: &Node) -> RDFLiteral {
     let ty = child(node, SyntaxKind::Iri).map(|n| Spanned(convert_iri(&n), text_range(&n)));
 
     RDFLiteral {
+        direction: None,
         value,
         quote_style,
         lang,
