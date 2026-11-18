@@ -1,6 +1,7 @@
 use std::{
     collections::{BinaryHeap, HashMap},
     fmt::Debug,
+    time::Instant,
 };
 
 use crate::{
@@ -124,6 +125,10 @@ pub const DEFAULT_DOMINANCE_WINDOW: usize = 12;
 /// bounds the search at O(tokens × budget) whatever the grammar does.
 pub const DEFAULT_POPS_PER_POSITION: u32 = 4096;
 
+/// Extra cost of matching a token in a role other than the one it had in
+/// the previous parse, at the same bracket depth.
+const ROLE_CONFLICT_COST: isize = 50;
+
 /// Number of consecutive error operations that triggers sync-point scanning.
 /// The paper's (R3S-n) is always available; we gate it at 2 to avoid
 /// scanning overhead on isolated single-token errors while still activating
@@ -132,6 +137,38 @@ const SYNC_THRESHOLD: u16 = 2;
 
 /// Maximum number of tokens to scan ahead when looking for a sync point.
 const MAX_SYNC_SCAN: usize = 50;
+
+/// `(open_before, close_from)` for `AStar`: unmatched real brackets, counted
+/// before / from each token position.
+fn unmatched_brackets<K: TokenTrait>(tokens: &[FatToken<K>]) -> (Vec<u32>, Vec<u32>) {
+    let n = tokens.len();
+    let mut stack: Vec<usize> = Vec::new();
+    let mut unmatched_close = vec![false; n];
+    for (i, t) in tokens.iter().enumerate() {
+        match t.kind.bracket_delta() {
+            d if d > 0 => stack.push(i),
+            d if d < 0 => {
+                if stack.pop().is_none() {
+                    unmatched_close[i] = true;
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut unmatched_open = vec![false; n];
+    for i in stack {
+        unmatched_open[i] = true;
+    }
+    let mut open_before = vec![0u32; n + 1];
+    for i in 0..n {
+        open_before[i + 1] = open_before[i] + unmatched_open[i] as u32;
+    }
+    let mut close_from = vec![0u32; n + 1];
+    for i in (0..n).rev() {
+        close_from[i] = close_from[i + 1] + unmatched_close[i] as u32;
+    }
+    (open_before, close_from)
+}
 
 pub struct AStar<'a, R: ParserTrait> {
     /// Maps each state key to the best (lowest) cost seen so far (queued or
@@ -150,6 +187,14 @@ pub struct AStar<'a, R: ParserTrait> {
     /// therefore admissible.
     /// In `Fast` mode this is always empty; 0 is used directly.
     heuristic: Vec<isize>,
+    /// Bracket balance of the text itself (`bracket_delta` of the real
+    /// tokens, matched with a stack): `open_before[i]` counts openers before
+    /// token `i` that no real closer matches, `close_from[i]` counts closers
+    /// at or after `i` that no real opener matches.  A depth shift between
+    /// edits is only cheap when the text backs it (see `expect_with_fallback`).
+    /// Empty in `Fast` mode.
+    open_before: Vec<u32>,
+    close_from: Vec<u32>,
     /// Number of elements popped from the heap so far.
     iterations: usize,
     /// Maximum number of heap pops before giving up.  See `DEFAULT_MAX_ITERATIONS`.
@@ -159,6 +204,13 @@ pub struct AStar<'a, R: ParserTrait> {
     /// times out before finding a fully-unwound parse (depth == 1).
     /// Never populated in `Fast` mode.
     best_at_eof: Option<(isize, List<Step<R::Kind>>, usize, List<Mark<R>>)>,
+    /// The path that got furthest into the input, as `(position, cost,
+    /// steps, stack depth, marks)`: when the search is stopped before any path
+    /// reaches the end, this one is finished by deleting the rest, so the
+    /// tokens before it keep their roles.  Never populated in `Fast` mode.
+    furthest: Option<(usize, isize, List<Step<R::Kind>>, usize, List<Mark<R>>)>,
+    /// Wall-clock limit for the fault-tolerant search (see `ParseOptions`).
+    pub(crate) deadline: Option<Instant>,
     /// Whether to perform fault-tolerant error recovery.
     mode: ParseMode,
     /// Maximum consecutive error operations before an element is dropped.
@@ -210,7 +262,10 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             // Maybe off by one
             heuristic[i] = heuristic[i + 1] + offset;
         }
+        let (open_before, close_from) = unmatched_brackets(tokens);
         Self {
+            open_before,
+            close_from,
             tokens,
             done: HashMap::default(),
             todo: BinaryHeap::new(),
@@ -219,6 +274,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             iterations: 0,
             max_iterations,
             best_at_eof: None,
+            furthest: None,
+            deadline: None,
             mode: ParseMode::FaultTolerant,
             max_repair_span: DEFAULT_MAX_REPAIR_SPAN,
             frontier: Vec::new(),
@@ -246,9 +303,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             todo: BinaryHeap::new(),
             bias: IncrementalBias { strength: 0 },
             heuristic: Vec::new(),
+            open_before: Vec::new(),
+            close_from: Vec::new(),
             iterations: 0,
             max_iterations: usize::MAX,
             best_at_eof: None,
+            furthest: None,
+            deadline: None,
             mode: ParseMode::Fast,
             max_repair_span: u16::MAX,
             frontier: Vec::new(),
@@ -344,6 +405,11 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 if self.try_splice(&e) {
                     continue;
                 }
+                if self.mode == ParseMode::FaultTolerant
+                    && self.furthest.as_ref().is_none_or(|f| pos > f.0 || (pos == f.0 && e.cost < f.1))
+                {
+                    self.furthest = Some((pos, e.cost, e.list.clone(), e.parent.len(), e.marks.clone()));
+                }
 
                 if e.state.1 == self.tokens.len() {
                     let depth = e.parent.len();
@@ -383,10 +449,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     }
                 }
 
-                // Enforce the iteration budget before expanding this element.
-                // In Fast mode max_iterations is usize::MAX, so this never fires.
-                if self.iterations >= self.max_iterations {
-                    eprintln!("Max iterations reached");
+                // Enforce the iteration and time budgets before expanding this
+                // element.  In Fast mode neither is set, so this never fires.
+                if self.iterations >= self.max_iterations
+                    || (self.iterations % 256 == 0
+                        && self.deadline.is_some_and(|d| Instant::now() >= d))
+                {
                     break;
                 }
 
@@ -427,8 +495,26 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 spliced: Some(s.checkpoint),
             });
         }
-        self.best_at_eof.take().map(|(cost, list, depth, marks)| {
-            let mut list = list;
+        if let Some((cost, mut list, depth, marks)) = self.best_at_eof.take() {
+            for _ in 0..depth.saturating_sub(1) {
+                list = list.prepend(Step::end());
+            }
+            return Some(Found {
+                list,
+                marks,
+                cost,
+                spliced: None,
+            });
+        }
+        // Stopped before any path reached the end of the input: finish the
+        // one that got furthest by deleting what is left.
+        self.furthest.take().map(|(pos, mut cost, mut list, depth, marks)| {
+            for t in &self.tokens[pos..] {
+                if !t.kind.skips() {
+                    list = list.prepend(Step::Delete);
+                    cost += t.kind.deletion_cost();
+                }
+            }
             for _ in 0..depth.saturating_sub(1) {
                 list = list.prepend(Step::end());
             }
@@ -744,7 +830,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     clean: element.clean,
                                     marks: element.marks.clone(),
                                 });
-                                (insert_error, 50)
+                                (insert_error, ROLE_CONFLICT_COST)
                             } else {
                                 // New or different depth conflict. Create two branches:
                                 // (a) adopt this depth delta (one-time cost), and
@@ -779,7 +865,24 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     .unwrap_or(element.assumed_depth_delta);
                                 let delta_change =
                                     (new_delta as i16 - element.assumed_depth_delta as i16).abs();
-                                let adoption_cost = delta_change as isize * token.max_error_value();
+                                // A shift the text's own brackets do not back
+                                // (an opener nothing closes, a closer nothing
+                                // opens) is no move of a block between
+                                // levels, just an unfinished bracket: it
+                                // costs as much as a role conflict, so the
+                                // search closes (or opens) the bracket instead
+                                // of re-reading the tokens after it.
+                                let deeper = new_delta > element.assumed_depth_delta;
+                                let backed = if deeper {
+                                    self.open_before.get(idx).is_none_or(|&n| n == 0)
+                                } else {
+                                    self.close_from.get(idx).is_none_or(|&n| n == 0)
+                                };
+                                let adoption_cost = if backed || depth_delta.is_none() {
+                                    delta_change as isize * token.max_error_value()
+                                } else {
+                                    ROLE_CONFLICT_COST
+                                };
                                 (insert_error, adoption_cost)
                             }
                         }
@@ -1263,7 +1366,7 @@ pub fn a_star<R: ParserTrait>(
     bias: IncrementalBias,
     max_iterations: usize,
 ) -> List<Step<R::Kind>> {
-    search(root, tokens, ParseMode::FaultTolerant, bias, max_iterations, None)
+    search(root, tokens, ParseMode::FaultTolerant, bias, max_iterations, None, None)
         .map_or_else(List::default, |f| f.list)
 }
 
@@ -1273,7 +1376,7 @@ pub fn a_star_fast<R: ParserTrait>(
     root: R,
     tokens: &[FatToken<R::Kind>],
 ) -> Option<List<Step<R::Kind>>> {
-    search(root, tokens, ParseMode::Fast, IncrementalBias { strength: 0 }, usize::MAX, None)
+    search(root, tokens, ParseMode::Fast, IncrementalBias { strength: 0 }, usize::MAX, None, None)
         .map(|f| f.list)
 }
 
@@ -1284,12 +1387,16 @@ pub(crate) fn search<'a, R: ParserTrait>(
     bias: IncrementalBias,
     max_iterations: usize,
     reuse: Option<&'a Reuse<'a>>,
+    deadline: Option<Instant>,
 ) -> Option<Found<R>> {
     let mut state = match mode {
         ParseMode::FaultTolerant => AStar::new(tokens, bias, max_iterations),
         ParseMode::Fast => AStar::new_fast(tokens),
     };
     state.reuse = reuse;
+    if mode == ParseMode::FaultTolerant {
+        state.deadline = deadline;
+    }
     let out = state.consume(root);
     LAST_ITERATIONS.with(|c| c.set(state.iterations));
     out

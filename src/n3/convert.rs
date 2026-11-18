@@ -25,7 +25,7 @@ fn terminal_text(node: &Node) -> String {
 }
 
 pub fn convert(root: &Node) -> Turtle {
-    let mut base = None;
+    let mut bases = Vec::new();
     let mut prefixes = Vec::new();
     let mut triples = Vec::new();
 
@@ -37,7 +37,7 @@ pub fn convert(root: &Node) -> Turtle {
             SyntaxKind::N3Statement => {
                 if let Some(dir) = child(&child_node, SyntaxKind::N3Directive) {
                     if let Some(b) = child(&dir, SyntaxKind::Base) {
-                        base = Some(Spanned(convert_base(&b), text_range(&b)));
+                        bases.push(Spanned(convert_base(&b), text_range(&b)));
                     } else if let Some(p) = child(&dir, SyntaxKind::PrefixId) {
                         prefixes.push(Spanned(convert_prefix(&p), text_range(&p)));
                     }
@@ -55,7 +55,7 @@ pub fn convert(root: &Node) -> Turtle {
             }
             SyntaxKind::SparqlDirective => {
                 if let Some(b) = child(&child_node, SyntaxKind::SparqlBase) {
-                    base = Some(Spanned(convert_base(&b), text_range(&b)));
+                    bases.push(Spanned(convert_base(&b), text_range(&b)));
                 } else if let Some(p) = child(&child_node, SyntaxKind::SparqlPrefix) {
                     prefixes.push(Spanned(convert_prefix(&p), text_range(&p)));
                 }
@@ -64,7 +64,7 @@ pub fn convert(root: &Node) -> Turtle {
         }
     }
 
-    Turtle::new(base, prefixes, triples)
+    Turtle::with_bases(bases, prefixes, triples)
 }
 
 /// Recursively find all Formula descendants and collect Triples within them.

@@ -333,7 +333,12 @@ pub enum TurtleSimpleError {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Turtle {
+    /// The last `@base` / `BASE` directive.  See `bases` for all of them.
     pub base: Option<Spanned<Base>>,
+    /// Every `@base` / `BASE` directive, in document order.  A base applies
+    /// to what follows it, so a document that changes its base needs all of
+    /// them (see `resolve::resolve`).
+    pub bases: Vec<Spanned<Base>>,
     pub prefixes: Vec<Spanned<TurtlePrefix>>,
     pub triples: Vec<Spanned<Triple>>,
     /// Document base URL for prefix/IRI resolution. Set by the language server
@@ -352,7 +357,23 @@ impl Turtle {
         triples: Vec<Spanned<Triple>>,
     ) -> Self {
         Self {
+            bases: base.iter().cloned().collect(),
             base,
+            prefixes,
+            triples,
+            set_base: None,
+        }
+    }
+
+    /// A document with every base directive, in document order.
+    pub fn with_bases(
+        bases: Vec<Spanned<Base>>,
+        prefixes: Vec<Spanned<TurtlePrefix>>,
+        triples: Vec<Spanned<Triple>>,
+    ) -> Self {
+        Self {
+            base: bases.last().cloned(),
+            bases,
             prefixes,
             triples,
             set_base: None,

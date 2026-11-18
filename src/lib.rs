@@ -22,6 +22,7 @@ pub mod jsonld;
 pub mod n3;
 pub mod ntriples;
 mod parser;
+pub mod resolve;
 pub mod sparql;
 pub mod trig;
 pub mod turtle;
@@ -300,6 +301,29 @@ impl Default for IncrementalBias {
     }
 }
 
+/// Search limits and bias for [`parse_incremental_with`].
+#[derive(Debug, Clone, Copy)]
+pub struct ParseOptions {
+    pub bias: IncrementalBias,
+    /// Wall-clock budget for the fault-tolerant search.  When it runs out the
+    /// search stops and returns the best parse it has: one that reached the
+    /// end of the input if any did, otherwise the path that got furthest,
+    /// with the remaining tokens as errors.  `None`: no time limit.
+    pub time_budget: Option<std::time::Duration>,
+    /// Heap pops before the fault-tolerant search stops the same way.
+    pub max_iterations: usize,
+}
+
+impl Default for ParseOptions {
+    fn default() -> Self {
+        Self {
+            bias: IncrementalBias::default(),
+            time_budget: None,
+            max_iterations: a_star::DEFAULT_MAX_ITERATIONS,
+        }
+    }
+}
+
 /// Re-parses `text`, reusing what it can of the previous parse `prev`.
 ///
 /// The parts of the document before and after the edit are not parsed again:
@@ -322,6 +346,22 @@ where
     T::Kind: Logos<'a, Source = str>,
     <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
 {
+    parse_incremental_with(root, text, prev, ParseOptions { bias, ..Default::default() })
+}
+
+/// [`parse_incremental`] with search limits: see [`ParseOptions`].
+pub fn parse_incremental_with<'a, T: a_star::ParserTrait + Clone + 'static>(
+    root: T,
+    text: &'a str,
+    prev: Option<&PrevParseInfo>,
+    options: ParseOptions,
+) -> (Parse, PrevParseInfo)
+where
+    T::Kind: Logos<'a, Source = str>,
+    <<T as a_star::ParserTrait>::Kind as Logos<'a>>::Extras: Default,
+{
+    let deadline = options.time_budget.map(|b| std::time::Instant::now() + b);
+    let bias = options.bias;
     let mut tokens = tokenize::<T::Kind>(text);
     let old_texts: Vec<&str> = prev
         .map(|p| p.tokens.iter().map(|t| t.text.as_str()).collect())
@@ -337,6 +377,7 @@ where
         IncrementalBias { strength: 0 },
         usize::MAX,
         reuse.as_ref(),
+        None,
     );
     let (list, memo) = match found {
         Some(found) => found.finish(reuse.as_ref()),
@@ -354,8 +395,9 @@ where
                 &tokens,
                 ParseMode::FaultTolerant,
                 bias,
-                a_star::DEFAULT_MAX_ITERATIONS,
+                options.max_iterations,
                 reuse.as_ref(),
+                deadline,
             )
             .map(|found| found.finish(reuse.as_ref()))
             .unwrap_or_default()

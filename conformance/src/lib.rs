@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use rdf_parsers::model::*;
-use rdf_parsers::{parse as rdf_parse, parse_fast, tokenize, Spanned};
+use rdf_parsers::{parse as rdf_parse, parse_fast, tokenize};
 use rdf_parsers::{ntriples, sparql, trig, turtle};
 
 fn has_lex_error_turtle(src: &str) -> bool {
@@ -22,38 +22,56 @@ fn has_lex_error_sparql(src: &str) -> bool {
         .any(|t| t.kind == sparql::parser::SyntaxKind::Error)
 }
 
+// ── RDF via the library's resolver ──────────────────────────────────────────
+
+/// The quads of a converted document, or the resolver's errors (undefined
+/// prefixes, invalid escapes, invalid IRIs).
+fn resolved_quads(doc: &Turtle, base: &str) -> Result<Vec<NQuad>, Vec<rdf_parsers::resolve::Error>> {
+    use rdf_parsers::resolve::{Node, resolve};
+    let r = resolve(doc, Some(base));
+    if !r.errors.is_empty() {
+        return Err(r.errors);
+    }
+    let term = |n: Node| match n {
+        Node::Iri(i) => NTerm::Iri(i),
+        Node::Blank(b) => NTerm::BlankNode(b),
+        Node::Literal { lexical, datatype, language } => NTerm::Literal(lexical, language, Some(datatype)),
+    };
+    Ok(r.quads
+        .into_iter()
+        .map(|q| (term(q.subject), term(q.predicate), term(q.object), q.graph.map(term)))
+        .collect())
+}
+
+fn turtle_doc(src: &str) -> Option<Turtle> {
+    let (parse, _) = parse_fast(turtle::parser::Rule::new(turtle::parser::SyntaxKind::TurtleDoc), src)?;
+    Some(turtle::convert::convert(&parse.syntax::<turtle::parser::Lang>()))
+}
+
+fn trig_doc(src: &str) -> Option<Turtle> {
+    let (parse, _) = parse_fast(trig::parser::Rule::new(trig::parser::SyntaxKind::TrigDoc), src)?;
+    Some(trig::convert::convert(&parse.syntax::<trig::parser::Lang>()))
+}
+
+/// Valid RDF: lexes, parses, and resolves without errors.
+fn turtle_is_valid(src: &str) -> bool {
+    !has_lex_error_turtle(src) && turtle_doc(src).is_some_and(|d| resolved_quads(&d, "http://example/base/").is_ok())
+}
+
+fn trig_is_valid(src: &str) -> bool {
+    !has_lex_error_trig(src) && trig_doc(src).is_some_and(|d| resolved_quads(&d, "http://example/base/").is_ok())
+}
+
 // ── public test runner entry points ─────────────────────────────────────────
 
 pub fn run_turtle_positive_syntax(path: &str) {
-    let src = std::fs::read_to_string(path)
-        .unwrap_or_else(|_| panic!("cannot read {}", path));
-    let no_lex_errors = !has_lex_error_turtle(&src);
-    let parse_ok = parse_fast(
-        turtle::parser::Rule::new(turtle::parser::SyntaxKind::TurtleDoc),
-        &src,
-    )
-    .is_some();
-    assert!(
-        no_lex_errors && parse_ok,
-        "expected valid Turtle syntax in {}",
-        path
-    );
+    let src = std::fs::read_to_string(path).unwrap_or_else(|_| panic!("cannot read {}", path));
+    assert!(turtle_is_valid(&src), "expected valid Turtle in {}", path);
 }
 
 pub fn run_turtle_negative_syntax(path: &str) {
-    let src = std::fs::read_to_string(path)
-        .unwrap_or_else(|_| panic!("cannot read {}", path));
-    let has_lex_err = has_lex_error_turtle(&src);
-    let parse_fails = parse_fast(
-        turtle::parser::Rule::new(turtle::parser::SyntaxKind::TurtleDoc),
-        &src,
-    )
-    .is_none();
-    assert!(
-        has_lex_err || parse_fails,
-        "expected invalid Turtle syntax in {}",
-        path
-    );
+    let src = std::fs::read_to_string(path).unwrap_or_else(|_| panic!("cannot read {}", path));
+    assert!(!turtle_is_valid(&src), "expected invalid Turtle in {}", path);
 }
 
 pub fn run_turtle_eval(action: &str, result: &str, base_iri: &str) {
@@ -77,8 +95,8 @@ pub fn run_turtle_eval(action: &str, result: &str, base_iri: &str) {
     let root = parse.syntax::<turtle::parser::Lang>();
     let doc = turtle::convert::convert(&root);
 
-    let mut norm = Normalizer::new(base_iri, &doc);
-    let got = norm.normalize_turtle(&doc);
+    let got = resolved_quads(&doc, base_iri)
+        .unwrap_or_else(|e| panic!("resolve errors in {}: {:?}", action, e));
     let expected = parse_nt_ref(result);
 
     assert!(
@@ -93,35 +111,13 @@ pub fn run_turtle_eval(action: &str, result: &str, base_iri: &str) {
 }
 
 pub fn run_trig_positive_syntax(path: &str) {
-    let src = std::fs::read_to_string(path)
-        .unwrap_or_else(|_| panic!("cannot read {}", path));
-    let no_lex_errors = !has_lex_error_trig(&src);
-    let parse_ok = parse_fast(
-        trig::parser::Rule::new(trig::parser::SyntaxKind::TrigDoc),
-        &src,
-    )
-    .is_some();
-    assert!(
-        no_lex_errors && parse_ok,
-        "expected valid TriG syntax in {}",
-        path
-    );
+    let src = std::fs::read_to_string(path).unwrap_or_else(|_| panic!("cannot read {}", path));
+    assert!(trig_is_valid(&src), "expected valid TriG in {}", path);
 }
 
 pub fn run_trig_negative_syntax(path: &str) {
-    let src = std::fs::read_to_string(path)
-        .unwrap_or_else(|_| panic!("cannot read {}", path));
-    let has_lex_err = has_lex_error_trig(&src);
-    let parse_fails = parse_fast(
-        trig::parser::Rule::new(trig::parser::SyntaxKind::TrigDoc),
-        &src,
-    )
-    .is_none();
-    assert!(
-        has_lex_err || parse_fails,
-        "expected invalid TriG syntax in {}",
-        path
-    );
+    let src = std::fs::read_to_string(path).unwrap_or_else(|_| panic!("cannot read {}", path));
+    assert!(!trig_is_valid(&src), "expected invalid TriG in {}", path);
 }
 
 pub fn run_trig_eval(action: &str, result: &str, base_iri: &str) {
@@ -145,8 +141,8 @@ pub fn run_trig_eval(action: &str, result: &str, base_iri: &str) {
     let root = parse.syntax::<trig::parser::Lang>();
     let doc = trig::convert::convert(&root);
 
-    let mut norm = Normalizer::new(base_iri, &doc);
-    let got = norm.normalize_turtle(&doc);
+    let got = resolved_quads(&doc, base_iri)
+        .unwrap_or_else(|e| panic!("resolve errors in {}: {:?}", action, e));
     let expected = parse_nq_ref(result);
 
     assert!(
@@ -220,212 +216,6 @@ pub enum NTerm {
 }
 
 pub type NQuad = (NTerm, NTerm, NTerm, Option<NTerm>);
-
-// ── normalizer ───────────────────────────────────────────────────────────────
-
-struct Normalizer {
-    prefixes: HashMap<String, String>,
-    base: String,
-    counter: usize,
-}
-
-impl Normalizer {
-    fn new(file_base: &str, doc: &Turtle) -> Self {
-        let mut prefixes = HashMap::new();
-        for p in &doc.prefixes {
-            let p = p.value();
-            let name = p.prefix.value().clone();
-            if let NamedNode::Full(iri, _) = p.value.value() {
-                prefixes.insert(name, resolve_iri(&unescape_iri(iri), file_base));
-            }
-        }
-
-        let base = if let Some(b) = &doc.base {
-            if let NamedNode::Full(iri, _) = b.value().1.value() {
-                resolve_iri(&unescape_iri(iri), file_base)
-            } else {
-                file_base.to_string()
-            }
-        } else {
-            file_base.to_string()
-        };
-
-        Normalizer { prefixes, base, counter: 0 }
-    }
-
-    fn fresh_bnode(&mut self) -> String {
-        let n = self.counter;
-        self.counter += 1;
-        format!("__gen_{}", n)
-    }
-
-    fn expand_named_node(&self, nn: &NamedNode) -> Option<String> {
-        match nn {
-            NamedNode::Full(iri, _) => Some(resolve_iri(&unescape_iri(iri), &self.base)),
-            NamedNode::Prefixed {
-                prefix,
-                value,
-                computed,
-                ..
-            } => {
-                // A parser-supplied absolute IRI (e.g. JSON-LD context expansion)
-                // takes precedence over re-expanding against the prefix map.
-                if let Some(iri) = computed {
-                    return Some(resolve_iri(&unescape_iri(iri), &self.base));
-                }
-                let base_iri = self.prefixes.get(prefix)?;
-                Some(format!("{}{}", base_iri, unescape_local_name(value)))
-            }
-            NamedNode::A(_) => {
-                Some("http://www.w3.org/1999/02/22-rdf-syntax-ns#type".to_string())
-            }
-            NamedNode::Invalid => None,
-        }
-    }
-
-    fn expand_term(
-        &mut self,
-        term: &Term,
-        extra: &mut Vec<NQuad>,
-        graph: &Option<NTerm>,
-    ) -> Option<NTerm> {
-        match term {
-            Term::NamedNode(nn) => self.expand_named_node(nn).map(NTerm::Iri),
-            Term::BlankNode(bn) => self.expand_blank_node(bn, extra, graph),
-            Term::Collection(items) => self.expand_collection(items, extra, graph),
-            Term::Literal(lit) => self.expand_literal(lit),
-            _ => None,
-        }
-    }
-
-    fn expand_blank_node(
-        &mut self,
-        bn: &BlankNode,
-        extra: &mut Vec<NQuad>,
-        graph: &Option<NTerm>,
-    ) -> Option<NTerm> {
-        match bn {
-            BlankNode::Named(name, _) => Some(NTerm::BlankNode(name.clone())),
-            BlankNode::Unnamed(pos, _, _) => {
-                let label = self.fresh_bnode();
-                let node = NTerm::BlankNode(label);
-                for po in pos {
-                    let po = po.value();
-                    let pred = self.expand_term(po.predicate.value(), extra, graph)?;
-                    for obj in &po.object {
-                        let obj_t = self.expand_term(obj.value(), extra, graph)?;
-                        extra.push((node.clone(), pred.clone(), obj_t, graph.clone()));
-                    }
-                }
-                Some(node)
-            }
-            BlankNode::Invalid => None,
-        }
-    }
-
-    fn expand_collection(
-        &mut self,
-        items: &[Spanned<Term>],
-        extra: &mut Vec<NQuad>,
-        graph: &Option<NTerm>,
-    ) -> Option<NTerm> {
-        let rdf_first = NTerm::Iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#first".to_string());
-        let rdf_rest = NTerm::Iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest".to_string());
-        let rdf_nil = NTerm::Iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil".to_string());
-
-        if items.is_empty() {
-            return Some(rdf_nil);
-        }
-
-        let bnodes: Vec<NTerm> = (0..items.len())
-            .map(|_| NTerm::BlankNode(self.fresh_bnode()))
-            .collect();
-
-        for (i, item) in items.iter().enumerate() {
-            let item_term = self.expand_term(item.value(), extra, graph)?;
-            let next = if i + 1 < bnodes.len() {
-                bnodes[i + 1].clone()
-            } else {
-                rdf_nil.clone()
-            };
-            extra.push((bnodes[i].clone(), rdf_first.clone(), item_term, graph.clone()));
-            extra.push((bnodes[i].clone(), rdf_rest.clone(), next, graph.clone()));
-        }
-
-        Some(bnodes[0].clone())
-    }
-
-    fn expand_literal(&self, lit: &Literal) -> Option<NTerm> {
-        match lit {
-            Literal::RDF(rdf) => {
-                let val = unescape(&rdf.value);
-                let lang = rdf.lang.as_ref().map(|l| l.to_lowercase());
-                let dt = if let Some(nn) = &rdf.ty {
-                    self.expand_named_node(nn)
-                } else if lang.is_some() {
-                    Some(
-                        "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString".to_string(),
-                    )
-                } else {
-                    Some("http://www.w3.org/2001/XMLSchema#string".to_string())
-                };
-                Some(NTerm::Literal(val, lang, dt))
-            }
-            Literal::Boolean(b) => Some(NTerm::Literal(
-                b.to_string(),
-                None,
-                Some("http://www.w3.org/2001/XMLSchema#boolean".to_string()),
-            )),
-            Literal::Numeric(n) => {
-                let n = n.trim().to_string();
-                let dt = infer_xsd_type(&n).to_string();
-                Some(NTerm::Literal(n, None, Some(dt)))
-            }
-        }
-    }
-
-    fn normalize_turtle(&mut self, doc: &Turtle) -> Vec<NQuad> {
-        let mut out: Vec<NQuad> = Vec::new();
-
-        for triple_sp in &doc.triples {
-            let triple = triple_sp.value();
-
-            let graph: Option<NTerm> = triple.graph.as_ref().and_then(|g| {
-                let mut dummy: Vec<NQuad> = Vec::new();
-                self.expand_term(g.value(), &mut dummy, &None)
-            });
-
-            let mut extra: Vec<NQuad> = Vec::new();
-            let subj = match self.expand_term(triple.subject.value(), &mut extra, &graph) {
-                Some(t) => t,
-                None => continue,
-            };
-            out.extend(extra.drain(..));
-
-            for po_sp in &triple.po {
-                let po = po_sp.value();
-                let mut extra2: Vec<NQuad> = Vec::new();
-                let pred = match self.expand_term(po.predicate.value(), &mut extra2, &graph) {
-                    Some(t) => t,
-                    None => continue,
-                };
-                out.extend(extra2.drain(..));
-
-                for obj_sp in &po.object {
-                    let mut extra3: Vec<NQuad> = Vec::new();
-                    let obj = match self.expand_term(obj_sp.value(), &mut extra3, &graph) {
-                        Some(t) => t,
-                        None => continue,
-                    };
-                    out.extend(extra3.drain(..));
-                    out.push((subj.clone(), pred.clone(), obj, graph.clone()));
-                }
-            }
-        }
-
-        out
-    }
-}
 
 // ── reference file parsers ───────────────────────────────────────────────────
 
@@ -557,111 +347,6 @@ fn parse_term_at(s: &str) -> Option<(NTerm, usize)> {
 
 // ── IRI resolution (RFC 3986 §5.2.2) ─────────────────────────────────────────
 
-fn resolve_iri(r: &str, base: &str) -> String {
-    if r.is_empty() {
-        return base.to_string();
-    }
-    // Already has a scheme: first ':' must come before any '/' or '?'
-    if let Some(colon) = r.find(':') {
-        let before = &r[..colon];
-        if !before.is_empty()
-            && before.chars().all(|c| c.is_alphanumeric() || c == '+' || c == '-' || c == '.')
-        {
-            return r.to_string();
-        }
-    }
-    if r.starts_with("//") {
-        let scheme = base.find(':').map(|i| &base[..i]).unwrap_or("https");
-        return remove_dot_segments(&format!("{}:{}", scheme, r));
-    }
-    if r.starts_with('/') {
-        let origin = base_origin(base);
-        return remove_dot_segments(&format!("{}{}", origin, r));
-    }
-    if r.starts_with('?') {
-        let base_path = base.split('?').next().unwrap_or(base);
-        let base_path = base_path.split('#').next().unwrap_or(base_path);
-        return format!("{}{}", base_path, r);
-    }
-    if r.starts_with('#') {
-        let base_no_frag = base.split('#').next().unwrap_or(base);
-        return format!("{}{}", base_no_frag, r);
-    }
-    // Relative path
-    let base_dir = base_directory(base);
-    remove_dot_segments(&format!("{}{}", base_dir, r))
-}
-
-fn base_origin(base: &str) -> &str {
-    if let Some(p) = base.find("://") {
-        let after_scheme = &base[p + 3..];
-        let path_start = after_scheme
-            .find('/')
-            .map(|i| p + 3 + i)
-            .unwrap_or(base.len());
-        &base[..path_start]
-    } else {
-        ""
-    }
-}
-
-fn base_directory(base: &str) -> &str {
-    let no_qf = base.split('?').next().unwrap_or(base);
-    let no_qf = no_qf.split('#').next().unwrap_or(no_qf);
-    match no_qf.rfind('/') {
-        Some(i) => &base[..=i],
-        None => base,
-    }
-}
-
-fn remove_dot_segments(input: &str) -> String {
-    // Split into scheme+authority and path+rest
-    let (prefix, rest) = if let Some(p) = input.find("://") {
-        let after = &input[p + 3..];
-        let path_start = after.find('/').map(|i| p + 3 + i).unwrap_or(input.len());
-        (input[..path_start].to_string(), &input[path_start..])
-    } else {
-        (String::new(), input)
-    };
-
-    // Separate path from query/fragment
-    let (path, suffix) = match rest.find(|c| c == '?' || c == '#') {
-        Some(i) => (&rest[..i], &rest[i..]),
-        None => (rest, ""),
-    };
-
-    let mut out: Vec<&str> = Vec::new();
-    let mut remaining = path;
-    loop {
-        if remaining.is_empty() {
-            break;
-        }
-        if remaining == "." || remaining == ".." {
-            break;
-        }
-        if remaining.starts_with("../") {
-            remaining = &remaining[3..];
-        } else if remaining.starts_with("./") {
-            remaining = &remaining[2..];
-        } else if remaining.starts_with("/./") || remaining == "/." {
-            remaining = if remaining == "/." { "/" } else { &remaining[2..] };
-        } else if remaining.starts_with("/../") || remaining == "/.." {
-            remaining = if remaining == "/.." { "/" } else { &remaining[3..] };
-            out.pop();
-        } else {
-            let seg_end = if remaining.starts_with('/') {
-                remaining[1..].find('/').map(|i| i + 1).unwrap_or(remaining.len())
-            } else {
-                remaining.find('/').unwrap_or(remaining.len())
-            };
-            out.push(&remaining[..seg_end]);
-            remaining = &remaining[seg_end..];
-        }
-    }
-
-    format!("{}{}{}", prefix, out.join(""), suffix)
-}
-
 // ── escape sequence processing ───────────────────────────────────────────────
 
 fn unescape(s: &str) -> String {
@@ -758,34 +443,6 @@ fn unescape_iri(iri: &str) -> String {
     out
 }
 
-fn unescape_local_name(s: &str) -> String {
-    if !s.contains('\\') {
-        return s.to_string();
-    }
-    let mut out = String::with_capacity(s.len());
-    let mut chars = s.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            if let Some(next) = chars.next() {
-                out.push(next);
-            }
-        } else {
-            out.push(c);
-        }
-    }
-    out
-}
-
-fn infer_xsd_type(n: &str) -> &'static str {
-    if n.to_lowercase().contains('e') {
-        "http://www.w3.org/2001/XMLSchema#double"
-    } else if n.contains('.') {
-        "http://www.w3.org/2001/XMLSchema#decimal"
-    } else {
-        "http://www.w3.org/2001/XMLSchema#integer"
-    }
-}
-
 // ── graph isomorphism ────────────────────────────────────────────────────────
 
 fn has_bnode(q: &NQuad) -> bool {
@@ -809,6 +466,16 @@ fn apply_mapping(q: &NQuad, m: &HashMap<String, String>) -> NQuad {
         t.clone()
     };
     (mt(&q.0), mt(&q.1), mt(&q.2), q.3.as_ref().map(mt))
+}
+
+/// The same quads with every blank node label prefixed by `ns` (`#` cannot
+/// occur in a label, so the namespaces are disjoint).
+fn namespaced(quads: Vec<NQuad>, ns: &str) -> Vec<NQuad> {
+    let t = |t: NTerm| match t {
+        NTerm::BlankNode(n) => NTerm::BlankNode(format!("{ns}{n}")),
+        t => t,
+    };
+    quads.into_iter().map(|(s, p, o, g)| (t(s), t(p), t(o), g.map(t))).collect()
 }
 
 fn try_iso(
@@ -889,6 +556,9 @@ pub fn graphs_isomorphic(a: Vec<NQuad>, b: Vec<NQuad>) -> bool {
     if a.len() != b.len() {
         return false;
     }
+    // The matcher substitutes mapped labels of `a` by labels of `b`, so the
+    // two sides must not share labels (`_:b1` in both used to break it).
+    let (a, b) = (namespaced(a, "A#"), namespaced(b, "B#"));
 
     let (mut a_ground, a_nonground): (Vec<_>, Vec<_>) =
         a.into_iter().partition(|q| !has_bnode(q));

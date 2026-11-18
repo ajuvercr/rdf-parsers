@@ -27,7 +27,7 @@ fn terminal_text(node: &Node) -> String {
 
 pub fn convert(root: &Node) -> Turtle {
     // TurtleDoc is the initial rule — its contents are direct children of ROOT.
-    let mut base = None;
+    let mut bases = Vec::new();
     let mut prefixes = Vec::new();
     let mut triples = Vec::new();
 
@@ -36,7 +36,7 @@ pub fn convert(root: &Node) -> Turtle {
             if let Some(b) =
                 child(&dir, SyntaxKind::Base).or_else(|| child(&dir, SyntaxKind::SparqlBase))
             {
-                base = Some(Spanned(convert_base(&b), text_range(&b)));
+                bases.push(Spanned(convert_base(&b), text_range(&b)));
             } else if let Some(p) =
                 child(&dir, SyntaxKind::PrefixId).or_else(|| child(&dir, SyntaxKind::SparqlPrefix))
             {
@@ -48,7 +48,7 @@ pub fn convert(root: &Node) -> Turtle {
         }
     }
 
-    Turtle::new(base, prefixes, triples)
+    Turtle::with_bases(bases, prefixes, triples)
 }
 
 fn convert_base(node: &Node) -> Base {
