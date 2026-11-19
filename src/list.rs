@@ -7,35 +7,42 @@ pub enum Inner<T> {
     Cons(T, List<T>, usize),
 }
 
-/// Iteratively drop a `List<T>` to avoid stack overflow on long lists.
-///
-/// The default recursive drop of `Rc<Inner<T>>` can overflow the stack when
-/// the list has thousands of nodes (e.g., A* parse results for large files).
-/// This function walks the list iteratively, unlinking each node before it is
-/// freed so that no stack frame chains are created.
+/// Drops a list.  Kept for compatibility: dropping a `List` no longer
+/// recurses (see the `Drop` impl of `Inner`), so a plain `drop` does the same.
 pub fn drop_list<T>(list: List<T>) {
-    let mut current = list;
-    loop {
-        // If we're the sole owner, move the inner value out so we can
-        // mutate it before it is freed.
-        match Rc::try_unwrap(current) {
-            Err(_) => break, // Other Rc clones exist; let them handle drop.
-            Ok(inner) => {
-                match inner {
-                    Inner::Nil => break,
-                    Inner::Cons(_item, tail, _) => {
-                        // Continue with the tail.  When this loop iteration
-                        // ends, `_item` is dropped (non-recursive because it's
-                        // a plain `T`, not a `List`), and the old `inner`
-                        // (which now owns only `_item`) is freed — with its
-                        // `tail` field already moved out, so no chain.
-                        current = tail;
-                    }
-                }
-            }
+    drop(list)
+}
+
+/// Frees a chain of nodes without recursing.  The default drop of an
+/// `Rc<Inner<T>>` frees the tail first, one stack frame per node, which
+/// overflows on long lists (A* step lists of large files, especially in
+/// debug builds).  Instead, while a node is the only owner of the next one,
+/// the next node's content is moved out (leaving `Nil`, so no allocation is
+/// needed) and freed here in a loop.  A tail that is shared stops the walk:
+/// its other owners free it later.
+impl<T> Drop for Inner<T> {
+    fn drop(&mut self) {
+        let Inner::Cons(_, tail, _) = self else {
+            return;
+        };
+        let Some(next) = Rc::get_mut(tail) else {
+            return;
+        };
+        let mut current = std::mem::take(next);
+        loop {
+            let next = match &mut current {
+                Inner::Cons(_, tail, _) => match Rc::get_mut(tail) {
+                    Some(next) => std::mem::take(next),
+                    None => break,
+                },
+                Inner::Nil => break,
+            };
+            // the old node's tail now holds `Nil`, so dropping it stops there
+            current = next;
         }
     }
 }
+
 impl<T: PartialEq> PartialEq for Inner<T> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -125,5 +132,33 @@ impl<T> Inner<T> {
                 Some(i)
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn long(n: usize) -> List<usize> {
+        (0..n).fold(Inner::new(), |l, i| l.prepend(i))
+    }
+
+    #[test]
+    fn dropping_a_long_list_does_not_recurse() {
+        // a recursive drop of a million nodes overflows the default stack
+        drop(long(1_000_000));
+    }
+
+    #[test]
+    fn a_shared_tail_survives_dropping_one_owner() {
+        let tail = long(200_000);
+        let a = tail.prepend(1);
+        let b = tail.prepend(2);
+        drop(tail);
+        drop(a);
+        assert_eq!(b.len(), 200_001);
+        assert_eq!(b.iter().count(), 200_001);
+        assert_eq!(b.iter().nth(1), Some(&199_999));
+        assert_eq!(b.iter().last(), Some(&0));
     }
 }
