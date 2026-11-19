@@ -13,26 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-78d2163e0db6867cca9e65856419c81420a19fb4/> resolve documents to RDF, back depth shifts by the text, add a time budget
    Model and resolver:
    - `Turtle.bases` keeps every @base/BASE in document order (`base` stays the
-     last one); the Turtle, TriG and N3 converters fill it.
+   last one); the Turtle, TriG and N3 converters fill it.
    - New `resolve` module: a converted document to quads with absolute IRIs,
-     unescaped strings and fresh blank nodes, directives applied in document
-     order. Reports invalid escapes (surrogates), IRIs that escape characters
-     an IRI may not contain, and undefined prefixes, with spans.
+   unescaped strings and fresh blank nodes, directives applied in document
+   order. Reports invalid escapes (surrogates), IRIs that escape characters
+   an IRI may not contain, and undefined prefixes, with spans.
    - The conformance crate uses it for Turtle and TriG (eval and negative
-     tests). Its isomorphism check failed when both graphs used the same blank
-     node labels; each side now gets its own namespace. The old normaliser is
-     removed. Turtle 280/296 -> 296/296, TriG 318/334 -> 334/334.
+   tests). Its isomorphism check failed when both graphs used the same blank
+   node labels; each side now gets its own namespace. The old normaliser is
+   removed. Turtle 280/296 -> 296/296, TriG 318/334 -> 334/334.
    
    A* search:
    - A token at a different bracket depth than in the previous parse used to
-     make later role conflicts free after a one-time cost of 2, so an unclosed
-     `[` swallowed the next statement. The shift is now cheap only when the
-     text's own brackets back it (no unmatched opener before it, or closer
-     after it); otherwise it costs as much as a role conflict.
+   make later role conflicts free after a one-time cost of 2, so an unclosed
+   `[` swallowed the next statement. The shift is now cheap only when the
+   text's own brackets back it (no unmatched opener before it, or closer
+   after it); otherwise it costs as much as a role conflict.
    - `parse_incremental_with` and `ParseOptions { bias, time_budget,
-     max_iterations }`; `parse_incremental` is unchanged.
+   max_iterations }`; `parse_incremental` is unchanged.
    - A search stopped before any path reached the end finishes the furthest
-     path by deleting the rest, instead of returning an empty parse.
+   path by deleting the rest, instead of returning an empty parse.
    - No more "Max iterations reached" on stderr.
 
 ### Bug Fixes
