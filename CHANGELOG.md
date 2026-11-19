@@ -5,7 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.2.2 (2026-11-19)
+## v0.3.0 (2026-11-19)
+
+### Bug Fixes
+
+ - <csr-id-d3fcdfebdfb33bfed83197da102f4f174658dda7/> stack overflow by better list structure
+
+### New Features (BREAKING)
+
+ - <csr-id-3a454f484bced763f63e3104ece0a62fbbac0cd9/> add the RDF 1.2 output model (triple terms, reifiers, annotations)
+ - <csr-id-78d2163e0db6867cca9e65856419c81420a19fb4/> resolve documents to RDF, back depth shifts by the text, add a time budget
+   Model and resolver:
+   - `Turtle.bases` keeps every @base/BASE in document order (`base` stays the
+     last one); the Turtle, TriG and N3 converters fill it.
+   - New `resolve` module: a converted document to quads with absolute IRIs,
+     unescaped strings and fresh blank nodes, directives applied in document
+     order. Reports invalid escapes (surrogates), IRIs that escape characters
+     an IRI may not contain, and undefined prefixes, with spans.
+   - The conformance crate uses it for Turtle and TriG (eval and negative
+     tests). Its isomorphism check failed when both graphs used the same blank
+     node labels; each side now gets its own namespace. The old normaliser is
+     removed. Turtle 280/296 -> 296/296, TriG 318/334 -> 334/334.
+   
+   A* search:
+   - A token at a different bracket depth than in the previous parse used to
+     make later role conflicts free after a one-time cost of 2, so an unclosed
+     `[` swallowed the next statement. The shift is now cheap only when the
+     text's own brackets back it (no unmatched opener before it, or closer
+     after it); otherwise it costs as much as a role conflict.
+   - `parse_incremental_with` and `ParseOptions { bias, time_budget,
+     max_iterations }`; `parse_incremental` is unchanged.
+   - A search stopped before any path reached the end finishes the furthest
+     path by deleting the rest, instead of returning an empty parse.
+   - No more "Max iterations reached" on stderr.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Stack overflow by better list structure ([`d3fcdfe`](https://github.com/ajuvercr/rdf-parsers/commit/d3fcdfebdfb33bfed83197da102f4f174658dda7))
+    - Add the RDF 1.2 output model (triple terms, reifiers, annotations) ([`3a454f4`](https://github.com/ajuvercr/rdf-parsers/commit/3a454f484bced763f63e3104ece0a62fbbac0cd9))
+    - Resolve documents to RDF, back depth shifts by the text, add a time budget ([`78d2163`](https://github.com/ajuvercr/rdf-parsers/commit/78d2163e0db6867cca9e65856419c81420a19fb4))
+</details>
+
+## v0.2.2 (2026-10-14)
 
 ### New Features (BREAKING)
 
@@ -52,8 +106,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release.
- - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 1 commit contributed to the release.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
@@ -63,9 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
-    - Stack overflow by better list structure ([`d3fcdfe`](https://github.com/ajuvercr/rdf-parsers/commit/d3fcdfebdfb33bfed83197da102f4f174658dda7))
-    - Add the RDF 1.2 output model (triple terms, reifiers, annotations) ([`3a454f4`](https://github.com/ajuvercr/rdf-parsers/commit/3a454f484bced763f63e3104ece0a62fbbac0cd9))
-    - Resolve documents to RDF, back depth shifts by the text, add a time budget ([`78d2163`](https://github.com/ajuvercr/rdf-parsers/commit/78d2163e0db6867cca9e65856419c81420a19fb4))
+    - Format blank nodes and collections like Turtle ([`dc9b09d`](https://github.com/ajuvercr/rdf-parsers/commit/dc9b09d4ce8be9609f3dca43efa4ce12d3f11324))
 </details>
 
 ## v0.2.1 (2026-10-14)

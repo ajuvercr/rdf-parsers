@@ -245,7 +245,7 @@ checksum = "3a8241f3ebb85c056b509d4327ad0358fbbba6ffb340bf388f26350aeda225b1"
 
 [[package]]
 name = "benchmark"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ariadne",
  "chumsky 0.9.3",
@@ -684,7 +684,7 @@ dependencies = [
 
 [[package]]
 name = "conformance"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rdf-parsers",
 ]
@@ -880,7 +880,7 @@ dependencies = [
 
 [[package]]
 name = "demo"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ariadne",
  "concolor",
@@ -2561,7 +2561,7 @@ dependencies = [
 
 [[package]]
 name = "rdf-parsers"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "logos 0.16.1",
