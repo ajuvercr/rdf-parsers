@@ -467,7 +467,15 @@ fn compute_dist_for_rule(
     initial_states: &HashMap<String, usize>,
     // dist table for all rules computed so far (rule_name → per-rule dist map)
     all_dists: &HashMap<String, HashMap<(usize, String), isize>>,
+    // `Some`: compute the table in construct costs (`Costs::Constructs`):
+    // every inserted terminal costs 1, and a rule entered and then filled
+    // with insertions (invented) adds its construct cost.  Still a lower
+    // bound: nested penalties and extra tokens are left out where unknown.
+    constructs: Option<&HashMap<String, isize>>,
 ) -> HashMap<(usize, String), isize> {
+    let construct_cost = |rule: &str| -> isize {
+        constructs.and_then(|c| c.get(rule)).copied().unwrap_or(0)
+    };
     let mut dist: HashMap<(usize, String), isize> = HashMap::new();
 
     // Fixed-point iteration.
@@ -503,9 +511,13 @@ fn compute_dist_for_rule(
                             if ident == terminal {
                                 0
                             } else {
-                                let expect_ev = *error_values
-                                    .get(ident.as_str())
-                                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT);
+                                let expect_ev = if constructs.is_some() {
+                                    1
+                                } else {
+                                    *error_values
+                                        .get(ident.as_str())
+                                        .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+                                };
                                 let next_dist =
                                     dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
                                 expect_ev.saturating_add(next_dist)
@@ -513,14 +525,29 @@ fn compute_dist_for_rule(
                         }
                         Transition::Push { rule, entry, next } => {
                             // Option 1: terminal is matched inside the pushed rule.
+                            // In construct costs, needing insertions first means
+                            // the rule's first token is inserted: it is invented.
                             let inside = all_dists
                                 .get(rule.as_str())
                                 .and_then(|d| d.get(&(*entry, terminal.clone())))
                                 .copied()
                                 .unwrap_or(0);
+                            let inside = if inside > 0 {
+                                inside.saturating_add(construct_cost(rule))
+                            } else {
+                                inside
+                            };
 
                             // Option 2: pushed rule completes, terminal matched after.
+                            // In construct costs, a rule that needs a token is
+                            // invented by completing it: at least one inserted
+                            // token plus its construct cost.
                             let completion = *min_completion_costs.get(rule.as_str()).unwrap_or(&0);
+                            let completion = match (constructs, completion > 0) {
+                                (Some(_), true) => 1 + construct_cost(rule),
+                                (Some(_), false) => 0,
+                                (None, _) => completion,
+                            };
                             let after = dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
                             let outside = completion.saturating_add(after);
 
@@ -1183,7 +1210,7 @@ pub fn generate(path: &str, contents: &str) -> String {
     };
 
     // Build transitions for each producing rule and compute dist tables.
-    let dist_tables: HashMap<String, HashMap<(usize, String), isize>> = {
+    let dist_tables_for = |constructs: Option<&HashMap<String, isize>>| -> HashMap<String, HashMap<(usize, String), isize>> {
         // Collect error_values for terminals.
         let error_values: HashMap<String, isize> = config
             .context
@@ -1217,6 +1244,7 @@ pub fn generate(path: &str, contents: &str) -> String {
                     &min_completion_costs,
                     &initial_states,
                     &all_dists,
+                    constructs,
                 );
 
                 if all_dists.get(&rule.name) != Some(&new_dist) {
@@ -1227,6 +1255,8 @@ pub fn generate(path: &str, contents: &str) -> String {
         }
         all_dists
     };
+    let dist_tables = dist_tables_for(None);
+    let dist_tables_c = dist_tables_for(Some(&config.context.construct_costs));
 
     // ── Phase 4: Generate state-machine code (pass 2) ──
     let mut terminals = HashSet::new();
@@ -1460,7 +1490,7 @@ pub fn generate(path: &str, contents: &str) -> String {
     // Group by (kind, state) and emit inner match on terminal.
     // Optimisation: when all terminals share the same dist, emit a single
     // wildcard arm instead of enumerating every terminal.
-    let state_dist_arms: Vec<_> = {
+    let dist_arms = |dist_tables: &HashMap<String, HashMap<(usize, String), isize>>| -> Vec<proc_macro2::TokenStream> {
         let mut arms = Vec::new();
         let mut sorted_rules: Vec<_> = config.rules.producing.iter().map(|r| &r.name).collect();
         sorted_rules.sort();
@@ -1535,6 +1565,8 @@ pub fn generate(path: &str, contents: &str) -> String {
         }
         arms
     };
+    let state_dist_arms = dist_arms(&dist_tables);
+    let state_dist_c_arms = dist_arms(&dist_tables_c);
 
     // ── Format module codegen ────────────────────────────────────────────────
 
@@ -2050,6 +2082,15 @@ pub fn generate(path: &str, contents: &str) -> String {
             }
         }
 
+        /// `state_dist` in construct costs: inserted tokens count 1, and
+        /// rules invented on the way add their construct cost.
+        pub fn state_dist_constructs(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
+            match (kind, state, terminal) {
+                #( #state_dist_c_arms )*
+                _ => 0,
+            }
+        }
+
         impl crate::a_star::ParserTrait for Rule {
             type Kind = SyntaxKind;
 
@@ -2079,6 +2120,10 @@ pub fn generate(path: &str, contents: &str) -> String {
 
             fn state_dist(&self, terminal: &SyntaxKind) -> isize {
                 state_dist(self.kind, self.state, *terminal)
+            }
+
+            fn state_dist_constructs(&self, terminal: &SyntaxKind) -> isize {
+                state_dist_constructs(self.kind, self.state, *terminal)
             }
         }
     }

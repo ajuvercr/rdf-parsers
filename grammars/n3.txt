@@ -91,6 +91,13 @@ base_token -> 100
 stop -> 5
 colon -> 4
 comma -> 3
+=== construct_cost ===
+n3Directive -> 20
+sparqlDirective -> 20
+blankNodePropertyList -> 3
+iriPropertyList -> 3
+collection -> 3
+formula -> 3
 === bracket_open ===
 sq_open
 br_open

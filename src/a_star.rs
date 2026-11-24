@@ -156,6 +156,11 @@ pub trait ParserTrait: Debug + Sized + 'static {
     fn state_dist(&self, _terminal: &Self::Kind) -> isize {
         0
     }
+
+    /// `state_dist` in construct costs (`Costs::Constructs`).  Default: 0.
+    fn state_dist_constructs(&self, _terminal: &Self::Kind) -> isize {
+        0
+    }
 }
 
 enum IsExpectedElement {
@@ -829,16 +834,17 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
                     pos += 1;
                 }
-                // `state_dist` is in the grammar's token costs, which can
-                // exceed the construct model's, so it is left out there.
-                let new_d = if self.constructs {
-                    0
-                } else {
-                    self.tokens
-                        .get(pos)
-                        .map(|tok| head.state_dist(&tok.kind).max(0))
-                        .unwrap_or(0)
-                };
+                let new_d = self
+                    .tokens
+                    .get(pos)
+                    .map(|tok| {
+                        if self.constructs {
+                            head.state_dist_constructs(&tok.kind).max(0)
+                        } else {
+                            head.state_dist(&tok.kind).max(0)
+                        }
+                    })
+                    .unwrap_or(0);
                 element.h = element.h - element.dist + new_d;
                 element.dist = new_d;
             }

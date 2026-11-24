@@ -32,6 +32,9 @@ sq_open -> 4
 sq_close -> 4
 comma -> 2
 colon -> 3
+=== construct_cost ===
+jsonObject -> 3
+jsonArray -> 3
 === bracket_open ===
 curly_open
 sq_open

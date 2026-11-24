@@ -505,6 +505,186 @@ mod definitions {
             _ => 0,
         }
     }
+    #[doc = r" `state_dist` in construct costs: inserted tokens count 1, and"]
+    #[doc = r" rules invented on the way add their construct cost."]
+    pub fn state_dist_constructs(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
+        match (kind, state, terminal) {
+            (SyntaxKind::JsonArray, 1usize, _) => match terminal {
+                SyntaxKind::SqClose => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonArray, 2usize, _) => match terminal {
+                SyntaxKind::Colon => 1isize,
+                SyntaxKind::Comma => 1isize,
+                SyntaxKind::CurlyClose => 1isize,
+                _ => 0,
+            },
+            (SyntaxKind::JsonArray, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 1usize, _) => match terminal {
+                SyntaxKind::CurlyClose => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 2usize, _) => match terminal {
+                SyntaxKind::StringToken | SyntaxKind::CurlyClose => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonObject, 4usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonString, 1usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
+                SyntaxKind::CurlyOpen => 0,
+                _ => 4isize,
+            },
+            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 4isize,
+            },
+            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 6usize, _) => match terminal {
+                SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
+                SyntaxKind::FalseLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
+                SyntaxKind::NullLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Member, 1usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::Member, 2usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 1isize,
+                SyntaxKind::StringToken => 1isize,
+                SyntaxKind::Comma => 2isize,
+                SyntaxKind::CurlyClose => 2isize,
+                SyntaxKind::CurlyOpen => 1isize,
+                SyntaxKind::FalseLit => 1isize,
+                SyntaxKind::NullLit => 1isize,
+                SyntaxKind::SqClose => 2isize,
+                SyntaxKind::SqOpen => 1isize,
+                SyntaxKind::TrueLit => 1isize,
+                _ => 0,
+            },
+            (SyntaxKind::Member, 3usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MemberList, 2usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::MemberList, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 2isize,
+                SyntaxKind::StringToken => 1isize,
+                SyntaxKind::Colon => 2isize,
+                SyntaxKind::CurlyClose => 2isize,
+                SyntaxKind::CurlyOpen => 2isize,
+                SyntaxKind::FalseLit => 2isize,
+                SyntaxKind::NullLit => 2isize,
+                SyntaxKind::SqClose => 2isize,
+                SyntaxKind::SqOpen => 2isize,
+                SyntaxKind::TrueLit => 2isize,
+                _ => 0,
+            },
+            (SyntaxKind::MemberList, 4usize, _) => match terminal {
+                SyntaxKind::StringToken => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::ValueList, 2usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::ValueList, 3usize, _) => match terminal {
+                SyntaxKind::JsonNumber => 1isize,
+                SyntaxKind::StringToken => 1isize,
+                SyntaxKind::Colon => 2isize,
+                SyntaxKind::CurlyClose => 2isize,
+                SyntaxKind::CurlyOpen => 1isize,
+                SyntaxKind::FalseLit => 1isize,
+                SyntaxKind::NullLit => 1isize,
+                SyntaxKind::SqClose => 2isize,
+                SyntaxKind::SqOpen => 1isize,
+                SyntaxKind::TrueLit => 1isize,
+                _ => 0,
+            },
+            (SyntaxKind::ValueList, 4usize, _) => match terminal {
+                SyntaxKind::JsonNumber
+                | SyntaxKind::StringToken
+                | SyntaxKind::CurlyOpen
+                | SyntaxKind::FalseLit
+                | SyntaxKind::NullLit
+                | SyntaxKind::SqOpen
+                | SyntaxKind::TrueLit => 0,
+                _ => 1isize,
+            },
+            _ => 0,
+        }
+    }
     impl crate::a_star::ParserTrait for Rule {
         type Kind = SyntaxKind;
         fn step(
@@ -1024,6 +1204,9 @@ mod definitions {
         fn state_dist(&self, terminal: &SyntaxKind) -> isize {
             state_dist(self.kind, self.state, *terminal)
         }
+        fn state_dist_constructs(&self, terminal: &SyntaxKind) -> isize {
+            state_dist_constructs(self.kind, self.state, *terminal)
+        }
     }
 }
 pub use definitions::*;
@@ -1086,6 +1269,8 @@ impl TokenTrait for SyntaxKind {
     }
     fn construct_cost(&self) -> isize {
         match self {
+            SyntaxKind::JsonArray => 3isize,
+            SyntaxKind::JsonObject => 3isize,
             _ => 0,
         }
     }
