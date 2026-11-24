@@ -264,11 +264,9 @@ fn convert_blank(node: &Node) -> Term {
 }
 
 fn convert_object(node: &Node) -> Term {
-    // In trig: object ::= iri | blank | blankNodePropertyList2 | blankNodePropertyList | literal
+    // object ::= iri | BlankNode | collection | blankNodePropertyList | literal
     if let Some(iri) = child(node, SyntaxKind::Iri) {
         Term::NamedNode(convert_iri(&iri))
-    } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList2) {
-        convert_blank_node_property_list(&bpl)
     } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
         convert_blank_node_property_list(&bpl)
     } else if let Some(lit) = child(node, SyntaxKind::Literal) {
@@ -322,6 +320,7 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
 }
 
 fn convert_blank_node(node: &Node) -> BlankNode {
+    // BlankNode ::= BLANK_NODE_LABEL | ANON
     if let Some(label) = child(node, SyntaxKind::BlankNodeLabel) {
         let text = terminal_text(&label);
         let offset: usize = label.text_range().start().into();
@@ -1100,6 +1099,92 @@ mod tests {
         match t.subject.value() {
             Term::NamedNode(NamedNode::Full(iri, _)) => assert_eq!(iri, "b"),
             other => panic!("expected <b> as subject, got {:?}", other),
+        }
+    }
+
+    // ── `[]` is one ANON token ────────────────────────────────────────────────
+
+    /// For each token with this text, the nearest ancestor that gives it a
+    /// position.
+    fn positions(root: &lang::SyntaxNode, text: &str) -> Vec<lang::SyntaxKind> {
+        use lang::SyntaxKind as K;
+        root.descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| t.text() == text)
+            .filter_map(|t| {
+                t.parent_ancestors().map(|n| n.kind()).find(|k| {
+                    matches!(
+                        k,
+                        K::Subject | K::Verb | K::Object | K::GraphTerm | K::Error
+                    )
+                })
+            })
+            .collect()
+    }
+
+    /// Where each `[]` is: an `Anon` token in a `BlankNode` (past the token's
+    /// own wrapper node), and the kind of that `BlankNode`'s parent.
+    fn anon_places(root: &lang::SyntaxNode) -> Vec<lang::SyntaxKind> {
+        use lang::SyntaxKind as K;
+        root.descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| t.kind() == K::Anon)
+            .map(|t| {
+                let bn = t.parent_ancestors().find(|n| n.kind() != K::Anon).unwrap();
+                assert_eq!(bn.kind(), K::BlankNode, "{t:?}");
+                bn.parent().unwrap().kind()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn test_empty_blank_node_is_one_token() {
+        use lang::SyntaxKind as K;
+        let input = "[] { [] <p> [ ], ( [] ) . }\nGRAPH [ # a comment\n] { <a> <p> [\n] . }";
+        let (result, _) = crate_parse(lang::Rule::new(K::TrigDoc), input);
+        assert_eq!(result.errors.len(), 0);
+        let root = result.syntax::<lang::Lang>();
+        assert_eq!(
+            anon_places(&root),
+            [
+                K::GraphTerm,
+                K::Subject,
+                K::Object,
+                K::Object,
+                K::GraphTerm,
+                K::Object
+            ]
+        );
+
+        let doc = convert(&root);
+        assert_eq!(doc.triples.len(), 2);
+        for t in &doc.triples {
+            assert!(matches!(
+                t.value().graph.as_ref().map(|g| g.value()),
+                Some(Term::BlankNode(BlankNode::Unnamed(po, _, _))) if po.is_empty()
+            ));
+        }
+    }
+
+    /// Typing inside `[ ]` starts a property list: the new token is a
+    /// predicate, in object and in subject position.
+    #[test]
+    fn test_typing_inside_empty_blank_node() {
+        use lang::SyntaxKind as K;
+        for (before, after) in [
+            ("<g> { <a> <p> [ ] . }", "<g> { <a> <p> [ <q> ] . }"),
+            ("<g> { [ ] <p> <o> . }", "<g> { [ <q> ] <p> <o> . }"),
+        ] {
+            let (result, _) = parse_incremental(
+                lang::Rule::new(K::TrigDoc),
+                after,
+                Some(&prev_info(before)),
+                IncrementalBias::default(),
+            );
+            let root = result.syntax::<lang::Lang>();
+            assert_eq!(positions(&root, "<q>"), [K::Verb], "{after}");
+            assert_eq!(positions(&root, "<p>"), [K::Verb], "{after}");
+            assert_eq!(positions(&root, "<g>"), [K::GraphTerm], "{after}");
         }
     }
 }

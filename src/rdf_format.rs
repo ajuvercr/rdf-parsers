@@ -171,3 +171,43 @@ macro_rules! turtle_like_format_rules {
         }
     };
 }
+
+/// `[]`, `[  ]` and `[\n]` are one `ANON` token: `anon` prints them all as
+/// `[ ]`. Comments inside one (`[ # note\n ]`) are printed as comments, with
+/// `]` on a line of its own. Expanded in the Turtle and TriG `format`
+/// modules, where `BlankNode ::= BLANK_NODE_LABEL | ANON`.
+macro_rules! anon_format_rule {
+    () => {
+        fn anon(node: &SyntaxNode) -> Option<Doc> {
+            let mut tokens = node
+                .descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .filter(|t| t.kind() != SyntaxKind::WhiteSpace);
+            let token = match (tokens.next(), tokens.next()) {
+                (Some(t), None) if t.kind() == SyntaxKind::Anon => t,
+                _ => return None,
+            };
+            // Inside ANON there is only white space and comments, so every
+            // `#` starts a comment that runs to the end of its line.
+            let comments: Vec<&str> = token
+                .text()
+                .split(['\n', '\r'])
+                .filter_map(|line| line.find('#').map(|i| line[i..].trim_end()))
+                .collect();
+            let Some((first, rest)) = comments.split_first() else {
+                return Some(Doc::text("[ ]"));
+            };
+            let rest = rest
+                .iter()
+                .flat_map(|c| [Doc::HardLine, Doc::text(*c)])
+                .collect();
+            Some(Doc::concat(vec![
+                Doc::text("[ "),
+                Doc::text(*first),
+                Doc::nest(2, Doc::concat(rest)),
+                Doc::HardLine,
+                Doc::text("]"),
+            ]))
+        }
+    };
+}

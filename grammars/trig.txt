@@ -17,9 +17,8 @@
 [15]    graphTerm ::= iri | BlankNode
 [16]	subject	::=	iri | BlankNode | collection
 [17]	predicate	::=	iri
-[18]	object	::=	iri | BlankNode | collection | blankNodePropertyList2 | literal
+[18]	object	::=	iri | BlankNode | collection | blankNodePropertyList | literal
 [19]	literal	::=	RDFLiteral | NumericLiteral | BooleanLiteral
-[14]	blankNodePropertyList2	::=	'[' predicateObjectList?  ']'
 [20]	blankNodePropertyList	::=	'[' predicateObjectList ']'
 [21]	collection	::=	'(' object* ')'
 [22]	NumericLiteral	::=	INTEGER | DECIMAL | DOUBLE
@@ -28,7 +27,7 @@
 [23]	String	::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
 [135s]	iri	::=	IRIREF | PrefixedName
 [136s]	PrefixedName	::=	PNAME_LN | PNAME_NS
-[137s]	BlankNode	::=	BLANK_NODE_LABEL | '[' ']'
+[137s]	BlankNode	::=	BLANK_NODE_LABEL | ANON
 === terminals ===
 [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>'
 [139s]	PNAME_NS	::=	PN_PREFIX? ':'
@@ -46,6 +45,7 @@
 [26]	UCHAR	::=	'\u' HEX HEX HEX HEX | '\U' HEX HEX HEX HEX HEX HEX HEX HEX
 [159s]	ECHAR	::=	'\' [tbnrf"'\]
 [161s]	WS	::=	#x20 | #x9 | #xD | #xA
+[162s]	ANON	::=	'[' (WS | '#' [^#xA#xD]* [#xA#xD])* ']'
 [163s]	PN_CHARS_BASE	::=	[A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
 [164s]	PN_CHARS_U	::=	PN_CHARS_BASE | '_'
 [166s]	PN_CHARS	::=	PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] | [#x203F-#x2040]
@@ -99,7 +99,6 @@ curly_close
 === format ===
 group objectList
 group blankNodePropertyList
-group blankNodePropertyList2
 group collection
 group wrappedGraph
 directive -> before: hardline
@@ -114,8 +113,5 @@ objectList -> before: space
 objectList.comma -> after: line
 blankNodePropertyList.predicateObjectList -> before: nest line
 blankNodePropertyList.sq_close -> before: line
-blankNodePropertyList2.predicateObjectList -> before: nest line
-blankNodePropertyList2.sq_close -> before: line
-BlankNode.sq_open -> after: space
 collection.object -> before: nest line
 collection.cl_close -> before: line

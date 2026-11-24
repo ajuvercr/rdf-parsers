@@ -34,15 +34,18 @@ impl FormatHook<Lang> for TurtleHook {
             SyntaxKind::Statement => statement(node, fmt),
             SyntaxKind::PredicateObjectList => predicate_object_list(node, fmt),
             SyntaxKind::ObjectList => object_list(node, fmt),
+            SyntaxKind::BlankNode => anon(node),
             _ => None,
         }
     }
 }
 
 turtle_like_format_rules! {
-    bnode_lists: [BlankNodePropertyList, BlankNodePropertyList2],
-    blocks: [BlankNodePropertyList2, Collection],
+    bnode_lists: [BlankNodePropertyList],
+    blocks: [BlankNodePropertyList, Collection],
 }
+
+anon_format_rule!();
 
 fn is_directive(statement: &SyntaxNode) -> bool {
     statement

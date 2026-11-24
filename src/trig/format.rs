@@ -36,15 +36,18 @@ impl FormatHook<Lang> for TrigHook {
             SyntaxKind::TriplesBlock => triples_block(node, fmt),
             SyntaxKind::PredicateObjectList => predicate_object_list(node, fmt),
             SyntaxKind::ObjectList => object_list(node, fmt),
+            SyntaxKind::BlankNode => anon(node),
             _ => None,
         }
     }
 }
 
 turtle_like_format_rules! {
-    bnode_lists: [BlankNodePropertyList, BlankNodePropertyList2],
-    blocks: [BlankNodePropertyList2, Collection],
+    bnode_lists: [BlankNodePropertyList],
+    blocks: [BlankNodePropertyList, Collection],
 }
+
+anon_format_rule!();
 
 fn top_level(node: &SyntaxNode, fmt: &Formatter<'_, Lang>) -> Option<Doc> {
     let is_top_level = |k| matches!(k, SyntaxKind::Directive | SyntaxKind::Block);

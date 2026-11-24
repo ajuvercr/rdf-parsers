@@ -325,4 +325,27 @@ mod format_tests {
         let expected = "@base <http://ex/>.\nBASE <http://ex/>\n@prefix ex: <http://ex/>.\nPREFIX ex2: <http://ex2/>\n";
         assert_eq!(format_turtle(input, 80), expected);
     }
+
+    // `[]` is one ANON token; it prints as `[ ]`, and comments inside it
+    // stay comments.
+
+    #[test]
+    fn format_anon_variants() {
+        let input = "<a> <p> [], [  ], [\n], ( [] ) .";
+        assert_eq!(
+            format_turtle(input, 80),
+            "<a> <p> [ ], [ ], [ ], ( [ ] ).\n"
+        );
+    }
+
+    #[test]
+    fn format_anon_with_comments() {
+        let input = "<a> <p> [ # one\n  # two\n ] .\n[ # s\n] <p> <o> .";
+        let once = format_turtle(input, 80);
+        assert_eq!(
+            once,
+            "<a> <p> [ # one\n    # two\n  ].\n\n[ # s\n] <p> <o>.\n"
+        );
+        assert_eq!(format_turtle(&once, 80), once);
+    }
 }

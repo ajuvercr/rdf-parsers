@@ -195,4 +195,24 @@ GRAPH ex:h { }
         let expected = "GRAPH <g> { <a> <b> <c> }\n<h> { <a> <b> <c> }\n";
         assert_eq!(format_trig(input, 80), expected);
     }
+
+    // `[]` is one ANON token; it prints as `[ ]`, and comments inside it
+    // stay comments.
+
+    #[test]
+    fn format_anon_variants() {
+        let input = "<a> <p> [], [  ], [\n], ( [] ) .";
+        assert_eq!(format_trig(input, 80), "<a> <p> [ ], [ ], [ ], ( [ ] ).\n");
+    }
+
+    #[test]
+    fn format_anon_with_comments() {
+        let input = "<a> <p> [ # one\n  # two\n ] .\n[ # s\n] <p> <o> .";
+        let once = format_trig(input, 80);
+        assert_eq!(
+            once,
+            "<a> <p> [ # one\n    # two\n  ].\n\n[ # s\n] <p> <o>.\n"
+        );
+        assert_eq!(format_trig(&once, 80), once);
+    }
 }

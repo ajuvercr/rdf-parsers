@@ -197,16 +197,11 @@ fn convert_object(node: &Node) -> Term {
     // object ::= iri | BlankNode | collection | blankNodePropertyList | literal
     if let Some(iri) = child(node, SyntaxKind::Iri) {
         Term::NamedNode(convert_iri(&iri))
-    } else if let Some(label) = child(node, SyntaxKind::BlankNodeLabel) {
-        let text = terminal_text(&label);
-        let offset: usize = label.text_range().start().into();
-        let name = text.strip_prefix("_:").unwrap_or(&text);
-        Term::BlankNode(BlankNode::Named(name.to_string(), offset))
     } else if let Some(bn) = child(node, SyntaxKind::BlankNode) {
         Term::BlankNode(convert_blank_node(&bn))
     } else if let Some(coll) = child(node, SyntaxKind::Collection) {
         Term::Collection(convert_collection(&coll))
-    } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList2) {
+    } else if let Some(bpl) = child(node, SyntaxKind::BlankNodePropertyList) {
         convert_blank_node_property_list(&bpl)
     } else if let Some(lit) = child(node, SyntaxKind::Literal) {
         Term::Literal(convert_literal(&lit))
@@ -262,14 +257,14 @@ fn convert_prefixed_name(node: &Node) -> NamedNode {
 }
 
 fn convert_blank_node(node: &Node) -> BlankNode {
-    // BlankNode ::= BLANK_NODE_LABEL | ANON | '[' ']'
+    // BlankNode ::= BLANK_NODE_LABEL | ANON
     if let Some(label) = child(node, SyntaxKind::BlankNodeLabel) {
         let text = terminal_text(&label);
         let offset: usize = label.text_range().start().into();
         let name = text.strip_prefix("_:").unwrap_or(&text);
         BlankNode::Named(name.to_string(), offset)
     } else {
-        // ANON or '[ ]'
+        // ANON
         let offset: usize = node.text_range().start().into();
         BlankNode::Unnamed(Vec::new(), offset, offset)
     }
@@ -1347,5 +1342,80 @@ ex:s4 ex:p4 ex:o4 .
             "10 error recovery parses took {:?} — performance regression?",
             elapsed
         );
+    }
+
+    // ── `[]` is one ANON token ────────────────────────────────────────────────
+
+    /// For each token with this text, the nearest ancestor that gives it a
+    /// position.
+    fn positions(root: &lang::SyntaxNode, text: &str) -> Vec<lang::SyntaxKind> {
+        use lang::SyntaxKind as K;
+        root.descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| t.text() == text)
+            .filter_map(|t| {
+                t.parent_ancestors()
+                    .map(|n| n.kind())
+                    .find(|k| matches!(k, K::Subject | K::Verb | K::Object | K::Error))
+            })
+            .collect()
+    }
+
+    /// Where each `[]` is: an `Anon` token in a `BlankNode` (past the token's
+    /// own wrapper node), and the kind of that `BlankNode`'s parent.
+    fn anon_places(root: &lang::SyntaxNode) -> Vec<lang::SyntaxKind> {
+        use lang::SyntaxKind as K;
+        root.descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| t.kind() == K::Anon)
+            .map(|t| {
+                let bn = t.parent_ancestors().find(|n| n.kind() != K::Anon).unwrap();
+                assert_eq!(bn.kind(), K::BlankNode, "{t:?}");
+                bn.parent().unwrap().kind()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn test_empty_blank_node_is_one_token() {
+        use lang::SyntaxKind as K;
+        let input = "[] <p> [ ], [\n], ( [] ) .\n[ # a comment\n] <p> <o> .";
+        let (result, _) = crate_parse(lang::Rule::new(K::TurtleDoc), input);
+        assert_eq!(result.errors.len(), 0);
+        let root = result.syntax::<lang::Lang>();
+        assert_eq!(
+            anon_places(&root),
+            [K::Subject, K::Object, K::Object, K::Object, K::Subject]
+        );
+
+        let doc = convert(&root);
+        assert_eq!(doc.triples.len(), 2);
+        for t in &doc.triples {
+            assert!(matches!(
+                t.value().subject.value(),
+                Term::BlankNode(BlankNode::Unnamed(po, _, _)) if po.is_empty()
+            ));
+        }
+    }
+
+    /// Typing inside `[ ]` starts a property list: the new token is a
+    /// predicate, in object and in subject position.
+    #[test]
+    fn test_typing_inside_empty_blank_node() {
+        use lang::SyntaxKind as K;
+        for (before, after) in [
+            ("<a> <p> [ ] .", "<a> <p> [ <q> ] ."),
+            ("[ ] <p> <o> .", "[ <q> ] <p> <o> ."),
+        ] {
+            let (result, _) = parse_incremental(
+                lang::Rule::new(K::TurtleDoc),
+                after,
+                Some(&prev_info(before)),
+                IncrementalBias::default(),
+            );
+            let root = result.syntax::<lang::Lang>();
+            assert_eq!(positions(&root, "<q>"), [K::Verb], "{after}");
+            assert_eq!(positions(&root, "<p>"), [K::Verb], "{after}");
+        }
     }
 }
