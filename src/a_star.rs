@@ -785,6 +785,17 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             }
         }
 
+        // Entering a rule sets the fingerprint to `descend(saved, branch)`
+        // and moving within it keeps it, so this holds for every state but
+        // the root's.  `done` and splicing identify states by it.
+        debug_assert!(
+            element.parent.len() <= 1
+                || element.parent.head().is_some_and(|f| {
+                    element.state.0 == descend(f.saved, f.rule.element_kind().branch())
+                }),
+            "state fingerprint does not match the stack after {:?}",
+            element.list.head(),
+        );
         let at = element.parent.head().map(|f| f.rule.at()).unwrap_or(0);
         let state = (element.state.0, element.state.1, at);
 
@@ -1130,11 +1141,11 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             cost: isize,
             h: isize,
             next: usize,
-            /// Rules popped, the stack after popping, and the accepting
-            /// ancestor's saved fingerprint.
+            /// Rules popped, the stack after popping, and the state
+            /// fingerprint with the accepting ancestor on top.
             pops: usize,
             parent: List<Frame<R>>,
-            saved: Fingerprint,
+            fp: Fingerprint,
             /// Non-trivia tokens skipped.
             skipped: usize,
         }
@@ -1153,6 +1164,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // is never popped.
                 let mut parent = element.parent.clone();
                 let mut pops = 0;
+                // A frame's `saved` is the fingerprint from before it was
+                // pushed, which is the state with the frame below on top.
+                let mut fp = element.state.0;
                 while let Some((Frame { rule, saved, .. }, tail)) = parent.slice() {
                     if rule.element_kind().min_error_for_token(&tok.kind) == 0 {
                         let next = self.get_actual_index(scan_pos);
@@ -1166,7 +1180,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 next,
                                 pops,
                                 parent: parent.clone(),
-                                saved: *saved,
+                                fp,
                                 skipped,
                             });
                         }
@@ -1175,6 +1189,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     if tail.len() == 0 {
                         break;
                     }
+                    fp = *saved;
                     parent = tail.clone();
                     pops += 1;
                 }
@@ -1194,7 +1209,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 parent: b.parent,
                 cost: b.cost,
                 h: b.h,
-                state: (b.saved, b.next),
+                state: (b.fp, b.next),
                 has_error: true,
                 assumed_depth_delta: element.assumed_depth_delta,
                 current_depth: element.current_depth,
