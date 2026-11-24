@@ -268,6 +268,10 @@ pub struct PrevParseInfo {
     /// The previous parse's steps and parser checkpoints, so the next parse
     /// can reuse the parts before and after an edit.
     memo: incremental::Memo,
+    /// Per token: whether its fingerprint comes from a parse in which its
+    /// top-level unit had no errors (see `anchor_history`).  Empty when not
+    /// known.
+    anchored: Vec<bool>,
 }
 
 impl PrevParseInfo {
@@ -278,6 +282,7 @@ impl PrevParseInfo {
             tokens,
             had_errors,
             memo: Default::default(),
+            anchored: Vec::new(),
         }
     }
 }
@@ -366,9 +371,10 @@ where
     let old_texts: Vec<&str> = prev
         .map(|p| p.tokens.iter().map(|t| t.text.as_str()).collect())
         .unwrap_or_default();
-    let new_texts: Vec<&str> = tokens.iter().map(|t| t.text()).collect();
+    // Borrowed from `text`, not `tokens`, which the search below mutates.
+    let new_texts: Vec<&str> = tokens.iter().map(|t| &text[t.range.clone()]).collect();
     let reuse =
-        prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts));
+        prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts, false));
 
     let found = a_star::search(
         root.clone(),
@@ -382,6 +388,10 @@ where
     let (list, memo) = match found {
         Some(found) => found.finish(reuse.as_ref()),
         None => {
+            // The fault-tolerant search may also resume after an earlier,
+            // unchanged error, so an edit below it is not parsed from there.
+            let reuse =
+                prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts, true));
             if let Some(prev) = prev {
                 let unchanged = unchanged_tokens(&old_texts, &new_texts);
                 for (old, new) in unchanged {
@@ -409,19 +419,117 @@ where
     let had_errors = parse.errors.len() > 0;
     // Compute bracket depths for the new token sequence to populate PrevParseInfo.
     let mut depth: i32 = 0;
+    let mut prev_tokens: Vec<PrevToken> = tokens
+        .iter()
+        .map(|t| {
+            let d = depth.clamp(0, 255) as u8;
+            depth += t.kind.bracket_delta() as i32;
+            t.to_prev_token(d)
+        })
+        .collect();
+    let anchored = match settled_tokens::<T::Kind>(&parse.green_node, tokens.len()) {
+        Some(settled) => anchor_history(prev, &old_texts, &new_texts, settled, &mut prev_tokens),
+        None => Vec::new(),
+    };
     let prev = PrevParseInfo {
-        tokens: tokens
-            .iter()
-            .map(|t| {
-                let d = depth.clamp(0, 255) as u8;
-                depth += t.kind.bracket_delta() as i32;
-                t.to_prev_token(d)
-            })
-            .collect(),
+        tokens: prev_tokens,
         had_errors,
         memo,
+        anchored,
     };
     (parse, prev)
+}
+
+/// Per token, trivia included: whether the top-level unit it belongs to (a
+/// child of the root, or of the root's only child node, e.g. a Turtle
+/// statement) parsed without errors.  `None` if the tree does not hold
+/// exactly `n_tokens` tokens.
+fn settled_tokens<K: TokenTrait>(green: &rowan::GreenNode, n_tokens: usize) -> Option<Vec<bool>> {
+    use rowan::{GreenNodeData, NodeOrToken};
+    let error: rowan::SyntaxKind = K::ERROR.into();
+    fn has_error(n: &GreenNodeData, error: rowan::SyntaxKind) -> bool {
+        n.kind() == error
+            || n.children().any(|c| match c {
+                NodeOrToken::Node(n) => has_error(n, error),
+                NodeOrToken::Token(t) => t.kind() == error,
+            })
+    }
+    fn leaves(n: &GreenNodeData, ok: bool, out: &mut Vec<bool>) {
+        for c in n.children() {
+            match c {
+                NodeOrToken::Node(n) => leaves(n, ok, out),
+                NodeOrToken::Token(_) => out.push(ok),
+            }
+        }
+    }
+    let mut out = Vec::with_capacity(n_tokens);
+    let mut nodes = green.children().filter_map(|c| c.into_node());
+    let wrapper = match (nodes.next(), nodes.next()) {
+        (Some(only), None) if only.kind() != error => Some(only),
+        _ => None,
+    };
+    for c in green.children() {
+        match c {
+            NodeOrToken::Node(n) if wrapper.is_some_and(|w| std::ptr::eq(w, n)) => {
+                for u in n.children() {
+                    match u {
+                        NodeOrToken::Node(u) => leaves(u, !has_error(u, error), &mut out),
+                        NodeOrToken::Token(t) => out.push(t.kind() != error),
+                    }
+                }
+            }
+            NodeOrToken::Node(n) => leaves(n, !has_error(n, error), &mut out),
+            NodeOrToken::Token(t) => out.push(t.kind() != error),
+        }
+    }
+    (out.len() == n_tokens).then_some(out)
+}
+
+/// History that holds up while a statement is broken.  A token whose
+/// top-level unit parsed cleanly takes its role from this parse.  A token in
+/// a broken unit that is unchanged since the previous version keeps the role
+/// it was last given by a clean parse of its unit, if it ever had one;
+/// otherwise it takes its role from this parse, as before.  So a bad recovery
+/// in one keystroke is not carried into the next ones, and the roles of a
+/// statement being edited keep pointing at the last version in which it was
+/// whole.  Returns, per token, whether its role is such a clean one.
+fn anchor_history(
+    prev: Option<&PrevParseInfo>,
+    old_texts: &[&str],
+    new_texts: &[&str],
+    mut anchored: Vec<bool>,
+    out: &mut [PrevToken],
+) -> Vec<bool> {
+    let Some(prev) = prev.filter(|p| p.anchored.len() == p.tokens.len()) else {
+        return anchored;
+    };
+    let (n, o) = (new_texts.len(), old_texts.len());
+    let prefix = old_texts.iter().zip(new_texts).take_while(|(a, b)| a == b).count();
+    let suffix = old_texts
+        .iter()
+        .rev()
+        .zip(new_texts.iter().rev())
+        .take(o.min(n) - prefix)
+        .take_while(|(a, b)| a == b)
+        .count();
+    for i in 0..n {
+        if anchored[i] {
+            continue;
+        }
+        let j = if i < prefix {
+            i
+        } else if i >= n - suffix {
+            i + o - n
+        } else {
+            continue;
+        };
+        if prev.anchored[j] {
+            out[i].fingerprint = prev.tokens[j].fingerprint;
+            out[i].depth = prev.tokens[j].depth;
+            anchored[i] = true;
+        }
+    }
+    anchored
 }
 
 /// `(old index, new index)` of each token that is unchanged between the

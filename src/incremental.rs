@@ -64,7 +64,16 @@ pub(crate) struct Checkpoint {
     /// No error steps before / after this point.
     pub clean_before: bool,
     pub clean_after: bool,
+    /// At least `SETTLE_TOKENS` tokens were parsed cleanly since the last
+    /// error step before this point (or there was none).  The search settles
+    /// an error recovery within that many clean tokens (its dominance
+    /// window), so what came before no longer depends on what comes after.
+    pub settled: bool,
 }
+
+/// Clean tokens after an error before a checkpoint counts as settled: the
+/// search's dominance window (see `a_star::DEFAULT_DOMINANCE_WINDOW`).
+const SETTLE_TOKENS: usize = crate::a_star::DEFAULT_DOMINANCE_WINDOW;
 
 /// Steps and checkpoints of a finished parse.
 #[derive(Clone, Debug, Default)]
@@ -80,9 +89,22 @@ impl Memo {
     pub(crate) fn new(steps: Vec<RawStep>, mut checkpoints: Vec<Checkpoint>, cost: isize) -> Self {
         let first_error = steps.iter().position(|s| s.is_error()).unwrap_or(usize::MAX);
         let last_error = steps.iter().rposition(|s| s.is_error());
+        // Tokens matched since the last error step, before each step index.
+        let mut clean_run = Vec::with_capacity(steps.len() + 1);
+        let mut run = usize::MAX / 2;
+        for s in &steps {
+            clean_run.push(run);
+            match s {
+                s if s.is_error() => run = 0,
+                RawStep::Bump(_) => run += 1,
+                _ => {}
+            }
+        }
+        clean_run.push(run);
         for cp in &mut checkpoints {
             cp.clean_before = cp.steps <= first_error;
             cp.clean_after = last_error.is_none_or(|e| e < cp.steps);
+            cp.settled = clean_run.get(cp.steps).is_some_and(|&r| r >= SETTLE_TOKENS);
         }
         Memo {
             steps,
@@ -111,7 +133,20 @@ pub(crate) struct Reuse<'p> {
 
 impl<'p> Reuse<'p> {
     /// Plans reuse from the token texts of the old and new document.
-    pub(crate) fn plan(memo: &'p Memo, old: &[&str], new: &[&str]) -> Option<Self> {
+    ///
+    /// With `past_errors`, the search may also resume after an error of the
+    /// previous parse, from a settled checkpoint outside any bracket: the
+    /// unchanged part before the edit keeps the recovery it had.  Only the
+    /// fault-tolerant search does this.  The fast search resumes before the
+    /// first error, so a document that became valid gets exactly the fresh
+    /// parse, even when the edit made an earlier recovery unnecessary (say, a
+    /// typed `]` that an earlier inserted one stood in for).
+    pub(crate) fn plan(
+        memo: &'p Memo,
+        old: &[&str],
+        new: &[&str],
+        past_errors: bool,
+    ) -> Option<Self> {
         if memo.checkpoints.is_empty() {
             return None;
         }
@@ -127,10 +162,10 @@ impl<'p> Reuse<'p> {
         let delta = new.len() as isize - old.len() as isize;
         let old_tail = old.len() - suffix;
 
-        let resume = memo
-            .checkpoints
-            .iter()
-            .rposition(|cp| cp.clean_before && cp.token + RESUME_MARGIN <= prefix);
+        let resume = memo.checkpoints.iter().rposition(|cp| {
+            (cp.clean_before || (past_errors && cp.settled && cp.depth == 0))
+                && cp.token + RESUME_MARGIN <= prefix
+        });
         let resume_token = resume.map_or(0, |i| memo.checkpoints[i].token);
 
         let mut splice: HashMap<usize, Vec<usize>> = HashMap::new();

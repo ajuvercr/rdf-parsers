@@ -1427,8 +1427,10 @@ impl<R: ParserTrait> Found<R> {
                 .iter()
                 .map(|f| (f.rule.element_kind().into(), f.rule.at() as u32, f.saved, f.role))
                 .collect(),
+            // Set from the final step list by `Memo::new`.
             clean_before: false,
             clean_after: false,
+            settled: false,
         }));
 
         let mut list = self.list;
