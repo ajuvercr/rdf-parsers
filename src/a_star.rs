@@ -25,6 +25,44 @@ pub enum ParseMode {
     Fast,
 }
 
+/// How the fault-tolerant search recovers from errors (see `ParseOptions`).
+///
+/// All engines search the same graph with the same costs, role agreement
+/// included: matching a token, inserting a missing one, deleting one, and
+/// skipping ahead to a token an enclosing rule accepts.  They differ in how
+/// much of that graph they are willing to explore.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Engine {
+    /// One search over the rest of the input for the cheapest parse, pruned
+    /// to stay fast: a path is set aside once a cheaper one is
+    /// `DEFAULT_DOMINANCE_WINDOW` tokens ahead of it on clean input, a token
+    /// position gets at most `DEFAULT_POPS_PER_POSITION` expansions, and a
+    /// path makes at most `DEFAULT_MAX_REPAIR_SPAN` repairs in a row.  Set
+    /// aside paths come back if every other path dead-ends.
+    #[default]
+    Global,
+    /// The same search without that pruning: the cheapest parse under the
+    /// cost model, within `max_iterations` and the time budget.  It shows
+    /// what the pruning costs, and can be very slow.
+    Exact,
+    /// Repairs each error where it is found.  Once a path has repaired
+    /// something (or given a token another role than it had before) and then
+    /// parsed `window` token positions cleanly, white space and comments
+    /// included, and no cheaper path is left, the search commits to it: every
+    /// other path is dropped, and later errors are repaired from there.
+    /// Within a window the cheapest repair still wins, role agreement
+    /// included, so the work per error is bounded by what lies within reach
+    /// of it.
+    Local { window: usize },
+}
+
+/// The window of `Engine::Local` when none is given: twice as far as the
+/// global engine's dominance pruning looks.  Shorter windows commit in the
+/// middle of a cluster of errors (say between `{|` and `|}` in a grammar
+/// without annotations), and the rest of the cluster is then repaired from
+/// there, which costs roles in every statement with such a cluster.
+pub const DEFAULT_LOCAL_WINDOW: usize = 2 * DEFAULT_DOMINANCE_WINDOW;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Fingerprint(pub u128);
 
@@ -248,6 +286,14 @@ pub struct AStar<'a, R: ParserTrait> {
     eager: Vec<Element<R>>,
     /// `(f, token position)` of the element being expanded.
     expanding: Option<(isize, usize)>,
+    /// `Engine::Local`: commit to a path once it has parsed this many tokens
+    /// cleanly after a repair.  `None` for the other engines.
+    commit_window: Option<usize>,
+    /// Excess cost (see `excess`) of the path committed to last: a path
+    /// with more has repaired something since.
+    committed_excess: isize,
+    /// Number of commits, for diagnostics (`last_commits`).
+    commits: usize,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -289,6 +335,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             spliced: None,
             eager: Vec::new(),
             expanding: None,
+            commit_window: None,
+            committed_excess: 0,
+            commits: 0,
         }
     }
 
@@ -323,6 +372,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             spliced: None,
             eager: Vec::new(),
             expanding: None,
+            commit_window: None,
+            committed_excess: 0,
+            commits: 0,
         }
     }
 
@@ -437,6 +489,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 }
 
                 if self.mode == ParseMode::FaultTolerant {
+                    if let Some(window) = self.commit_window {
+                        let excess = self.excess(&mut e);
+                        if excess > self.committed_excess && e.state.1 - e.clean.1 >= window {
+                            self.commit(excess);
+                        }
+                    }
                     let pops = &mut self.pops_at[e.state.1];
                     if *pops >= self.pops_per_position {
                         self.parked.push(e);
@@ -577,6 +635,47 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         self.todo.extend(resume);
     }
 
+    /// `e`'s cost above a perfect match of the tokens it consumed, i.e. what
+    /// its repairs and role conflicts cost.  Records in `e.clean` where that
+    /// last changed: `e` has parsed cleanly from there.
+    fn excess(&self, e: &mut Element<R>) -> isize {
+        let pos = e.state.1;
+        let matched = self.heuristic[self.start] - self.heuristic[pos];
+        let excess = e.cost - matched;
+        if excess != e.clean.0 {
+            e.clean = (excess, pos);
+        }
+        excess
+    }
+
+    /// `Engine::Local`: the element being expanded repaired something and has
+    /// since parsed a window of tokens cleanly, and it was popped first, so
+    /// nothing left is cheaper.  Drop every other path: later errors are
+    /// repaired from this one.
+    fn commit(&mut self, excess: isize) {
+        self.todo.clear();
+        self.eager.clear();
+        self.parked.clear();
+        self.frontier.clear();
+        self.done.clear();
+        self.pops_at.fill(0);
+        self.committed_excess = excess;
+        self.commits += 1;
+    }
+
+    /// Sets the search up for `engine` (fault-tolerant mode only).
+    fn configure(&mut self, engine: Engine) {
+        match engine {
+            Engine::Global => {}
+            Engine::Exact => {
+                self.dominance_window = usize::MAX;
+                self.pops_per_position = u32::MAX;
+                self.max_repair_span = u16::MAX;
+            }
+            Engine::Local { window } => self.commit_window = Some(window.max(1)),
+        }
+    }
+
     /// Frontier-dominance check for a freshly popped element.
     ///
     /// A path is dropped when a path with strictly lower excess cost is at
@@ -588,11 +687,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     /// that end up costing more than one bigger fix.
     fn dominated(&mut self, e: &mut Element<R>) -> bool {
         let pos = e.state.1;
-        let matched = self.heuristic[self.start] - self.heuristic[pos];
-        let excess = e.cost - matched;
-        if excess != e.clean.0 {
-            e.clean = (excess, pos);
-        }
+        let excess = self.excess(e);
         let level = excess.max(0) as usize;
         if let Some(below) = level.min(self.frontier.len()).checked_sub(1)
             && self.frontier[below] > pos
@@ -1354,6 +1449,7 @@ impl<R: ParserTrait> PartialOrd for Element<R> {
 
 thread_local! {
     static LAST_ITERATIONS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+    static LAST_COMMITS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 
 /// Heap pops performed by the most recent search on this thread.  Diagnostic
@@ -1361,6 +1457,13 @@ thread_local! {
 #[doc(hidden)]
 pub fn last_iterations() -> usize {
     LAST_ITERATIONS.with(|c| c.get())
+}
+
+/// Commits made by the most recent search on this thread (`Engine::Local`;
+/// 0 for the other engines).  Diagnostic only, for benchmarks.
+#[doc(hidden)]
+pub fn last_commits() -> usize {
+    LAST_COMMITS.with(|c| c.get())
 }
 
 fn same_stack<R: ParserTrait>(
@@ -1379,7 +1482,7 @@ pub fn a_star<R: ParserTrait>(
     bias: IncrementalBias,
     max_iterations: usize,
 ) -> List<Step<R::Kind>> {
-    search(root, tokens, ParseMode::FaultTolerant, bias, max_iterations, None, None)
+    search(root, tokens, ParseMode::FaultTolerant, bias, max_iterations, None, None, Engine::Global)
         .map_or_else(List::default, |f| f.list)
 }
 
@@ -1389,7 +1492,16 @@ pub fn a_star_fast<R: ParserTrait>(
     root: R,
     tokens: &[FatToken<R::Kind>],
 ) -> Option<List<Step<R::Kind>>> {
-    search(root, tokens, ParseMode::Fast, IncrementalBias { strength: 0 }, usize::MAX, None, None)
+    search(
+        root,
+        tokens,
+        ParseMode::Fast,
+        IncrementalBias { strength: 0 },
+        usize::MAX,
+        None,
+        None,
+        Engine::Global,
+    )
         .map(|f| f.list)
 }
 
@@ -1401,6 +1513,7 @@ pub(crate) fn search<'a, R: ParserTrait>(
     max_iterations: usize,
     reuse: Option<&'a Reuse<'a>>,
     deadline: Option<Instant>,
+    engine: Engine,
 ) -> Option<Found<R>> {
     let mut state = match mode {
         ParseMode::FaultTolerant => AStar::new(tokens, bias, max_iterations),
@@ -1409,9 +1522,11 @@ pub(crate) fn search<'a, R: ParserTrait>(
     state.reuse = reuse;
     if mode == ParseMode::FaultTolerant {
         state.deadline = deadline;
+        state.configure(engine);
     }
     let out = state.consume(root);
     LAST_ITERATIONS.with(|c| c.set(state.iterations));
+    LAST_COMMITS.with(|c| c.set(state.commits));
     out
 }
 

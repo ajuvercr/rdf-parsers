@@ -4,21 +4,32 @@
 //! A sync-ahead recovery used to skip tokens without recording them, so every
 //! later token landed in the node meant for the token after it, and the last
 //! ones were left over as `Unparsed`. These tests type into documents one
-//! keystroke at a time, as an editor does, and check every parse.
+//! keystroke at a time, as an editor does, and check every parse, with every
+//! engine.
 
-use rdf_parsers::{IncrementalBias, PrevParseInfo, parse_incremental};
+use rdf_parsers::{
+    DEFAULT_LOCAL_WINDOW, Engine, ParseOptions, PrevParseInfo, parse_incremental_with,
+};
+
+const ENGINES: [Engine; 3] = [
+    Engine::Global,
+    Engine::Exact,
+    Engine::Local {
+        window: DEFAULT_LOCAL_WINDOW,
+    },
+];
 
 /// Ok, or the first token that sits alone in a node of another kind, or an
 /// `Unparsed` error.
 macro_rules! alignment {
-    ($lang:ident, $root:ident, $text:expr, $prev:expr) => {{
+    ($lang:ident, $root:ident, $engine:expr, $text:expr, $prev:expr) => {{
         use rdf_parsers::$lang::{Lang, Rule, SyntaxKind};
-        let (parse, info) = parse_incremental(
-            Rule::new(SyntaxKind::$root),
-            $text,
-            $prev,
-            IncrementalBias::default(),
-        );
+        let options = ParseOptions {
+            engine: $engine,
+            ..ParseOptions::default()
+        };
+        let (parse, info) =
+            parse_incremental_with(Rule::new(SyntaxKind::$root), $text, $prev, options);
         let mut problem = parse
             .errors
             .iter()
@@ -49,7 +60,8 @@ macro_rules! alignment {
                 && node.kind() != t.kind()
             {
                 problem = Some(format!(
-                    "token {:?} {:?} in a {:?} node, in {:?}",
+                    "{:?}: token {:?} {:?} in a {:?} node, in {:?}",
+                    $engine,
                     t.kind(),
                     t.text(),
                     node.kind(),
@@ -77,16 +89,18 @@ WHERE {
 }
 ORDER BY ?name
 ";
-    let (problem, mut prev): (Option<String>, PrevParseInfo) =
-        alignment!(sparql, QueryUnit, before, None);
-    assert_eq!(problem, None);
-    let at = before.find("          foaf:name").unwrap();
-    let mut text = before.to_string();
-    for (i, c) in "          foaf:foaf [\n".char_indices() {
-        text.insert(at + i, c);
-        let (problem, info) = alignment!(sparql, QueryUnit, &text, Some(&prev));
+    for engine in ENGINES {
+        let (problem, mut prev): (Option<String>, PrevParseInfo) =
+            alignment!(sparql, QueryUnit, engine, before, None);
         assert_eq!(problem, None);
-        prev = info;
+        let at = before.find("          foaf:name").unwrap();
+        let mut text = before.to_string();
+        for (i, c) in "          foaf:foaf [\n".char_indices() {
+            text.insert(at + i, c);
+            let (problem, info) = alignment!(sparql, QueryUnit, engine, &text, Some(&prev));
+            assert_eq!(problem, None);
+            prev = info;
+        }
     }
 }
 
@@ -126,8 +140,9 @@ _:b1 ex:rank -3 ; ex:ok true .
         seed ^= seed << 17;
         (seed % n as u64) as usize
     };
-    for _ in 0..8 {
-        let (_, mut prev) = alignment!(turtle, TurtleDoc, base, None);
+    for i in 0..9 {
+        let engine = ENGINES[i % ENGINES.len()];
+        let (_, mut prev) = alignment!(turtle, TurtleDoc, engine, base, None);
         let mut text = base.to_string();
         for _ in 0..3 {
             let mut at = next(text.len() + 1);
@@ -137,7 +152,7 @@ _:b1 ex:rank -3 ; ex:ok true .
             for c in snippets[next(snippets.len())].chars() {
                 text.insert(at, c);
                 at += c.len_utf8();
-                let (problem, info) = alignment!(turtle, TurtleDoc, &text, Some(&prev));
+                let (problem, info) = alignment!(turtle, TurtleDoc, engine, &text, Some(&prev));
                 assert_eq!(problem, None);
                 prev = info;
             }

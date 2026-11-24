@@ -12,7 +12,7 @@ pub use a_star::Fingerprint;
 pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
 #[doc(hidden)]
-pub use a_star::last_iterations;
+pub use a_star::{DEFAULT_LOCAL_WINDOW, Engine, last_commits, last_iterations};
 pub mod list;
 pub mod model;
 pub mod format;
@@ -317,6 +317,11 @@ pub struct ParseOptions {
     pub time_budget: Option<std::time::Duration>,
     /// Heap pops before the fault-tolerant search stops the same way.
     pub max_iterations: usize,
+    /// How the fault-tolerant search recovers from errors: one pruned search
+    /// for the cheapest parse (`Engine::Global`, the default), the same
+    /// search without pruning (`Engine::Exact`), or a repair per error
+    /// (`Engine::Local`).
+    pub engine: Engine,
 }
 
 impl Default for ParseOptions {
@@ -325,6 +330,7 @@ impl Default for ParseOptions {
             bias: IncrementalBias::default(),
             time_budget: None,
             max_iterations: a_star::DEFAULT_MAX_ITERATIONS,
+            engine: Engine::Global,
         }
     }
 }
@@ -384,6 +390,7 @@ where
         usize::MAX,
         reuse.as_ref(),
         None,
+        Engine::Global,
     );
     let (list, memo) = match found {
         Some(found) => found.finish(reuse.as_ref()),
@@ -408,6 +415,7 @@ where
                 options.max_iterations,
                 reuse.as_ref(),
                 deadline,
+                options.engine,
             )
             .map(|found| found.finish(reuse.as_ref()))
             .unwrap_or_default()
