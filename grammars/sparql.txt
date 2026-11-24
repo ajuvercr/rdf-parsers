@@ -100,9 +100,9 @@
 [95]  	PathNegatedPropertySet	  ::=  	PathOneInPropertySet | "(" ( PathOneInPropertySet ( "|" PathOneInPropertySet )* )? ")"
 [96]  	PathOneInPropertySet	  ::=  	iri | 'a' | "^" ( iri | 'a' )
 [98]  	TriplesNode	  ::=  	Collection | BlankNodePropertyList
-[99]  	BlankNodePropertyList	  ::=  	"[" PropertyListNotEmpty "]"
+[99]  	BlankNodePropertyList	  ::=  	"[" PropertyListNotEmpty? "]"
 [100]  	TriplesNodePath	  ::=  	CollectionPath | BlankNodePropertyListPath
-[101]  	BlankNodePropertyListPath	  ::=  	"[" PropertyListPathNotEmpty "]"
+[101]  	BlankNodePropertyListPath	  ::=  	"[" PropertyListPathNotEmpty? "]"
 [102]  	Collection	  ::=  	"(" GraphNode+ ")"
 [103]  	CollectionPath	  ::=  	"(" GraphNodePath+ ")"
 [104]  	GraphNode	  ::=  	VarOrTerm | TriplesNode

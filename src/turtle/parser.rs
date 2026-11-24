@@ -214,7 +214,7 @@ mod definitions {
                 },
                 SyntaxKind::BlankNodePropertyList => Rule {
                     kind,
-                    state: 3usize,
+                    state: 4usize,
                 },
                 SyntaxKind::Collection => Rule {
                     kind,
@@ -998,38 +998,20 @@ mod definitions {
                 SyntaxKind::Alit
                 | SyntaxKind::Iriref
                 | SyntaxKind::PnameLn
-                | SyntaxKind::PnameNs => 0,
+                | SyntaxKind::PnameNs
+                | SyntaxKind::SqClose => 0,
                 _ => 1isize,
             },
             (SyntaxKind::BlankNodePropertyList, 3usize, _) => match terminal {
-                SyntaxKind::Alit => 2isize,
-                SyntaxKind::Anon => 3isize,
-                SyntaxKind::BlankNodeLabel => 3isize,
-                SyntaxKind::Decimal => 3isize,
-                SyntaxKind::Double => 3isize,
-                SyntaxKind::FalseLit => 3isize,
-                SyntaxKind::Integer => 3isize,
-                SyntaxKind::Iriref => 2isize,
-                SyntaxKind::Langtag => 3isize,
-                SyntaxKind::PnameLn => 2isize,
-                SyntaxKind::PnameNs => 2isize,
-                SyntaxKind::StringLiteralLongQuote => 3isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 3isize,
-                SyntaxKind::StringLiteralQuote => 3isize,
-                SyntaxKind::StringLiteralSingleQuote => 3isize,
-                SyntaxKind::TrueLit => 3isize,
-                SyntaxKind::BaseToken => 3isize,
-                SyntaxKind::ClClose => 3isize,
-                SyntaxKind::ClOpen => 3isize,
-                SyntaxKind::Colon => 3isize,
-                SyntaxKind::Comma => 3isize,
-                SyntaxKind::Datatype => 3isize,
-                SyntaxKind::PrefixToken => 3isize,
-                SyntaxKind::SparqlBaseToken => 3isize,
-                SyntaxKind::SparqlPrefixToken => 3isize,
-                SyntaxKind::SqClose => 3isize,
-                SyntaxKind::Stop => 3isize,
-                _ => 0,
+                SyntaxKind::Alit
+                | SyntaxKind::Iriref
+                | SyntaxKind::PnameLn
+                | SyntaxKind::PnameNs => 0,
+                _ => 1isize,
+            },
+            (SyntaxKind::BlankNodePropertyList, 4usize, _) => match terminal {
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::Collection, 1usize, _) => match terminal {
                 SyntaxKind::ClClose => 0,
@@ -1296,34 +1278,8 @@ mod definitions {
                 _ => 2isize,
             },
             (SyntaxKind::Object, 5usize, _) => match terminal {
-                SyntaxKind::Alit => 2isize,
-                SyntaxKind::Anon => 3isize,
-                SyntaxKind::BlankNodeLabel => 3isize,
-                SyntaxKind::Decimal => 3isize,
-                SyntaxKind::Double => 3isize,
-                SyntaxKind::FalseLit => 3isize,
-                SyntaxKind::Integer => 3isize,
-                SyntaxKind::Iriref => 2isize,
-                SyntaxKind::Langtag => 3isize,
-                SyntaxKind::PnameLn => 2isize,
-                SyntaxKind::PnameNs => 2isize,
-                SyntaxKind::StringLiteralLongQuote => 3isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 3isize,
-                SyntaxKind::StringLiteralQuote => 3isize,
-                SyntaxKind::StringLiteralSingleQuote => 3isize,
-                SyntaxKind::TrueLit => 3isize,
-                SyntaxKind::BaseToken => 3isize,
-                SyntaxKind::ClClose => 3isize,
-                SyntaxKind::ClOpen => 3isize,
-                SyntaxKind::Colon => 3isize,
-                SyntaxKind::Comma => 3isize,
-                SyntaxKind::Datatype => 3isize,
-                SyntaxKind::PrefixToken => 3isize,
-                SyntaxKind::SparqlBaseToken => 3isize,
-                SyntaxKind::SparqlPrefixToken => 3isize,
-                SyntaxKind::SqClose => 3isize,
-                SyntaxKind::Stop => 3isize,
-                _ => 0,
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::Object, 6usize, _) => match terminal {
                 SyntaxKind::Decimal
@@ -1751,34 +1707,8 @@ mod definitions {
                 _ => 1isize,
             },
             (SyntaxKind::Triples, 4usize, _) => match terminal {
-                SyntaxKind::Alit => 2isize,
-                SyntaxKind::Anon => 3isize,
-                SyntaxKind::BlankNodeLabel => 3isize,
-                SyntaxKind::Decimal => 3isize,
-                SyntaxKind::Double => 3isize,
-                SyntaxKind::FalseLit => 3isize,
-                SyntaxKind::Integer => 3isize,
-                SyntaxKind::Iriref => 2isize,
-                SyntaxKind::Langtag => 3isize,
-                SyntaxKind::PnameLn => 2isize,
-                SyntaxKind::PnameNs => 2isize,
-                SyntaxKind::StringLiteralLongQuote => 3isize,
-                SyntaxKind::StringLiteralLongSingleQuote => 3isize,
-                SyntaxKind::StringLiteralQuote => 3isize,
-                SyntaxKind::StringLiteralSingleQuote => 3isize,
-                SyntaxKind::TrueLit => 3isize,
-                SyntaxKind::BaseToken => 3isize,
-                SyntaxKind::ClClose => 3isize,
-                SyntaxKind::ClOpen => 3isize,
-                SyntaxKind::Colon => 3isize,
-                SyntaxKind::Comma => 3isize,
-                SyntaxKind::Datatype => 3isize,
-                SyntaxKind::PrefixToken => 3isize,
-                SyntaxKind::SparqlBaseToken => 3isize,
-                SyntaxKind::SparqlPrefixToken => 3isize,
-                SyntaxKind::SqClose => 3isize,
-                SyntaxKind::Stop => 3isize,
-                _ => 0,
+                SyntaxKind::SqOpen => 0,
+                _ => 2isize,
             },
             (SyntaxKind::Triples, 5usize, _) => match terminal {
                 SyntaxKind::Alit
@@ -2226,7 +2156,7 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BlankNodePropertyList,
-                                state: 3usize,
+                                state: 4usize,
                             }),
                         SyntaxKind::BlankNodePropertyList,
                     );
@@ -2588,7 +2518,7 @@ mod definitions {
                             })
                             .push(Rule {
                                 kind: SyntaxKind::BlankNodePropertyList,
-                                state: 3usize,
+                                state: 4usize,
                             }),
                         SyntaxKind::BlankNodePropertyList,
                     );
@@ -2687,6 +2617,16 @@ mod definitions {
                     }
                 }
                 (SyntaxKind::BlankNodePropertyList, 2usize) => {
+                    state.add_element(element.pop_push(Rule {
+                        kind: self.kind,
+                        state: 1usize,
+                    }));
+                    state.add_element(element.pop_push(Rule {
+                        kind: self.kind,
+                        state: 3usize,
+                    }));
+                }
+                (SyntaxKind::BlankNodePropertyList, 3usize) => {
                     state.add_element_checked(
                         element
                             .pop_push(Rule {
@@ -2700,7 +2640,7 @@ mod definitions {
                         SyntaxKind::PredicateObjectList,
                     );
                 }
-                (SyntaxKind::BlankNodePropertyList, 3usize) => {
+                (SyntaxKind::BlankNodePropertyList, 4usize) => {
                     let (matched, fb) = state.expect_as_inline(element, SyntaxKind::SqOpen);
                     state.add_element(matched.pop_push(Rule {
                         kind: self.kind,
@@ -3431,7 +3371,7 @@ impl TokenTrait for SyntaxKind {
     fn min_completion_cost(&self) -> isize {
         match self {
             SyntaxKind::Base => 104isize,
-            SyntaxKind::BlankNodePropertyList => 6isize,
+            SyntaxKind::BlankNodePropertyList => 4isize,
             SyntaxKind::Collection => 4isize,
             SyntaxKind::Directive => 101isize,
             SyntaxKind::PredicateObjectList => 2isize,

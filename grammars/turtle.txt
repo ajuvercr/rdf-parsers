@@ -15,7 +15,7 @@
 [11]	predicate	::=	iri
 [12]	object	::=	iri | BlankNode | collection | blankNodePropertyList | literal
 [13]	literal	::=	RDFLiteral | NumericLiteral | BooleanLiteral
-[14]	blankNodePropertyList	::=	'[' predicateObjectList  ']'
+[14]	blankNodePropertyList	::=	'[' predicateObjectList?  ']'
 [15]	collection	::=	'(' object* ')'
 [16]	NumericLiteral	::=	INTEGER | DECIMAL | DOUBLE
 [128s]	RDFLiteral	::=	String (LANGTAG | '^^' iri)?
