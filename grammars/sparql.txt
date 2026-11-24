@@ -334,6 +334,20 @@ DeleteWhereLit -> 20
 AddLit -> 20
 MoveLit -> 20
 CopyLit -> 20
+WhereLit -> 20
+OptionalLit -> 20
+FilterLit -> 20
+BindLit -> 20
+MinusLit -> 20
+GraphLit -> 20
+ServiceLit -> 20
+UnionLit -> 20
+ValuesLit -> 20
+OrderLit -> 20
+GroupLit -> 20
+HavingLit -> 20
+LimitLit -> 20
+OffsetLit -> 20
 === bracket_open ===
 sq_open
 br_open
