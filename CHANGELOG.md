@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.4.0 (2026-11-24)
+
+### New Features
+
+ - <csr-id-f5cb636514ba8b5bf3dab34d66f54b6b952ac22b/> improve incremental parsing
+
+### New Features (BREAKING)
+
+ - <csr-id-c151a3cb075095b5c0c865a0d7071d4c06f4f4eb/> parse an empty blank node as one ANON token in Turtle and TriG
+   `[]`, with white space or comments inside, is one `ANON` token again, as in
+   the W3C grammars, and `BlankNode ::= BLANK_NODE_LABEL | ANON` wherever a
+   blank node can stand: subject, object and, in TriG, graph name. `object`
+   follows the W3C grammar: `iri | BlankNode | collection |
+   blankNodePropertyList | literal`.
+   
+   - An empty blank node is found the same way as `_:b`: a token of kind
+     `Anon` in a `BlankNode`. It used to be a `[` `]` pair, under `BlankNode`
+     as a subject but under an empty `BlankNodePropertyList2` as an object.
+   - Typing inside `[ ]` makes the new token a predicate. Turtle used to read
+     `[ <q> ] <p> <o> .` as `[]` with `<q>` skipped, and TriG did the same
+     for objects. A `[` that is not closed yet, or holds a half-typed term,
+     starts a property list; it is no longer an empty blank node.
+   - Comments are allowed inside `[ ]`, as the W3C grammar's comments-as-white-
+     space rule suggests although its `ANON ::= '[' WS* ']'` leaves them out.
+   - The formatter prints `[]`, `[  ]` and a `[ ]` across lines as `[ ]`, and
+     keeps comments inside as comments, with `]` on a line of its own.
+   - W3C suites unchanged: Turtle 296/296, TriG 334/334.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 2 commits contributed to the release.
+ - 4 days passed between releases.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Parse an empty blank node as one ANON token in Turtle and TriG ([`c151a3c`](https://github.com/ajuvercr/rdf-parsers/commit/c151a3cb075095b5c0c865a0d7071d4c06f4f4eb))
+    - Improve incremental parsing ([`f5cb636`](https://github.com/ajuvercr/rdf-parsers/commit/f5cb636514ba8b5bf3dab34d66f54b6b952ac22b))
+</details>
+
 ## v0.3.0 (2026-11-19)
 
 ### Bug Fixes
