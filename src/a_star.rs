@@ -1029,81 +1029,86 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         let pos = element.state.1;
         let max_scan = (pos + MAX_SYNC_SCAN).min(self.tokens.len());
 
-        // Track the best sync candidate (lowest cost).
-        let mut best: Option<Element<R>> = None;
+        /// The best sync point so far; its steps are only built at the end.
+        struct Best<R: ParserTrait> {
+            f: isize,
+            cost: isize,
+            h: isize,
+            next: usize,
+            /// Rules popped, the stack after popping, and the accepting
+            /// ancestor's saved fingerprint.
+            pops: usize,
+            parent: List<Frame<R>>,
+            saved: Fingerprint,
+            /// Non-trivia tokens skipped.
+            skipped: usize,
+        }
+        let mut best: Option<Best<R>> = None;
+        // Deletion cost and count of the non-trivia tokens in pos..scan_pos.
+        let (mut skip_cost, mut skipped) = (0isize, 0usize);
 
-        for scan_pos in (pos + 1)..max_scan {
+        for scan_pos in pos..max_scan {
             let tok = &self.tokens[scan_pos];
             if tok.kind.skips() {
                 continue;
             }
-
-            // Walk the parent stack looking for an ancestor that can accept
-            // this token (min_error_for_token == 0).
-            let mut parent = element.parent.clone();
-            let mut list = element.list.clone();
-
-            loop {
-                let Some((Frame { rule, saved: saved_fp, .. }, tail)) = parent.slice() else {
-                    break;
-                };
-
-                let kind = rule.element_kind();
-                if kind.min_error_for_token(&tok.kind) == 0 {
-                    // This ancestor can accept the sync token.
-                    // Cost: deletion cost for each non-trivia token we skip.
-                    let skip_cost: isize = (pos..scan_pos)
-                        .filter_map(|p| self.tokens.get(p))
-                        .filter(|t| !t.kind.skips())
-                        .map(|t| t.kind.deletion_cost())
-                        .sum();
-
-                    let next = self.get_actual_index(scan_pos);
-                    let h = self.heuristic.get(next).copied().unwrap_or(0);
-
-                    // Without these, the tree would put every later token in
-                    // the node meant for the one after it.
-                    let skipped = (pos..scan_pos)
-                        .filter(|&p| self.tokens.get(p).is_some_and(|t| !t.kind.skips()))
-                        .count();
-                    let list = (0..skipped).fold(list, |l, _| l.prepend(Step::Delete));
-
-                    let candidate = Element {
-                        list,
-                        parent: parent.clone(),
-                        cost: element.cost + skip_cost,
-                        h,
-                        state: (*saved_fp, next),
-                        has_error: true,
-                        assumed_depth_delta: element.assumed_depth_delta,
-                        current_depth: element.current_depth,
-                        consecutive_errors: 0,
-                        shifts_since_pop: 0, // sync resets — we popped to ancestor
-                        dist: 0,             // h is a fresh suffix-sum
-                        clean: element.clean,
-                        marks: element.marks.clone(),
-                    };
-
-                    let f = candidate.cost + candidate.h;
-                    if best.as_ref().map_or(true, |b| f < b.cost + b.h) {
-                        best = Some(candidate);
+            if scan_pos > pos {
+                // Walk the parent stack looking for an ancestor that can
+                // accept this token (min_error_for_token == 0). The root rule
+                // is never popped.
+                let mut parent = element.parent.clone();
+                let mut pops = 0;
+                while let Some((Frame { rule, saved, .. }, tail)) = parent.slice() {
+                    if rule.element_kind().min_error_for_token(&tok.kind) == 0 {
+                        let next = self.get_actual_index(scan_pos);
+                        let h = self.heuristic.get(next).copied().unwrap_or(0);
+                        let cost = element.cost + skip_cost;
+                        if best.as_ref().is_none_or(|b| cost + h < b.f) {
+                            best = Some(Best {
+                                f: cost + h,
+                                cost,
+                                h,
+                                next,
+                                pops,
+                                parent: parent.clone(),
+                                saved: *saved,
+                                skipped,
+                            });
+                        }
+                        break;
                     }
-                    break;
-                }
-
-                // Pop this rule: append an End step.
-                list = list.prepend(Step::end());
-                parent = tail.clone();
-
-                // Don't pop the root rule.
-                if parent.len() == 0 {
-                    break;
+                    if tail.len() == 0 {
+                        break;
+                    }
+                    parent = tail.clone();
+                    pops += 1;
                 }
             }
+            skip_cost += tok.kind.deletion_cost();
+            skipped += 1;
         }
 
-        if let Some(sync_element) = best {
-            self.add_element(sync_element);
+        if let Some(b) = best {
+            // End the popped rules, then record each skipped token as a Delete
+            // step in the accepting ancestor. Without them, the tree would put
+            // every later token in the node meant for the one after it.
+            let list = (0..b.pops).fold(element.list.clone(), |l, _| l.prepend(Step::end()));
+            let list = (0..b.skipped).fold(list, |l, _| l.prepend(Step::Delete));
+            self.add_element(Element {
+                list,
+                parent: b.parent,
+                cost: b.cost,
+                h: b.h,
+                state: (b.saved, b.next),
+                has_error: true,
+                assumed_depth_delta: element.assumed_depth_delta,
+                current_depth: element.current_depth,
+                consecutive_errors: 0,
+                shifts_since_pop: 0, // sync resets — we popped to ancestor
+                dist: 0,             // h is a fresh suffix-sum
+                clean: element.clean,
+                marks: element.marks.clone(),
+            });
         }
     }
 }
