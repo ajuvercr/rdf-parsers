@@ -1016,7 +1016,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     /// threshold, scan ahead for a token that an ancestor rule can accept.
     /// If found, create a single recovery element that:
     ///   1. Pops rules to the accepting ancestor
-    ///   2. Wraps all skipped tokens in a single Error node (via Delete steps)
+    ///   2. Records each skipped token as a Delete step (an Error node in
+    ///      the ancestor), so the steps still account for every token
     ///   3. Resets consecutive_errors to 0
     ///
     /// This is the recursive-descent analog of Kim & Yi's (R3S-n) unrestricted
@@ -1059,6 +1060,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
 
                     let next = self.get_actual_index(scan_pos);
                     let h = self.heuristic.get(next).copied().unwrap_or(0);
+
+                    // Without these, the tree would put every later token in
+                    // the node meant for the one after it.
+                    let skipped = (pos..scan_pos)
+                        .filter(|&p| self.tokens.get(p).is_some_and(|t| !t.kind.skips()))
+                        .count();
+                    let list = (0..skipped).fold(list, |l, _| l.prepend(Step::Delete));
 
                     let candidate = Element {
                         list,
