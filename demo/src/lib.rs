@@ -13,14 +13,15 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
 use rdf_parsers::{
-    IncrementalBias, Parse, ParserTrait, PrevParseInfo, TokenTrait, effective_error_span,
+    DEFAULT_LOCAL_WINDOW, Engine, Parse, ParseOptions, ParserTrait, PrevParseInfo, TokenTrait,
+    effective_error_span, last_commits, last_iterations,
     jsonld::parser::{Lang as JsonLdLang, Rule as JsonLdRule, SyntaxKind as JsonLdSyntaxKind},
     model::Turtle,
     n3::parser::{Lang as N3Lang, Rule as N3Rule, SyntaxKind as N3SyntaxKind},
     ntriples::parser::{
         Lang as NTriplesLang, Rule as NTriplesRule, SyntaxKind as NTriplesSyntaxKind,
     },
-    parse_incremental,
+    parse_incremental_with,
     sparql::parser::{Lang as SparqlLang, Rule as SparqlRule, SyntaxKind as SparqlSyntaxKind},
     trig::parser::{Lang as TrigLang, Rule as TrigRule, SyntaxKind as TrigSyntaxKind},
     turtle::parser::{Lang, Rule, SyntaxKind},
@@ -34,6 +35,110 @@ thread_local! {
     static PREV_N3:       RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static PREV_JSONLD:   RefCell<Option<PrevParseInfo>> = RefCell::new(None);
     static JSONLD_CACHE:   RefCell<WasmFetchLoader> = RefCell::new(WasmFetchLoader::default());
+    /// The engine of `parse` (see `set_engine`).
+    static ENGINE: std::cell::Cell<Engine> = const { std::cell::Cell::new(Engine::Global) };
+    /// The editing history of every engine in `compare`, per language.
+    static COMPARE_PREV: RefCell<HashMap<(String, usize), PrevParseInfo>> = RefCell::new(HashMap::new());
+}
+
+/// The engines the page offers, by the names it uses.
+const ENGINES: [(&str, Engine); 4] = [
+    ("global", Engine::Global),
+    ("exact", Engine::Exact),
+    ("local", Engine::Local { window: DEFAULT_LOCAL_WINDOW }),
+    ("local:4", Engine::Local { window: 4 }),
+];
+
+/// Sets the engine `parse` uses: `global`, `exact`, `local` or `local:4`.
+#[wasm_bindgen]
+pub fn set_engine(name: &str) -> Result<(), JsValue> {
+    let (_, engine) = ENGINES
+        .iter()
+        .find(|(n, _)| *n == name)
+        .ok_or_else(|| JsValue::from_str("unknown engine"))?;
+    ENGINE.set(*engine);
+    Ok(())
+}
+
+fn options() -> ParseOptions {
+    ParseOptions {
+        engine: ENGINE.get(),
+        ..ParseOptions::default()
+    }
+}
+
+fn now_ms() -> f64 {
+    web_sys::window()
+        .and_then(|w| w.performance())
+        .map_or(0.0, |p| p.now())
+}
+
+fn json_str(s: &str) -> String {
+    let mut out = String::from("\"");
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            c if (c as u32) < 0x20 => {
+                let _ = write!(out, "\\u{:04x}", c as u32);
+            }
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
+/// Parses `text` with every engine, each with its own editing history (so
+/// they see the same sequence of edits), and returns a JSON array with one
+/// object per engine: `engine`, `iterations`, `commits`, `ms`, `errors`.
+fn compare_engines<T>(root: T, language: &str, text: &str) -> String
+where
+    T: ParserTrait + 'static + Clone,
+    for<'a> T::Kind: logos::Logos<'a, Source = str>,
+    for<'a> <<T as ParserTrait>::Kind as logos::Logos<'a>>::Extras: Default,
+{
+    let mut rows = Vec::new();
+    COMPARE_PREV.with(|prev| {
+        let mut prev = prev.borrow_mut();
+        for (i, (name, engine)) in ENGINES.iter().enumerate() {
+            let key = (language.to_string(), i);
+            let options = ParseOptions {
+                engine: *engine,
+                ..ParseOptions::default()
+            };
+            let t0 = now_ms();
+            let (result, info) = parse_incremental_with(root.clone(), text, prev.get(&key), options);
+            let ms = now_ms() - t0;
+            let errors: Vec<String> = result.errors.iter().map(|e| json_str(e)).collect();
+            rows.push(format!(
+                "{{\"engine\":{},\"iterations\":{},\"commits\":{},\"ms\":{:.2},\"errors\":[{}]}}",
+                json_str(name),
+                last_iterations(),
+                last_commits(),
+                ms,
+                errors.join(",")
+            ));
+            prev.insert(key, info);
+        }
+    });
+    format!("[{}]", rows.join(","))
+}
+
+/// `compare_engines` for `language`.
+#[wasm_bindgen]
+pub fn compare(language: &str, text: &str) -> Result<String, JsValue> {
+    Ok(match language {
+        "turtle" => compare_engines(Rule::new(SyntaxKind::TurtleDoc), language, text),
+        "sparql" => compare_engines(SparqlRule::new(SparqlSyntaxKind::QueryUnit), language, text),
+        "trig" => compare_engines(TrigRule::new(TrigSyntaxKind::TrigDoc), language, text),
+        "ntriples" => {
+            compare_engines(NTriplesRule::new(NTriplesSyntaxKind::NtriplesDoc), language, text)
+        }
+        "n3" => compare_engines(N3Rule::new(N3SyntaxKind::N3Doc), language, text),
+        "jsonld" => compare_engines(JsonLdRule::new(JsonLdSyntaxKind::JsonldDoc), language, text),
+        _ => return Err("Unknown language".into()),
+    })
 }
 
 #[wasm_bindgen(start)]
@@ -232,6 +337,8 @@ pub struct ParseResult {
     ast: String,
     triples: String,
     formatted: String,
+    iterations: u32,
+    commits: u32,
 }
 
 #[wasm_bindgen]
@@ -255,6 +362,18 @@ impl ParseResult {
     pub fn formatted(&self) -> String {
         self.formatted.clone()
     }
+
+    /// Search iterations of this parse.
+    #[wasm_bindgen(getter)]
+    pub fn iterations(&self) -> u32 {
+        self.iterations
+    }
+
+    /// Commits of this parse (local engine only).
+    #[wasm_bindgen(getter)]
+    pub fn commits(&self) -> u32 {
+        self.commits
+    }
 }
 
 /// Parse `text` incrementally against `prev`, render the ariadne error report,
@@ -275,8 +394,9 @@ where
 {
     let (parse, new_prev) = {
         let p = prev.borrow();
-        parse_incremental(root, text, p.as_ref(), IncrementalBias::default())
+        parse_incremental_with(root, text, p.as_ref(), options())
     };
+    let (iterations, commits) = (last_iterations() as u32, last_commits() as u32);
     let pairs = get_error_range_pairs::<L>(&parse);
     let syntax_root = parse.syntax::<L>();
     let turtle = convert_fn(&syntax_root);
@@ -287,6 +407,8 @@ where
         ast: render_ast::<L>(&parse, &pairs),
         triples: render_triples(&turtle),
         formatted,
+        iterations,
+        commits,
     }
 }
 
@@ -391,17 +513,18 @@ pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
             let (parse, pairs) = PREV_JSONLD.with(|prev| {
                 let (parse, new_prev) = {
                     let p = prev.borrow();
-                    parse_incremental(
+                    parse_incremental_with(
                         JsonLdRule::new(JsonLdSyntaxKind::JsonldDoc),
                         text,
                         p.as_ref(),
-                        IncrementalBias::default(),
+                        options(),
                     )
                 };
                 let pairs = get_error_range_pairs::<JsonLdLang>(&parse);
                 *prev.borrow_mut() = Some(new_prev);
                 (parse, pairs)
             });
+            let (iterations, commits) = (last_iterations() as u32, last_commits() as u32);
             let root = parse.syntax::<JsonLdLang>();
 
             let mut cache = JSONLD_CACHE.take();
@@ -415,6 +538,8 @@ pub async fn parse(language: &str, text: &str) -> Result<ParseResult, JsValue> {
                 ast: render_ast::<JsonLdLang>(&parse, &pairs),
                 triples: render_triples(&turtle),
                 formatted,
+                iterations,
+                commits,
             }
         }
         _ => return Err("Unknown language".into()),
