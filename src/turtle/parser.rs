@@ -3388,6 +3388,14 @@ impl TokenTrait for SyntaxKind {
             _ => Self::max_error_value(self) * 5,
         }
     }
+    fn construct_cost(&self) -> isize {
+        match self {
+            SyntaxKind::BlankNodePropertyList => 3isize,
+            SyntaxKind::Collection => 3isize,
+            SyntaxKind::Directive => 20isize,
+            _ => 0,
+        }
+    }
 }
 pub mod format {
     use super::{Lang, SyntaxKind, SyntaxNode};

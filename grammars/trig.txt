@@ -88,6 +88,11 @@ sq_open -> 2
 sq_close -> 2
 curly_open -> 2
 curly_close -> 2
+=== construct_cost ===
+blankNodePropertyList -> 3
+collection -> 3
+directive -> 20
+wrappedGraph -> 3
 === bracket_open ===
 sq_open
 cl_open

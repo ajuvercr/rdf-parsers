@@ -86,6 +86,11 @@ pub struct Context {
     /// Use this to make keywords cheap to delete (skip over) even when their
     /// `error_value` is high (expensive to insert).
     pub deletion_values: HashMap<String, isize>,
+    /// Per-rule penalties for inventing a construct during recovery (its
+    /// first token inserted, not typed), from `=== construct_cost ===`.
+    /// Rules not listed cost nothing extra.  Only used by the construct cost
+    /// model (`Costs::Constructs`).
+    pub construct_costs: HashMap<String, isize>,
     /// Tokens whose `bracket_delta()` is +1 (openers: `{`, `[`, `(`).
     pub bracket_openers: Vec<String>,
     /// Tokens whose `bracket_delta()` is -1 (closers: `}`, `]`, `)`).
@@ -130,6 +135,7 @@ enum CtxBlock {
     With(Vec<(String, String)>),
     ErrorValues(Vec<(String, isize)>),
     DeletionValues(Vec<(String, isize)>),
+    ConstructCosts(Vec<(String, isize)>),
     BracketOpeners(Vec<String>),
     BracketClosers(Vec<String>),
     Format(Vec<String>, Vec<FormatEntry>),
@@ -275,6 +281,15 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         })
         .map(CtxBlock::DeletionValues);
 
+    let construct_costs = section_header("construct_cost", "===")
+        .ignore_then(mapping.clone())
+        .map(|vs| {
+            vs.into_iter()
+                .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
+                .collect::<Vec<_>>()
+        })
+        .map(CtxBlock::ConstructCosts);
+
     let bracket_openers = section_header("bracket_open", "===")
         .ignore_then(name_list.clone())
         .map(CtxBlock::BracketOpeners);
@@ -287,6 +302,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .or(with)
         .or(error_values)
         .or(deletion_values)
+        .or(construct_costs)
         .or(bracket_openers)
         .or(bracket_closers)
         .or(format_section_parser());
@@ -302,6 +318,7 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                     CtxBlock::With(entries) => ctx.with.extend(entries),
                     CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
                     CtxBlock::DeletionValues(items) => ctx.deletion_values.extend(items),
+                    CtxBlock::ConstructCosts(items) => ctx.construct_costs.extend(items),
                     CtxBlock::BracketOpeners(names) => ctx.bracket_openers.extend(names),
                     CtxBlock::BracketClosers(names) => ctx.bracket_closers.extend(names),
                     CtxBlock::Format(groups, hints) => {

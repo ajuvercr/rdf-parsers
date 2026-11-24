@@ -1414,6 +1414,20 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .collect();
 
+    // Build construct_cost arms: per-rule penalties for inventing a construct
+    // during recovery (`=== construct_cost ===`), sorted for stable output.
+    let construct_cost_arms: Vec<_> = {
+        let mut costs: Vec<_> = config.context.construct_costs.iter().collect();
+        costs.sort();
+        costs
+            .into_iter()
+            .map(|(name, cost)| {
+                let n = config.context.ident_for(name);
+                quote! { SyntaxKind::#n => #cost, }
+            })
+            .collect()
+    };
+
     // Build bracket_delta arms for openers (+1) and closers (-1).
     let bracket_delta_arms: Vec<_> = {
         let openers = config.context.bracket_openers.iter().map(|name| {
@@ -2125,6 +2139,13 @@ pub fn generate(path: &str, contents: &str) -> String {
             match self {
                 #( #deletion_cost_arms )*
                 _ => Self::max_error_value(self) * 5,
+            }
+        }
+
+        fn construct_cost(&self) -> isize {
+            match self {
+                #( #construct_cost_arms )*
+                _ => 0,
             }
         }
     }

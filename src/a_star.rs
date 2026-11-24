@@ -56,6 +56,27 @@ pub enum Engine {
     Local { window: usize },
 }
 
+/// What a repair costs (see `ParseOptions`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Costs {
+    /// The grammar's per-token error values: inserting a token costs its
+    /// error value, deleting one 5 times that unless the grammar's
+    /// `deletion_value` says otherwise.
+    #[default]
+    Tokens,
+    /// Every inserted token costs 1 and every deleted one `CONSTRUCT_DELETE`.
+    /// A construct the repair invents (entered with its first token inserted,
+    /// not typed) adds the penalty the grammar's `=== construct_cost ===`
+    /// gives it.  So the grammar says how unlikely a construct is, not how
+    /// much each token weighs, and what the user typed is kept as long as a
+    /// few insertions explain it.
+    Constructs,
+}
+
+/// `Costs::Constructs`: the cost of deleting a token.  The parser invents up
+/// to `CONSTRUCT_DELETE - 1` missing tokens to keep one the user typed.
+pub const CONSTRUCT_DELETE: isize = 4;
+
 /// The window of `Engine::Local` when none is given: twice as far as the
 /// global engine's dominance pruning looks.  Shorter windows commit in the
 /// middle of a cluster of errors (say between `{|` and `|}` in a grammar
@@ -294,6 +315,8 @@ pub struct AStar<'a, R: ParserTrait> {
     committed_excess: isize,
     /// Number of commits, for diagnostics (`last_commits`).
     commits: usize,
+    /// `Costs::Constructs`: flat token costs plus construct penalties.
+    constructs: bool,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -338,6 +361,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             commit_window: None,
             committed_excess: 0,
             commits: 0,
+            constructs: false,
         }
     }
 
@@ -375,6 +399,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             commit_window: None,
             committed_excess: 0,
             commits: 0,
+            constructs: false,
         }
     }
 
@@ -663,6 +688,35 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         self.commits += 1;
     }
 
+    /// The cost of inserting / deleting `tok` under the search's cost model.
+    /// Matching a token costs its `max_error_value` and the heuristic counts
+    /// that value for every token ahead, so a deletion pays it as well.
+    fn insert_cost(&self, tok: &R::Kind) -> isize {
+        if self.constructs { 1 } else { tok.max_error_value() }
+    }
+
+    fn delete_cost(&self, tok: &R::Kind) -> isize {
+        if self.constructs {
+            tok.max_error_value() + CONSTRUCT_DELETE
+        } else {
+            tok.deletion_cost()
+        }
+    }
+
+    /// `Costs::Constructs`: the penalty for the constructs `element` entered
+    /// at this position without a token yet, which an insertion now invents.
+    fn invented(&self, element: &Element<R>) -> isize {
+        if !self.constructs {
+            return 0;
+        }
+        element
+            .parent
+            .iter()
+            .take(element.fresh as usize)
+            .map(|f| f.rule.element_kind().construct_cost())
+            .sum()
+    }
+
     /// Sets the search up for `engine` (fault-tolerant mode only).
     fn configure(&mut self, engine: Engine) {
         match engine {
@@ -775,11 +829,16 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
                     pos += 1;
                 }
-                let new_d = self
-                    .tokens
-                    .get(pos)
-                    .map(|tok| head.state_dist(&tok.kind).max(0))
-                    .unwrap_or(0);
+                // `state_dist` is in the grammar's token costs, which can
+                // exceed the construct model's, so it is left out there.
+                let new_d = if self.constructs {
+                    0
+                } else {
+                    self.tokens
+                        .get(pos)
+                        .map(|tok| head.state_dist(&tok.kind).max(0))
+                        .unwrap_or(0)
+                };
                 element.h = element.h - element.dist + new_d;
                 element.dist = new_d;
             }
@@ -922,7 +981,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                         token.clone().into(),
                                     ))),
                                     parent: element.parent.clone(),
-                                    cost: element.cost + token.max_error_value(),
+                                    cost: element.cost
+                                        + self.insert_cost(&token)
+                                        + self.invented(element),
                                     h: element.h,
                                     state: element.state,
                                     has_error: true,
@@ -935,6 +996,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     dist: element.dist,
                                     clean: element.clean,
                                     marks: element.marks.clone(),
+                                    fresh: 0,
                                 });
                                 (insert_error, ROLE_CONFLICT_COST)
                             } else {
@@ -946,7 +1008,9 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                         token.clone().into(),
                                     ))),
                                     parent: element.parent.clone(),
-                                    cost: element.cost + token.max_error_value(),
+                                    cost: element.cost
+                                        + self.insert_cost(&token)
+                                        + self.invented(element),
                                     h: element.h,
                                     state: element.state,
                                     has_error: true,
@@ -959,6 +1023,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     dist: element.dist,
                                     clean: element.clean,
                                     marks: element.marks.clone(),
+                                    fresh: 0,
                                 });
                                 // One-time delta-adoption cost: proportional to how much
                                 // the assumed delta changes.  When depth info is unavailable
@@ -985,7 +1050,8 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     self.close_from.get(idx).is_none_or(|&n| n == 0)
                                 };
                                 let adoption_cost = if backed || depth_delta.is_none() {
-                                    delta_change as isize * token.max_error_value()
+                                    delta_change as isize
+                                        * if self.constructs { 1 } else { token.max_error_value() }
                                 } else {
                                     ROLE_CONFLICT_COST
                                 };
@@ -1022,6 +1088,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     dist: 0, // h is a fresh suffix-sum; no dist folded in yet
                     clean: element.clean,
                     marks: element.marks.clone(),
+                    fresh: 0, // the constructs entered here got a real token
                 };
 
                 return (matched, fallback);
@@ -1038,7 +1105,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         let error = Element {
             list: create_list(Step::error(Error::Expected(token.clone().into()))),
             parent: element.parent.clone(),
-            cost: element.cost + token.max_error_value(),
+            cost: element.cost + self.insert_cost(&token) + self.invented(element),
             h,
             state: (element.state.0, idx),
             has_error: true,
@@ -1049,6 +1116,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             dist: 0, // h is a fresh suffix-sum
             clean: element.clean,
             marks: element.marks.clone(),
+            fresh: 0, // the constructs entered here are invented, and paid for
         };
 
         (error, None)
@@ -1084,7 +1152,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             return;
         }
 
-        let del_cost = tok.kind.deletion_cost();
+        let del_cost = self.delete_cost(&tok.kind);
         let next = self.get_actual_index(pos + 1);
         let h = if let Some(&hv) = self.heuristic.get(next) {
             hv
@@ -1114,6 +1182,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             dist: 0, // h is a fresh suffix-sum
             clean: element.clean,
             marks: element.marks.clone(),
+            fresh: element.fresh, // a construct may still start with a typed token
         };
         self.add_element(del_element);
     }
@@ -1194,7 +1263,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     pops += 1;
                 }
             }
-            skip_cost += tok.kind.deletion_cost();
+            skip_cost += self.delete_cost(&tok.kind);
             skipped += 1;
         }
 
@@ -1218,6 +1287,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 dist: 0,             // h is a fresh suffix-sum
                 clean: element.clean,
                 marks: element.marks.clone(),
+                fresh: 0,
             });
         }
     }
@@ -1268,6 +1338,9 @@ pub struct Element<R: ParserTrait> {
     clean: (isize, usize),
     /// Parser states along this path, newest first; see `Mark`.
     marks: List<Mark<R>>,
+    /// Rules entered at this token position that have no token yet, innermost
+    /// first: if the next token is inserted, the repair invents them.
+    fresh: u16,
 }
 
 /// Minimum distance in token indices (trivia included) between two marks.
@@ -1332,6 +1405,7 @@ impl<R: ParserTrait> Element<R> {
             dist: 0,
             clean: (0, at),
             marks: List::default(),
+            fresh: 0,
         }
     }
 
@@ -1359,6 +1433,7 @@ impl<R: ParserTrait> Element<R> {
             dist: 0,
             clean: (0, cp.token),
             marks: List::default(),
+            fresh: 0,
         }
     }
 
@@ -1388,6 +1463,7 @@ impl<R: ParserTrait> Element<R> {
             dist: self.dist,
             clean: self.clean,
             marks: self.marks.clone(),
+            fresh: self.fresh,
         }
     }
 
@@ -1420,6 +1496,7 @@ impl<R: ParserTrait> Element<R> {
             dist: self.dist,
             clean: self.clean,
             marks: self.marks.clone(),
+            fresh: self.fresh.saturating_add(1), // a new construct, no token yet
         }
     }
 
@@ -1441,6 +1518,7 @@ impl<R: ParserTrait> Element<R> {
             dist: self.dist,
             clean: self.clean,
             marks: self.marks.clone(),
+            fresh: self.fresh.saturating_sub(1),
         })
     }
 }
@@ -1497,7 +1575,17 @@ pub fn a_star<R: ParserTrait>(
     bias: IncrementalBias,
     max_iterations: usize,
 ) -> List<Step<R::Kind>> {
-    search(root, tokens, ParseMode::FaultTolerant, bias, max_iterations, None, None, Engine::Global)
+    search(
+        root,
+        tokens,
+        ParseMode::FaultTolerant,
+        bias,
+        max_iterations,
+        None,
+        None,
+        Engine::Global,
+        Costs::Tokens,
+    )
         .map_or_else(List::default, |f| f.list)
 }
 
@@ -1516,8 +1604,9 @@ pub fn a_star_fast<R: ParserTrait>(
         None,
         None,
         Engine::Global,
+        Costs::Tokens,
     )
-        .map(|f| f.list)
+    .map(|f| f.list)
 }
 
 pub(crate) fn search<'a, R: ParserTrait>(
@@ -1529,6 +1618,7 @@ pub(crate) fn search<'a, R: ParserTrait>(
     reuse: Option<&'a Reuse<'a>>,
     deadline: Option<Instant>,
     engine: Engine,
+    costs: Costs,
 ) -> Option<Found<R>> {
     let mut state = match mode {
         ParseMode::FaultTolerant => AStar::new(tokens, bias, max_iterations),
@@ -1538,6 +1628,7 @@ pub(crate) fn search<'a, R: ParserTrait>(
     if mode == ParseMode::FaultTolerant {
         state.deadline = deadline;
         state.configure(engine);
+        state.constructs = costs == Costs::Constructs;
     }
     let out = state.consume(root);
     LAST_ITERATIONS.with(|c| c.set(state.iterations));

@@ -12,7 +12,9 @@ pub use a_star::Fingerprint;
 pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
 #[doc(hidden)]
-pub use a_star::{DEFAULT_LOCAL_WINDOW, Engine, last_commits, last_iterations};
+pub use a_star::{
+    CONSTRUCT_DELETE, Costs, DEFAULT_LOCAL_WINDOW, Engine, last_commits, last_iterations,
+};
 pub mod list;
 pub mod model;
 pub mod format;
@@ -166,6 +168,14 @@ pub trait TokenTrait:
     /// cheaper than long cascades of error insertions.
     fn deletion_cost(&self) -> isize {
         self.max_error_value() * 5
+    }
+
+    /// Penalty for inventing this construct during recovery: entering the
+    /// rule and inserting its first token instead of matching one.  Set per
+    /// rule in the grammar's `=== construct_cost ===` section; only the
+    /// construct cost model (`Costs::Constructs`) charges it.
+    fn construct_cost(&self) -> isize {
+        0
     }
 
     /// Bracket nesting delta for this token kind.
@@ -322,6 +332,10 @@ pub struct ParseOptions {
     /// search without pruning (`Engine::Exact`), or a repair per error
     /// (`Engine::Local`).
     pub engine: Engine,
+    /// What a repair costs: the grammar's per-token error values
+    /// (`Costs::Tokens`, the default) or flat token costs plus per-construct
+    /// penalties (`Costs::Constructs`).
+    pub costs: Costs,
 }
 
 impl Default for ParseOptions {
@@ -331,6 +345,7 @@ impl Default for ParseOptions {
             time_budget: None,
             max_iterations: a_star::DEFAULT_MAX_ITERATIONS,
             engine: Engine::Global,
+            costs: Costs::Tokens,
         }
     }
 }
@@ -391,6 +406,7 @@ where
         reuse.as_ref(),
         None,
         Engine::Global,
+        Costs::Tokens,
     );
     let (list, memo) = match found {
         Some(found) => found.finish(reuse.as_ref()),
@@ -416,6 +432,7 @@ where
                 reuse.as_ref(),
                 deadline,
                 options.engine,
+                options.costs,
             )
             .map(|found| found.finish(reuse.as_ref()))
             .unwrap_or_default()
