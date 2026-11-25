@@ -5,6 +5,326 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.5.0 (2026-11-25)
+
+### New Features
+
+ - <csr-id-ac8327b7d1ef191468b75af53bc7ebfba58b35ee/> under construct costs, delete a run of junk as one mistake
+   Typing an IRI in front of `SELECT` gives fragments like `< http: / /`, each
+   a valid token (less-than, a prefix, division). At 4 per deletion, deleting
+   them cost more than reading them as operators in an invented projection
+   expression, which then also deleted the real `SELECT`.
+   
+   Now the first deleted token costs `CONSTRUCT_DELETE` (4) and each token
+   deleted right after it `CONSTRUCT_DELETE_MORE` (1). The discount only goes
+   to tokens without a clean role: new text, or text that has not been part of
+   a statement that parsed (anchored history). Valid text keeps its full price.
+   A version that discounted every token deleted the valid `PREFIX` line,
+   because the per-token deletion cost is also what protects valid text.
+   Using clean roles rather than the previous parse's roles matters as well:
+   once a broken parse reads the junk as operators, it has roles, but still no
+   clean one. There's no discount without a previous version.
+   
+   Whether a path is in a run is part of the state key, since it changes what
+   the next deletion costs.
+   
+   Typing `<http://x/> ` before `SELECT`, keystroke by keystroke: `<http:/` and
+   `<http://` now delete the junk and keep `SELECT` (1.1k and 1.8k search
+   iterations, against 29k and 38k for the expression reading). The worst
+   keystroke takes 13.5k iterations, against 49k, about what the token weights
+   need (12.7k). The other probe cases are unchanged.
+ - <csr-id-2472b7a73831289fe005cd2500789dd46e74bbd3/> construct costs for SPARQL, N3 and JSON-LD, with a distance table
+   `=== construct_cost ===` sections for the other grammars, on Turtle's scale:
+   
+   - 20 for optional top-level constructs: SPARQL's BASE/PREFIX declarations
+     and update operations, N3's directives.
+   - 10 for keyword-led clauses inside a query: OPTIONAL, FILTER, BIND,
+     VALUES, GRAPH, SERVICE, MINUS, ORDER/GROUP BY, HAVING, LIMIT, OFFSET,
+     EXISTS, aggregates and built-in calls, sub-selects, FROM/USING.
+   - 3 for inventing brackets: SPARQL groups, blank nodes and collections, N3
+     formulas, blank nodes and collections, JSON objects and arrays.
+   - 3 for SPARQL's query forms. A query must have exactly one, so a penalty
+     there never decides between readings. It only made the unavoidable repair
+     expensive when a `SELECT` gets mangled (`<h` typed against it lexes as
+     `hSELECT`), which sent the search to its iteration cap.
+   
+   The generator now also computes the distance heuristic (`state_dist`) in
+   construct costs: inserted tokens count 1, and rules invented on the way add
+   their penalty. Before, construct costs ran without a distance heuristic.
+   Typing `FILTER` into a SELECT clause takes 1.2k search iterations on its
+   worst keystroke, against 18.8k with the token weights.
+ - <csr-id-f65f7bdc3b3f63a81667595b6a56439d9fd8005e/> add a construct cost model for recovery
+   `ParseOptions.costs` chooses what a repair costs. `Costs::Tokens` (the
+   default) keeps the grammar's per-token error values. `Costs::Constructs`
+   prices a repair by what it does to the document:
+   
+   - Every inserted token costs 1, and every deleted token `CONSTRUCT_DELETE`
+     (4). So the parser invents up to three missing tokens to keep a token the
+     user typed, and deletes a stray one without searching far.
+   - A construct the repair invents (a rule entered with its first token
+     inserted, not typed) adds the penalty the grammar gives it in a new
+     `=== construct_cost ===` section. Turtle and TriG penalise inventing a
+     blank node or collection (3) and a directive (20); TriG also a graph
+     block (3). A construct that starts after deleted tokens is not penalised.
+   - History (role conflicts) stays as it is.
+   
+   The grammar then says how unlikely a construct is, instead of how much each
+   token weighs. Under the token weights, deleting a `@prefix` typed inside a
+   statement costs 500, so the parser invents seven tokens around it. The
+   construct model deletes it. `tests/construct_costs.rs` covers that, a typed
+   `x:` that starts a new pair, a typed directive that gets completed, and a
+   lone `[` that gets closed.
+
+### Bug Fixes
+
+ - <csr-id-5297f15595e986c988588518299d318f95c1d082/> find a token's statement neighbour past tokens edited away
+   The split check links each unchanged token to the token before it in its
+   statement in the history. In a statement that never parses cleanly (here
+   `"دَيْف"@ar--rtl`, RDF 1.2 that the Turtle 1.1 lexer rejects), that history
+   comes from the previous keystroke's parse. While a new pair is typed after a
+   `;`, that parse has the next pair right after the half-typed name (`:`),
+   which the next keystroke turns into `:since`. The link then pointed at a
+   token that no longer exists, so the split went unnoticed and `:since`
+   became the subject of the next pair.
+   
+   The link now follows the history's chain of predecessors past tokens that
+   were edited away, to the nearest one still there.
+   
+   Found with the `add-pair` traces added to the public study-3 dev kit. Over
+   all six layouts, the typed terms of those traces (the ones an editor
+   completes) are right in 100% of the cases (288/288), against 85.4% before
+   this fix, 77.4% without the split check, and 95.8% with token weights.
+   Near-edit roles 93.5% (92.8% with token weights); the other families do
+   not change.
+ - <csr-id-4d74ec148b68ec59728c661e443dc229749dcc49/> don't let a repair split a statement of the previous parse
+   Typing a new pair after a `;`, before the next pair:
+   
+       ex:Alice a foaf:Person ;
+           foaf:age
+           foaf:knows ex:Bob .
+   
+   Until the pair's own `;` is typed, a repair can read `foaf:age` as a new
+   predicate (insert an object and a `;`) or end Alice's statement after the
+   `;` (insert one `.`) and make `foaf:age foaf:knows ex:Bob .` a statement of
+   its own. The second is cheaper, and role agreement does not object: every
+   old token keeps its role, but `foaf:knows ex:Bob` moves to another subject.
+   An editor then suggests predicates where an object is wanted, and history
+   keeps that reading for the rest of the pair.
+   
+   History now records, per token, the token before it in its top-level unit
+   (a statement), anchored like the roles. A repair that starts a new unit
+   right after an insertion or deletion, between two unchanged tokens that
+   directly followed each other in one unit, splits that unit and costs as
+   much as a role conflict. A split the text makes (a typed `.`) follows a
+   match and stays free, and so does a new unit next to tokens that were not
+   together before, such as after a string that swallowed the next statement
+   while it was being typed.
+   
+   The Turtle completion tests now build their history with a real parse, so
+   they test what an editor gets. A new test types `foaf:age 42 ;` one
+   character at a time and checks every parse.
+   
+   Public study-3 kit, with history: no change under construct costs except
+   one trace in the packed layout of the RDF 1.2 document; under token
+   weights, that document's trace loses 2 roles in every layout (flicker 20 ->
+   23 of 12192). p95 latency 2.9 -> 2.1 ms (construct costs), 9.0 -> 7.9 ms
+   (token weights).
+ - <csr-id-9012eb3dc8d9fa683f421646f5df89b6636f6ddf/> record the bracket depth a token had in the parse
+   History stored each token's bracket depth from the text, counting only the
+   brackets the user typed. The search compares that with its own depth, which
+   also counts brackets the repair inserted. While a `[` is still open, the
+   repair closes it, so every token after it was stored one level deeper than
+   it was parsed. The next search then saw a block moved up a level, and
+   adopting that shift skips the role check: the next statement's subject
+   could become an object without a role conflict.
+   
+   Now `from_steps` counts inserted brackets, as the search does, and history
+   stores the depth the parse gave each token. Tokens the parse did not
+   consume keep the text's depth.
+   
+   Public study-3 kit, editing traces with history, token weights: broken-state
+   roles 92.9% -> 93.5%, near-edit roles 94.4% -> 95.2% (retype-token) and
+   89.6% -> 92.3% (retype-char); states all-right and flicker unchanged.
+ - <csr-id-20e41d6f9754a2a223721436319208ef83cc4a07/> give sync-ahead states the right fingerprint
+   When sync-ahead skips tokens, it climbs the parser stack to a rule that
+   accepts the next token and keeps that rule on top. But it set the state's
+   fingerprint to that rule's `saved` value, which is the fingerprint from
+   before the rule was entered: the state of the rule below it. Every state
+   sync-ahead produced was labelled one level too low.
+   
+   The search identifies states by that fingerprint, both to drop duplicates
+   and to splice in the previous parse. So a mislabelled state could be taken
+   for a different one. In the case that found this (an IRI typed in front of
+   `SELECT`, character by character), the finished parse was dropped as a
+   duplicate of its own parent state, and the search ran to its iteration cap.
+   
+   A debug assertion in `add_element` now checks that every state's fingerprint
+   matches its stack.
+   
+   On the edits of the incremental reuse test (release build), SPARQL needs
+   8.5M search iterations instead of 25.5M (26.3 s to 8.2 s), and none of its
+   14 edits that hit the 1M cap still do. Turtle is unchanged (480 edits,
+   340k to 318k iterations).
+ - <csr-id-1c1b1898da820fc82df9271d76bfa1b177add26f/> make a stray clause keyword cheap to delete
+   Deleting a token costs 5× its error value unless the grammar sets its own
+   deletion value, so deleting `FILTER`, `WHERE`, `OPTIONAL`, `ORDER`, ...
+   cost 50. The search explores every partial parse cheaper than the parse it
+   returns, so one of these keywords typed where it does not belong
+   (`SELECT ?person ?name FILTER`) made it explore over a million states in
+   SPARQL's grammar. It then hit the iteration cap and deleted everything
+   after the furthest point it had reached, reporting errors on `WHERE`,
+   `ORDER`, `BY` and the rest. These keywords now cost 20 to delete, as
+   `SELECT`, `ASK` and the update keywords already did.
+   
+   That query now parses in 19522 search iterations (18 ms, native) instead of
+   1029928 (1.0 s), with one error: the stray `FILTER`.
+   `tests/stray_keyword.rs` checks it.
+ - <csr-id-a9d65acf6b4782bfdec45252fbec73fad781acf7/> let recovery close a lone `[` with one missing `]`
+   Since `[]` is one ANON token, a `[` that is not closed yet could only start
+   a property list, so recovery had to invent a whole predicate-object list
+   as well as the `]`: two errors, and a large search. The list inside `[ ]`
+   is now optional (Turtle and TriG `blankNodePropertyList`, SPARQL
+   `BlankNodePropertyList` and `BlankNodePropertyListPath`). Valid text never
+   has the empty form, because the lexer reads `[ ]` as ANON, so only
+   recovery uses it: a lone `[` costs one missing `]`, as it did before ANON.
+   
+   Typing `foaf:foaf [` above `foaf:name ?name .` in a SPARQL WHERE block now
+   gives `Expected(SqClose)` and `Expected(Colon)`, and keeps
+   `foaf:name ?name` as they were, instead of inventing a list and deleting
+   them. The search takes 7293 iterations instead of 38773 (8 ms instead of
+   41 ms, native). The SyntaxKinds and the trees of valid documents do not
+   change.
+   
+   SPARQL's ANON does not take comments, so in SPARQL `[ # note` + newline +
+   `]` now parses as an empty property list instead of failing.
+ - <csr-id-f13f5637a1e6577e02c1c839dcc16d083bb1ffc7/> keep the tree aligned with the tokens after a sync-ahead recovery
+   When the search recovered by skipping ahead to a token that an enclosing
+   rule accepts, the skipped tokens got no Delete steps. The steps then
+   consumed fewer tokens than the text has, so the tree put every later token
+   in the node meant for the token after it (in SPARQL, a `?name` in a `.`
+   node, `OPTIONAL` in a `{` node, ...) and left the last tokens over as
+   `Unparsed(...)` errors. The next incremental parse reused those steps, so
+   the shift carried over to later edits.
+   
+   Each skipped token is now a Delete step: an error node in the rule that
+   takes over.
+   
+   Typing snippets like `[`, ` ;`, `(` or `"ab` one keystroke at a time into
+   the W3C Turtle test files gave a misaligned tree in 1693 of 16484 parses
+   with 0.4.0 (1253 with 0.3.0), and in none with this fix.
+   `tests/cst_alignment.rs` checks every parse while typing an unclosed `[`
+   into a SPARQL WHERE block, and while typing snippets at random places of a
+   Turtle document.
+
+### Performance
+
+ - <csr-id-ea4f0e1973a2de22e6378e189af698369d7e72da/> build sync-ahead steps for the chosen candidate only
+   For every candidate in its 50-token window, the sync-ahead scan re-summed
+   the cost of the skipped tokens and built a full step list (End steps for
+   the popped rules, Delete steps for the skipped tokens), although it keeps
+   only the cheapest candidate. It now keeps running totals while scanning and
+   builds the steps once, for the chosen candidate. The choice is the same,
+   ties included.
+   
+   Typing an unclosed `[` into a SPARQL WHERE block took 209 ms for that
+   keystroke with 0.4.0 and takes 75 ms now (native, release build, the same
+   38773 search iterations). `tests/incremental_reuse.rs` runs in 110 s
+   instead of 272 s in a debug build.
+
+### New Features (BREAKING)
+
+ - <csr-id-2ad87db085a13020e1f1f8016e8e23b230a267fc/> construct costs are the only cost model
+   Recovery prices repairs one way only: inserting a token costs 1, deleting
+   one `CONSTRUCT_DELETE` (4; `CONSTRUCT_DELETE_MORE`, 1, for each further
+   token of a run of junk), and a construct the repair invents adds the
+   penalty in the grammar's `=== construct_cost ===` section. Role conflicts
+   and statement splits cost 50, as before.
+   
+   Everything for per-token weights is gone:
+   
+   - `Costs` and `ParseOptions::costs`;
+   - the grammars' `=== error_value ===` and `=== deletion_value ===`
+     sections, and their parsing in xtask;
+   - `TokenTrait::max_error_value`, `min_completion_cost` and
+     `deletion_cost`;
+   - the token-weight distance table: `ParserTrait::state_dist` is now the
+     construct-cost table, which was `state_dist_constructs`.
+   
+   `min_error_for_token` only ever mattered as zero or not, and is now
+   `can_start_with`, a bool.
+   
+   Every token a parse consumes, matched or deleted, costs the same constant,
+   which the heuristic counts for every token ahead. It cancels out between
+   paths, as the token weights did before under construct costs, so recovery
+   is unchanged from `Costs::Constructs`. The public study-3 kit gives
+   identical results, and the regenerated distance tables are identical in
+   all six grammars. The generated parsers shrink by about 52k lines.
+   
+   Against the token weights (the old default), public study-3 kit, with
+   history:
+   
+   | | token weights | construct costs |
+   |-|-|-|
+   | roles, valid / broken states | 93.7 / 93.5 | 94.8 / 94.9 |
+   | near-edit roles, retype-token / retype-char | 95.2 / 92.3 | 97.8 / 94.9 |
+   | states all-right, retype-token / retype-char | 104/186, 174/388 | 104/186, 174/388 |
+   | flicker, retype-token | 20 / 12192 | 0 / 12192 |
+   | latency p50 / p95 / max | 1.17 / 9.02 / 42.8 ms | 0.77 / 2.07 / 3.47 ms |
+ - <csr-id-6829c6c5f10eb2a363f2b8f8277abe262b14eed1/> choose the recovery engine: global, exact or local
+   `ParseOptions` has a new field `engine`. All engines search the same graph
+   (match a token, insert a missing one, delete one, skip ahead to a token an
+   enclosing rule accepts) with the same costs, role agreement included. They
+   differ in how much of it they explore:
+   
+   - `Engine::Global`, the default: the search as before, pruned to stay fast
+     (dominance window, a budget per token position, a cap on repairs in a
+     row; pruned paths come back if everything else dead-ends).
+   - `Engine::Exact`: the same search without that pruning, so the cheapest
+     parse under the cost model. It shows what the pruning costs, and can be
+     much slower on input with many errors.
+   - `Engine::Local { window }`: once a path has repaired something (or given
+     a token another role than it had before) and then parsed `window` token
+     positions cleanly, and nothing cheaper is left, the search commits to it
+     and drops every other path; later errors are repaired from there.
+     `DEFAULT_LOCAL_WINDOW` is 24 positions, twice the dominance window:
+     shorter windows commit in the middle of a cluster of errors and repair
+     the rest of the cluster from there.
+   
+   `last_commits()` reports the commits of the last search, next to
+   `last_iterations()`. `tests/cst_alignment.rs` now checks every engine, and
+   `tests/engines.rs` compares them on documents with distant errors.
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 13 commits contributed to the release over the course of 1 calendar day.
+ - 1 day passed between releases.
+ - 13 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Find a token's statement neighbour past tokens edited away ([`5297f15`](https://github.com/ajuvercr/rdf-parsers/commit/5297f15595e986c988588518299d318f95c1d082))
+    - Construct costs are the only cost model ([`2ad87db`](https://github.com/ajuvercr/rdf-parsers/commit/2ad87db085a13020e1f1f8016e8e23b230a267fc))
+    - Don't let a repair split a statement of the previous parse ([`4d74ec1`](https://github.com/ajuvercr/rdf-parsers/commit/4d74ec148b68ec59728c661e443dc229749dcc49))
+    - Under construct costs, delete a run of junk as one mistake ([`ac8327b`](https://github.com/ajuvercr/rdf-parsers/commit/ac8327b7d1ef191468b75af53bc7ebfba58b35ee))
+    - Construct costs for SPARQL, N3 and JSON-LD, with a distance table ([`2472b7a`](https://github.com/ajuvercr/rdf-parsers/commit/2472b7a73831289fe005cd2500789dd46e74bbd3))
+    - Add a construct cost model for recovery ([`f65f7bd`](https://github.com/ajuvercr/rdf-parsers/commit/f65f7bdc3b3f63a81667595b6a56439d9fd8005e))
+    - Record the bracket depth a token had in the parse ([`9012eb3`](https://github.com/ajuvercr/rdf-parsers/commit/9012eb3dc8d9fa683f421646f5df89b6636f6ddf))
+    - Give sync-ahead states the right fingerprint ([`20e41d6`](https://github.com/ajuvercr/rdf-parsers/commit/20e41d6f9754a2a223721436319208ef83cc4a07))
+    - Make a stray clause keyword cheap to delete ([`1c1b189`](https://github.com/ajuvercr/rdf-parsers/commit/1c1b1898da820fc82df9271d76bfa1b177add26f))
+    - Choose the recovery engine: global, exact or local ([`6829c6c`](https://github.com/ajuvercr/rdf-parsers/commit/6829c6c5f10eb2a363f2b8f8277abe262b14eed1))
+    - Let recovery close a lone `[` with one missing `]` ([`a9d65ac`](https://github.com/ajuvercr/rdf-parsers/commit/a9d65acf6b4782bfdec45252fbec73fad781acf7))
+    - Build sync-ahead steps for the chosen candidate only ([`ea4f0e1`](https://github.com/ajuvercr/rdf-parsers/commit/ea4f0e1973a2de22e6378e189af698369d7e72da))
+    - Keep the tree aligned with the tokens after a sync-ahead recovery ([`f13f563`](https://github.com/ajuvercr/rdf-parsers/commit/f13f5637a1e6577e02c1c839dcc16d083bb1ffc7))
+</details>
+
 ## v0.4.0 (2026-11-24)
 
 ### New Features
@@ -21,16 +341,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    blankNodePropertyList | literal`.
    
    - An empty blank node is found the same way as `_:b`: a token of kind
-     `Anon` in a `BlankNode`. It used to be a `[` `]` pair, under `BlankNode`
-     as a subject but under an empty `BlankNodePropertyList2` as an object.
+   `Anon` in a `BlankNode`. It used to be a `[` `]` pair, under `BlankNode`
+   as a subject but under an empty `BlankNodePropertyList2` as an object.
    - Typing inside `[ ]` makes the new token a predicate. Turtle used to read
-     `[ <q> ] <p> <o> .` as `[]` with `<q>` skipped, and TriG did the same
-     for objects. A `[` that is not closed yet, or holds a half-typed term,
-     starts a property list; it is no longer an empty blank node.
+   `[ <q> ] <p> <o> .` as `[]` with `<q>` skipped, and TriG did the same
+   for objects. A `[` that is not closed yet, or holds a half-typed term,
+   starts a property list; it is no longer an empty blank node.
    - Comments are allowed inside `[ ]`, as the W3C grammar's comments-as-white-
-     space rule suggests although its `ANON ::= '[' WS* ']'` leaves them out.
+   space rule suggests although its `ANON ::= '[' WS* ']'` leaves them out.
    - The formatter prints `[]`, `[  ]` and a `[ ]` across lines as `[ ]`, and
-     keeps comments inside as comments, with `]` on a line of its own.
+   keeps comments inside as comments, with `]` on a line of its own.
    - W3C suites unchanged: Turtle 296/296, TriG 334/334.
 
 ### Commit Statistics
