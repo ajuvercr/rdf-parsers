@@ -5,6 +5,8 @@
 //! 2. While a statement is broken, its unchanged tokens keep the history of
 //!    the last version in which the statement parsed cleanly, not the roles
 //!    the latest recovery happened to give them.
+//! 3. History records the bracket depth each token had in the parse, the
+//!    depth the next search compares against.
 
 use rdf_parsers::turtle::{Rule, SyntaxKind};
 use rdf_parsers::{IncrementalBias, PrevParseInfo, last_iterations, parse_incremental};
@@ -159,4 +161,27 @@ fn damage_from_one_broken_keystroke_does_not_carry_over() {
         found,
         "the next statement was pulled into the broken one:\n{root:#?}"
     );
+}
+
+/// While a `[` is still open, the repair closes it, and the statements after
+/// it are parsed at depth 0.  History used to record the text's depth (1)
+/// instead.  The next search then saw those statements moved a level up, and
+/// adopting that shift skips the role check: a subject there could be read
+/// as an object without a role conflict.
+#[test]
+fn history_records_the_depth_the_parse_gave_a_token() {
+    let text = "@prefix ex: <http://example.org/> .\n\
+                ex:a ex:p [ a ex:D .\n\
+                ex:b ex:q ex:c .\n";
+    let (parse, info) = parse(text, None);
+    assert_eq!(
+        parse.errors.iter().collect::<Vec<_>>(),
+        ["Expected(SqClose)"],
+        "expected the repair to close the bracket before the `.`"
+    );
+    for (i, t) in info.tokens.iter().enumerate().skip_while(|(_, t)| t.text != "ex:D").skip(1) {
+        if !t.text.trim().is_empty() {
+            assert_eq!(t.depth, 0, "depth of {:?} (token {i}) after the closed bracket", t.text);
+        }
+    }
 }

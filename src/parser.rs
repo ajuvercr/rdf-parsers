@@ -203,6 +203,9 @@ impl Parse {
                     // than "Expected(SyntaxKind(42))").
                     let Error::Expected(raw_kind) = e;
                     let lang_kind: T = raw_kind.into();
+                    // An inserted bracket counts, as it does in the search:
+                    // the parse goes on as if it were there.
+                    current_depth += lang_kind.bracket_delta() as i32;
                     error_msgs.push(format!("Expected({:?})", lang_kind));
                     builder.finish_node();
                 }

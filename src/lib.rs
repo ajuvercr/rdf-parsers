@@ -425,12 +425,16 @@ where
 
     let parse = Parse::from_steps(&mut tokens, list);
     let had_errors = parse.errors.len() > 0;
-    // Compute bracket depths for the new token sequence to populate PrevParseInfo.
+    // Each token's bracket depth in this parse (`from_steps` records it for
+    // every token the parse consumed), which is what the next search
+    // compares against: a bracket the repair inserted counts, a deleted one
+    // does not.  The text's own depth stands in for tokens the parse did
+    // not consume.
     let mut depth: i32 = 0;
     let mut prev_tokens: Vec<PrevToken> = tokens
         .iter()
         .map(|t| {
-            let d = depth.clamp(0, 255) as u8;
+            let d = t.old_depth().unwrap_or(depth.clamp(0, 255) as u8);
             depth += t.kind.bracket_delta() as i32;
             t.to_prev_token(d)
         })
