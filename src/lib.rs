@@ -13,7 +13,7 @@ pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
 #[doc(hidden)]
 pub use a_star::{
-    CONSTRUCT_DELETE, CONSTRUCT_DELETE_MORE, Costs, DEFAULT_LOCAL_WINDOW, Engine, last_commits,
+    CONSTRUCT_DELETE, CONSTRUCT_DELETE_MORE, CONSTRUCT_INSERT, DEFAULT_LOCAL_WINDOW, Engine, last_commits,
     last_iterations,
 };
 pub mod list;
@@ -130,51 +130,19 @@ pub trait TokenTrait:
     fn starting_tokens(&self) -> &'static [Self];
     fn ending_tokens(&self) -> &'static [Self];
 
-    /// Returns the minimum error cost this rule must incur when `tok` is the
-    /// current token.  Returns 0 if `tok` is reachable anywhere inside the
-    /// rule or the rule is nullable (can match zero tokens).  Returns a
-    /// positive value otherwise — the rule cannot make progress without
-    /// producing at least that much error cost.
-    ///
-    /// Used by `add_element_checked` to pre-charge elements before adding
-    /// them to the A* search.  Defaults to 0 (no pre-charging).
-    fn min_error_for_token(&self, _tok: &Self) -> isize {
-        0
+    /// Whether this rule can start with `tok`, or match nothing: whether it
+    /// can make progress without an error when `tok` is the current token.
+    /// Lets fast mode drop a branch as soon as it is pushed.  Defaults to
+    /// `true`.
+    fn can_start_with(&self, _tok: &Self) -> bool {
+        true
     }
 
-
-    /// Maximum `error_value` for this token kind across all grammar rules that
-    /// may match it.
-    ///
-    /// Must always return > 0: the A* cost model adds `error_value` on a miss
-    /// and nothing on a match, so matching is strictly cheaper when
-    /// `error_value > 0`.
-    /// Defaults to 2, matching the minimum terminal weight used in codegen.
-    fn max_error_value(&self) -> isize {
-        2
-    }
-
-    /// Minimum cost to complete this rule via insertions.  This is the sum of
-    /// error_values for all required terminals on the cheapest path through the
-    /// rule.  Used by `add_element_checked` to pre-charge elements that push
-    /// a rule the current token cannot start.  Defaults to `max_error_value()`.
-    fn min_completion_cost(&self) -> isize {
-        self.max_error_value()
-    }
-
-    /// Cost of deleting (skipping) this token during error recovery.
-    ///
-    /// Defaults to `5 × max_error_value()`.  Must be high enough that
-    /// matching tokens is always cheaper than deleting them, while still
-    /// cheaper than long cascades of error insertions.
-    fn deletion_cost(&self) -> isize {
-        self.max_error_value() * 5
-    }
 
     /// Penalty for inventing this construct during recovery: entering the
     /// rule and inserting its first token instead of matching one.  Set per
     /// rule in the grammar's `=== construct_cost ===` section; only the
-    /// construct cost model (`Costs::Constructs`) charges it.
+    /// search charges it (see `CONSTRUCT_INSERT`).
     fn construct_cost(&self) -> isize {
         0
     }
@@ -337,10 +305,6 @@ pub struct ParseOptions {
     /// search without pruning (`Engine::Exact`), or a repair per error
     /// (`Engine::Local`).
     pub engine: Engine,
-    /// What a repair costs: the grammar's per-token error values
-    /// (`Costs::Tokens`, the default) or flat token costs plus per-construct
-    /// penalties (`Costs::Constructs`).
-    pub costs: Costs,
 }
 
 impl Default for ParseOptions {
@@ -350,7 +314,6 @@ impl Default for ParseOptions {
             time_budget: None,
             max_iterations: a_star::DEFAULT_MAX_ITERATIONS,
             engine: Engine::Global,
-            costs: Costs::Tokens,
         }
     }
 }
@@ -411,7 +374,6 @@ where
         reuse.as_ref(),
         None,
         Engine::Global,
-        Costs::Tokens,
     );
     let (list, memo) = match found {
         Some(found) => found.finish(reuse.as_ref()),
@@ -447,7 +409,6 @@ where
                 reuse.as_ref(),
                 deadline,
                 options.engine,
-                options.costs,
             )
             .map(|found| found.finish(reuse.as_ref()))
             .unwrap_or_default()

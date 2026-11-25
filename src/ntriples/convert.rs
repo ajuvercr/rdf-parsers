@@ -348,9 +348,7 @@ mod tests {
     // ── incremental re-parse tests ────────────────────────────────────────────
     //
     // These tests verify that the A* search finds the correct parse within its
-    // iteration budget after a small edit.  They catch grammar weight errors:
-    // if a token's error_value is set too high the heuristic becomes too
-    // optimistic and the search exhausts its budget before finding the solution.
+    // iteration budget after a small edit.
 
     use crate::{IncrementalBias, PrevParseInfo, TokenTrait, parse_incremental};
 

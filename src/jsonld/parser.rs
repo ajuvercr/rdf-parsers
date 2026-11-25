@@ -168,346 +168,129 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
-    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
-    #[doc = r" is nullable); positive means the rule cannot make progress without"]
-    #[doc = r" at least that much error cost."]
-    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
+    #[doc = r" Whether `kind` can start with `tok` (or match nothing), i.e. make"]
+    #[doc = r" progress without an error when `tok` is the current token."]
+    pub fn can_start_with(kind: SyntaxKind, tok: SyntaxKind) -> bool {
         match kind {
-            SyntaxKind::JsonArray => match tok {
+            SyntaxKind::JsonArray => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::JsonObject => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::JsonObject => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::JsonString => match tok {
-                SyntaxKind::StringToken => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::JsonValue => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::JsonString => matches!(tok, SyntaxKind::StringToken),
+            SyntaxKind::JsonValue => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::JsonldDoc => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::JsonldDoc => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Member => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::Member => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::MemberList => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::MemberList => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::ValueList => match tok {
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::ValueList => matches!(
+                tok,
                 SyntaxKind::Colon
-                | SyntaxKind::Comma
-                | SyntaxKind::CurlyClose
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::JsonNumber
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqClose
-                | SyntaxKind::SqOpen
-                | SyntaxKind::StringToken
-                | SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Comma => match tok {
-                SyntaxKind::Comma => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Colon => match tok {
-                SyntaxKind::Colon => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::SqOpen => match tok {
-                SyntaxKind::SqOpen => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::SqClose => match tok {
-                SyntaxKind::SqClose => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::FalseLit => match tok {
-                SyntaxKind::FalseLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::NullLit => match tok {
-                SyntaxKind::NullLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::TrueLit => match tok {
-                SyntaxKind::TrueLit => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::CurlyOpen => match tok {
-                SyntaxKind::CurlyOpen => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::CurlyClose => match tok {
-                SyntaxKind::CurlyClose => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::JsonNumber => match tok {
-                SyntaxKind::JsonNumber => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::StringToken => match tok {
-                SyntaxKind::StringToken => 0,
-                _ => kind.max_error_value(),
-            },
-            _ => 0,
+                    | SyntaxKind::Comma
+                    | SyntaxKind::CurlyClose
+                    | SyntaxKind::CurlyOpen
+                    | SyntaxKind::FalseLit
+                    | SyntaxKind::JsonNumber
+                    | SyntaxKind::NullLit
+                    | SyntaxKind::SqClose
+                    | SyntaxKind::SqOpen
+                    | SyntaxKind::StringToken
+                    | SyntaxKind::TrueLit
+            ),
+            SyntaxKind::Comma => tok == SyntaxKind::Comma,
+            SyntaxKind::Colon => tok == SyntaxKind::Colon,
+            SyntaxKind::SqOpen => tok == SyntaxKind::SqOpen,
+            SyntaxKind::SqClose => tok == SyntaxKind::SqClose,
+            SyntaxKind::FalseLit => tok == SyntaxKind::FalseLit,
+            SyntaxKind::NullLit => tok == SyntaxKind::NullLit,
+            SyntaxKind::TrueLit => tok == SyntaxKind::TrueLit,
+            SyntaxKind::CurlyOpen => tok == SyntaxKind::CurlyOpen,
+            SyntaxKind::CurlyClose => tok == SyntaxKind::CurlyClose,
+            SyntaxKind::JsonNumber => tok == SyntaxKind::JsonNumber,
+            SyntaxKind::StringToken => tok == SyntaxKind::StringToken,
+            _ => true,
         }
     }
-    #[doc = r" Precomputed dist(q, a): minimum insertion cost to reach a point"]
-    #[doc = r" where terminal `terminal` can be matched, starting from parser"]
-    #[doc = r" state `(kind, state)`.  Returns 0 as the conservative default"]
+    #[doc = r" Precomputed dist(q, a): the least a repair costs (insertions, plus"]
+    #[doc = r" the construct costs of rules it invents) to reach a point where"]
+    #[doc = r" terminal `terminal` can be matched, starting from parser state"]
+    #[doc = r" `(kind, state)`.  Returns 0 as the conservative default"]
     #[doc = r" (admissible — parent context might accept the terminal after a pop)."]
     pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
-        match (kind, state, terminal) {
-            (SyntaxKind::JsonArray, 1usize, _) => match terminal {
-                SyntaxKind::SqClose => 0,
-                _ => 4isize,
-            },
-            (SyntaxKind::JsonArray, 2usize, _) => match terminal {
-                SyntaxKind::Colon => 1isize,
-                SyntaxKind::Comma => 1isize,
-                SyntaxKind::CurlyClose => 1isize,
-                _ => 0,
-            },
-            (SyntaxKind::JsonArray, 3usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonArray, 4usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 4isize,
-            },
-            (SyntaxKind::JsonObject, 1usize, _) => match terminal {
-                SyntaxKind::CurlyClose => 0,
-                _ => 2isize,
-            },
-            (SyntaxKind::JsonObject, 2usize, _) => match terminal {
-                SyntaxKind::StringToken | SyntaxKind::CurlyClose => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonObject, 3usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonObject, 4usize, _) => match terminal {
-                SyntaxKind::CurlyOpen => 0,
-                _ => 2isize,
-            },
-            (SyntaxKind::JsonString, 1usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 1usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 2usize, _) => match terminal {
-                SyntaxKind::CurlyOpen => 0,
-                _ => 2isize,
-            },
-            (SyntaxKind::JsonValue, 3usize, _) => match terminal {
-                SyntaxKind::SqOpen => 0,
-                _ => 4isize,
-            },
-            (SyntaxKind::JsonValue, 4usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 5usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 6usize, _) => match terminal {
-                SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 7usize, _) => match terminal {
-                SyntaxKind::FalseLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonValue, 8usize, _) => match terminal {
-                SyntaxKind::NullLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::JsonldDoc, 1usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Member, 1usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Member, 2usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 3isize,
-                SyntaxKind::StringToken => 3isize,
-                SyntaxKind::Comma => 4isize,
-                SyntaxKind::CurlyClose => 4isize,
-                SyntaxKind::CurlyOpen => 3isize,
-                SyntaxKind::FalseLit => 3isize,
-                SyntaxKind::NullLit => 3isize,
-                SyntaxKind::SqClose => 4isize,
-                SyntaxKind::SqOpen => 3isize,
-                SyntaxKind::TrueLit => 3isize,
-                _ => 0,
-            },
-            (SyntaxKind::Member, 3usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::MemberList, 2usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::MemberList, 3usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 3isize,
-                SyntaxKind::StringToken => 2isize,
-                SyntaxKind::Colon => 3isize,
-                SyntaxKind::CurlyClose => 3isize,
-                SyntaxKind::CurlyOpen => 3isize,
-                SyntaxKind::FalseLit => 3isize,
-                SyntaxKind::NullLit => 3isize,
-                SyntaxKind::SqClose => 3isize,
-                SyntaxKind::SqOpen => 3isize,
-                SyntaxKind::TrueLit => 3isize,
-                _ => 0,
-            },
-            (SyntaxKind::MemberList, 4usize, _) => match terminal {
-                SyntaxKind::StringToken => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::ValueList, 2usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::ValueList, 3usize, _) => match terminal {
-                SyntaxKind::JsonNumber => 2isize,
-                SyntaxKind::StringToken => 2isize,
-                SyntaxKind::Colon => 3isize,
-                SyntaxKind::CurlyClose => 3isize,
-                SyntaxKind::CurlyOpen => 2isize,
-                SyntaxKind::FalseLit => 2isize,
-                SyntaxKind::NullLit => 2isize,
-                SyntaxKind::SqClose => 3isize,
-                SyntaxKind::SqOpen => 2isize,
-                SyntaxKind::TrueLit => 2isize,
-                _ => 0,
-            },
-            (SyntaxKind::ValueList, 4usize, _) => match terminal {
-                SyntaxKind::JsonNumber
-                | SyntaxKind::StringToken
-                | SyntaxKind::CurlyOpen
-                | SyntaxKind::FalseLit
-                | SyntaxKind::NullLit
-                | SyntaxKind::SqOpen
-                | SyntaxKind::TrueLit => 0,
-                _ => 1isize,
-            },
-            _ => 0,
-        }
-    }
-    #[doc = r" `state_dist` in construct costs: inserted tokens count 1, and"]
-    #[doc = r" rules invented on the way add their construct cost."]
-    pub fn state_dist_constructs(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
         match (kind, state, terminal) {
             (SyntaxKind::JsonArray, 1usize, _) => match terminal {
                 SyntaxKind::SqClose => 0,
@@ -1204,9 +987,6 @@ mod definitions {
         fn state_dist(&self, terminal: &SyntaxKind) -> isize {
             state_dist(self.kind, self.state, *terminal)
         }
-        fn state_dist_constructs(&self, terminal: &SyntaxKind) -> isize {
-            state_dist_constructs(self.kind, self.state, *terminal)
-        }
     }
 }
 pub use definitions::*;
@@ -1227,22 +1007,11 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
-        min_error_for_token(*self, *tok)
+    fn can_start_with(&self, tok: &SyntaxKind) -> bool {
+        can_start_with(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
-    }
-    fn max_error_value(&self) -> isize {
-        match self {
-            SyntaxKind::Comma => 2isize,
-            SyntaxKind::Colon => 3isize,
-            SyntaxKind::SqOpen => 4isize,
-            SyntaxKind::SqClose => 4isize,
-            SyntaxKind::CurlyOpen => 2isize,
-            SyntaxKind::CurlyClose => 2isize,
-            _ => 1isize,
-        }
     }
     fn bracket_delta(&self) -> i8 {
         match self {
@@ -1251,20 +1020,6 @@ impl TokenTrait for SyntaxKind {
             SyntaxKind::CurlyClose => -1,
             SyntaxKind::SqClose => -1,
             _ => 0,
-        }
-    }
-    fn min_completion_cost(&self) -> isize {
-        match self {
-            SyntaxKind::JsonArray => 8isize,
-            SyntaxKind::JsonObject => 4isize,
-            SyntaxKind::Member => 5isize,
-            SyntaxKind::MemberList => 5isize,
-            _ => Self::max_error_value(self),
-        }
-    }
-    fn deletion_cost(&self) -> isize {
-        match self {
-            _ => Self::max_error_value(self) * 5,
         }
     }
     fn construct_cost(&self) -> isize {

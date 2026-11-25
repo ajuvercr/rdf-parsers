@@ -1,21 +1,13 @@
-//! The construct cost model (`Costs::Constructs`): every inserted token costs
-//! 1, every deleted one `CONSTRUCT_DELETE`, and a construct the repair invents
-//! costs what the grammar's `=== construct_cost ===` says.
+//! The cost model: every inserted token costs 1, every deleted one
+//! `CONSTRUCT_DELETE`, and a construct the repair invents costs what the
+//! grammar's `=== construct_cost ===` says.
 
 use rdf_parsers::turtle::{Lang, Rule, SyntaxKind};
-use rdf_parsers::{Costs, ParseOptions, PrevParseInfo, last_iterations, parse_incremental_with};
+use rdf_parsers::{ParseOptions, PrevParseInfo, last_iterations, parse_incremental_with};
 
 /// Errors, the kinds around each probed token (nearest first), and iterations.
-fn run(
-    costs: Costs,
-    before: Option<&str>,
-    after: &str,
-    probe: &[&str],
-) -> (Vec<String>, Vec<String>, usize) {
-    let options = ParseOptions {
-        costs,
-        ..ParseOptions::default()
-    };
+fn run(before: Option<&str>, after: &str, probe: &[&str]) -> (Vec<String>, Vec<String>, usize) {
+    let options = ParseOptions::default();
     let rule = || Rule::new(SyntaxKind::TurtleDoc);
     let prev: Option<PrevParseInfo> =
         before.map(|b| parse_incremental_with(rule(), b, None, options).1);
@@ -58,10 +50,10 @@ const P: &str = "@prefix x: <http://example.org/x#> .\n@prefix ex: <http://examp
 fn typed_name_starts_a_new_pair() {
     let before = format!("{P}<a> <b> <c> .\n");
     let after = format!("{P}<a> x: <b> <c> .\n");
-    let (errors, roles, _) = run(Costs::Constructs, Some(&before), &after, &["<b>", "<c>"]);
+    let (errors, roles, _) = run(Some(&before), &after, &["<b>", "<c>"]);
     assert_eq!(errors, ["Expected(ObjectList)", "Expected(Colon)"]);
     assert_eq!(roles, ["<b>=Verb", "<c>=Object"]);
-    let (errors, _, _) = run(Costs::Constructs, None, &after, &[]);
+    let (errors, _, _) = run(None, &after, &[]);
     assert_eq!(errors, ["Expected(Comma)"]);
 }
 
@@ -71,7 +63,7 @@ fn typed_name_starts_a_new_pair() {
 fn typed_directive_is_completed() {
     let before = format!("{P}ex:a ex:p ex:o .\n");
     let after = format!("{P}ex:a ex:p ex:o .\n@prefix\n");
-    let (errors, roles, _) = run(Costs::Constructs, Some(&before), &after, &["@prefix"]);
+    let (errors, roles, _) = run(Some(&before), &after, &["@prefix"]);
     assert_eq!(
         errors,
         ["Expected(PnameNs)", "Expected(Iriref)", "Expected(Stop)"]
@@ -80,25 +72,20 @@ fn typed_directive_is_completed() {
 }
 
 /// A `@prefix` typed inside a statement is deleted: inventing a directive
-/// around it costs more. With the grammar's token weights, deleting it costs
-/// 500 and the parser invents seven tokens instead.
+/// around it costs more.  (Per-token weights, the earlier cost model, charged
+/// 500 to delete it, and the parser invented seven tokens instead.)
 #[test]
 fn stray_directive_keyword_is_deleted() {
     let before = format!("{P}ex:a ex:p ex:o .\n");
     let after = format!("{P}ex:a ex:p @prefix ex:o .\n");
-    let (errors, roles, _) = run(Costs::Constructs, Some(&before), &after, &["ex:o"]);
+    let (errors, roles, _) = run(Some(&before), &after, &["ex:o"]);
     assert_eq!(errors, ["Unexpected(PrefixToken)"]);
     assert_eq!(roles, ["ex:o=Object"]);
 }
 
 #[test]
 fn lone_bracket_is_closed() {
-    let (errors, roles, _) = run(
-        Costs::Constructs,
-        None,
-        &format!("{P}<a> <p> [ .\n<b> <p> <o> .\n"),
-        &["<b>"],
-    );
+    let (errors, roles, _) = run(None, &format!("{P}<a> <p> [ .\n<b> <p> <o> .\n"), &["<b>"]);
     assert_eq!(errors, ["Expected(SqClose)"]);
     assert_eq!(roles, ["<b>=Subject"]);
 }
@@ -113,10 +100,7 @@ fn lone_bracket_is_closed() {
 fn stray_iri_before_select_is_deleted_as_a_run() {
     use rdf_parsers::sparql::Rule as Q;
     use rdf_parsers::sparql::SyntaxKind as K;
-    let options = ParseOptions {
-        costs: Costs::Constructs,
-        ..ParseOptions::default()
-    };
+    let options = ParseOptions::default();
     let query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\nSELECT ?person ?name\nWHERE {\n  ?person a foaf:Person ;\n          foaf:name ?name .\n}\nORDER BY ?name\n";
     let at = query.find("SELECT").unwrap();
     let (_, mut prev) = parse_incremental_with(Q::new(K::QueryUnit), query, None, options);

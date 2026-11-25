@@ -16,14 +16,6 @@ use crate::regex::{order_rules_by_references, to_regex};
 mod parser;
 mod regex;
 
-/// Default `error_value` for all tokens (terminal references and keyword literals).
-///
-/// Must be > 0: the A* cost model requires `error_value > 0` so that matching
-/// a token is strictly cheaper than skipping it.  Tokens that need different
-/// recovery behaviour should be assigned explicit weights in the grammar's
-/// `=== error_value ===` section.
-const DEFAULT_TOKEN_WEIGHT: isize = 1;
-
 #[derive(Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 enum IgnoreCase {
     True,
@@ -462,20 +454,17 @@ fn compute_dist_for_rule(
     transitions: &HashMap<usize, Vec<Transition>>,
     state_count: usize,
     terminal_idents: &[String],
-    error_values: &HashMap<String, isize>,
     min_completion_costs: &HashMap<String, isize>,
     initial_states: &HashMap<String, usize>,
     // dist table for all rules computed so far (rule_name → per-rule dist map)
     all_dists: &HashMap<String, HashMap<(usize, String), isize>>,
-    // `Some`: compute the table in construct costs (`Costs::Constructs`):
-    // every inserted terminal costs 1, and a rule entered and then filled
-    // with insertions (invented) adds its construct cost.  Still a lower
-    // bound: nested penalties and extra tokens are left out where unknown.
-    constructs: Option<&HashMap<String, isize>>,
+    // The grammar's construct costs.  Every inserted terminal costs 1, and a
+    // rule entered and then filled with insertions (invented) adds its
+    // construct cost.  Still a lower bound: nested penalties and extra tokens
+    // are left out where unknown.
+    construct_costs: &HashMap<String, isize>,
 ) -> HashMap<(usize, String), isize> {
-    let construct_cost = |rule: &str| -> isize {
-        constructs.and_then(|c| c.get(rule)).copied().unwrap_or(0)
-    };
+    let construct_cost = |rule: &str| -> isize { construct_costs.get(rule).copied().unwrap_or(0) };
     let mut dist: HashMap<(usize, String), isize> = HashMap::new();
 
     // Fixed-point iteration.
@@ -497,9 +486,6 @@ fn compute_dist_for_rule(
             }
 
             for terminal in terminal_idents {
-                let ev = *error_values
-                    .get(terminal.as_str())
-                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT);
                 let key = (state_id, terminal.clone());
 
                 let mut best = dist.get(&key).copied().unwrap_or(isize::MAX);
@@ -511,22 +497,15 @@ fn compute_dist_for_rule(
                             if ident == terminal {
                                 0
                             } else {
-                                let expect_ev = if constructs.is_some() {
-                                    1
-                                } else {
-                                    *error_values
-                                        .get(ident.as_str())
-                                        .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
-                                };
                                 let next_dist =
                                     dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
-                                expect_ev.saturating_add(next_dist)
+                                1isize.saturating_add(next_dist)
                             }
                         }
                         Transition::Push { rule, entry, next } => {
                             // Option 1: terminal is matched inside the pushed rule.
-                            // In construct costs, needing insertions first means
-                            // the rule's first token is inserted: it is invented.
+                            // Needing insertions first means the rule's first
+                            // token is inserted: it is invented.
                             let inside = all_dists
                                 .get(rule.as_str())
                                 .and_then(|d| d.get(&(*entry, terminal.clone())))
@@ -539,15 +518,11 @@ fn compute_dist_for_rule(
                             };
 
                             // Option 2: pushed rule completes, terminal matched after.
-                            // In construct costs, a rule that needs a token is
-                            // invented by completing it: at least one inserted
-                            // token plus its construct cost.
+                            // A rule that needs a token is invented by
+                            // completing it: at least one inserted token plus
+                            // its construct cost.
                             let completion = *min_completion_costs.get(rule.as_str()).unwrap_or(&0);
-                            let completion = match (constructs, completion > 0) {
-                                (Some(_), true) => 1 + construct_cost(rule),
-                                (Some(_), false) => 0,
-                                (None, _) => completion,
-                            };
+                            let completion = if completion > 0 { 1 + construct_cost(rule) } else { 0 };
                             let after = dist.get(&(*next, terminal.clone())).copied().unwrap_or(0);
                             let outside = completion.saturating_add(after);
 
@@ -995,30 +970,15 @@ fn rule_can_be_empty(expr: &Expr, ctx: &Config, map: &mut HashMap<String, bool>)
 
 // ── Minimum completion cost ───────────────────────────────────────────────────
 
-/// Compute the minimum insertion cost to complete `expr` along its cheapest path.
-/// Returns `None` for recursive references not yet resolved (treated as 0).
+/// The fewest tokens that complete `expr`.  Recursive references not yet
+/// resolved count 0.
 fn expr_min_completion_cost(expr: &Expr, ctx: &Config, known: &HashMap<String, isize>) -> isize {
     match expr {
-        Expr::Literal(lt, f) => {
-            let ignore_case = if lt == &LiteralType::Double {
-                IgnoreCase::True
-            } else {
-                IgnoreCase::False
-            };
-            let ident = Terminal::Literal(f.clone(), ignore_case).ident(ctx);
-            *ctx.context
-                .error_values
-                .get(ident.as_str())
-                .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
-        }
+        Expr::Literal(..) => 1,
         Expr::Reference(name) => {
             let is_terminal = !ctx.rules.producing.iter().any(|r| &r.name == name);
             if is_terminal {
-                let ident = Terminal::Ref(name.clone()).ident(ctx);
-                *ctx.context
-                    .error_values
-                    .get(ident.as_str())
-                    .unwrap_or(&DEFAULT_TOKEN_WEIGHT)
+                1
             } else {
                 // Non-terminal: use previously computed value, or 0 for cycles.
                 known.get(name).copied().unwrap_or(0)
@@ -1038,7 +998,7 @@ fn expr_min_completion_cost(expr: &Expr, ctx: &Config, known: &HashMap<String, i
     }
 }
 
-/// Compute `min_completion_cost(rule_name)` for every producing rule.
+/// The fewest tokens that complete each producing rule.
 /// Uses fixed-point iteration to handle mutual recursion.
 fn compute_min_completion_costs(config: &Config) -> HashMap<String, isize> {
     let mut result: HashMap<String, isize> = HashMap::new();
@@ -1210,15 +1170,7 @@ pub fn generate(path: &str, contents: &str) -> String {
     };
 
     // Build transitions for each producing rule and compute dist tables.
-    let dist_tables_for = |constructs: Option<&HashMap<String, isize>>| -> HashMap<String, HashMap<(usize, String), isize>> {
-        // Collect error_values for terminals.
-        let error_values: HashMap<String, isize> = config
-            .context
-            .error_values
-            .iter()
-            .map(|(k, v)| (k.clone(), *v))
-            .collect();
-
+    let dist_tables: HashMap<String, HashMap<(usize, String), isize>> = {
         let mut all_dists: HashMap<String, HashMap<(usize, String), isize>> = HashMap::new();
 
         // Fixed-point: iterate until all cross-rule references converge.
@@ -1240,11 +1192,10 @@ pub fn generate(path: &str, contents: &str) -> String {
                     &transitions,
                     sc,
                     &all_terminal_idents,
-                    &error_values,
                     &min_completion_costs,
                     &initial_states,
                     &all_dists,
-                    constructs,
+                    &config.context.construct_costs,
                 );
 
                 if all_dists.get(&rule.name) != Some(&new_dist) {
@@ -1255,8 +1206,6 @@ pub fn generate(path: &str, contents: &str) -> String {
         }
         all_dists
     };
-    let dist_tables = dist_tables_for(None);
-    let dist_tables_c = dist_tables_for(Some(&config.context.construct_costs));
 
     // ── Phase 4: Generate state-machine code (pass 2) ──
     let mut terminals = HashSet::new();
@@ -1329,7 +1278,7 @@ pub fn generate(path: &str, contents: &str) -> String {
         })
         .collect();
 
-    // Build sorted_reachable: terminal sets for each producing rule, used by min_error_for_token.
+    // Build sorted_reachable: terminal sets for each producing rule, used by can_start_with.
     let mut sorted_reachable: Vec<_> = reachable_terminals
         .iter()
         .filter(|(name, _)| config.rules.producing.iter().any(|r| &r.name == *name))
@@ -1339,9 +1288,9 @@ pub fn generate(path: &str, contents: &str) -> String {
     let mut producing: Vec<_> = config.rules.producing.iter().map(|x| &x.name).collect();
     producing.sort();
 
-    // Build min_error_for_token arms for each non-nullable producing rule:
-    // returns 0 if tok is in the reachable set, max_error_value() otherwise.
-    // Nullable rules are omitted (fall through to the default arm that returns 0).
+    // Build can_start_with arms for each non-nullable producing rule: true if
+    // tok is in the reachable set.  Nullable rules are omitted (fall through
+    // to the default arm, true).
     let min_error_producing_arms: Vec<_> = sorted_reachable
         .iter()
         .filter(|(name, _)| !can_be_empty.get(*name).copied().unwrap_or(false))
@@ -1351,25 +1300,18 @@ pub fn generate(path: &str, contents: &str) -> String {
             tok_idents.sort_by_key(|id| id.to_string());
             tok_idents.dedup_by_key(|id| id.to_string());
             quote! {
-                SyntaxKind::#n => match tok {
-                    #( SyntaxKind::#tok_idents )|* => 0,
-                    _ => kind.max_error_value(),
-                },
+                SyntaxKind::#n => matches!(tok, #( SyntaxKind::#tok_idents )|*),
             }
         })
         .collect();
-    // Terminal rules: they match exactly one token kind; return 0 for that
-    // token and max_error_value() for everything else.
+    // Terminal rules: they match exactly one token kind.
     let min_error_terminal_arms: Vec<_> = sorted_terminals
         .iter()
         .map(|x| {
             let name = x.ident(&config);
             let n = config.context.ident_for(&name);
             quote! {
-                SyntaxKind::#n => match tok {
-                    SyntaxKind::#n => 0,
-                    _ => kind.max_error_value(),
-                },
+                SyntaxKind::#n => tok == SyntaxKind::#n,
             }
         })
         .collect();
@@ -1409,41 +1351,6 @@ pub fn generate(path: &str, contents: &str) -> String {
         .map(|x| config.context.ident_for(x))
         .collect();
 
-    // Build max_error_value arms: for each terminal, emit the error_value used
-    // by grammar rules that match it.  Only emit arms that differ from the
-    // wildcard default (2), so the match stays compact.
-    let max_error_value_arms: Vec<_> = sorted_terminals
-        .iter()
-        .filter_map(|x| {
-            let ident_str = x.ident(&config);
-            let ev = config
-                .context
-                .error_values
-                .get(ident_str.as_str())
-                .copied()?;
-
-            let n = config.context.ident_for(&ident_str);
-            Some(quote! { SyntaxKind::#n => #ev, })
-        })
-        .collect();
-
-    // Build deletion_cost arms: for each terminal with a deletion_value
-    // override, emit a direct cost instead of the default 5×max_error_value.
-    let deletion_cost_arms: Vec<_> = sorted_terminals
-        .iter()
-        .filter_map(|x| {
-            let ident_str = x.ident(&config);
-            let dv = config
-                .context
-                .deletion_values
-                .get(ident_str.as_str())
-                .copied()?;
-
-            let n = config.context.ident_for(&ident_str);
-            Some(quote! { SyntaxKind::#n => #dv, })
-        })
-        .collect();
-
     // Build construct_cost arms: per-rule penalties for inventing a construct
     // during recovery (`=== construct_cost ===`), sorted for stable output.
     let construct_cost_arms: Vec<_> = {
@@ -1469,21 +1376,6 @@ pub fn generate(path: &str, contents: &str) -> String {
             quote! { SyntaxKind::#n => -1, }
         });
         openers.chain(closers).collect()
-    };
-
-    // Build min_completion_cost arms for producing rules.
-    let min_completion_cost_arms: Vec<_> = {
-        let mut sorted: Vec<_> = min_completion_costs.iter().collect();
-        sorted.sort_by_key(|(name, _)| name.as_str());
-        sorted
-            .iter()
-            .filter(|&&(_, cost)| *cost > DEFAULT_TOKEN_WEIGHT) // only emit non-default
-            .map(|&(name, cost)| {
-                let n = config.context.ident_for(name);
-                let c = *cost;
-                quote! { SyntaxKind::#n => #c, }
-            })
-            .collect()
     };
 
     // Build state_dist match arms from the precomputed dist tables.
@@ -1566,7 +1458,6 @@ pub fn generate(path: &str, contents: &str) -> String {
         arms
     };
     let state_dist_arms = dist_arms(&dist_tables);
-    let state_dist_c_arms = dist_arms(&dist_tables_c);
 
     // ── Format module codegen ────────────────────────────────────────────────
 
@@ -2059,34 +1950,24 @@ pub fn generate(path: &str, contents: &str) -> String {
             }
         }
 
-        /// Returns the minimum error cost that `kind` must incur when `tok`
-        /// is the current token.  0 means the token is reachable (or the rule
-        /// is nullable); positive means the rule cannot make progress without
-        /// at least that much error cost.
-        pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
+        /// Whether `kind` can start with `tok` (or match nothing), i.e. make
+        /// progress without an error when `tok` is the current token.
+        pub fn can_start_with(kind: SyntaxKind, tok: SyntaxKind) -> bool {
             match kind {
                 #( #min_error_producing_arms )*
                 #( #min_error_terminal_arms )*
-                _ => 0,
+                _ => true,
             }
         }
 
-        /// Precomputed dist(q, a): minimum insertion cost to reach a point
-        /// where terminal `terminal` can be matched, starting from parser
-        /// state `(kind, state)`.  Returns 0 as the conservative default
+        /// Precomputed dist(q, a): the least a repair costs (insertions, plus
+        /// the construct costs of rules it invents) to reach a point where
+        /// terminal `terminal` can be matched, starting from parser state
+        /// `(kind, state)`.  Returns 0 as the conservative default
         /// (admissible — parent context might accept the terminal after a pop).
         pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
             match (kind, state, terminal) {
                 #( #state_dist_arms )*
-                _ => 0,
-            }
-        }
-
-        /// `state_dist` in construct costs: inserted tokens count 1, and
-        /// rules invented on the way add their construct cost.
-        pub fn state_dist_constructs(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
-            match (kind, state, terminal) {
-                #( #state_dist_c_arms )*
                 _ => 0,
             }
         }
@@ -2121,10 +2002,6 @@ pub fn generate(path: &str, contents: &str) -> String {
             fn state_dist(&self, terminal: &SyntaxKind) -> isize {
                 state_dist(self.kind, self.state, *terminal)
             }
-
-            fn state_dist_constructs(&self, terminal: &SyntaxKind) -> isize {
-                state_dist_constructs(self.kind, self.state, *terminal)
-            }
         }
     }
     pub use definitions::*;
@@ -2150,8 +2027,8 @@ pub fn generate(path: &str, contents: &str) -> String {
             &[]
         }
 
-        fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
-            min_error_for_token(*self, *tok)
+        fn can_start_with(&self, tok: &SyntaxKind) -> bool {
+            can_start_with(*self, *tok)
         }
 
 
@@ -2159,31 +2036,10 @@ pub fn generate(path: &str, contents: &str) -> String {
             &[]
         }
 
-        fn max_error_value(&self) -> isize {
-            match self {
-                #( #max_error_value_arms )*
-                _ => #DEFAULT_TOKEN_WEIGHT,
-            }
-        }
-
         fn bracket_delta(&self) -> i8 {
             match self {
                 #( #bracket_delta_arms )*
                 _ => 0,
-            }
-        }
-
-        fn min_completion_cost(&self) -> isize {
-            match self {
-                #( #min_completion_cost_arms )*
-                _ => Self::max_error_value(self),
-            }
-        }
-
-        fn deletion_cost(&self) -> isize {
-            match self {
-                #( #deletion_cost_arms )*
-                _ => Self::max_error_value(self) * 5,
             }
         }
 

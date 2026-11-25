@@ -85,12 +85,6 @@ double -> myDouble
 = -> eq
 ! -> bang
 ^ -> hat
-=== error_value ===
-prefix_token -> 100
-base_token -> 100
-stop -> 5
-colon -> 4
-comma -> 3
 === construct_cost ===
 n3Directive -> 20
 sparqlDirective -> 20

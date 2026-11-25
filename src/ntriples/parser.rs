@@ -125,163 +125,51 @@ mod definitions {
             _ => &[],
         }
     }
-    #[doc = r" Returns the minimum error cost that `kind` must incur when `tok`"]
-    #[doc = r" is the current token.  0 means the token is reachable (or the rule"]
-    #[doc = r" is nullable); positive means the rule cannot make progress without"]
-    #[doc = r" at least that much error cost."]
-    pub fn min_error_for_token(kind: SyntaxKind, tok: SyntaxKind) -> isize {
+    #[doc = r" Whether `kind` can start with `tok` (or match nothing), i.e. make"]
+    #[doc = r" progress without an error when `tok` is the current token."]
+    pub fn can_start_with(kind: SyntaxKind, tok: SyntaxKind) -> bool {
         match kind {
-            SyntaxKind::Literal => match tok {
+            SyntaxKind::Literal => matches!(
+                tok,
                 SyntaxKind::Datatype
-                | SyntaxKind::Iriref
-                | SyntaxKind::Langtag
-                | SyntaxKind::StringLiteralQuote => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Object => match tok {
+                    | SyntaxKind::Iriref
+                    | SyntaxKind::Langtag
+                    | SyntaxKind::StringLiteralQuote
+            ),
+            SyntaxKind::Object => matches!(
+                tok,
                 SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Datatype
-                | SyntaxKind::Iriref
-                | SyntaxKind::Langtag
-                | SyntaxKind::StringLiteralQuote => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Predicate => match tok {
-                SyntaxKind::Iriref => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Subject => match tok {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Triple => match tok {
+                    | SyntaxKind::Datatype
+                    | SyntaxKind::Iriref
+                    | SyntaxKind::Langtag
+                    | SyntaxKind::StringLiteralQuote
+            ),
+            SyntaxKind::Predicate => matches!(tok, SyntaxKind::Iriref),
+            SyntaxKind::Subject => matches!(tok, SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref),
+            SyntaxKind::Triple => matches!(
+                tok,
                 SyntaxKind::BlankNodeLabel
-                | SyntaxKind::Datatype
-                | SyntaxKind::Iriref
-                | SyntaxKind::Langtag
-                | SyntaxKind::Stop
-                | SyntaxKind::StringLiteralQuote => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Stop => match tok {
-                SyntaxKind::Stop => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Datatype => match tok {
-                SyntaxKind::Datatype => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::BlankNodeLabel => match tok {
-                SyntaxKind::BlankNodeLabel => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Iriref => match tok {
-                SyntaxKind::Iriref => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::Langtag => match tok {
-                SyntaxKind::Langtag => 0,
-                _ => kind.max_error_value(),
-            },
-            SyntaxKind::StringLiteralQuote => match tok {
-                SyntaxKind::StringLiteralQuote => 0,
-                _ => kind.max_error_value(),
-            },
-            _ => 0,
+                    | SyntaxKind::Datatype
+                    | SyntaxKind::Iriref
+                    | SyntaxKind::Langtag
+                    | SyntaxKind::Stop
+                    | SyntaxKind::StringLiteralQuote
+            ),
+            SyntaxKind::Stop => tok == SyntaxKind::Stop,
+            SyntaxKind::Datatype => tok == SyntaxKind::Datatype,
+            SyntaxKind::BlankNodeLabel => tok == SyntaxKind::BlankNodeLabel,
+            SyntaxKind::Iriref => tok == SyntaxKind::Iriref,
+            SyntaxKind::Langtag => tok == SyntaxKind::Langtag,
+            SyntaxKind::StringLiteralQuote => tok == SyntaxKind::StringLiteralQuote,
+            _ => true,
         }
     }
-    #[doc = r" Precomputed dist(q, a): minimum insertion cost to reach a point"]
-    #[doc = r" where terminal `terminal` can be matched, starting from parser"]
-    #[doc = r" state `(kind, state)`.  Returns 0 as the conservative default"]
+    #[doc = r" Precomputed dist(q, a): the least a repair costs (insertions, plus"]
+    #[doc = r" the construct costs of rules it invents) to reach a point where"]
+    #[doc = r" terminal `terminal` can be matched, starting from parser state"]
+    #[doc = r" `(kind, state)`.  Returns 0 as the conservative default"]
     #[doc = r" (admissible — parent context might accept the terminal after a pop)."]
     pub fn state_dist(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
-        match (kind, state, terminal) {
-            (SyntaxKind::Literal, 2usize, _) => match terminal {
-                SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Literal, 3usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Literal, 4usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 2isize,
-                SyntaxKind::Iriref => 1isize,
-                SyntaxKind::Langtag => 2isize,
-                SyntaxKind::StringLiteralQuote => 2isize,
-                SyntaxKind::Stop => 2isize,
-                _ => 0,
-            },
-            (SyntaxKind::Literal, 5usize, _) => match terminal {
-                SyntaxKind::Langtag => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Literal, 6usize, _) => match terminal {
-                SyntaxKind::StringLiteralQuote => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::NtriplesDoc, 2usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 1usize, _) => match terminal {
-                SyntaxKind::Langtag => 1isize,
-                SyntaxKind::Datatype => 1isize,
-                SyntaxKind::Stop => 1isize,
-                _ => 0,
-            },
-            (SyntaxKind::Object, 2usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 3usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Object, 4usize, _) => match terminal {
-                SyntaxKind::StringLiteralQuote => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Predicate, 1usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Subject, 1usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Subject, 2usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Subject, 3usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triple, 1usize, _) => match terminal {
-                SyntaxKind::Stop => 0,
-                _ => 8isize,
-            },
-            (SyntaxKind::Triple, 2usize, _) => match terminal {
-                SyntaxKind::Langtag => 1isize,
-                SyntaxKind::Datatype => 1isize,
-                SyntaxKind::Stop => 1isize,
-                _ => 0,
-            },
-            (SyntaxKind::Triple, 3usize, _) => match terminal {
-                SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            (SyntaxKind::Triple, 4usize, _) => match terminal {
-                SyntaxKind::BlankNodeLabel | SyntaxKind::Iriref => 0,
-                _ => 1isize,
-            },
-            _ => 0,
-        }
-    }
-    #[doc = r" `state_dist` in construct costs: inserted tokens count 1, and"]
-    #[doc = r" rules invented on the way add their construct cost."]
-    pub fn state_dist_constructs(kind: SyntaxKind, state: usize, terminal: SyntaxKind) -> isize {
         match (kind, state, terminal) {
             (SyntaxKind::Literal, 2usize, _) => match terminal {
                 SyntaxKind::Langtag | SyntaxKind::Datatype => 0,
@@ -725,9 +613,6 @@ mod definitions {
         fn state_dist(&self, terminal: &SyntaxKind) -> isize {
             state_dist(self.kind, self.state, *terminal)
         }
-        fn state_dist_constructs(&self, terminal: &SyntaxKind) -> isize {
-            state_dist_constructs(self.kind, self.state, *terminal)
-        }
     }
 }
 pub use definitions::*;
@@ -748,32 +633,15 @@ impl TokenTrait for SyntaxKind {
     fn starting_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn min_error_for_token(&self, tok: &SyntaxKind) -> isize {
-        min_error_for_token(*self, *tok)
+    fn can_start_with(&self, tok: &SyntaxKind) -> bool {
+        can_start_with(*self, *tok)
     }
     fn ending_tokens(&self) -> &'static [SyntaxKind] {
         &[]
     }
-    fn max_error_value(&self) -> isize {
-        match self {
-            SyntaxKind::Stop => 8isize,
-            _ => 1isize,
-        }
-    }
     fn bracket_delta(&self) -> i8 {
         match self {
             _ => 0,
-        }
-    }
-    fn min_completion_cost(&self) -> isize {
-        match self {
-            SyntaxKind::Triple => 11isize,
-            _ => Self::max_error_value(self),
-        }
-    }
-    fn deletion_cost(&self) -> isize {
-        match self {
-            _ => Self::max_error_value(self) * 5,
         }
     }
     fn construct_cost(&self) -> isize {

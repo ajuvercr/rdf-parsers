@@ -56,30 +56,21 @@ pub enum Engine {
     Local { window: usize },
 }
 
-/// What a repair costs (see `ParseOptions`).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum Costs {
-    /// The grammar's per-token error values: inserting a token costs its
-    /// error value, deleting one 5 times that unless the grammar's
-    /// `deletion_value` says otherwise.
-    #[default]
-    Tokens,
-    /// Every inserted token costs 1 and a deleted one `CONSTRUCT_DELETE`, or
-    /// `CONSTRUCT_DELETE_MORE` when it directly follows a deleted token.
-    /// A construct the repair invents (entered with its first token inserted,
-    /// not typed) adds the penalty the grammar's `=== construct_cost ===`
-    /// gives it.  So the grammar says how unlikely a construct is, not how
-    /// much each token weighs, and what the user typed is kept as long as a
-    /// few insertions explain it.
-    Constructs,
-}
+/// What a repair costs: inserting a missing token costs `CONSTRUCT_INSERT`,
+/// deleting one `CONSTRUCT_DELETE` (`CONSTRUCT_DELETE_MORE` right after
+/// another deletion), and a construct the repair invents (entered with its
+/// first token inserted, not typed) adds the penalty the grammar's
+/// `=== construct_cost ===` section gives it.  So the grammar says how
+/// unlikely a construct is, not how much each token weighs, and what the
+/// user typed is kept as long as a few insertions explain it.  Role conflicts
+/// with the previous parse cost `ROLE_CONFLICT_COST`.
+pub const CONSTRUCT_INSERT: isize = 1;
 
-/// `Costs::Constructs`: the cost of deleting a token.  The parser invents up
-/// to `CONSTRUCT_DELETE - 1` missing tokens to keep one the user typed.
+/// The cost of deleting a token.  The parser invents up to
+/// `CONSTRUCT_DELETE - 1` missing tokens to keep one the user typed.
 pub const CONSTRUCT_DELETE: isize = 4;
 
-/// `Costs::Constructs`: the cost of each further token deleted right after a
-/// deleted one, when it has no clean role (it is new, or has not been part of
+/// The cost of each further token deleted right after a deleted one, when it has no clean role (it is new, or has not been part of
 /// a statement that parsed).  A run of
 /// junk just typed (half an IRI typed against a keyword: `< http: / /`) is
 /// one mistake, not one per token, so deleting it stays cheaper than
@@ -87,6 +78,11 @@ pub const CONSTRUCT_DELETE: isize = 4;
 /// cost, so valid text is never cheap to delete; without a previous version
 /// there is no history to tell junk from text, and no discount.
 pub const CONSTRUCT_DELETE_MORE: isize = 1;
+
+/// What every token the parse consumes costs, matched or deleted (on top of
+/// the deletion cost).  The heuristic counts it for every token ahead, so it
+/// cancels out between paths: only repairs and role conflicts decide.
+const MATCH_COST: isize = 1;
 
 /// The window of `Engine::Local` when none is given: twice as far as the
 /// global engine's dominance pruning looks.  Shorter windows commit in the
@@ -161,15 +157,11 @@ pub trait ParserTrait: Debug + Sized + 'static {
     /// Rebuilds the rule in state `at` (see `at`), e.g. from a checkpoint.
     fn from_parts(kind: Self::Kind, at: usize) -> Self;
 
-    /// Precomputed dist(q, a): minimum insertion cost to reach a point where
-    /// terminal `terminal` can be matched, starting from this parser state
+    /// Precomputed dist(q, a): the least a repair costs (insertions, plus the
+    /// construct costs of rules it invents) to reach a point where terminal
+    /// `terminal` can be matched, starting from this parser state
     /// (kind, state_number).  Default: 0 (always admissible).
     fn state_dist(&self, _terminal: &Self::Kind) -> isize {
-        0
-    }
-
-    /// `state_dist` in construct costs (`Costs::Constructs`).  Default: 0.
-    fn state_dist_constructs(&self, _terminal: &Self::Kind) -> isize {
         0
     }
 }
@@ -259,12 +251,9 @@ pub struct AStar<'a, R: ParserTrait> {
     tokens: &'a [FatToken<R::Kind>],
     todo: BinaryHeap<Element<R>>,
     pub bias: IncrementalBias,
-    /// Admissible heuristic: `heuristic[pos]` is a non-positive lower bound on
-    /// the minimum additional cost from token position `pos` to end of input.
-    /// Computed as suffix sum of potential agreement bonuses: each remaining
-    /// token with `old_kind` could yield a `-strength` discount.  This is
-    /// optimistic (assumes every token lands in its previous role) and
-    /// therefore admissible.
+    /// Admissible heuristic: `heuristic[pos]` is `MATCH_COST` for every token
+    /// from `pos` to the end of the input, which each of them costs whether
+    /// it is matched or deleted.
     /// In `Fast` mode this is always empty; 0 is used directly.
     heuristic: Vec<isize>,
     /// Bracket balance of the text itself (`bracket_delta` of the real
@@ -336,8 +325,6 @@ pub struct AStar<'a, R: ParserTrait> {
     committed_excess: isize,
     /// Number of commits, for diagnostics (`last_commits`).
     commits: usize,
-    /// `Costs::Constructs`: flat token costs plus construct penalties.
-    constructs: bool,
     /// Some token has a role from a previous parse (an incremental parse).
     has_history: bool,
     /// Per token position: whether the first unchanged token from there on
@@ -351,12 +338,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     fn new(tokens: &'a [FatToken<R::Kind>], bias: IncrementalBias, max_iterations: usize) -> Self {
         let mut heuristic = vec![0isize; tokens.len() + 1];
         for i in (0..tokens.len()).rev() {
-            let offset = if tokens[i].kind.skips() {
-                0
-            } else {
-                tokens[i].kind.max_error_value()
-            };
-            // Maybe off by one
+            let offset = if tokens[i].kind.skips() { 0 } else { MATCH_COST };
             heuristic[i] = heuristic[i + 1] + offset;
         }
         let (open_before, close_from) = unmatched_brackets(tokens);
@@ -399,7 +381,6 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             commit_window: None,
             committed_excess: 0,
             commits: 0,
-            constructs: false,
             has_history: false,
         }
     }
@@ -438,7 +419,6 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             commit_window: None,
             committed_excess: 0,
             commits: 0,
-            constructs: false,
             has_history: false,
             linked_ahead: Vec::new(),
         }
@@ -636,7 +616,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             for t in &self.tokens[pos..] {
                 if !t.kind.skips() {
                     list = list.prepend(Step::Delete);
-                    cost += t.kind.deletion_cost();
+                    cost += MATCH_COST + CONSTRUCT_DELETE;
                 }
             }
             for _ in 0..depth.saturating_sub(1) {
@@ -729,46 +709,40 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         self.commits += 1;
     }
 
-    /// The cost of inserting / deleting `tok` under the search's cost model.
-    /// Matching a token costs its `max_error_value` and the heuristic counts
-    /// that value for every token ahead, so a deletion pays it as well.
-    fn insert_cost(&self, tok: &R::Kind) -> isize {
-        if self.constructs { 1 } else { tok.max_error_value() }
-    }
-
-    fn delete_cost(&self, tok: &R::Kind) -> isize {
-        if self.constructs {
-            tok.max_error_value() + CONSTRUCT_DELETE
-        } else {
-            tok.deletion_cost()
-        }
+    /// The cost of deleting a token at `pos` from `element`'s path: a token
+    /// deleted right after another costs `CONSTRUCT_DELETE_MORE` when the
+    /// run discount applies to it (`in_run`: the deletion continues a run).
+    fn delete_cost(&self, tok: &FatToken<R::Kind>, in_run: bool) -> isize {
+        MATCH_COST
+            + if in_run && self.run_discount(tok.clean_role()) {
+                CONSTRUCT_DELETE_MORE
+            } else {
+                CONSTRUCT_DELETE
+            }
     }
 
     /// The key under which `done` keeps the cheapest path to a parser state.
     /// Under the run discount, a path that just deleted a token pays less
     /// for deleting the next one, so "in a run" is part of the state.
     fn done_key(&self, e: &Element<R>, at: usize) -> (Fingerprint, usize, usize) {
-        let in_run = self.constructs && self.has_history && e.run_end == e.state.1;
+        let in_run = self.has_history && e.run_end == e.state.1;
         let fp = if in_run { descend(e.state.0, 0x5EED_0001) } else { e.state.0 };
         (fp, e.state.1, at)
     }
 
     /// Whether deleting this token right after another costs only
-    /// `CONSTRUCT_DELETE_MORE`: construct costs, an incremental parse, and a
-    /// token without a clean role (new, or never part of a statement that
+    /// `CONSTRUCT_DELETE_MORE`: an incremental parse, and a token without a
+    /// clean role (new, or never part of a statement that
     /// parsed).  Text that was valid keeps its full price, so the discount
     /// cannot delete it in bulk, and junk stays cheap even after a broken
     /// parse gave it some role.
     fn run_discount(&self, clean_role: bool) -> bool {
-        self.constructs && self.has_history && !clean_role
+        self.has_history && !clean_role
     }
 
-    /// `Costs::Constructs`: the penalty for the constructs `element` entered
-    /// at this position without a token yet, which an insertion now invents.
+    /// The penalty for the constructs `element` entered at this position
+    /// without a token yet, which an insertion now invents.
     fn invented(&self, element: &Element<R>) -> isize {
-        if !self.constructs {
-            return 0;
-        }
         element
             .parent
             .iter()
@@ -828,16 +802,12 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         false
     }
 
-    /// Like `add_element` but pre-charges the element with the minimum error
-    /// cost implied by the current token before adding it when in Fast mode.
-    /// In FaultTolerant mode, explores the branch without pre-charging to allow
-    /// lower-cost alternatives to be found.  Called by generated `push_rule`
-    /// code at sub-rule entry.
-    ///
-    /// `pushed_kind.min_error_for_token(tok)` returns 0 when the token is
-    /// reachable inside the sub-rule (or the rule is nullable), and a positive
-    /// value otherwise.  Pre-charging in Fast mode lets early pruning happen
-    /// automatically via the `has_error` guard in `add_element`.
+    /// Like `add_element`, but in Fast mode marks the element as failed when
+    /// the pushed rule cannot start with the current token
+    /// (`can_start_with`), so the `has_error` guard in `add_element` drops it
+    /// straight away.  FaultTolerant mode explores the branch, since a repair
+    /// may still make it the cheapest.  Called by generated `push_rule` code
+    /// at sub-rule entry.
     pub fn add_element_checked(&mut self, mut element: Element<R>, pushed_kind: R::Kind) -> bool {
         if self.splits_unit(&element) {
             element.cost += UNIT_SPLIT_COST;
@@ -848,15 +818,13 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 pos += 1;
             }
             let element = if let Some(tok) = self.tokens.get(pos) {
-                let min_err = pushed_kind.min_error_for_token(&tok.kind);
-                if min_err > 0 {
+                if pushed_kind.can_start_with(&tok.kind) {
+                    element
+                } else {
                     Element {
-                        cost: element.cost + min_err,
                         has_error: true,
                         ..element
                     }
-                } else {
-                    element
                 }
             } else {
                 element
@@ -912,13 +880,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 let new_d = self
                     .tokens
                     .get(pos)
-                    .map(|tok| {
-                        if self.constructs {
-                            head.state_dist_constructs(&tok.kind).max(0)
-                        } else {
-                            head.state_dist(&tok.kind).max(0)
-                        }
-                    })
+                    .map(|tok| head.state_dist(&tok.kind).max(0))
                     .unwrap_or(0);
                 element.h = element.h - element.dist + new_d;
                 element.dist = new_d;
@@ -1063,7 +1025,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     ))),
                                     parent: element.parent.clone(),
                                     cost: element.cost
-                                        + self.insert_cost(&token)
+                                        + CONSTRUCT_INSERT
                                         + self.invented(element),
                                     h: element.h,
                                     state: element.state,
@@ -1091,7 +1053,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                     ))),
                                     parent: element.parent.clone(),
                                     cost: element.cost
-                                        + self.insert_cost(&token)
+                                        + CONSTRUCT_INSERT
                                         + self.invented(element),
                                     h: element.h,
                                     state: element.state,
@@ -1134,7 +1096,6 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                                 };
                                 let adoption_cost = if backed || depth_delta.is_none() {
                                     delta_change as isize
-                                        * if self.constructs { 1 } else { token.max_error_value() }
                                 } else {
                                     ROLE_CONFLICT_COST
                                 };
@@ -1148,7 +1109,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 let matched = Element {
                     list: create_list(Step::Bump(element.role())),
                     parent: element.parent.clone(),
-                    cost: element.cost + token.max_error_value() + bias,
+                    cost: element.cost + MATCH_COST + bias,
                     h,
                     state: (element.state.0, next),
                     has_error: element.has_error,
@@ -1189,7 +1150,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
         let error = Element {
             list: create_list(Step::error(Error::Expected(token.clone().into()))),
             parent: element.parent.clone(),
-            cost: element.cost + self.insert_cost(&token) + self.invented(element),
+            cost: element.cost + CONSTRUCT_INSERT + self.invented(element),
             h,
             state: (element.state.0, idx),
             has_error: true,
@@ -1237,11 +1198,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             return;
         }
 
-        let del_cost = if self.run_discount(tok.clean_role()) && element.run_end == pos {
-            tok.kind.max_error_value() + CONSTRUCT_DELETE_MORE
-        } else {
-            self.delete_cost(&tok.kind)
-        };
+        let del_cost = self.delete_cost(tok, element.run_end == pos);
         let next = self.get_actual_index(pos + 1);
         let h = if let Some(&hv) = self.heuristic.get(next) {
             hv
@@ -1319,7 +1276,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             }
             if scan_pos > pos {
                 // Walk the parent stack looking for an ancestor that can
-                // accept this token (min_error_for_token == 0). The root rule
+                // accept this token (`can_start_with`). The root rule
                 // is never popped.
                 let mut parent = element.parent.clone();
                 let mut pops = 0;
@@ -1327,7 +1284,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                 // pushed, which is the state with the frame below on top.
                 let mut fp = element.state.0;
                 while let Some((Frame { rule, saved, .. }, tail)) = parent.slice() {
-                    if rule.element_kind().min_error_for_token(&tok.kind) == 0 {
+                    if rule.element_kind().can_start_with(&tok.kind) {
                         let next = self.get_actual_index(scan_pos);
                         let h = self.heuristic.get(next).copied().unwrap_or(0);
                         let cost = element.cost + skip_cost;
@@ -1353,13 +1310,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
                     pops += 1;
                 }
             }
-            skip_cost += if self.run_discount(tok.clean_role())
-                && (skipped > 0 || element.run_end == pos)
-            {
-                tok.kind.max_error_value() + CONSTRUCT_DELETE_MORE
-            } else {
-                self.delete_cost(&tok.kind)
-            };
+            skip_cost += self.delete_cost(tok, skipped > 0 || element.run_end == pos);
             skipped += 1;
         }
 
@@ -1690,7 +1641,6 @@ pub fn a_star<R: ParserTrait>(
         None,
         None,
         Engine::Global,
-        Costs::Tokens,
     )
         .map_or_else(List::default, |f| f.list)
 }
@@ -1710,7 +1660,6 @@ pub fn a_star_fast<R: ParserTrait>(
         None,
         None,
         Engine::Global,
-        Costs::Tokens,
     )
     .map(|f| f.list)
 }
@@ -1724,7 +1673,6 @@ pub(crate) fn search<'a, R: ParserTrait>(
     reuse: Option<&'a Reuse<'a>>,
     deadline: Option<Instant>,
     engine: Engine,
-    costs: Costs,
 ) -> Option<Found<R>> {
     let mut state = match mode {
         ParseMode::FaultTolerant => AStar::new(tokens, bias, max_iterations),
@@ -1734,7 +1682,6 @@ pub(crate) fn search<'a, R: ParserTrait>(
     if mode == ParseMode::FaultTolerant {
         state.deadline = deadline;
         state.configure(engine);
-        state.constructs = costs == Costs::Constructs;
         state.has_history = tokens.iter().any(|t| t.old_kind().is_some());
     }
     let out = state.consume(root);

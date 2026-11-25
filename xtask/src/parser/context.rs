@@ -80,16 +80,9 @@ pub struct FormatEntry {
 pub struct Context {
     pub rename: HashMap<String, String>,
     with: HashMap<String, String>,
-    pub error_values: HashMap<String, isize>,
-    /// Per-token deletion cost overrides.  When present, `deletion_cost()`
-    /// returns this value instead of the default `5 × max_error_value()`.
-    /// Use this to make keywords cheap to delete (skip over) even when their
-    /// `error_value` is high (expensive to insert).
-    pub deletion_values: HashMap<String, isize>,
     /// Per-rule penalties for inventing a construct during recovery (its
     /// first token inserted, not typed), from `=== construct_cost ===`.
-    /// Rules not listed cost nothing extra.  Only used by the construct cost
-    /// model (`Costs::Constructs`).
+    /// Rules not listed cost nothing extra.
     pub construct_costs: HashMap<String, isize>,
     /// Tokens whose `bracket_delta()` is +1 (openers: `{`, `[`, `(`).
     pub bracket_openers: Vec<String>,
@@ -133,8 +126,6 @@ impl Context {
 enum CtxBlock {
     Rename(Vec<(String, String)>),
     With(Vec<(String, String)>),
-    ErrorValues(Vec<(String, isize)>),
-    DeletionValues(Vec<(String, isize)>),
     ConstructCosts(Vec<(String, isize)>),
     BracketOpeners(Vec<String>),
     BracketClosers(Vec<String>),
@@ -263,24 +254,6 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
         .ignore_then(mapping)
         .map(CtxBlock::With);
 
-    let error_values = section_header("error_value", "===")
-        .ignore_then(mapping.clone())
-        .map(|vs| {
-            vs.into_iter()
-                .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
-                .collect::<Vec<_>>()
-        })
-        .map(CtxBlock::ErrorValues);
-
-    let deletion_values = section_header("deletion_value", "===")
-        .ignore_then(mapping)
-        .map(|vs| {
-            vs.into_iter()
-                .flat_map(|(x, y)| isize::from_str_radix(&y, 10).map(|y| (x, y)))
-                .collect::<Vec<_>>()
-        })
-        .map(CtxBlock::DeletionValues);
-
     let construct_costs = section_header("construct_cost", "===")
         .ignore_then(mapping.clone())
         .map(|vs| {
@@ -300,8 +273,6 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
 
     let block = rename
         .or(with)
-        .or(error_values)
-        .or(deletion_values)
         .or(construct_costs)
         .or(bracket_openers)
         .or(bracket_closers)
@@ -316,8 +287,6 @@ pub fn context_parser<'src>() -> impl Parser<'src, &'src str, Context, Err<Rich<
                 match b {
                     CtxBlock::Rename(entries) => ctx.rename.extend(entries),
                     CtxBlock::With(entries) => ctx.with.extend(entries),
-                    CtxBlock::ErrorValues(items) => ctx.error_values.extend(items),
-                    CtxBlock::DeletionValues(items) => ctx.deletion_values.extend(items),
                     CtxBlock::ConstructCosts(items) => ctx.construct_costs.extend(items),
                     CtxBlock::BracketOpeners(names) => ctx.bracket_openers.extend(names),
                     CtxBlock::BracketClosers(names) => ctx.bracket_closers.extend(names),

@@ -25,13 +25,6 @@ JSON_STRING -> stringToken
 null -> null_lit
 true -> true_lit
 false -> false_lit
-=== error_value ===
-curly_open -> 2
-curly_close -> 2
-sq_open -> 4
-sq_close -> 4
-comma -> 2
-colon -> 3
 === construct_cost ===
 jsonObject -> 3
 jsonArray -> 3
