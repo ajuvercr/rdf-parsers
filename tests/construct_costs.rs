@@ -102,3 +102,38 @@ fn lone_bracket_is_closed() {
     assert_eq!(errors, ["Expected(SqClose)"]);
     assert_eq!(roles, ["<b>=Subject"]);
 }
+
+/// Half an IRI typed in front of `SELECT`, one character at a time.  Once
+/// the keyword is no longer glued to the junk (`<http:/`, `<http://`), the
+/// junk is deleted as one run and `SELECT` is kept, rather than read as
+/// operators in an invented projection.  That holds even after a broken parse
+/// gave the junk such roles, because it never had a clean role.  And no
+/// keystroke runs to the search's iteration cap.
+#[test]
+fn stray_iri_before_select_is_deleted_as_a_run() {
+    use rdf_parsers::sparql::Rule as Q;
+    use rdf_parsers::sparql::SyntaxKind as K;
+    let options = ParseOptions {
+        costs: Costs::Constructs,
+        ..ParseOptions::default()
+    };
+    let query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\nSELECT ?person ?name\nWHERE {\n  ?person a foaf:Person ;\n          foaf:name ?name .\n}\nORDER BY ?name\n";
+    let at = query.find("SELECT").unwrap();
+    let (_, mut prev) = parse_incremental_with(Q::new(K::QueryUnit), query, None, options);
+    let mut text = query.to_string();
+    for (i, c) in "<http://x/> ".char_indices() {
+        text.insert(at + i, c);
+        let (parse, next) = parse_incremental_with(Q::new(K::QueryUnit), &text, Some(&prev), options);
+        let iterations = last_iterations();
+        assert!(iterations < 200_000, "{iterations} iterations after typing {c:?}");
+        let typed = &text[at..at + i + 1];
+        let errors: Vec<&String> = parse.errors.iter().collect();
+        if typed.ends_with('/') {
+            assert!(
+                errors.iter().all(|e| !e.starts_with("Expected(") && e.as_str() != "Unexpected(SelectLit)"),
+                "{typed:?} should only delete junk, got {errors:?}"
+            );
+        }
+        prev = next;
+    }
+}

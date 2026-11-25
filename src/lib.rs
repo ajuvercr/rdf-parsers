@@ -13,7 +13,8 @@ pub use a_star::ParseMode;
 pub use a_star::ParserTrait;
 #[doc(hidden)]
 pub use a_star::{
-    CONSTRUCT_DELETE, Costs, DEFAULT_LOCAL_WINDOW, Engine, last_commits, last_iterations,
+    CONSTRUCT_DELETE, CONSTRUCT_DELETE_MORE, Costs, DEFAULT_LOCAL_WINDOW, Engine, last_commits,
+    last_iterations,
 };
 pub mod list;
 pub mod model;
@@ -421,6 +422,9 @@ where
                     let prev_tok = &prev.tokens[old];
                     tokens[new].set_old_kind(prev_tok.fingerprint);
                     tokens[new].set_old_depth(Some(prev_tok.depth));
+                    // Unknown (no anchoring info): count the role as clean,
+                    // which keeps the token's full deletion cost.
+                    tokens[new].set_clean_role(prev.anchored.get(old).copied().unwrap_or(true));
                 }
             }
             a_star::search(

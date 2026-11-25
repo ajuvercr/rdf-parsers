@@ -8,6 +8,10 @@ pub struct FatToken<T: TokenTrait> {
     /// Bracket nesting depth from the previous parse at which this token was
     /// parsed.  `None` for new (inserted) tokens.
     old_depth: Option<u8>,
+    /// Whether `old_kind` is a clean role: one a parse gave this token while
+    /// its statement was whole (see `anchor_history`).  False for new tokens
+    /// and for text that never parsed cleanly, such as junk being typed.
+    clean_role: bool,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -17,6 +21,7 @@ impl<T: TokenTrait> FatToken<T> {
             text,
             old_kind: None,
             old_depth: None,
+            clean_role: false,
         }
     }
 
@@ -38,6 +43,14 @@ impl<T: TokenTrait> FatToken<T> {
 
     pub fn set_old_depth(&mut self, depth: Option<u8>) {
         self.old_depth = depth;
+    }
+
+    pub fn clean_role(&self) -> bool {
+        self.clean_role
+    }
+
+    pub fn set_clean_role(&mut self, clean: bool) {
+        self.clean_role = clean;
     }
 
     pub fn to_prev_token(&self, current_depth: u8) -> crate::PrevToken {
