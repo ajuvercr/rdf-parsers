@@ -783,23 +783,12 @@ mod tests {
 
     // ── incremental parsing ───────────────────────────────────────────────────
 
-    use crate::{IncrementalBias, PrevParseInfo, TokenTrait, parse_incremental};
+    use crate::{IncrementalBias, PrevParseInfo, parse_incremental};
 
+    /// The history an editor has after parsing `text`.
     fn prev_info(text: &str) -> PrevParseInfo {
-        let (_, tokens) = crate_parse(lang::Rule::new(lang::SyntaxKind::TurtleDoc), text);
-        let mut depth: i32 = 0;
-        PrevParseInfo {
-            tokens: tokens
-                .iter()
-                .map(|t| {
-                    let d = depth.clamp(0, 255) as u8;
-                    depth += t.kind.bracket_delta() as i32;
-                    t.to_prev_token(d)
-                })
-                .collect(),
-            had_errors: false,
-            ..Default::default()
-        }
+        let rule = lang::Rule::new(lang::SyntaxKind::TurtleDoc);
+        parse_incremental(rule, text, None, IncrementalBias::default()).1
     }
 
     /// Going from `<b> <c> <d> .` to `<a> <b> <c> <d> .` (inserting `<a>`

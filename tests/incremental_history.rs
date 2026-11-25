@@ -185,3 +185,53 @@ fn history_records_the_depth_the_parse_gave_a_token() {
         }
     }
 }
+
+/// A new pair typed after a `;`, before the next pair, the way an editor sees
+/// it: Enter after the `;`, then `foaf:age 42 ;` one character at a time.
+/// Until its own `;` is typed, the half-typed pair could also be read as a
+/// statement of its own, `foaf:age foaf:knows ex:Bob .`, with a `.` inserted
+/// after Alice's `;`.  That repair is cheaper, but it moves `foaf:knows
+/// ex:Bob` to another subject, and the editor would suggest predicates where
+/// an object is wanted.  So the new name stays a predicate of Alice, and
+/// `foaf:knows` stays in her statement.
+#[test]
+fn new_pair_typed_before_the_next_one_stays_in_the_statement() {
+    use rdf_parsers::turtle::Lang;
+    let before = "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n\
+                  @prefix ex: <http://example.org/> .\n\
+                  ex:Alice a foaf:Person ;\n    foaf:knows ex:Bob .\n";
+    let at = before.find("    foaf:knows").unwrap();
+    let (_, mut prev) = parse(before, None);
+    let mut text = before.to_string();
+    for (i, c) in "    foaf:age 42 ;\n".char_indices() {
+        text.insert(at + i, c);
+        let (p, next) = parse(&text, Some(&prev));
+        let root = p.syntax::<Lang>();
+        let statement_of = |word: &str| {
+            root.descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .find(|t| t.text() == word)
+                .and_then(|t| t.parent_ancestors().find(|n| format!("{:?}", n.kind()) == "Statement"))
+                .map(|n| n.text().to_string())
+        };
+        let role_of_age = root
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .find(|t| t.text() == "foaf:age")
+            .and_then(|t| {
+                t.parent_ancestors()
+                    .map(|n| format!("{:?}", n.kind()))
+                    .find(|k| matches!(k.as_str(), "Subject" | "Verb" | "Object" | "Error"))
+            });
+        let typed = &text[at..at + i + c.len_utf8()];
+        if typed.contains("foaf:age") {
+            assert_eq!(role_of_age.as_deref(), Some("Verb"), "after typing {typed:?}");
+        }
+        let knows = statement_of("foaf:knows").unwrap_or_default();
+        assert!(
+            knows.contains("ex:Alice"),
+            "after typing {typed:?}, foaf:knows left Alice's statement: {knows:?}"
+        );
+        prev = next;
+    }
+}

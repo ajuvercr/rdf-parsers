@@ -12,6 +12,10 @@ pub struct FatToken<T: TokenTrait> {
     /// its statement was whole (see `anchor_history`).  False for new tokens
     /// and for text that never parsed cleanly, such as junk being typed.
     clean_role: bool,
+    /// Whether this token shares a top-level unit (a statement) with the
+    /// token the history had right before it, and that token is still the
+    /// last unchanged one before it.  See `AStar::splits_unit`.
+    unit_linked: bool,
 }
 impl<T: TokenTrait> FatToken<T> {
     pub fn new(kind: T, range: Range<usize>, text: String) -> Self {
@@ -22,6 +26,7 @@ impl<T: TokenTrait> FatToken<T> {
             old_kind: None,
             old_depth: None,
             clean_role: false,
+            unit_linked: false,
         }
     }
 
@@ -51,6 +56,14 @@ impl<T: TokenTrait> FatToken<T> {
 
     pub fn set_clean_role(&mut self, clean: bool) {
         self.clean_role = clean;
+    }
+
+    pub fn unit_linked(&self) -> bool {
+        self.unit_linked
+    }
+
+    pub fn set_unit_linked(&mut self, linked: bool) {
+        self.unit_linked = linked;
     }
 
     pub fn to_prev_token(&self, current_depth: u8) -> crate::PrevToken {

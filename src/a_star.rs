@@ -204,6 +204,11 @@ pub const DEFAULT_POPS_PER_POSITION: u32 = 4096;
 /// the previous parse, at the same bracket depth.
 const ROLE_CONFLICT_COST: isize = 50;
 
+/// Extra cost of a repair that splits a top-level unit of the previous parse
+/// in two: see `AStar::splits_unit`.  As much as a role conflict, since the
+/// tokens after the split keep their roles but change statements.
+const UNIT_SPLIT_COST: isize = ROLE_CONFLICT_COST;
+
 /// Number of consecutive error operations that triggers sync-point scanning.
 /// The paper's (R3S-n) is always available; we gate it at 2 to avoid
 /// scanning overhead on isolated single-token errors while still activating
@@ -335,6 +340,11 @@ pub struct AStar<'a, R: ParserTrait> {
     constructs: bool,
     /// Some token has a role from a previous parse (an incremental parse).
     has_history: bool,
+    /// Per token position: whether the first unchanged token from there on
+    /// (white space and new tokens skipped) is `unit_linked`: it shares a
+    /// top-level unit with the unchanged token before it, which lies before
+    /// this position.
+    linked_ahead: Vec<bool>,
 }
 
 impl<'a, R: ParserTrait> AStar<'a, R> {
@@ -350,7 +360,17 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             heuristic[i] = heuristic[i + 1] + offset;
         }
         let (open_before, close_from) = unmatched_brackets(tokens);
+        let mut linked_ahead = vec![false; tokens.len() + 1];
+        for i in (0..tokens.len()).rev() {
+            let t = &tokens[i];
+            linked_ahead[i] = if t.kind.skips() || t.old_kind().is_none() {
+                linked_ahead[i + 1]
+            } else {
+                t.unit_linked()
+            };
+        }
         Self {
+            linked_ahead,
             open_before,
             close_from,
             tokens,
@@ -420,6 +440,7 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             commits: 0,
             constructs: false,
             has_history: false,
+            linked_ahead: Vec::new(),
         }
     }
 
@@ -817,7 +838,10 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
     /// reachable inside the sub-rule (or the rule is nullable), and a positive
     /// value otherwise.  Pre-charging in Fast mode lets early pruning happen
     /// automatically via the `has_error` guard in `add_element`.
-    pub fn add_element_checked(&mut self, element: Element<R>, pushed_kind: R::Kind) -> bool {
+    pub fn add_element_checked(&mut self, mut element: Element<R>, pushed_kind: R::Kind) -> bool {
+        if self.splits_unit(&element) {
+            element.cost += UNIT_SPLIT_COST;
+        }
         if self.mode == ParseMode::Fast {
             let mut pos = element.state.1;
             while self.tokens.get(pos).map_or(false, |t| t.kind.skips()) {
@@ -840,6 +864,23 @@ impl<'a, R: ParserTrait> AStar<'a, R> {
             return self.add_element(element);
         }
         self.add_element(element)
+    }
+
+    /// Whether `element`, which just entered a rule, splits a top-level unit
+    /// (a statement) of the history: it starts a new unit right after a
+    /// repair (an insertion or a deletion), and the unchanged tokens on
+    /// either side shared a unit, the one before directly preceding the one
+    /// after it (`linked_ahead`).  Say `ex:a ex:p ex:o ;` is followed by
+    /// `ex:q ex:r .` on the next line and a new `ex:n` is typed after the
+    /// `;`.  Inserting `.` after the `;` makes `ex:n ex:q ex:r .` a statement
+    /// of its own: one insertion, every old token keeps its role, but
+    /// `ex:q ex:r` moves to another subject.  A split the text makes (a
+    /// typed `.`) follows a match and is free, and so is a new unit next to
+    /// tokens that were not together before.
+    fn splits_unit(&self, element: &Element<R>) -> bool {
+        element.parent.len() == 2
+            && element.consecutive_errors > 0
+            && self.linked_ahead.get(element.state.1).copied().unwrap_or(false)
     }
 
     pub fn add_element(&mut self, mut element: Element<R>) -> bool {

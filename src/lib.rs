@@ -283,6 +283,9 @@ pub struct PrevParseInfo {
     /// top-level unit had no errors (see `anchor_history`).  Empty when not
     /// known.
     anchored: Vec<bool>,
+    /// Per token: the token before it in its top-level unit, if any (see
+    /// `unit_predecessors`), anchored like the roles.  Empty when not known.
+    unit_pred: Vec<Option<u32>>,
 }
 
 impl PrevParseInfo {
@@ -294,6 +297,7 @@ impl PrevParseInfo {
             had_errors,
             memo: Default::default(),
             anchored: Vec::new(),
+            unit_pred: Vec::new(),
         }
     }
 }
@@ -418,7 +422,14 @@ where
                 prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts, true));
             if let Some(prev) = prev {
                 let unchanged = unchanged_tokens(&old_texts, &new_texts);
+                // The last unchanged non-trivia token so far (old index).
+                let mut last_old: Option<usize> = None;
                 for (old, new) in unchanged {
+                    if !tokens[new].kind.skips() {
+                        let pred = prev.unit_pred.get(old).copied().flatten();
+                        tokens[new].set_unit_linked(pred.is_some() && pred.map(|p| p as usize) == last_old);
+                        last_old = Some(old);
+                    }
                     let prev_tok = &prev.tokens[old];
                     tokens[new].set_old_kind(prev_tok.fingerprint);
                     tokens[new].set_old_depth(Some(prev_tok.depth));
@@ -460,8 +471,16 @@ where
             t.to_prev_token(d)
         })
         .collect();
+    let mut unit_pred = unit_predecessors::<T::Kind>(&parse.green_node, tokens.len()).unwrap_or_default();
     let anchored = match settled_tokens::<T::Kind>(&parse.green_node, tokens.len()) {
-        Some(settled) => anchor_history(prev, &old_texts, &new_texts, settled, &mut prev_tokens),
+        Some(settled) => anchor_history(
+            prev,
+            &old_texts,
+            &new_texts,
+            settled,
+            &mut prev_tokens,
+            &mut unit_pred,
+        ),
         None => Vec::new(),
     };
     let prev = PrevParseInfo {
@@ -469,6 +488,7 @@ where
         had_errors,
         memo,
         anchored,
+        unit_pred,
     };
     (parse, prev)
 }
@@ -518,6 +538,49 @@ fn settled_tokens<K: TokenTrait>(green: &rowan::GreenNode, n_tokens: usize) -> O
     (out.len() == n_tokens).then_some(out)
 }
 
+/// Per token, trivia included: the index of the token before it in its
+/// top-level unit (a child node of the root, such as a Turtle statement),
+/// trivia skipped.  `None` for trivia, for the first token of a unit and for
+/// tokens outside any unit (deleted between units).  `None` overall if the
+/// tree does not hold exactly `n_tokens` tokens.
+fn unit_predecessors<K: TokenTrait>(
+    green: &rowan::GreenNode,
+    n_tokens: usize,
+) -> Option<Vec<Option<u32>>> {
+    use rowan::{GreenNodeData, NodeOrToken};
+    let error: rowan::SyntaxKind = K::ERROR.into();
+    fn leaves<K: TokenTrait>(n: &GreenNodeData, last: &mut Option<u32>, out: &mut Vec<Option<u32>>) {
+        for c in n.children() {
+            match c {
+                NodeOrToken::Node(n) => leaves::<K>(n, last, out),
+                NodeOrToken::Token(t) if K::from(t.kind()).skips() => out.push(None),
+                NodeOrToken::Token(_) => {
+                    out.push(*last);
+                    *last = Some(out.len() as u32 - 1);
+                }
+            }
+        }
+    }
+    let mut out = Vec::with_capacity(n_tokens);
+    for c in green.children() {
+        match c {
+            NodeOrToken::Node(n) if n.kind() != error => leaves::<K>(n, &mut None, &mut out),
+            NodeOrToken::Node(n) => out.extend(std::iter::repeat_n(None, count_tokens(n))),
+            NodeOrToken::Token(_) => out.push(None),
+        }
+    }
+    (out.len() == n_tokens).then_some(out)
+}
+
+fn count_tokens(n: &rowan::GreenNodeData) -> usize {
+    n.children()
+        .map(|c| match c {
+            rowan::NodeOrToken::Node(n) => count_tokens(n),
+            rowan::NodeOrToken::Token(_) => 1,
+        })
+        .sum()
+}
+
 /// History that holds up while a statement is broken.  A token whose
 /// top-level unit parsed cleanly takes its role from this parse.  A token in
 /// a broken unit that is unchanged since the previous version keeps the role
@@ -532,6 +595,7 @@ fn anchor_history(
     new_texts: &[&str],
     mut anchored: Vec<bool>,
     out: &mut [PrevToken],
+    unit_pred: &mut [Option<u32>],
 ) -> Vec<bool> {
     let Some(prev) = prev.filter(|p| p.anchored.len() == p.tokens.len()) else {
         return anchored;
@@ -559,6 +623,18 @@ fn anchor_history(
         if prev.anchored[j] {
             out[i].fingerprint = prev.tokens[j].fingerprint;
             out[i].depth = prev.tokens[j].depth;
+            // The predecessor keeps its place if it is unchanged too (before
+            // or after the edit); otherwise it is gone.
+            if let Some(u) = unit_pred.get_mut(i) {
+                *u = prev.unit_pred.get(j).copied().flatten().and_then(|p| {
+                    let p = p as usize;
+                    if p < prefix {
+                        Some(p as u32)
+                    } else {
+                        (p >= o - suffix).then(|| (p + n - o) as u32)
+                    }
+                });
+            }
             anchored[i] = true;
         }
     }
