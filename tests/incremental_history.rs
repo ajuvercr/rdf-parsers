@@ -186,6 +186,46 @@ fn history_records_the_depth_the_parse_gave_a_token() {
     }
 }
 
+/// Types `pair` one character at a time in front of `next_pair` in `before`
+/// (after a `;` and a line break), parsing each version with the history of
+/// the one before.  Once `name` is typed whole it must be a predicate, and
+/// `next_pair` must stay in the statement of `subject` throughout.
+fn type_pair_before(before: &str, next_pair: &str, pair: &str, name: &str, subject: &str) {
+    use rdf_parsers::turtle::Lang;
+    let at = before.find(next_pair).unwrap();
+    let (_, mut prev) = parse(before, None);
+    let mut text = before.to_string();
+    for (i, c) in pair.char_indices() {
+        text.insert(at + i, c);
+        let (p, next) = parse(&text, Some(&prev));
+        let root = p.syntax::<Lang>();
+        let token = |word: &str| {
+            root.descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .find(|t| t.text() == word)
+        };
+        let typed = &text[at..at + i + c.len_utf8()];
+        if typed.contains(name) {
+            let role = token(name).and_then(|t| {
+                t.parent_ancestors()
+                    .map(|n| format!("{:?}", n.kind()))
+                    .find(|k| matches!(k.as_str(), "Subject" | "Verb" | "Object" | "Error"))
+            });
+            assert_eq!(role.as_deref(), Some("Verb"), "{name} after typing {typed:?}");
+        }
+        let first = next_pair.split_whitespace().next().unwrap();
+        let statement = token(first)
+            .and_then(|t| t.parent_ancestors().find(|n| format!("{:?}", n.kind()) == "Statement"))
+            .map(|n| n.text().to_string())
+            .unwrap_or_default();
+        assert!(
+            statement.contains(subject),
+            "after typing {typed:?}, {first} left {subject}'s statement: {statement:?}"
+        );
+        prev = next;
+    }
+}
+
 /// A new pair typed after a `;`, before the next pair, the way an editor sees
 /// it: Enter after the `;`, then `foaf:age 42 ;` one character at a time.
 /// Until its own `;` is typed, the half-typed pair could also be read as a
@@ -196,42 +236,19 @@ fn history_records_the_depth_the_parse_gave_a_token() {
 /// `foaf:knows` stays in her statement.
 #[test]
 fn new_pair_typed_before_the_next_one_stays_in_the_statement() {
-    use rdf_parsers::turtle::Lang;
     let before = "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n\
                   @prefix ex: <http://example.org/> .\n\
                   ex:Alice a foaf:Person ;\n    foaf:knows ex:Bob .\n";
-    let at = before.find("    foaf:knows").unwrap();
-    let (_, mut prev) = parse(before, None);
-    let mut text = before.to_string();
-    for (i, c) in "    foaf:age 42 ;\n".char_indices() {
-        text.insert(at + i, c);
-        let (p, next) = parse(&text, Some(&prev));
-        let root = p.syntax::<Lang>();
-        let statement_of = |word: &str| {
-            root.descendants_with_tokens()
-                .filter_map(|e| e.into_token())
-                .find(|t| t.text() == word)
-                .and_then(|t| t.parent_ancestors().find(|n| format!("{:?}", n.kind()) == "Statement"))
-                .map(|n| n.text().to_string())
-        };
-        let role_of_age = root
-            .descendants_with_tokens()
-            .filter_map(|e| e.into_token())
-            .find(|t| t.text() == "foaf:age")
-            .and_then(|t| {
-                t.parent_ancestors()
-                    .map(|n| format!("{:?}", n.kind()))
-                    .find(|k| matches!(k.as_str(), "Subject" | "Verb" | "Object" | "Error"))
-            });
-        let typed = &text[at..at + i + c.len_utf8()];
-        if typed.contains("foaf:age") {
-            assert_eq!(role_of_age.as_deref(), Some("Verb"), "after typing {typed:?}");
-        }
-        let knows = statement_of("foaf:knows").unwrap_or_default();
-        assert!(
-            knows.contains("ex:Alice"),
-            "after typing {typed:?}, foaf:knows left Alice's statement: {knows:?}"
-        );
-        prev = next;
-    }
+    type_pair_before(before, "    foaf:knows", "    foaf:age 42 ;\n", "foaf:age", "ex:Alice");
+}
+
+/// The same in a statement that never parses cleanly (`--x` is not a token),
+/// so its history comes from the last keystroke's parse, in which the next
+/// pair followed the half-typed name.  That name changes with every
+/// keystroke, so the next pair still belongs after the `;`.
+#[test]
+fn new_pair_typed_into_a_broken_statement_stays_in_it() {
+    let before = "@prefix : <http://example.org/> .\n\
+                  :dave :name \"Dave\"@en--x ;\n    :nick ( \"dave\" ) ;\n    :mbox <mailto:dave@example.org> .\n";
+    type_pair_before(before, "    :nick", "    :since 2019 ;\n", ":since", ":dave");
 }

@@ -384,12 +384,23 @@ where
                 prev.and_then(|p| incremental::Reuse::plan(&p.memo, &old_texts, &new_texts, true));
             if let Some(prev) = prev {
                 let unchanged = unchanged_tokens(&old_texts, &new_texts);
+                let mut kept = vec![false; old_texts.len()];
+                for &(old, _) in &unchanged {
+                    kept[old] = true;
+                }
+                let unit_pred = |i: usize| prev.unit_pred.get(i).copied().flatten().map(|p| p as usize);
                 // The last unchanged non-trivia token so far (old index).
                 let mut last_old: Option<usize> = None;
                 for (old, new) in unchanged {
                     if !tokens[new].kind.skips() {
-                        let pred = prev.unit_pred.get(old).copied().flatten();
-                        tokens[new].set_unit_linked(pred.is_some() && pred.map(|p| p as usize) == last_old);
+                        // The nearest token before this one in its unit that
+                        // is still there: tokens edited away (a name being
+                        // typed) are skipped.
+                        let mut pred = unit_pred(old);
+                        while let Some(p) = pred.filter(|&p| !kept[p]) {
+                            pred = unit_pred(p);
+                        }
+                        tokens[new].set_unit_linked(pred.is_some() && pred == last_old);
                         last_old = Some(old);
                     }
                     let prev_tok = &prev.tokens[old];

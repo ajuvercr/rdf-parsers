@@ -13,8 +13,9 @@ pub struct FatToken<T: TokenTrait> {
     /// and for text that never parsed cleanly, such as junk being typed.
     clean_role: bool,
     /// Whether this token shares a top-level unit (a statement) with the
-    /// token the history had right before it, and that token is still the
-    /// last unchanged one before it.  See `AStar::splits_unit`.
+    /// last unchanged token before it: in the history, that token came right
+    /// before this one in its unit, tokens edited away since skipped.  See
+    /// `AStar::splits_unit`.
     unit_linked: bool,
 }
 impl<T: TokenTrait> FatToken<T> {
